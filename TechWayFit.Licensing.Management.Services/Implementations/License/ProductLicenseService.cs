@@ -1,10 +1,17 @@
 using Microsoft.Extensions.Logging;
+using TechWayFit.Licensing.Generator.Models;
+using TechWayFit.Licensing.Generator.Services;
 using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.License;
+using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Product;
+using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Consumer;
 using TechWayFit.Licensing.Infrastructure.Models.Entities.License;
 using TechWayFit.Licensing.Infrastructure.Models.Search;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Core.Models.Common;
 using TechWayFit.Licensing.Management.Core.Models.License;
+using System.Text.Json;
+using CoreModels = TechWayFit.Licensing.Core.Models;
+using ManagementModels = TechWayFit.Licensing.Management.Core.Models.License;
 
 namespace TechWayFit.Licensing.Management.Services.Implementations.License;
 
@@ -14,13 +21,19 @@ namespace TechWayFit.Licensing.Management.Services.Implementations.License;
 public class ProductLicenseService : IProductLicenseService
 {
     private readonly IProductLicenseRepository _productLicenseRepository;
+    private readonly ILicenseGenerator _licenseGenerator;
+    private readonly IKeyManagementService _keyManagementService;
     private readonly ILogger<ProductLicenseService> _logger;
 
     public ProductLicenseService(
         IProductLicenseRepository productLicenseRepository,
+        ILicenseGenerator licenseGenerator,
+        IKeyManagementService keyManagementService,
         ILogger<ProductLicenseService> logger)
     {
         _productLicenseRepository = productLicenseRepository ?? throw new ArgumentNullException(nameof(productLicenseRepository));
+        _licenseGenerator = licenseGenerator ?? throw new ArgumentNullException(nameof(licenseGenerator));
+        _keyManagementService = keyManagementService ?? throw new ArgumentNullException(nameof(keyManagementService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -40,20 +53,45 @@ public class ProductLicenseService : IProductLicenseService
 
         try
         {
-            // Generate license key
-            var licenseKey = GenerateLicenseKey();
+            // Get or generate private key for the product
+            var privateKey = await _keyManagementService.GetPrivateKeyAsync(request.ProductId);
+            if (string.IsNullOrEmpty(privateKey))
+            {
+                _logger.LogInformation("No private key found for product {ProductId}, generating new key pair", request.ProductId);
+                var publicKey = await _keyManagementService.GenerateKeyPairForProductAsync(request.ProductId);
+                privateKey = await _keyManagementService.GetPrivateKeyAsync(request.ProductId);
+                _logger.LogInformation("Generated new key pair for product {ProductId}, public key length: {PublicKeyLength}", 
+                    request.ProductId, publicKey.Length);
+            }
+
+            // Create license generation request for the Generator
+            var generationRequest = new SimplifiedLicenseGenerationRequest
+            {
+                ProductId = request.ProductId,
+                LicensedTo = request.ConsumerId, // Map ConsumerId to LicensedTo
+                ValidFrom = DateTime.UtcNow,
+                ValidTo = request.ExpiryDate ?? DateTime.UtcNow.AddYears(1),
+                CustomData = request.Metadata ?? new Dictionary<string, object>(),
+                PrivateKeyPem = privateKey,
+                // TODO: Map additional fields when needed:
+                // ProductName, ContactPerson, ContactEmail, Features, etc.
+            };
+
+            // Generate cryptographically signed license
+            var signedLicense = await _licenseGenerator.GenerateLicenseAsync(generationRequest);
+            
             var licenseId = Guid.NewGuid().ToString();
 
-            // Create license entity - TODO: Map properties correctly when entity structure is finalized
+            // Create license entity for database storage
             var licenseEntity = new ProductLicenseEntity
             {
                 LicenseId = licenseId,
                 ProductId = request.ProductId,
                 ConsumerId = request.ConsumerId,
-                LicenseKey = licenseKey,
-                ValidFrom = DateTime.UtcNow,
-                ValidTo = request.ExpiryDate ?? DateTime.UtcNow.AddYears(1),
-                Status = LicenseStatus.Active.ToString(), // TODO: Fix when entity uses enum
+                LicenseKey = signedLicense.LicenseData, // Store the signed license data
+                ValidFrom = generationRequest.ValidFrom,
+                ValidTo = generationRequest.ValidTo,
+                Status = ManagementModels.LicenseStatus.Active.ToString(),
                 MetadataJson = SerializeMetadata(request.Metadata ?? new Dictionary<string, object>()),
                 CreatedBy = generatedBy,
                 CreatedOn = DateTime.UtcNow,
@@ -71,7 +109,7 @@ public class ProductLicenseService : IProductLicenseService
             // Map to model
             var result = createdEntity.ToModel();
             
-            _logger.LogInformation("Successfully generated license with ID: {LicenseId}", result.LicenseId);
+            _logger.LogInformation("Successfully generated cryptographically signed license with ID: {LicenseId}", result.LicenseId);
             return result;
         }
         catch (Exception ex)
@@ -390,13 +428,6 @@ public class ProductLicenseService : IProductLicenseService
     #endregion
 
     #region Private Helper Methods
-
-    private static string GenerateLicenseKey()
-    {
-        // Simple license key generation - TODO: Implement proper cryptographic key generation
-        var guid = Guid.NewGuid().ToString("N").ToUpper();
-        return $"{guid[..8]}-{guid[8..16]}-{guid[16..24]}-{guid[24..]}";
-    }
 
     private static string SerializeMetadata(Dictionary<string, object> metadata)
     {

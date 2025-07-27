@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <AssemblyName>TechWayFit.Licensing.Infrastructure</AssemblyName>
-    <RootNamespace>TechWayFit.Licensing.Infrastructure</RootNamespace>
-    
+    <AssemblyName>TechWayFit.Licensing.Management.Infrastructure</AssemblyName>
+    <RootNamespace>TechWayFit.Licensing.Management.Infrastructure</RootNamespace>
+
     <!-- Assembly Information -->
     <AssemblyTitle>TechWayFit Licensing Management Infrastructure</AssemblyTitle>
     <AssemblyDescription>Infrastructure layer for TechWayFit licensing management system</AssemblyDescription>
