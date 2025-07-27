@@ -10,6 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="EFCore.NamingConventions" Version="9.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="8.0.0" />
     <PackageReference Include="System.Text.Json" Version="9.0.7" />
     <PackageReference Include="Npgsql" Version="9.0.3" />

@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using System.Linq.Expressions;
 using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Product;
 using TechWayFit.Licensing.Infrastructure.Models.Entities.Products;
 using TechWayFit.Licensing.Infrastructure.Models.Search;
@@ -177,7 +178,7 @@ public class ProductFeatureService : IProductFeatureService
             
             var searchRequest = new SearchRequest<ProductFeatureEntity>
             {
-                Filters = new List<Func<ProductFeatureEntity, bool>>
+                Filters = new List<Expression<Func<ProductFeatureEntity, bool>>>
                 {
                     f => f.TierId == tierId && f.IsEnabled
                 }
@@ -210,7 +211,7 @@ public class ProductFeatureService : IProductFeatureService
             
             var searchRequest = new SearchRequest<ProductFeatureEntity>
             {
-                Filters = new List<Func<ProductFeatureEntity, bool>>
+                Filters = new List<Expression<Func<ProductFeatureEntity, bool>>>
                 {
                     f => f.TierId == tierId && f.Code == featureCode
                 }
@@ -296,7 +297,7 @@ public class ProductFeatureService : IProductFeatureService
             
             var searchRequest = new SearchRequest<ProductFeatureEntity>
             {
-                Filters = new List<Func<ProductFeatureEntity, bool>>
+                Filters = new List<Expression<Func<ProductFeatureEntity, bool>>>
                 {
                     f => f.TierId == tierId && f.Code == featureCode
                 }
@@ -381,7 +382,7 @@ public class ProductFeatureService : IProductFeatureService
         {
             var searchRequest = new SearchRequest<ProductFeatureEntity>
             {
-                Filters = new List<Func<ProductFeatureEntity, bool>>(),
+                Filters = new List<Expression<Func<ProductFeatureEntity, bool>>>(),
                 Page = pageNumber,
                 PageSize = pageSize
             };
@@ -420,7 +421,7 @@ public class ProductFeatureService : IProductFeatureService
         {
             var searchRequest = new SearchRequest<ProductFeatureEntity>
             {
-                Filters = new List<Func<ProductFeatureEntity, bool>>()
+                Filters = new List<Expression<Func<ProductFeatureEntity, bool>>>()
             };
             
             // Apply search term filter
@@ -546,7 +547,7 @@ public class ProductFeatureService : IProductFeatureService
             
             var searchRequest = new SearchRequest<ProductFeatureEntity>
             {
-                Filters = new List<Func<ProductFeatureEntity, bool>>()
+                Filters = new List<Expression<Func<ProductFeatureEntity, bool>>>()
             };
             
             var searchResult = await _productFeatureRepository.SearchAsync(searchRequest);

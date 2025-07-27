@@ -4,6 +4,7 @@ using TechWayFit.Licensing.Core.Services;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Services.Implementations.License;
 using TechWayFit.Licensing.Management.Services.Implementations.Product;
+using TechWayFit.Licensing.Management.Services.Implementations.Consumer;
 using TechWayFit.Licensing.WebUI.Models.Authentication;
 using TechWayFit.Licensing.WebUI.Services;
 // using TechWayFit.Licensing.WebUI.Extensions;
@@ -11,7 +12,9 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using TechWayFit.Licensing.Infrastructure.Data.Context;
 using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Product;
+using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Consumer;
 using TechWayFit.Licensing.Infrastructure.Data.Repositories.Product;
+using TechWayFit.Licensing.Infrastructure.Data.Repositories.Consumer;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,13 +60,15 @@ builder.Services.AddMemoryCache();
 // Configure Entity Framework with PostgreSQL (Database First approach)
 builder.Services.AddDbContext<LicensingDbContext>(options =>
 {
-    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    var connectionString = builder.Configuration.GetConnectionString("PostgreSQL");
     options.UseNpgsql(connectionString, npgsqlOptions =>
     {
         // Database First: Assume database schema exists
         // No migrations - schema managed via SQL scripts
         npgsqlOptions.MigrationsAssembly((string?)null);
-    });
+    })
+    // Configure PostgreSQL to use snake_case naming convention
+    .UseSnakeCaseNamingConvention();
     
     // Enable sensitive data logging in development
     if (builder.Environment.IsDevelopment())
@@ -94,11 +99,14 @@ Directory.CreateDirectory(dataPath);
 
 // Register repositories
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IConsumerAccountRepository, ConsumerAccountRepository>();
 
 // Register real services (replacing mock)
 builder.Services.AddScoped<IEnterpriseProductService, EnterpriseProductService>();
 
-// Step 4: Consumer management services will be added here
+// Step 4: Consumer management services - IMPLEMENTING NOW
+builder.Services.AddScoped<IConsumerAccountService, ConsumerAccountService>();
+
 // Step 5: License management services will be added here
 // Step 6: Audit management services will be added here
 // Step 7: Notification management services will be added here

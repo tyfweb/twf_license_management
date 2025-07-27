@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using System.Linq.Expressions;
 using TechWayFit.Licensing.Generator.Models;
 using TechWayFit.Licensing.Generator.Services;
 using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.License;
@@ -143,7 +144,7 @@ public class ProductLicenseService : IProductLicenseService
             
             var searchRequest = new SearchRequest<ProductLicenseEntity>
             {
-                Filters = new List<Func<ProductLicenseEntity, bool>>
+                Filters = new List<Expression<Func<ProductLicenseEntity, bool>>>
                 {
                     l => l.LicenseKey == licenseKey
                 }

@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using TechWayFit.Licensing.Infrastructure.Models.Entities.License;
 using TechWayFit.Licensing.Management.Core.Models.Product;
 
@@ -6,6 +7,7 @@ namespace TechWayFit.Licensing.Infrastructure.Models.Entities.Products;
 /// <summary>
 /// Database entity for ProductTier
 /// </summary>
+[Table("product_tiers")]
 public class ProductTierEntity : BaseAuditEntity
 {
     /// <summary>

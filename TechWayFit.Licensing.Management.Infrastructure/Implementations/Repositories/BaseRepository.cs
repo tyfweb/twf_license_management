@@ -120,12 +120,15 @@ public partial class BaseRepository<TEntity> : IBaseRepository<TEntity>
         {
             query = SearchQuery(query, request.Query.Trim());
         }
-        if (request.Filters != null)
+        if (request.Filters != null && request.Filters.Any())
         {
-            if (request.Filters is Expression<Func<TEntity, bool>> filter)
-                query = query.Where(filter);
-            else
-                throw new ArgumentException("Filters must be an expression of type Expression<Func<TEntity, bool>>");
+            foreach (var filter in request.Filters)
+            {
+                if (filter is Expression<Func<TEntity, bool>> expression)
+                    query = query.Where(expression);
+                else
+                    throw new ArgumentException("All filters must be expressions of type Expression<Func<TEntity, bool>>");
+            }
         }
 
         var totalCount = await query.CountAsync(cancellationToken);

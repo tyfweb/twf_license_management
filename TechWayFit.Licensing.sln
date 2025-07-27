@@ -13,8 +13,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TechWayFit.Licensing.Manage
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TechWayFit.Licensing.Management.Web", "TechWayFit.Licensing.Management.Web\TechWayFit.Licensing.Management.Web.csproj", "{8B6A277F-E01F-4575-A305-3CBCA3B41ADE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TechWayFit.Licensing.Validation", "TechWayFit.Licensing.Validation\TechWayFit.Licensing.Validation.csproj", "{DCB2A946-D843-4656-93EB-0B4337C469E7}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,10 +39,6 @@ Global
 		{8B6A277F-E01F-4575-A305-3CBCA3B41ADE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8B6A277F-E01F-4575-A305-3CBCA3B41ADE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8B6A277F-E01F-4575-A305-3CBCA3B41ADE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DCB2A946-D843-4656-93EB-0B4337C469E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DCB2A946-D843-4656-93EB-0B4337C469E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DCB2A946-D843-4656-93EB-0B4337C469E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DCB2A946-D843-4656-93EB-0B4337C469E7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

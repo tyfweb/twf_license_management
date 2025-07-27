@@ -1,10 +1,17 @@
 -- TechWayFit Licensing Management System - PostgreSQL Database Creation Script
--- Generated from actual Entity Framework Core entities and DbContext configurations
+-- Generated from Entity Framework Core configurations in LicensingDbContext
 -- Compatible with PostgreSQL 12+
--- Version: 1.0.0-corrected
+
+-- Create database (run this separately as a superuser if needed)
+-- CREATE DATABASE techwayfit_licensing;
+
+-- Connect to the database and create schema
+-- \c techwayfit_licensing;
 
 -- Enable UUID extension for better ID generation (optional)
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- Create sequences for auto-incrementing fields (if needed)
 
 -- =============================================
 -- CORE PRODUCT ENTITIES
@@ -14,13 +21,12 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE products (
     product_id VARCHAR(50) PRIMARY KEY,
     name VARCHAR(200) NOT NULL,
-    description VARCHAR(1000),
+    description TEXT,
     release_date TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     support_email VARCHAR(255),
     support_phone VARCHAR(50),
     decommission_date TIMESTAMP WITH TIME ZONE,
     status VARCHAR(20) NOT NULL DEFAULT 'Active',
-    is_active BOOLEAN NOT NULL DEFAULT true,
     created_by VARCHAR(100) NOT NULL,
     updated_by VARCHAR(100),
     created_on TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -36,9 +42,8 @@ CREATE TABLE product_versions (
     release_date TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     end_of_life_date TIMESTAMP WITH TIME ZONE,
     support_end_date TIMESTAMP WITH TIME ZONE,
-    release_notes VARCHAR(2000),
+    release_notes TEXT,
     is_current BOOLEAN NOT NULL DEFAULT false,
-    is_active BOOLEAN NOT NULL DEFAULT true,
     created_by VARCHAR(100) NOT NULL,
     updated_by VARCHAR(100),
     created_on TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -54,7 +59,7 @@ CREATE TABLE product_tiers (
     tier_id VARCHAR(50) PRIMARY KEY,
     product_id VARCHAR(50) NOT NULL,
     name VARCHAR(200) NOT NULL,
-    description VARCHAR(1000),
+    description TEXT,
     price VARCHAR(10),
     display_order INTEGER NOT NULL DEFAULT 0,
     support_sla_json VARCHAR(1000) DEFAULT '{}',
@@ -75,14 +80,13 @@ CREATE TABLE product_features (
     product_id VARCHAR(50) NOT NULL,
     tier_id VARCHAR(50) NOT NULL,
     name VARCHAR(200) NOT NULL,
-    description VARCHAR(1000),
+    description TEXT,
     code VARCHAR(100) NOT NULL,
     is_enabled BOOLEAN NOT NULL DEFAULT true,
     display_order INTEGER DEFAULT 0,
     support_from_version VARCHAR(20) DEFAULT '1.0.0',
     support_to_version VARCHAR(20) DEFAULT '9999.0.0',
     feature_usage_json VARCHAR(1000) DEFAULT '{}',
-    is_active BOOLEAN NOT NULL DEFAULT true,
     created_by VARCHAR(100) NOT NULL,
     updated_by VARCHAR(100),
     created_on TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -114,6 +118,7 @@ CREATE TABLE consumer_accounts (
     secondary_contact_position VARCHAR(100),
     activated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     subscription_end TIMESTAMP WITH TIME ZONE,
+    is_active BOOLEAN NOT NULL DEFAULT true,
     address_street VARCHAR(500),
     address_city VARCHAR(100),
     address_state VARCHAR(100),
@@ -121,7 +126,6 @@ CREATE TABLE consumer_accounts (
     address_country VARCHAR(100),
     notes VARCHAR(2000),
     status VARCHAR(20),
-    is_active BOOLEAN NOT NULL DEFAULT true,
     created_by VARCHAR(100) NOT NULL,
     updated_by VARCHAR(100),
     created_on TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -137,7 +141,6 @@ CREATE TABLE product_consumers (
     account_manager_email VARCHAR(255),
     account_manager_phone VARCHAR(50),
     account_manager_position VARCHAR(100),
-    is_active BOOLEAN NOT NULL DEFAULT true,
     created_by VARCHAR(100) NOT NULL,
     updated_by VARCHAR(100),
     created_on TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -173,7 +176,6 @@ CREATE TABLE product_licenses (
     revoked_at TIMESTAMP WITH TIME ZONE,
     revocation_reason VARCHAR(500),
     metadata_json VARCHAR(2000) DEFAULT '{}',
-    is_active BOOLEAN NOT NULL DEFAULT true,
     created_by VARCHAR(100) NOT NULL,
     updated_by VARCHAR(100),
     created_on TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -200,6 +202,20 @@ CREATE TABLE product_license_features (
         FOREIGN KEY (feature_id) REFERENCES product_features(feature_id) ON DELETE CASCADE
 );
 
+-- Many-to-many relationship table for ProductTier and ProductFeature
+CREATE TABLE product_tier_features (
+    tier_id VARCHAR(50) NOT NULL,
+    feature_id VARCHAR(50) NOT NULL,
+    
+    PRIMARY KEY (tier_id, feature_id),
+    
+    -- Foreign key constraints
+    CONSTRAINT fk_tier_features_tier_id 
+        FOREIGN KEY (tier_id) REFERENCES product_tiers(tier_id) ON DELETE CASCADE,
+    CONSTRAINT fk_tier_features_feature_id 
+        FOREIGN KEY (feature_id) REFERENCES product_features(feature_id) ON DELETE CASCADE
+);
+
 -- =============================================
 -- AUDIT ENTITIES
 -- =============================================
@@ -216,7 +232,6 @@ CREATE TABLE audit_entries (
     user_agent VARCHAR(500),
     reason VARCHAR(1000),
     metadata VARCHAR(1000),
-    is_active BOOLEAN NOT NULL DEFAULT true,
     created_by VARCHAR(100) NOT NULL,
     updated_by VARCHAR(100),
     created_on TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -255,7 +270,6 @@ CREATE TABLE notification_history (
     sent_date TIMESTAMP WITH TIME ZONE NOT NULL,
     delivery_status VARCHAR(20),
     delivery_error VARCHAR(2000),
-    is_active BOOLEAN NOT NULL DEFAULT true,
     created_by VARCHAR(100) NOT NULL,
     updated_by VARCHAR(100),
     created_on TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -273,13 +287,11 @@ CREATE TABLE notification_history (
 -- Product indexes
 CREATE INDEX idx_products_name ON products(name);
 CREATE INDEX idx_products_status ON products(status);
-CREATE INDEX idx_products_is_active ON products(is_active);
 
 -- Product Version indexes
 CREATE INDEX idx_product_versions_product_id ON product_versions(product_id);
 CREATE INDEX idx_product_versions_version ON product_versions(version);
 CREATE INDEX idx_product_versions_is_current ON product_versions(is_current);
-CREATE INDEX idx_product_versions_is_active ON product_versions(is_active);
 
 -- Product Tier indexes
 CREATE INDEX idx_product_tiers_product_id ON product_tiers(product_id);
@@ -288,10 +300,8 @@ CREATE INDEX idx_product_tiers_is_active ON product_tiers(is_active);
 
 -- Product Feature indexes
 CREATE INDEX idx_product_features_product_id ON product_features(product_id);
-CREATE INDEX idx_product_features_tier_id ON product_features(tier_id);
 CREATE INDEX idx_product_features_code ON product_features(code);
 CREATE INDEX idx_product_features_is_enabled ON product_features(is_enabled);
-CREATE INDEX idx_product_features_is_active ON product_features(is_active);
 
 -- Consumer Account indexes
 CREATE INDEX idx_consumer_accounts_account_code ON consumer_accounts(account_code);
@@ -303,17 +313,15 @@ CREATE INDEX idx_consumer_accounts_company_name ON consumer_accounts(company_nam
 -- Product Consumer indexes
 CREATE INDEX idx_product_consumers_product_id ON product_consumers(product_id);
 CREATE INDEX idx_product_consumers_consumer_id ON product_consumers(consumer_id);
-CREATE INDEX idx_product_consumers_is_active ON product_consumers(is_active);
 CREATE INDEX idx_product_consumers_created_on ON product_consumers(created_on);
+CREATE INDEX idx_product_consumers_product_consumer ON product_consumers(product_id, consumer_id);
 
 -- Product License indexes
 CREATE UNIQUE INDEX idx_product_licenses_license_key ON product_licenses(license_key);
-CREATE INDEX idx_product_licenses_license_code ON product_licenses(license_code);
 CREATE INDEX idx_product_licenses_product_id ON product_licenses(product_id);
 CREATE INDEX idx_product_licenses_consumer_id ON product_licenses(consumer_id);
 CREATE INDEX idx_product_licenses_status ON product_licenses(status);
 CREATE INDEX idx_product_licenses_valid_to ON product_licenses(valid_to);
-CREATE INDEX idx_product_licenses_is_active ON product_licenses(is_active);
 CREATE INDEX idx_product_licenses_product_consumer ON product_licenses(product_id, consumer_id);
 
 -- Audit Entry indexes
@@ -322,20 +330,17 @@ CREATE INDEX idx_audit_entries_entity_id ON audit_entries(entity_id);
 CREATE INDEX idx_audit_entries_action_type ON audit_entries(action_type);
 CREATE INDEX idx_audit_entries_created_on ON audit_entries(created_on);
 CREATE INDEX idx_audit_entries_created_by ON audit_entries(created_by);
-CREATE INDEX idx_audit_entries_is_active ON audit_entries(is_active);
 CREATE INDEX idx_audit_entries_entity_operation ON audit_entries(entity_type, entity_id);
 
 -- Notification Template indexes
 CREATE INDEX idx_notification_templates_template_name ON notification_templates(template_name);
 CREATE INDEX idx_notification_templates_is_active ON notification_templates(is_active);
-CREATE INDEX idx_notification_templates_notification_type ON notification_templates(notification_type);
 
 -- Notification History indexes
 CREATE INDEX idx_notification_history_template_id ON notification_history(notification_template_id);
 CREATE INDEX idx_notification_history_delivery_status ON notification_history(delivery_status);
 CREATE INDEX idx_notification_history_notification_type ON notification_history(notification_type);
 CREATE INDEX idx_notification_history_sent_date ON notification_history(sent_date);
-CREATE INDEX idx_notification_history_is_active ON notification_history(is_active);
 CREATE INDEX idx_notification_history_entity ON notification_history(entity_type, entity_id);
 
 -- =============================================
@@ -352,17 +357,40 @@ ALTER TABLE product_versions ADD CONSTRAINT uk_product_versions_product_version 
 ALTER TABLE product_tiers ADD CONSTRAINT uk_product_tiers_product_tier UNIQUE (product_id, name);
 
 -- Product Feature unique constraints
-ALTER TABLE product_features ADD CONSTRAINT uk_product_features_tier_code UNIQUE (tier_id, code);
+ALTER TABLE product_features ADD CONSTRAINT uk_product_features_product_feature UNIQUE (product_id, code);
 
 -- Consumer Account unique constraints
 ALTER TABLE consumer_accounts ADD CONSTRAINT uk_consumer_accounts_account_code UNIQUE (account_code);
-ALTER TABLE consumer_accounts ADD CONSTRAINT uk_consumer_accounts_primary_email UNIQUE (primary_contact_email);
 
 -- Product Consumer unique constraints
-ALTER TABLE product_consumers ADD CONSTRAINT uk_product_consumers_product_consumer UNIQUE (consumer_id, product_id);
+ALTER TABLE product_consumers ADD CONSTRAINT uk_product_consumers_product_consumer UNIQUE (product_id, consumer_id);
 
--- Product License unique constraints
-ALTER TABLE product_licenses ADD CONSTRAINT uk_product_licenses_license_code UNIQUE (license_code);
+-- =============================================
+-- SAMPLE DATA (Optional - for testing)
+-- =============================================
+
+-- Insert sample data for testing
+/*
+-- Sample Product
+INSERT INTO products (product_id, product_name, product_code, description, vendor_name, is_active, created_by, created_on)
+VALUES ('prod-001', 'TechWayFit Enterprise', 'TWF-ENT', 'Enterprise fitness management solution', 'TechWayFit Inc.', true, 'system', CURRENT_TIMESTAMP);
+
+-- Sample Product Version
+INSERT INTO product_versions (product_version_id, product_id, version_number, version_name, description, release_date, is_active, created_by, created_on)
+VALUES ('ver-001', 'prod-001', '1.0.0', 'Initial Release', 'First major release', CURRENT_TIMESTAMP, true, 'system', CURRENT_TIMESTAMP);
+
+-- Sample Product Tier
+INSERT INTO product_tiers (product_tier_id, product_id, tier_name, tier_code, description, pricing_model, base_price, is_active, display_order, created_by, created_on)
+VALUES ('tier-001', 'prod-001', 'Basic', 'BASIC', 'Basic tier with core features', 'monthly', 99.99, true, 1, 'system', CURRENT_TIMESTAMP);
+
+-- Sample Product Feature
+INSERT INTO product_features (product_feature_id, product_id, feature_name, feature_code, description, feature_type, is_core_feature, is_active, created_by, created_on)
+VALUES ('feat-001', 'prod-001', 'User Management', 'USER_MGMT', 'Core user management functionality', 'core', true, true, 'system', CURRENT_TIMESTAMP);
+
+-- Sample Consumer Account
+INSERT INTO consumer_accounts (consumer_account_id, account_name, account_code, contact_email, contact_name, organization_name, account_status, is_active, created_by, created_on)
+VALUES ('cons-001', 'Demo Gym', 'DEMO_GYM', 'admin@demogym.com', 'John Smith', 'Demo Gym LLC', 'Active', true, 'system', CURRENT_TIMESTAMP);
+*/
 
 -- =============================================
 -- VIEWS (Optional - for common queries)
@@ -372,7 +400,6 @@ ALTER TABLE product_licenses ADD CONSTRAINT uk_product_licenses_license_code UNI
 CREATE OR REPLACE VIEW active_licenses_view AS
 SELECT 
     pl.license_id,
-    pl.license_code,
     pl.license_key,
     p.name as product_name,
     ca.company_name,
@@ -385,23 +412,20 @@ INNER JOIN products p ON pl.product_id = p.product_id
 INNER JOIN consumer_accounts ca ON pl.consumer_id = ca.consumer_id
 WHERE pl.status = 'Active' 
   AND pl.valid_to > CURRENT_TIMESTAMP
-  AND ca.is_active = true
-  AND pl.is_active = true;
+  AND ca.is_active = true;
 
 -- View for product feature summary
 CREATE OR REPLACE VIEW product_features_summary AS
 SELECT 
     p.product_id,
     p.name as product_name,
-    pt.tier_id,
-    pt.name as tier_name,
     COUNT(pf.feature_id) as total_features,
     COUNT(CASE WHEN pf.is_enabled = true THEN 1 END) as active_features
 FROM products p
 LEFT JOIN product_tiers pt ON p.product_id = pt.product_id
 LEFT JOIN product_features pf ON pt.tier_id = pf.tier_id
-WHERE p.status = 'Active' AND p.is_active = true
-GROUP BY p.product_id, p.name, pt.tier_id, pt.name;
+WHERE p.status = 'Active'
+GROUP BY p.product_id, p.name;
 
 -- =============================================
 -- COMMENTS
@@ -414,7 +438,6 @@ COMMENT ON TABLE product_features IS 'Individual product features and capabiliti
 COMMENT ON TABLE consumer_accounts IS 'Customer accounts and organization information';
 COMMENT ON TABLE product_consumers IS 'Assignment of products to consumer accounts';
 COMMENT ON TABLE product_licenses IS 'License instances with keys and validity periods';
-COMMENT ON TABLE product_license_features IS 'Many-to-many relationship between licenses and features';
 COMMENT ON TABLE audit_entries IS 'Audit trail for all entity changes';
 COMMENT ON TABLE notification_templates IS 'Templates for system notifications';
 COMMENT ON TABLE notification_history IS 'History of sent notifications and delivery status';
@@ -426,11 +449,11 @@ COMMENT ON TABLE notification_history IS 'History of sent notifications and deli
 -- Script execution completed successfully
 -- Database schema created with:
 -- - 10 main tables with proper relationships
--- - 1 many-to-many junction table  
+-- - 2 many-to-many junction tables  
 -- - Comprehensive indexes for performance
 -- - Unique constraints for data integrity
--- - Audit trail support with is_active soft delete
--- - Views for common queries
--- - All entities aligned with actual C# entity definitions
+-- - Audit trail support
+-- - Optional views for common queries
+-- - Sample data templates (commented out)
 
 COMMIT;

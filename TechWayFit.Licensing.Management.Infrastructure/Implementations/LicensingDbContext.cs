@@ -102,9 +102,10 @@ public class LicensingDbContext : DbContext
             entity.HasKey(e => e.ConsumerId);
             entity.Property(e => e.ConsumerId).HasMaxLength(50).IsRequired();
             entity.Property(e => e.CompanyName).HasMaxLength(200).IsRequired();
+            entity.Property(e => e.AccountCode).HasMaxLength(50);
 
-            entity.Property(e => e.PrimaryContactName).HasMaxLength(100).IsRequired();
-            entity.Property(e => e.PrimaryContactEmail).HasMaxLength(255).IsRequired();
+            entity.Property(e => e.PrimaryContactName).HasMaxLength(200);
+            entity.Property(e => e.PrimaryContactEmail).HasMaxLength(255);
             entity.Property(e => e.PrimaryContactPhone).HasMaxLength(50);
             entity.Property(e => e.PrimaryContactPosition).HasMaxLength(100);
 
@@ -195,7 +196,11 @@ public class LicensingDbContext : DbContext
             entity.Property(e => e.ProductId).HasMaxLength(50).IsRequired();
             entity.Property(e => e.Version).HasMaxLength(50).IsRequired();
             entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
+            entity.Property(e => e.ReleaseDate).IsRequired();
+            entity.Property(e => e.EndOfLifeDate);
+            entity.Property(e => e.SupportEndDate);
             entity.Property(e => e.ReleaseNotes).HasMaxLength(2000);
+            entity.Property(e => e.IsCurrent).IsRequired();
 
             // Audit fields
             entity.Property(e => e.CreatedBy).HasMaxLength(100).IsRequired();
@@ -221,7 +226,8 @@ public class LicensingDbContext : DbContext
             entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
             entity.Property(e => e.Description).HasMaxLength(1000);
             entity.Property(e => e.Price).HasMaxLength(10); // Assuming price is a string for currency formatting
-  
+            entity.Property(e => e.DisplayOrder);
+            entity.Property(e => e.SupportSLAJson).HasMaxLength(1000);
 
             // Audit fields
             entity.Property(e => e.CreatedBy).HasMaxLength(100).IsRequired();
@@ -243,14 +249,16 @@ public class LicensingDbContext : DbContext
         {
             entity.HasKey(e => e.FeatureId);
             entity.Property(e => e.FeatureId).HasMaxLength(50).IsRequired();
+            entity.Property(e => e.ProductId).HasMaxLength(50).IsRequired();
             entity.Property(e => e.TierId).HasMaxLength(50).IsRequired();
             entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
             entity.Property(e => e.Description).HasMaxLength(1000);
             entity.Property(e => e.Code).HasMaxLength(100).IsRequired();
             entity.Property(e => e.IsEnabled).IsRequired();
             entity.Property(e => e.DisplayOrder);
-            entity.Property(e => e.FeatureUsageJson).HasMaxLength(1000);
             entity.Property(e => e.SupportFromVersion).HasMaxLength(20);
+            entity.Property(e => e.SupportToVersion).HasMaxLength(20);
+            entity.Property(e => e.FeatureUsageJson).HasMaxLength(1000);
 
             // Audit fields
             entity.Property(e => e.CreatedBy).HasMaxLength(100).IsRequired();

@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using TechWayFit.Licensing.Infrastructure.Models.Entities;
 using TechWayFit.Licensing.Infrastructure.Models.Entities.Consumer;
@@ -10,52 +11,80 @@ namespace TechWayFit.Licensing.Infrastructure.Data.Entities.Consumer;
 /// <summary>
 /// Database entity for ConsumerAccount
 /// </summary>
-[Table("license_consumers")]
+[Table("consumer_accounts")]
 public class ConsumerAccountEntity : BaseAuditEntity
 {
     /// <summary>
     /// Unique identifier for the consumer
     /// </summary>
+    [Key]
     public string ConsumerId { get; set; } = string.Empty;
+    
     /// <summary>
     ///  Company or organization name
     /// </summary>
     public string CompanyName { get; set; } = string.Empty;
+    
+    /// <summary>
+    /// Account code for the consumer
+    /// </summary>
+    public string? AccountCode { get; set; }
+    
     /// <summary>
     /// Primary contact information for the consumer
     /// </summary>
     public string PrimaryContactName { get; set; } = string.Empty;
+    
     public string PrimaryContactEmail { get; set; } = string.Empty;
+    
     public string PrimaryContactPhone { get; set; } = string.Empty;
+    
     public string PrimaryContactPosition { get; set; } = string.Empty;
+    
     /// <summary>
     /// Secondary contact information for the consumer (optional)
     /// </summary>
     public string? SecondaryContactName { get; set; }
+    
     public string? SecondaryContactEmail { get; set; }
+    
     public string? SecondaryContactPhone { get; set; }
+    
     public string? SecondaryContactPosition { get; set; }
 
     /// <summary>
     /// Date when the consumer was activated
     /// </summary>
     public DateTime ActivatedAt { get; set; } = DateTime.UtcNow;
+    
+    /// <summary>
+    /// Subscription end date
+    /// </summary>
+    public DateTime? SubscriptionEnd { get; set; }
+    
     /// <summary>
     /// Indicates if the consumer is active
     /// </summary>
-    public bool IsActive { get; set; } = true;
+    public new bool IsActive { get; set; } = true;
+    
     /// <summary>
     /// Address of the consumer
     /// </summary>
     public string AddressStreet { get; set; } = string.Empty;
+    
     public string AddressCity { get; set; } = string.Empty;
+    
     public string AddressState { get; set; } = string.Empty;
+    
     public string AddressPostalCode { get; set; } = string.Empty;
+    
     public string AddressCountry { get; set; } = string.Empty;
+    
     /// <summary>
     /// Additional notes or comments about the consumer
     /// </summary>
     public string Notes { get; set; } = string.Empty;
+    
     /// <summary>
     /// Status of the consumer account
     /// </summary>

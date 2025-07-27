@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using TechWayFit.Licensing.Infrastructure.Models.Search;
 using TechWayFit.Licensing.Management.Core.Models.License;
 
@@ -13,7 +14,7 @@ public class LicenseSearchRequest:SearchRequest<ProductLicenseEntity>
         ProductId = productId;
         ConsumerId = consumerId;
         Status = status;
-        Filters = new List<Func<ProductLicenseEntity, bool>>();
+        Filters = new List<Expression<Func<ProductLicenseEntity, bool>>>();
         if (!string.IsNullOrEmpty(productId))
             Filters.Add(license => license.ProductId == productId);
         if (!string.IsNullOrEmpty(consumerId))

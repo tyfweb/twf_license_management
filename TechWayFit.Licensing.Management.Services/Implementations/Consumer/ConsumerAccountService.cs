@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Microsoft.Extensions.Logging;
 using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Consumer;
 using TechWayFit.Licensing.Infrastructure.Data.Entities.Consumer;
@@ -177,7 +178,7 @@ public class ConsumerAccountService : IConsumerAccountService
             // For now, use search functionality to filter by email
             var searchRequest = new SearchRequest<ConsumerAccountEntity>
             {
-                Filters = new List<Func<ConsumerAccountEntity, bool>>
+                Filters = new List<Expression<Func<ConsumerAccountEntity, bool>>>
                 {
                     c => c.PrimaryContactEmail.Equals(email, StringComparison.OrdinalIgnoreCase) ||
                          (c.SecondaryContactEmail != null && c.SecondaryContactEmail.Equals(email, StringComparison.OrdinalIgnoreCase))
@@ -213,7 +214,7 @@ public class ConsumerAccountService : IConsumerAccountService
             
             var searchRequest = new SearchRequest<ConsumerAccountEntity>
             {
-                Filters = new List<Func<ConsumerAccountEntity, bool>>()
+                Filters = new List<Expression<Func<ConsumerAccountEntity, bool>>>()
             };
             
             // Apply basic filtering through search
@@ -256,7 +257,7 @@ public class ConsumerAccountService : IConsumerAccountService
             
             var searchRequest = new SearchRequest<ConsumerAccountEntity>
             {
-                Filters = new List<Func<ConsumerAccountEntity, bool>>()
+                Filters = new List<Expression<Func<ConsumerAccountEntity, bool>>>()
             };
             
             // Apply basic filtering

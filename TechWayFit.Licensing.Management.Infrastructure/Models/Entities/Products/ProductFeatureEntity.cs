@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using TechWayFit.Licensing.Infrastructure.Models.Entities.License;
 using TechWayFit.Licensing.Management.Core.Models.License;
 using TechWayFit.Licensing.Management.Core.Models.Product;
@@ -7,6 +8,7 @@ namespace TechWayFit.Licensing.Infrastructure.Models.Entities.Products;
 /// <summary>
 /// Database entity for ProductFeature
 /// </summary>
+[Table("product_features")]
 public class ProductFeatureEntity : BaseAuditEntity
 {
     public string ProductId { get; set; } = string.Empty;

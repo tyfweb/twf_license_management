@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using TechWayFit.Licensing.Core.Helpers;
 using TechWayFit.Licensing.Management.Core.Models.Notification;
 
@@ -6,6 +7,7 @@ namespace TechWayFit.Licensing.Infrastructure.Models.Entities.Notification;
 /// <summary>
 /// Database entity for Notification Templates
 /// </summary>
+[Table("notification_templates")]
 public class NotificationTemplateEntity : BaseAuditEntity
 {
     public string NotificationTemplateId { get; set; } = string.Empty;

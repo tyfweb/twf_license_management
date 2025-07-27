@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using TechWayFit.Licensing.Management.Core.Models.Product;
 
 namespace TechWayFit.Licensing.Infrastructure.Models.Entities.Products;
@@ -5,6 +6,7 @@ namespace TechWayFit.Licensing.Infrastructure.Models.Entities.Products;
 /// <summary>
 /// Database entity for ProductVersion
 /// </summary>
+[Table("product_versions")]
 public class ProductVersionEntity : BaseAuditEntity
 {
     /// <summary>

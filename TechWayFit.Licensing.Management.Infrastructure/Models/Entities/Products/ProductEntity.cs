@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using TechWayFit.Licensing.Core.Helpers;
 using TechWayFit.Licensing.Infrastructure.Models.Entities.Consumer;
 using TechWayFit.Licensing.Infrastructure.Models.Entities.License;
@@ -8,6 +9,7 @@ namespace TechWayFit.Licensing.Infrastructure.Models.Entities.Products;
 /// <summary>
 /// Database entity for EnterpriseProduct
 /// </summary>
+[Table("products")]
 public class ProductEntity : BaseAuditEntity
 {
     /// <summary>

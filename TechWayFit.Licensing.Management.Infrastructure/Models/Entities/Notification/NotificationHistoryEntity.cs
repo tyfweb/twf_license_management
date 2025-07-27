@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using TechWayFit.Licensing.Core.Helpers;
 using TechWayFit.Licensing.Management.Core.Models.Notification;
 
@@ -6,6 +7,7 @@ namespace TechWayFit.Licensing.Infrastructure.Models.Entities.Notification;
 /// <summary>
 /// Database entity for Notification History
 /// </summary>
+[Table("notification_history")]
 public class NotificationHistoryEntity : BaseAuditEntity
 {
     public string NotificationId { get; set; } = string.Empty;

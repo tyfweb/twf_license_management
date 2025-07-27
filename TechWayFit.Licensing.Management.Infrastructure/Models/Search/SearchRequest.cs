@@ -1,3 +1,5 @@
+using System.Linq.Expressions;
+
 namespace TechWayFit.Licensing.Infrastructure.Models.Search;
 
 public class SearchRequest<TEntity> where TEntity : class
@@ -9,5 +11,5 @@ public class SearchRequest<TEntity> where TEntity : class
     public bool SortDescending { get; set; } = false;
     public DateTime? FromDate { get; set; }
     public DateTime? ToDate { get; set; }
-    public IList<Func<TEntity, bool>> Filters { get; set; } = new List<Func<TEntity, bool>>();
+    public IList<Expression<Func<TEntity, bool>>> Filters { get; set; } = new List<Expression<Func<TEntity, bool>>>();
 }

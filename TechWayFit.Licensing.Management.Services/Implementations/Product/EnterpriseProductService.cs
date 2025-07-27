@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using System.Linq.Expressions;
 using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Product;
 using TechWayFit.Licensing.Infrastructure.Models.Entities.Products;
 using TechWayFit.Licensing.Infrastructure.Models.Search;
@@ -176,7 +177,7 @@ public class EnterpriseProductService : IEnterpriseProductService
             
             var searchRequest = new SearchRequest<ProductEntity>
             {
-                Filters = new List<Func<ProductEntity, bool>>
+                Filters = new List<Expression<Func<ProductEntity, bool>>>
                 {
                     p => p.Name.Equals(productName, StringComparison.OrdinalIgnoreCase)
                 }
@@ -203,7 +204,7 @@ public class EnterpriseProductService : IEnterpriseProductService
         {
             var searchRequest = new SearchRequest<ProductEntity>
             {
-                Filters = new List<Func<ProductEntity, bool>>()
+                Filters = new List<Expression<Func<ProductEntity, bool>>>()
             };
 
             // Apply status filter
