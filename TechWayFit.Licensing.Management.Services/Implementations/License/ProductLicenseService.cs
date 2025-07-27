@@ -73,8 +73,17 @@ public class ProductLicenseService : IProductLicenseService
                 ValidTo = request.ExpiryDate ?? DateTime.UtcNow.AddYears(1),
                 CustomData = request.Metadata ?? new Dictionary<string, object>(),
                 PrivateKeyPem = privateKey,
+                
+                // Map tier information
+                Tier = MapTierFromRequest(request.TierId),
+                MaxApiCallsPerMonth = request.MaxUsers, // Map MaxUsers to API calls if applicable
+                MaxConcurrentConnections = request.MaxDevices, // Map MaxDevices to connections if applicable
+                
+                // Map features from request properties
+                Features = MapFeaturesFromRequest(request),
+                
                 // TODO: Map additional fields when needed:
-                // ProductName, ContactPerson, ContactEmail, Features, etc.
+                // ProductName, ContactPerson, ContactEmail, etc.
             };
 
             // Generate cryptographically signed license
@@ -439,6 +448,86 @@ public class ProductLicenseService : IProductLicenseService
         {
             return "{}";
         }
+    }
+
+    private static CoreModels.LicenseTier MapTierFromRequest(string? tierId)
+    {
+        if (string.IsNullOrWhiteSpace(tierId))
+            return CoreModels.LicenseTier.Community;
+
+        return tierId.ToLowerInvariant() switch
+        {
+            "community" or "free" => CoreModels.LicenseTier.Community,
+            "professional" or "pro" => CoreModels.LicenseTier.Professional,
+            "enterprise" or "ent" => CoreModels.LicenseTier.Enterprise,
+            _ => CoreModels.LicenseTier.Community // Default to Community for unknown tiers
+        };
+    }
+
+    private static List<LicenseFeature> MapFeaturesFromRequest(LicenseGenerationRequest request)
+    {
+        var features = new List<LicenseFeature>();
+
+        // Map boolean features from request properties
+        if (request.AllowOfflineUsage)
+        {
+            features.Add(new LicenseFeature
+            {
+                Name = "OfflineUsage",
+                Description = "Allows application to function without internet connectivity"
+            });
+        }
+
+        if (request.AllowVirtualization)
+        {
+            features.Add(new LicenseFeature
+            {
+                Name = "Virtualization", 
+                Description = "Allows application to run in virtualized environments"
+            });
+        }
+
+        // Map usage limits as features
+        if (request.MaxUsers.HasValue && request.MaxUsers.Value > 0)
+        {
+            features.Add(new LicenseFeature
+            {
+                Name = "UserLimit",
+                Description = $"Maximum {request.MaxUsers.Value} concurrent users"
+            });
+        }
+
+        if (request.MaxDevices.HasValue && request.MaxDevices.Value > 0)
+        {
+            features.Add(new LicenseFeature
+            {
+                Name = "DeviceLimit",
+                Description = $"Maximum {request.MaxDevices.Value} registered devices"
+            });
+        }
+
+        // Map custom properties as features
+        foreach (var customProperty in request.CustomProperties)
+        {
+            if (customProperty.Value is bool boolValue && boolValue)
+            {
+                features.Add(new LicenseFeature
+                {
+                    Name = customProperty.Key,
+                    Description = $"Custom feature: {customProperty.Key}"
+                });
+            }
+            else if (customProperty.Value is int intValue && intValue > 0)
+            {
+                features.Add(new LicenseFeature
+                {
+                    Name = customProperty.Key,
+                    Description = $"Custom limit: {customProperty.Key} = {intValue}"
+                });
+            }
+        }
+
+        return features;
     }
 
     #endregion
