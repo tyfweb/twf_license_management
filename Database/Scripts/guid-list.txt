@@ -1,0 +1,122 @@
+-- Generated GUIDs for TechWayFit Licensing Sample Data
+-- Total: 100 unique identifiers
+
+-- Products (4)
+-- f47ac10b-58cc-4372-a567-0e02b2c3d479
+-- 6ba7b810-9dad-11d1-80b4-00c04fd430c8  
+-- 6ba7b811-9dad-11d1-80b4-00c04fd430c8
+-- 550e8400-e29b-41d4-a716-446655440000
+
+-- Product Versions (8)
+-- 123e4567-e89b-12d3-a456-426614174000
+-- 987fcdeb-51d2-4a8b-9c45-123456789abc
+-- c9bf9e57-1685-4c89-bafb-ff5af830be8a
+-- 15f8b2c1-4d6e-4a2b-8f3c-1e4d5a6b7c8d
+-- 2a5b8c3d-6e9f-4a1b-9c2d-5e6f7a8b9c0d
+-- 3b6c9d4e-7f0a-5b2c-ad3e-6f7a8b9c0d1e
+-- 4c7d0e5f-8a1b-6c3d-be4f-7a8b9c0d1e2f
+-- 5d8e1f6a-9b2c-7d4e-cf5a-8b9c0d1e2f3a
+
+-- Product Tiers (12)
+-- 6e9f2a7b-ac3d-8e5f-da6b-9c0d1e2f3a4b
+-- 7f0a3b8c-bd4e-9f6a-eb7c-0d1e2f3a4b5c
+-- 8a1b4c9d-ce5f-0a7b-fc8d-1e2f3a4b5c6d
+-- 9b2c5d0e-df6a-1b8c-ad9e-2f3a4b5c6d7e
+-- ac3d6e1f-ea7b-2c9d-be0f-3a4b5c6d7e8f
+-- bd4e7f2a-fb8c-3d0e-cf1a-4b5c6d7e8f9a
+-- ce5f8a3b-ac9d-4e1f-da2b-5c6d7e8f9a0b
+-- df6a9b4c-bd0e-5f2a-eb3c-6d7e8f9a0b1c
+-- ea7bac5d-ce1f-6a3b-fc4d-7e8f9a0b1c2d
+-- fb8cbd6e-df2a-7b4c-ad5e-8f9a0b1c2d3e
+-- ac9dce7f-ea3b-8c5d-be6f-9a0b1c2d3e4f
+-- bd0edf8a-fb4c-9d6e-cf7a-0b1c2d3e4f5a
+
+-- Product Features (16)
+-- ce1fea9b-ac5d-0e7f-da8b-1c2d3e4f5a6b
+-- df2afbac-bd6e-1f8a-eb9c-2d3e4f5a6b7c
+-- ea3bacbd-ce7f-2a9b-fcad-3e4f5a6b7c8d
+-- fb4cbdce-df8a-3bac-adbe-4f5a6b7c8d9e
+-- ac5dcedf-ea9b-4cbd-becf-5a6b7c8d9e0f
+-- bd6edfea-fb0c-5dce-cfda-6b7c8d9e0f1a
+-- ce7feafb-ac1d-6edf-daeb-7c8d9e0f1a2b
+-- df8afbac-bd2e-7fea-ebfc-8d9e0f1a2b3c
+-- ea9bacbd-ce3f-8afb-fcad-9e0f1a2b3c4d
+-- fb0cbdce-df4a-9bac-adbe-0f1a2b3c4d5e
+-- ac1dcedf-ea5b-acbd-becf-1a2b3c4d5e6f
+-- bd2edfea-fb6c-bdce-cfda-2b3c4d5e6f7a
+-- ce3feafb-ac7d-cedf-daeb-3c4d5e6f7a8b
+-- df4afbac-bd8e-dfea-ebfc-4d5e6f7a8b9c
+-- ea5bacbd-ce9f-eafb-fcad-5e6f7a8b9c0d
+-- fb6cbdce-df0a-fbac-adbe-6f7a8b9c0d1e
+
+-- Consumer Accounts (8)
+-- ac7dcedf-ea1b-acbd-becf-7a8b9c0d1e2f
+-- bd8edfea-fb2c-bdce-cfda-8b9c0d1e2f3a
+-- ce9feafb-ac3d-cedf-daeb-9c0d1e2f3a4b
+-- df0afbac-bd4e-dfea-ebfc-0d1e2f3a4b5c
+-- ea1bacbd-ce5f-eafb-fcad-1e2f3a4b5c6d
+-- fb2cbdce-df6a-fbac-adbe-2f3a4b5c6d7e
+-- ac3dcedf-ea7b-acbd-becf-3a4b5c6d7e8f
+-- bd4edfea-fb8c-bdce-cfda-4b5c6d7e8f9a
+
+-- Product Consumers (12)
+-- ce5feafb-ac9d-cedf-daeb-5c6d7e8f9a0b
+-- df6afbac-bd0e-dfea-ebfc-6d7e8f9a0b1c
+-- ea7bacbd-ce1f-eafb-fcad-7e8f9a0b1c2d
+-- fb8cbdce-df2a-fbac-adbe-8f9a0b1c2d3e
+-- ac9dcedf-ea3b-acbd-becf-9a0b1c2d3e4f
+-- bd0edfea-fb4c-bdce-cfda-0b1c2d3e4f5a
+-- ce1feafb-ac5d-cedf-daeb-1c2d3e4f5a6b
+-- df2afbac-bd6e-dfea-ebfc-2d3e4f5a6b7c
+-- ea3bacbd-ce7f-eafb-fcad-3e4f5a6b7c8d
+-- fb4cbdce-df8a-fbac-adbe-4f5a6b7c8d9e
+-- ac5dcedf-ea9b-acbd-becf-5a6b7c8d9e0f
+-- bd6edfea-fb0c-bdce-cfda-6b7c8d9e0f1a
+
+-- Product Licenses (16)
+-- ce7feafb-ac1d-cedf-daeb-7c8d9e0f1a2b
+-- df8afbac-bd2e-dfea-ebfc-8d9e0f1a2b3c
+-- ea9bacbd-ce3f-eafb-fcad-9e0f1a2b3c4d
+-- fb0cbdce-df4a-fbac-adbe-0f1a2b3c4d5e
+-- ac1dcedf-ea5b-acbd-becf-1a2b3c4d5e6f
+-- bd2edfea-fb6c-bdce-cfda-2b3c4d5e6f7a
+-- ce3feafb-ac7d-cedf-daeb-3c4d5e6f7a8b
+-- df4afbac-bd8e-dfea-ebfc-4d5e6f7a8b9c
+-- ea5bacbd-ce9f-eafb-fcad-5e6f7a8b9c0d
+-- fb6cbdce-df0a-fbac-adbe-6f7a8b9c0d1e
+-- ac7dcedf-ea1b-acbd-becf-7a8b9c0d1e2f
+-- bd8edfea-fb2c-bdce-cfda-8b9c0d1e2f3a
+-- ce9feafb-ac3d-cedf-daeb-9c0d1e2f3a4b
+-- df0afbac-bd4e-dfea-ebfc-0d1e2f3a4b5c
+-- ea1bacbd-ce5f-eafb-fcad-1e2f3a4b5c6d
+-- fb2cbdce-df6a-fbac-adbe-2f3a4b5c6d7e
+
+-- Audit Entries (12)
+-- ac3dcedf-ea7b-acbd-becf-3a4b5c6d7e8f
+-- bd4edfea-fb8c-bdce-cfda-4b5c6d7e8f9a
+-- ce5feafb-ac9d-cedf-daeb-5c6d7e8f9a0b
+-- df6afbac-bd0e-dfea-ebfc-6d7e8f9a0b1c
+-- ea7bacbd-ce1f-eafb-fcad-7e8f9a0b1c2d
+-- fb8cbdce-df2a-fbac-adbe-8f9a0b1c2d3e
+-- ac9dcedf-ea3b-acbd-becf-9a0b1c2d3e4f
+-- bd0edfea-fb4c-bdce-cfda-0b1c2d3e4f5a
+-- ce1feafb-ac5d-cedf-daeb-1c2d3e4f5a6b
+-- df2afbac-bd6e-dfea-ebfc-2d3e4f5a6b7c
+-- ea3bacbd-ce7f-eafb-fcad-3e4f5a6b7c8d
+-- fb4cbdce-df8a-fbac-adbe-4f5a6b7c8d9e
+
+-- Notification Templates (6)
+-- ac5dcedf-ea9b-acbd-becf-5a6b7c8d9e0f
+-- bd6edfea-fb0c-bdce-cfda-6b7c8d9e0f1a
+-- ce7feafb-ac1d-cedf-daeb-7c8d9e0f1a2b
+-- df8afbac-bd2e-dfea-ebfc-8d9e0f1a2b3c
+-- ea9bacbd-ce3f-eafb-fcad-9e0f1a2b3c4d
+-- fb0cbdce-df4a-fbac-adbe-0f1a2b3c4d5e
+
+-- Notification History (6)
+-- ac1dcedf-ea5b-acbd-becf-1a2b3c4d5e6f
+-- bd2edfea-fb6c-bdce-cfda-2b3c4d5e6f7a
+-- ce3feafb-ac7d-cedf-daeb-3c4d5e6f7a8b
+-- df4afbac-bd8e-dfea-ebfc-4d5e6f7a8b9c
+-- ea5bacbd-ce9f-eafb-fcad-5e6f7a8b9c0d
+-- fb6cbdce-df0a-fbac-adbe-6f7a8b9c0d1e
