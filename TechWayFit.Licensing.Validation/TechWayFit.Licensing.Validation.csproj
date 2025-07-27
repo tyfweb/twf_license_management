@@ -1,12 +1,27 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+    <!-- NuGet Package Information -->
+    <PackageId>TechWayFit.Licensing.Validation</PackageId>
+    <Title>TechWayFit Licensing Validation</Title>
+    <Description>Validation components and attributes for TechWayFit licensing system including MVC integration.</Description>
+    <PackageTags>licensing;validation;mvc;attributes;techway;fit</PackageTags>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <IsPackable>true</IsPackable>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    
+    <!-- Documentation -->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
+    
+    <!-- Assembly Information -->
+    <AssemblyTitle>TechWayFit Licensing Validation Library</AssemblyTitle>
+    <AssemblyDescription>Validation components and MVC integration for TechWayFit licensing</AssemblyDescription>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />

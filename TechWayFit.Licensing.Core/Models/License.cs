@@ -209,7 +209,7 @@ namespace TechWayFit.Licensing.Core.Models
         /// <returns>True if feature is included and enabled</returns>
         public bool HasFeature(string featureName)
         {
-            return FeaturesIncluded.Any(f => f.Name.Equals(featureName, StringComparison.OrdinalIgnoreCase) && f.IsEnabled);
+            return FeaturesIncluded.Any(f => f.Name.Equals(featureName, StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>

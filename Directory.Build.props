@@ -1,0 +1,42 @@
+<Project>
+  
+  <PropertyGroup>
+    <!-- Version Information -->
+    <MajorVersion>1</MajorVersion>
+    <MinorVersion>0</MinorVersion>
+    <PatchVersion>0</PatchVersion>
+    <PreReleaseLabel></PreReleaseLabel>
+    
+    <!-- Build Version Components -->
+    <Version>$(MajorVersion).$(MinorVersion).$(PatchVersion)$(PreReleaseLabel)</Version>
+    <AssemblyVersion>$(MajorVersion).$(MinorVersion).0.0</AssemblyVersion>
+    <FileVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion).0</FileVersion>
+    
+    <!-- Common Assembly Information -->
+    <Company>TechWayFit</Company>
+    <Product>TechWayFit Licensing System</Product>
+    <Copyright>Copyright © TechWayFit $(CurrentYear)</Copyright>
+    <CurrentYear>$([System.DateTime]::Now.ToString(`yyyy`))</CurrentYear>
+    
+    <!-- Common Build Settings -->
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningsAsErrors />
+    
+    <!-- Repository Information -->
+    <RepositoryUrl>https://github.com/tyfweb/two_license_management</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    
+    <!-- Common Package Settings (for libraries) -->
+    <Authors>TechWayFit Development Team</Authors>
+    <Description>TechWayFit Licensing System Components</Description>
+    <PackageProjectUrl>https://github.com/tyfweb/two_license_management</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+</Project>

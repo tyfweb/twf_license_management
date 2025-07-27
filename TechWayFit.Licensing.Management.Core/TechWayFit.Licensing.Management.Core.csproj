@@ -1,9 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+    <!-- Assembly Information -->
+    <AssemblyTitle>TechWayFit Licensing Management Core</AssemblyTitle>
+    <AssemblyDescription>Core management functionality for TechWayFit licensing system</AssemblyDescription>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>

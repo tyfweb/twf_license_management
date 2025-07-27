@@ -9,37 +9,44 @@ using TechWayFit.Licensing.Core.Contracts;
 
 namespace TechWayFit.Licensing.Core.Services
 {
+
+
     /// <summary>
-    /// Service for validating tamper-proof licenses using RSA digital signatures
-    /// Moved from separate validation project to consolidate validation logic
+    /// Service for validating tamper-proof licenses using RSA digital signatures.
+    /// Provides lean validation focused on cryptographic integrity and temporal validation.
+    /// Consuming applications handle feature-specific business logic using the validated license data.
     /// </summary>
     public class LicenseValidationService : ILicenseValidationService
     {
         private readonly ILogger<LicenseValidationService> _logger;
-        private readonly IConfiguration _configuration;
         private readonly IMemoryCache _cache;
-        private readonly IKeyRepository _keyRepository;
-        private readonly IAuditRepository _auditRepository;
         private readonly LicenseValidationOptions _defaultOptions;
 
+        /// <summary>
+        /// Initializes a new instance of the LicenseValidationService.
+        /// </summary>
+        /// <param name="logger">Logger for validation operations</param>
+        /// <param name="configuration">Configuration provider for default settings</param>
+        /// <param name="cache">Memory cache for validation result caching</param>
         public LicenseValidationService(
             ILogger<LicenseValidationService> logger,
             IConfiguration configuration,
-            IMemoryCache cache,
-            IKeyRepository keyRepository,
-            IAuditRepository auditRepository)
+            IMemoryCache cache)
         {
             _logger = logger;
-            _configuration = configuration;
             _cache = cache;
-            _keyRepository = keyRepository;
-            _auditRepository = auditRepository;
-            
-            _defaultOptions = new LicenseValidationOptions();
-            configuration.GetSection("LicenseValidation").Bind(_defaultOptions);
+            _defaultOptions = configuration.GetSection("LicenseValidation").Get<LicenseValidationOptions>() ?? new LicenseValidationOptions();
         }
 
-        public async Task<LicenseValidationResult> ValidateAsync(SignedLicense signedLicense, LicenseValidationOptions? options = null)
+        /// <summary>
+        /// Validates a signed license with cryptographic signature verification and temporal validation.
+        /// Returns the decoded license data for consuming applications to interpret features and limits.
+        /// </summary>
+        /// <param name="signedLicense">The signed license to validate</param>
+        /// <param name="publicKey">The RSA public key for signature verification</param>
+        /// <param name="options">Optional validation options (uses defaults if not provided)</param>
+        /// <returns>License validation result containing decoded license data and validation status</returns>
+        public Task<LicenseValidationResult> ValidateAsync(SignedLicense signedLicense,string publicKey, LicenseValidationOptions? options = null)
         {
             var validationOptions = options ?? _defaultOptions;
             var cacheKey = $"license_validation_{signedLicense.PublicKeyThumbprint}_{signedLicense.Checksum}";
@@ -47,41 +54,32 @@ namespace TechWayFit.Licensing.Core.Services
             try
             {
                 // Check cache first if enabled
-                if (validationOptions.EnableCaching && _cache.TryGetValue(cacheKey, out LicenseValidationResult cachedResult))
+                if (validationOptions.EnableCaching && _cache.TryGetValue(cacheKey, out LicenseValidationResult? cachedResult) && cachedResult != null)
                 {
                     _logger.LogDebug("License validation result retrieved from cache");
-                    return cachedResult;
+                    return Task.FromResult(cachedResult);
                 }
 
                 _logger.LogInformation("Validating license with format version {FormatVersion}", signedLicense.FormatVersion);
 
                 // Decode and deserialize license data first
-                var license = await DecodeLicenseDataAsync(signedLicense);
+                var license = DecodeLicenseData(signedLicense);
                 if (license == null)
                 {
                     var result = LicenseValidationResult.Failure(LicenseStatus.Corrupted, "License data is corrupted or unreadable");
-                    await LogValidationAttempt(result);
-                    return result;
-                }
-
-                // Get public key for this product
-                var publicKey = await _keyRepository.GetPublicKeyAsync(license.ProductId);
-                if (publicKey == null)
-                {
-                    var result = LicenseValidationResult.Failure(LicenseStatus.Invalid, $"Public key not found for product {license.ProductId}");
-                    await LogValidationAttempt(result);
-                    return result;
-                }
+                    LogValidationAttempt(result);
+                    return Task.FromResult(result);
+                }                 
 
                 // Validate signature if enabled
                 if (validationOptions.ValidateSignature)
                 {
-                    var signatureValid = await ValidateSignatureAsync(signedLicense, publicKey);
+                    var signatureValid = ValidateSignature(signedLicense, publicKey);
                     if (!signatureValid)
                     {
                         var result = LicenseValidationResult.Failure(LicenseStatus.Invalid, "License signature validation failed");
-                        await LogValidationAttempt(result);
-                        return result;
+                        LogValidationAttempt(result);
+                        return Task.FromResult(result);
                     }
                 }
 
@@ -91,12 +89,12 @@ namespace TechWayFit.Licensing.Core.Services
                     var dateValidation = ValidateLicenseDates(license, validationOptions);
                     if (!dateValidation.IsValid)
                     {
-                        await LogValidationAttempt(dateValidation);
+                        LogValidationAttempt(dateValidation);
                         if (validationOptions.EnableCaching)
                         {
                             _cache.Set(cacheKey, dateValidation, TimeSpan.FromMinutes(validationOptions.CacheDurationMinutes));
                         }
-                        return dateValidation;
+                        return Task.FromResult(dateValidation);
                     }
                 }
 
@@ -105,11 +103,8 @@ namespace TechWayFit.Licensing.Core.Services
                 successResult.IsSignatureValid = true;
                 successResult.AreDatesValid = true;
 
-                // Populate available features
-                successResult.AvailableFeatures = license.FeaturesIncluded
-                    .Where(f => f.IsCurrentlyValid)
-                    .Select(f => f.Name)
-                    .ToList();
+                // Note: Core does not interpret features - consuming applications handle feature validation
+                // using the validated license data in successResult.License
 
                 // Cache result if enabled
                 if (validationOptions.EnableCaching)
@@ -117,20 +112,27 @@ namespace TechWayFit.Licensing.Core.Services
                     _cache.Set(cacheKey, successResult, TimeSpan.FromMinutes(validationOptions.CacheDurationMinutes));
                 }
 
-                await LogValidationAttempt(successResult);
-                return successResult;
+                LogValidationAttempt(successResult);
+                return Task.FromResult(successResult);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "License validation failed with exception");
-                var errorResult = LicenseValidationResult.Failure(LicenseStatus.ServiceUnavailable, 
+                var errorResult = LicenseValidationResult.Failure(LicenseStatus.ServiceUnavailable,
                     $"License validation service encountered an error: {ex.Message}");
-                await LogValidationAttempt(errorResult);
-                return errorResult;
+                LogValidationAttempt(errorResult);
+                return Task.FromResult(errorResult);
             }
         }
 
-        public async Task<LicenseValidationResult> ValidateFromJsonAsync(string licenseJson, LicenseValidationOptions? options = null)
+        /// <summary>
+        /// Validates a license from JSON string format.
+        /// </summary>
+        /// <param name="licenseJson">The license in JSON format</param>
+        /// <param name="publicKey">The RSA public key for signature verification</param>
+        /// <param name="options">Optional validation options (uses defaults if not provided)</param>
+        /// <returns>License validation result containing decoded license data and validation status</returns>
+        public async Task<LicenseValidationResult> ValidateFromJsonAsync(string licenseJson, string publicKey, LicenseValidationOptions? options = null)
         {
             try
             {
@@ -144,7 +146,7 @@ namespace TechWayFit.Licensing.Core.Services
                     return LicenseValidationResult.Failure(LicenseStatus.Corrupted, "Invalid license JSON format");
                 }
 
-                return await ValidateAsync(signedLicense, options);
+                return await ValidateAsync(signedLicense, publicKey, options);
             }
             catch (JsonException ex)
             {
@@ -153,17 +155,30 @@ namespace TechWayFit.Licensing.Core.Services
             }
         }
 
-        public async Task<LicenseValidationResult> ValidateFromFileAsync(string filePath, LicenseValidationOptions? options = null)
+        /// <summary>
+        /// Validates a license from file.
+        /// </summary>
+        /// <param name="filePath">Path to the license file</param>
+        /// <param name="publicKeyPath">Path to the public key file</param>
+        /// <param name="options">Optional validation options (uses defaults if not provided)</param>
+        /// <returns>License validation result containing decoded license data and validation status</returns>
+        public async Task<LicenseValidationResult> ValidateFromFileAsync(string filePath, string publicKeyPath, LicenseValidationOptions? options = null)
         {
             try
             {
-                if (!File.Exists(filePath))
+                if (!File.Exists(filePath) || !File.Exists(publicKeyPath))
                 {
-                    return LicenseValidationResult.Failure(LicenseStatus.NotFound, $"License file not found: {filePath}");
+                    _logger.LogError("License file or public key file not found: {FilePath} or {PublicKeyPath}", filePath, publicKeyPath);
+                    return LicenseValidationResult.Failure(LicenseStatus.NotFound, $"License file or public key file not found: {filePath} or {publicKeyPath}");
                 }
-
+                var publicKey = await File.ReadAllTextAsync(publicKeyPath);
+                if (string.IsNullOrWhiteSpace(publicKey))
+                {
+                    _logger.LogError("Public key file is empty: {PublicKeyPath}", publicKeyPath);
+                    return LicenseValidationResult.Failure(LicenseStatus.Invalid, "Public key file is empty");
+                }
                 var licenseJson = await File.ReadAllTextAsync(filePath);
-                return await ValidateFromJsonAsync(licenseJson, options);
+                return await ValidateFromJsonAsync(licenseJson, publicKey, options);
             }
             catch (Exception ex)
             {
@@ -172,36 +187,13 @@ namespace TechWayFit.Licensing.Core.Services
             }
         }
 
-        public async Task<bool> IsFeatureAllowedAsync(string licenseId, string featureName)
-        {
-            try
-            {
-                // This would need integration with license repository to get the license
-                // For now, return a basic implementation
-                return true;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to check feature {FeatureName} for license {LicenseId}", featureName, licenseId);
-                return false;
-            }
-        }
-
-        public async Task<List<string>> GetAvailableFeaturesAsync(string licenseId)
-        {
-            try
-            {
-                // This would need integration with license repository
-                return new List<string>();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to get available features for license {LicenseId}", licenseId);
-                return new List<string>();
-            }
-        }
-
-        public async Task<bool> ValidateSignatureAsync(SignedLicense signedLicense, string publicKey)
+        /// <summary>
+        /// Validates the digital signature of a signed license
+        /// </summary>
+        /// <param name="signedLicense">The signed license to validate</param>
+        /// <param name="publicKey">Public key for signature verification</param>
+        /// <returns>True if signature is valid</returns>
+        public bool ValidateSignature(SignedLicense signedLicense, string publicKey)
         {
             try
             {
@@ -220,7 +212,7 @@ namespace TechWayFit.Licensing.Core.Services
             }
         }
 
-        private async Task<License?> DecodeLicenseDataAsync(SignedLicense signedLicense)
+        private License? DecodeLicenseData(SignedLicense signedLicense)
         {
             try
             {
@@ -246,7 +238,7 @@ namespace TechWayFit.Licensing.Core.Services
             // Check if license is not yet valid
             if (license.ValidFrom > now)
             {
-                var result = LicenseValidationResult.Failure(LicenseStatus.NotYetValid, 
+                var result = LicenseValidationResult.Failure(LicenseStatus.NotYetValid,
                     $"License is not yet valid. Valid from: {license.ValidFrom:yyyy-MM-dd HH:mm:ss} UTC");
                 result.AreDatesValid = false;
                 return result;
@@ -271,7 +263,7 @@ namespace TechWayFit.Licensing.Core.Services
                     }
                 }
 
-                var expiredResult = LicenseValidationResult.Failure(LicenseStatus.Expired, 
+                var expiredResult = LicenseValidationResult.Failure(LicenseStatus.Expired,
                     $"License has expired. Expired on: {license.ValidTo:yyyy-MM-dd HH:mm:ss} UTC");
                 expiredResult.AreDatesValid = false;
                 return expiredResult;
@@ -279,38 +271,37 @@ namespace TechWayFit.Licensing.Core.Services
 
             var validResult = LicenseValidationResult.Success(license);
             validResult.AreDatesValid = true;
-            
+
             // Add warning if license expires soon
             var daysUntilExpiry = (license.ValidTo - now).TotalDays;
             if (daysUntilExpiry <= 7)
             {
                 validResult.AddMessage($"Warning: License expires in {(int)daysUntilExpiry} days on {license.ValidTo:yyyy-MM-dd HH:mm:ss} UTC");
             }
-            
+
             return validResult;
         }
 
-        private async Task LogValidationAttempt(LicenseValidationResult result)
+        private void LogValidationAttempt(LicenseValidationResult result)
         {
             try
             {
+                //TODO: Log in memory and block after 3 failed retry.
                 if (_defaultOptions.EnableAuditLogging && result.License != null)
                 {
-                    await _auditRepository.AddAuditEntryAsync(new LicenseAuditEntry
+                    var logEntry = new
                     {
                         LicenseId = result.License.LicenseId,
-                        ProductId = result.License.ProductId,
-                        ConsumerId = result.License.ConsumerId,
-                        Operation = LicenseOperation.Validated,
-                        Description = $"License validation: {result.Status}",
-                        PerformedBy = "ValidationService",
-                        AdditionalDetails = new Dictionary<string, string>
-                        {
-                            ["ValidationStatus"] = result.Status.ToString(),
-                            ["IsValid"] = result.IsValid.ToString(),
-                            ["Messages"] = string.Join("; ", result.ValidationMessages)
-                        }
-                    });
+                        Status = result.Status,
+                        IsSignatureValid = result.IsSignatureValid,
+                        AreDatesValid = result.AreDatesValid,
+                        AvailableFeatures = result.AvailableFeatures,
+                        Messages = result.ValidationMessages,
+                        Timestamp = DateTime.UtcNow
+                    };
+
+                    // Log the validation attempt (this could be to a file, database, etc.)
+                    _logger.LogInformation("License validation attempt: {@LogEntry}", logEntry);
                 }
             }
             catch (Exception ex)

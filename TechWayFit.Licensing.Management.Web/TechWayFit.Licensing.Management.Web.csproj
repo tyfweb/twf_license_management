@@ -1,10 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>TechWayFit.Licensing.WebUI</AssemblyName>
+    
+    <!-- Assembly Information -->
+    <AssemblyTitle>TechWayFit Licensing Management Web UI</AssemblyTitle>
+    <AssemblyDescription>Web user interface for TechWayFit licensing management system</AssemblyDescription>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>

@@ -90,7 +90,7 @@ namespace TechWayFit.Licensing.Core.Models
         /// <summary>
         /// List of features that are available based on the license
         /// </summary>
-        public List<string> AvailableFeatures { get; set; } = new();
+        public List<LicenseFeature> AvailableFeatures { get; set; } = new();
 
         /// <summary>
         /// Indicates if validation was successful
@@ -119,7 +119,7 @@ namespace TechWayFit.Licensing.Core.Models
                 License = license,
                 IsSignatureValid = true,
                 AreDatesValid = true,
-                AvailableFeatures = license.FeaturesIncluded.Where(f => f.IsCurrentlyValid).Select(f => f.Name).ToList()
+                AvailableFeatures = license.FeaturesIncluded.Where(f => f.IsCurrentlyValid).ToList()
             };
         }
 

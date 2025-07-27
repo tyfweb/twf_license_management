@@ -2,12 +2,14 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
     <AssemblyName>TechWayFit.LicenseGenerator</AssemblyName>
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>false</SelfContained>
+    <IsPackable>false</IsPackable>
+    
+    <!-- Assembly Information -->
+    <AssemblyTitle>TechWayFit License Generator</AssemblyTitle>
+    <AssemblyDescription>Command-line tool for generating TechWayFit licenses</AssemblyDescription>
   </PropertyGroup>
 
   <ItemGroup>
