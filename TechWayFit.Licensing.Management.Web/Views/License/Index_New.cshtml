@@ -1,0 +1,377 @@
+@model TechWayFit.Licensing.WebUI.ViewModels.Dashboard.DashboardViewModel
+@{
+    ViewData["Title"] = "License Management Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-certificate text-primary me-2"></i>
+                        License Management Portal
+                    </h2>
+                    <p class="text-muted mb-0">Welcome, @User.Identity.Name - Manage all your licensing needs</p>
+                </div>
+                <div>
+                    <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-outline-secondary">
+                            <i class="fas fa-sign-out-alt me-1"></i>
+                            Logout
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Products Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-box me-2"></i>
+                        Products Overview
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Products.Any())
+                    {
+                        <div class="row">
+                            @foreach (var product in Model.Products)
+                            {
+                                <div class="col-lg-4 col-md-6 mb-3">
+                                    <div class="card h-100 border-0 shadow-sm product-card" data-product-id="@product.ProductId">
+                                        <div class="card-header @(product.IsActive ? "bg-success" : "bg-secondary") text-white">
+                                            <h6 class="mb-0">
+                                                <i class="fas fa-cube me-1"></i>
+                                                @product.Name
+                                            </h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="card-text small">@product.Description</p>
+                                            <div class="row text-center small">
+                                                <div class="col-4">
+                                                    <div class="bg-light p-2 rounded">
+                                                        <strong>@product.ConsumerCount</strong>
+                                                        <br>Consumers
+                                                    </div>
+                                                </div>
+                                                <div class="col-4">
+                                                    <div class="bg-light p-2 rounded">
+                                                        <strong>@product.LicenseCount</strong>
+                                                        <br>Licenses
+                                                    </div>
+                                                </div>
+                                                <div class="col-4">
+                                                    <div class="bg-light p-2 rounded">
+                                                        <strong>@product.ExpiringLicenses</strong>
+                                                        <br>Expiring
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-footer bg-transparent">
+                                            <button class="btn btn-outline-primary btn-sm w-100" onclick="viewProductLicenses('@product.ProductId', '@product.Name')">
+                                                <i class="fas fa-eye me-1"></i>
+                                                View Licenses
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <i class="fas fa-box fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No Products Found</h5>
+                            <p class="text-muted">Create your first product to get started with licensing.</p>
+                            <a href="@Url.Action("Index", "Product")" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i>
+                                Add Product
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Management Actions Row -->
+    <div class="row mb-4">
+        <!-- License Generation -->
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card h-100 border-0 shadow-sm hover-card">
+                <div class="card-header bg-primary text-white border-0">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-plus-circle me-2"></i>
+                        Generate License
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text text-muted">Create new licenses for products and consumers.</p>
+                    <ul class="list-unstyled small">
+                        <li><i class="fas fa-check text-success me-1"></i> Product-specific licensing</li>
+                        <li><i class="fas fa-check text-success me-1"></i> Feature management</li>
+                        <li><i class="fas fa-check text-success me-1"></i> Tier-based controls</li>
+                    </ul>
+                </div>
+                <div class="card-footer bg-transparent border-0">
+                    <button type="button" class="btn btn-primary w-100" onclick="showLicenseGeneration()">
+                        <i class="fas fa-certificate me-1"></i>
+                        Generate New License
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Management -->
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card h-100 border-0 shadow-sm hover-card">
+                <div class="card-header bg-success text-white border-0">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-box me-2"></i>
+                        Product Management
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text text-muted">Manage products, features, and configurations.</p>
+                    <ul class="list-unstyled small">
+                        <li><i class="fas fa-check text-success me-1"></i> Product configuration</li>
+                        <li><i class="fas fa-check text-success me-1"></i> Feature definitions</li>
+                        <li><i class="fas fa-check text-success me-1"></i> Key management</li>
+                    </ul>
+                </div>
+                <div class="card-footer bg-transparent border-0">
+                    <a href="@Url.Action("Index", "Product")" class="btn btn-success w-100">
+                        <i class="fas fa-cogs me-1"></i>
+                        Manage Products
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Consumer Management -->
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card h-100 border-0 shadow-sm hover-card">
+                <div class="card-header bg-info text-white border-0">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-users me-2"></i>
+                        Consumer Management
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text text-muted">Manage license consumers and organizations.</p>
+                    <ul class="list-unstyled small">
+                        <li><i class="fas fa-check text-success me-1"></i> Organization profiles</li>
+                        <li><i class="fas fa-check text-success me-1"></i> Contact management</li>
+                        <li><i class="fas fa-check text-success me-1"></i> License history</li>
+                    </ul>
+                </div>
+                <div class="card-footer bg-transparent border-0">
+                    <a href="@Url.Action("Index", "Consumer")" class="btn btn-info w-100">
+                        <i class="fas fa-users me-1"></i>
+                        Manage Consumers
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Licenses Modal -->
+    <div class="modal fade" id="productLicensesModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-certificate me-2"></i>
+                        <span id="productLicensesTitle">Product Licenses</span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="productLicensesContent">
+                    <!-- Content will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="showLicenseGeneration()">
+                        <i class="fas fa-plus me-1"></i>
+                        Generate License
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- License Generation Form (Hidden by default) -->
+    <div id="licenseGenerationSection" style="display: none;">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-certificate me-2"></i>
+                    Generate New License
+                    <button type="button" class="btn btn-outline-light btn-sm float-end" onclick="hideLicenseGeneration()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </h5>
+            </div>
+            <div class="card-body">
+                <form asp-controller="License" asp-action="Generate" method="post">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="LicenseGenerationModel.LicensedTo" class="form-label">Licensed To *</label>
+                                <input asp-for="LicenseGenerationModel.LicensedTo" class="form-control" placeholder="e.g., Acme Corporation" required />
+                                <span asp-validation-for="LicenseGenerationModel.LicensedTo" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="LicenseGenerationModel.Tier" class="form-label">License Tier *</label>
+                                <select asp-for="LicenseGenerationModel.Tier" class="form-select" id="tierSelect" required>
+                                    <option value="0">Community (Free)</option>
+                                    <option value="1">Professional</option>
+                                    <option value="2">Enterprise</option>
+                                </select>
+                                <span asp-validation-for="LicenseGenerationModel.Tier" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="LicenseGenerationModel.ContactPerson" class="form-label">Contact Person *</label>
+                                <input asp-for="LicenseGenerationModel.ContactPerson" class="form-control" placeholder="e.g., John Smith" required />
+                                <span asp-validation-for="LicenseGenerationModel.ContactPerson" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="LicenseGenerationModel.ContactEmail" class="form-label">Contact Email *</label>
+                                <input asp-for="LicenseGenerationModel.ContactEmail" class="form-control" type="email" placeholder="e.g., john@company.com" required />
+                                <span asp-validation-for="LicenseGenerationModel.ContactEmail" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="LicenseGenerationModel.ValidFrom" class="form-label">Valid From *</label>
+                                <input asp-for="LicenseGenerationModel.ValidFrom" type="datetime-local" class="form-control" required />
+                                <span asp-validation-for="LicenseGenerationModel.ValidFrom" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="LicenseGenerationModel.ValidTo" class="form-label">Valid To *</label>
+                                <input asp-for="LicenseGenerationModel.ValidTo" type="datetime-local" class="form-control" required />
+                                <span asp-validation-for="LicenseGenerationModel.ValidTo" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-certificate me-2"></i>
+                            Generate License
+                        </button>
+                        <button type="button" class="btn btn-secondary btn-lg ms-2" onclick="hideLicenseGeneration()">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function viewProductLicenses(productId, productName) {
+            $('#productLicensesTitle').text(productName + ' - Licenses');
+            
+            // Show loading state
+            $('#productLicensesContent').html(`
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Loading licenses for ${productName}...</p>
+                </div>
+            `);
+            
+            // Show modal
+            $('#productLicensesModal').modal('show');
+            
+            // Load product licenses (placeholder for now)
+            setTimeout(() => {
+                $('#productLicensesContent').html(`
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        License listing for <strong>${productName}</strong> is being implemented.
+                        <br>This will show all consumers and their licenses for this product.
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Consumers</h6>
+                            <p class="text-muted">No consumers found for this product.</p>
+                            <a href="/Consumer" class="btn btn-sm btn-outline-primary">Add Consumer</a>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Recent Licenses</h6>
+                            <p class="text-muted">No licenses generated yet.</p>
+                            <button class="btn btn-sm btn-outline-success" onclick="showLicenseGeneration()">Generate License</button>
+                        </div>
+                    </div>
+                `);
+            }, 1000);
+        }
+        
+        function showLicenseGeneration() {
+            // Hide modal if open
+            $('#productLicensesModal').modal('hide');
+            
+            // Show license generation form
+            $('#licenseGenerationSection').show();
+            $('html, body').animate({
+                scrollTop: $('#licenseGenerationSection').offset().top - 100
+            }, 500);
+        }
+        
+        function hideLicenseGeneration() {
+            $('#licenseGenerationSection').hide();
+        }
+        
+        // Add hover effects
+        $('.product-card').hover(
+            function() { $(this).addClass('border-primary'); },
+            function() { $(this).removeClass('border-primary'); }
+        );
+        
+        $('.hover-card').hover(
+            function() { $(this).css('transform', 'translateY(-2px)'); },
+            function() { $(this).css('transform', 'translateY(0)'); }
+        );
+    </script>
+    
+    <style>
+        .product-card {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .hover-card {
+            transition: all 0.3s ease;
+        }
+        
+        .card {
+            border-radius: 10px;
+        }
+    </style>
+}

@@ -1,0 +1,124 @@
+using System.ComponentModel.DataAnnotations;
+
+namespace TechWayFit.Licensing.Management.Core.Models.Product;
+
+public class ProductTier
+{
+    public string ProductId { get; set; } = string.Empty;
+    /// <summary>
+    /// Unique identifier for the product tier
+    /// </summary>
+    public string TierId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Name of the product tier
+    /// </summary>
+    public string Name { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Description of the product tier
+    /// </summary>
+    public string Description { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Display order of the product tier
+    /// </summary>
+    public int DisplayOrder { get; set; } = 0;
+
+    /// <summary>
+    /// Features included in this tier
+    /// </summary>
+    public List<ProductFeature> Features { get; set; } = new();
+    /// <summary>
+    /// Support level for this tier
+    /// </summary>
+    public ProductSupportSLA SupportSLA { get; set; } = new();
+
+    public ProductTier()
+    {
+        Features.Add(ProductFeature.Default);
+        Price = Money.Zero;
+        MaxUsers = 1;
+        MaxDevices = 1;
+        IsActive = true;
+    }
+
+    public static ProductTier Default => new ProductTier
+    {
+        TierId = "default",
+        Name = "Default Tier",
+        Description = "Default product tier with basic features",
+        SupportSLA = ProductSupportSLA.NoSLA
+    };
+    /// <summary>
+    /// Price of the product tier
+    /// </summary>
+    public Money Price { get; set; }
+    
+    /// <summary>
+    /// Maximum number of users allowed in this tier
+    /// </summary>
+    public int MaxUsers { get; set; }
+    /// <summary>
+    /// Maximum number of devices allowed in this tier
+    /// </summary>
+    public int MaxDevices { get; set; }
+    /// <summary>
+    /// Indicates if the tier is active
+    /// </summary>
+    public bool IsActive { get; set; }
+}
+public class Money
+{
+    static string[] ValidCurrencies = { "USD", "EUR", "GBP", "SGD", "INR" };
+    public decimal Amount { get; set; } = 0.0m;
+    [MaxLength(3)]
+    public string Currency { get; set; } = "USD";
+
+    public static implicit operator Money(string amount)
+    {
+        if (string.IsNullOrWhiteSpace(amount))
+            return new Money();
+        if (amount.Length > 3 && ValidCurrencies.Contains(amount.Substring(0, 3)))
+        {
+            var value = amount.Substring(3).Trim();
+            if (decimal.TryParse(value, out var parsedAmount))
+            {
+                return new Money { Amount = parsedAmount, Currency = amount.Substring(0, 3) };
+            }
+        }
+        throw new FormatException("Invalid money format");
+    }
+
+    public static implicit operator string(Money money)
+    {
+        return $"{money.Currency} {money.Amount:0.00}";
+    }
+
+    public static Money operator +(Money a, Money b)
+    {
+        if (a.Currency != b.Currency)
+            throw new InvalidOperationException("Cannot add amounts with different currencies");
+        return new Money { Amount = a.Amount + b.Amount, Currency = a.Currency };
+    }
+    public static Money operator -(Money a, Money b)
+    {
+        if (a.Currency != b.Currency)
+            throw new InvalidOperationException("Cannot subtract amounts with different currencies");
+        return new Money { Amount = a.Amount - b.Amount, Currency = a.Currency };
+    }
+    public override string ToString() => $"{this.Currency} {this.Amount:0.00}";
+    public static Money Parse(string input)
+    {
+        var parts = input.Split(' ');
+        if (parts.Length != 2 || !decimal.TryParse(parts[0], out var amount))
+            throw new FormatException("Invalid money format");
+        return new Money { Amount = amount, Currency = parts[1] };
+    }
+    public static Money operator *(Money a, decimal multiplier)
+    {
+        return new Money { Amount = a.Amount * multiplier, Currency = a.Currency };
+    }
+    
+    public static Money Zero => new Money { Amount = 0.0m, Currency = "USD" };
+}

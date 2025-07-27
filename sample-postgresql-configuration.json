@@ -1,0 +1,27 @@
+{
+  "PostgreSql": {
+    "Host": "localhost",
+    "Port": 5432,
+    "Database": "twf_license_management",
+    "Username": "twf_license_user",
+    "Password": "SecurePassword123!@#",
+    "SslMode": "Prefer",
+    "Pooling": true,
+    "MinPoolSize": 5,
+    "MaxPoolSize": 100,
+    "ConnectionTimeout": 15,
+    "CommandTimeout": 30,
+    "ApplicationName": "TechWayFit.Licensing",
+    "EnableMetrics": true,
+    "ConnectionString": ""
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft": "Warning",
+      "Microsoft.Hosting.Lifetime": "Information",
+      "TechWayFit.Licensing": "Debug",
+      "Npgsql": "Warning"
+    }
+  }
+}

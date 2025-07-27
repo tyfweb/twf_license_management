@@ -1,0 +1,13 @@
+namespace TechWayFit.Licensing.Infrastructure.Models.Search;
+
+public class SearchRequest<TEntity> where TEntity : class
+{
+    public string? Query { get; set; }
+    public int Page { get; set; } = 1;
+    public int PageSize { get; set; } = 20;
+    public string? SortBy { get; set; }
+    public bool SortDescending { get; set; } = false;
+    public DateTime? FromDate { get; set; }
+    public DateTime? ToDate { get; set; }
+    public IList<Func<TEntity, bool>> Filters { get; set; } = new List<Func<TEntity, bool>>();
+}

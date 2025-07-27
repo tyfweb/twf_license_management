@@ -1,0 +1,292 @@
+@model TechWayFit.Licensing.WebUI.ViewModels.Consumer.ConsumerListViewModel
+@{
+    ViewData["Title"] = "Consumer Management";
+}
+
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-users text-info me-2"></i>
+                        Consumer Management
+                    </h2>
+                    <p class="text-muted mb-0">Manage license consumers and their organizational details</p>
+                </div>
+                <div>
+                    <a href="@Url.Action("Index", "License")" class="btn btn-outline-secondary me-2">
+                        <i class="fas fa-arrow-left me-1"></i>
+                        Back to Dashboard
+                    </a>
+                    <a href="@Url.Action("Create", "Consumer")" class="btn btn-info">
+                        <i class="fas fa-plus me-1"></i>
+                        Add New Consumer
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Search Organizations</label>
+                            <input type="text" name="search" class="form-control" placeholder="Organization name or contact..." 
+                                   value="@Model.SearchTerm">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Status</label>
+                            <select name="status" class="form-select">
+                                <option value="">All Status</option>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Sort By</label>
+                            <select name="sort" class="form-select">
+                                <option value="name">Organization Name</option>
+                                <option value="email">Contact Email</option>
+                                <option value="created">Date Created</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-search me-1"></i>
+                                Search
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Consumers Grid -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-list me-2"></i>
+                        Consumer Directory
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model?.Consumers != null && Model.Consumers.Any())
+                    {
+                        <div class="row">
+                            @foreach (var consumer in Model.Consumers)
+                            {
+                                <div class="col-lg-6 col-xl-4 mb-4">
+                                    <div class="card h-100 border-0 shadow-sm hover-card">
+                                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="card-title mb-0">
+                                                    <i class="fas fa-building text-info me-1"></i>
+                                                    @consumer.OrganizationName
+                                                </h6>
+                                                <small class="text-muted">ID: @consumer.ConsumerId</small>
+                                            </div>
+                                            @if (consumer.IsActive)
+                                            {
+                                                <span class="badge bg-success">Active</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">Inactive</span>
+                                            }
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="mb-2">
+                                                <strong>Contact Person:</strong><br>
+                                                <i class="fas fa-user text-muted me-1"></i>
+                                                @consumer.ContactPerson
+                                            </div>
+                                            <div class="mb-2">
+                                                <strong>Email:</strong><br>
+                                                <i class="fas fa-envelope text-muted me-1"></i>
+                                                <a href="mailto:@consumer.ContactEmail" class="text-decoration-none">
+                                                    @consumer.ContactEmail
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="card-footer bg-transparent">
+                                            <div class="d-flex justify-content-between">
+                                                <div class="btn-group">
+                                                    <a href="@Url.Action("Details", "Consumer", new { id = consumer.ConsumerId })" 
+                                                       class="btn btn-outline-primary btn-sm">
+                                                        <i class="fas fa-eye me-1"></i>
+                                                        View
+                                                    </a>
+                                                    <a href="@Url.Action("Edit", "Consumer", new { id = consumer.ConsumerId })" 
+                                                       class="btn btn-outline-secondary btn-sm">
+                                                        <i class="fas fa-edit me-1"></i>
+                                                        Edit
+                                                    </a>
+                                                </div>
+                                                <div class="btn-group">
+                                                    <button type="button" class="btn btn-outline-info btn-sm" 
+                                                            onclick="viewLicenses('@consumer.ConsumerId')">
+                                                        <i class="fas fa-certificate me-1"></i>
+                                                        Licenses
+                                                    </button>
+                                                    <button type="button" class="btn btn-outline-danger btn-sm" 
+                                                            onclick="confirmDelete('@consumer.ConsumerId', '@consumer.OrganizationName')">
+                                                        <i class="fas fa-trash me-1"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                            <h4 class="text-muted">No Consumers Found</h4>
+                            <p class="text-muted">Get started by adding your first consumer organization.</p>
+                            <a href="@Url.Action("Create", "Consumer")" class="btn btn-info">
+                                <i class="fas fa-plus me-1"></i>
+                                Add First Consumer
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-users fa-2x mb-2"></i>
+                    <h4>@(Model?.Consumers?.Count ?? 0)</h4>
+                    <small>Total Consumers</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-check-circle fa-2x mb-2"></i>
+                    <h4>@(Model?.Consumers?.Count(c => c.IsActive) ?? 0)</h4>
+                    <small>Active Consumers</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark">
+                <div class="card-body text-center">
+                    <i class="fas fa-pause-circle fa-2x mb-2"></i>
+                    <h4>@(Model?.Consumers?.Count(c => !c.IsActive) ?? 0)</h4>
+                    <small>Inactive Consumers</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-certificate fa-2x mb-2"></i>
+                    <h4>0</h4>
+                    <small>Total Licenses</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h6 class="card-title">
+                        <i class="fas fa-bolt text-warning me-1"></i>
+                        Quick Actions
+                    </h6>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="exportConsumers()">
+                            <i class="fas fa-download me-1"></i>
+                            Export Consumers
+                        </button>
+                        <button type="button" class="btn btn-outline-info btn-sm" onclick="importConsumers()">
+                            <i class="fas fa-upload me-1"></i>
+                            Import Consumers
+                        </button>
+                        <button type="button" class="btn btn-outline-success btn-sm" onclick="bulkEmail()">
+                            <i class="fas fa-envelope me-1"></i>
+                            Bulk Email
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the consumer "<strong id="deleteConsumerName"></strong>"?</p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-1"></i>
+                    This action cannot be undone and will affect all associated licenses.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="post" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-1"></i>
+                        Delete Consumer
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmDelete(consumerId, consumerName) {
+            $('#deleteConsumerName').text(consumerName);
+            $('#deleteForm').attr('action', '@Url.Action("Delete", "Consumer")/' + consumerId);
+            $('#deleteModal').modal('show');
+        }
+
+        function viewLicenses(consumerId) {
+            // Navigate to licenses filtered by consumer
+            window.location.href = '@Url.Action("Index", "License")?consumerId=' + consumerId;
+        }
+
+        function exportConsumers() {
+            alert('Export functionality will be implemented in future updates.');
+        }
+
+        function importConsumers() {
+            alert('Import functionality will be implemented in future updates.');
+        }
+
+        function bulkEmail() {
+            alert('Bulk email functionality will be implemented in future updates.');
+        }
+    </script>
+}

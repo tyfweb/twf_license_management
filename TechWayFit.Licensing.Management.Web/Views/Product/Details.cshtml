@@ -1,0 +1,275 @@
+@model TechWayFit.Licensing.WebUI.ViewModels.Product.ProductDetailViewModel
+@{
+    ViewData["Title"] = $"Product Details - {Model.Product.ProductName}";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2>Product Details</h2>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a asp-controller="License" asp-action="Index">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a asp-controller="Product" asp-action="Index">Products</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">@Model.Product.ProductName</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div>
+                    <a asp-action="Edit" asp-route-id="@Model.Product.ProductId" class="btn btn-warning">
+                        <i class="fas fa-edit me-2"></i>Edit
+                    </a>
+                    <a asp-controller="ProductLicense" asp-action="Index" asp-route-productId="@Model.Product.ProductId" class="btn btn-primary">
+                        <i class="fas fa-license me-2"></i>View Licenses
+                    </a>
+                </div>
+            </div>
+
+            <!-- Product Information -->
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-box-open me-2"></i>@Model.Product.ProductName
+                                @if (Model.Product.IsActive)
+                                {
+                                    <span class="badge bg-success ms-2">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger ms-2">Inactive</span>
+                                }
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <dl class="row">
+                                        <dt class="col-sm-4">Product ID:</dt>
+                                        <dd class="col-sm-8"><code>@Model.Product.ProductId</code></dd>
+                                        
+                                        <dt class="col-sm-4">Type:</dt>
+                                        <dd class="col-sm-8">@Model.Product.ProductType</dd>
+                                        
+                                        <dt class="col-sm-4">Version:</dt>
+                                        <dd class="col-sm-8">@Model.Product.Version</dd>
+                                    </dl>
+                                </div>
+                                <div class="col-md-6">
+                                    <dl class="row">
+                                        <dt class="col-sm-4">Created:</dt>
+                                        <dd class="col-sm-8">@Model.Product.CreatedAt.ToString("MMM dd, yyyy")</dd>
+                                        
+                                        <dt class="col-sm-4">Updated:</dt>
+                                        <dd class="col-sm-8">@Model.Product.UpdatedAt.ToString("MMM dd, yyyy")</dd>
+                                    </dl>
+                                </div>
+                            </div>
+
+                            @if (Model.Product.Metadata.Any())
+                            {
+                                <h6 class="mt-3">Metadata</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Key</th>
+                                                <th>Value</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var metadata in Model.Product.Metadata)
+                                            {
+                                                <tr>
+                                                    <td><code>@metadata.Key</code></td>
+                                                    <td>@metadata.Value</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Available Features -->
+                    @if (Model.Product.AvailableFeatures.Any())
+                    {
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-cogs me-2"></i>Available Features
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    @foreach (var feature in Model.Product.AvailableFeatures)
+                                    {
+                                        <div class="col-md-6 mb-3">
+                                            <div class="border rounded p-3">
+                                                <h6>@feature.Name</h6>
+                                                <p class="text-muted small mb-2">@feature.Description</p>
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <span class="badge bg-secondary">@feature.Category</span>
+                                                    <span class="badge bg-info">@feature.MinimumTier+</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Statistics -->
+                <div class="col-md-4">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-chart-bar me-2"></i>Statistics
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-6">
+                                    <div class="border-end">
+                                        <h4 class="text-primary">@Model.Consumers.Count</h4>
+                                        <small class="text-muted">Consumers</small>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <h4 class="text-success">@Model.Statistics.TotalLicenses</h4>
+                                    <small class="text-muted">Total Licenses</small>
+                                </div>
+                            </div>
+                            
+                            <hr>
+                            
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span>Active:</span>
+                                        <span class="badge bg-success">@Model.Statistics.ActiveLicenses</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span>Expiring Soon:</span>
+                                        <span class="badge bg-warning">@Model.Statistics.LicensesExpiringSoon</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span>Expired:</span>
+                                        <span class="badge bg-danger">@Model.Statistics.ExpiredLicenses</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span>Suspended:</span>
+                                        <span class="badge bg-secondary">@Model.Statistics.SuspendedLicenses</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @if (Model.Statistics.LicensesByTier.Any())
+                            {
+                                <hr>
+                                <h6>By Tier</h6>
+                                @foreach (var tierStat in Model.Statistics.LicensesByTier.OrderBy(x => x.Key))
+                                {
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span>@tierStat.Key:</span>
+                                        <span class="badge bg-info">@tierStat.Value</span>
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-bolt me-2"></i>Quick Actions
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <a asp-controller="License" asp-action="Create" asp-route-productId="@Model.Product.ProductId" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-plus me-2"></i>Generate License
+                                </a>
+                                <a asp-controller="Consumer" asp-action="Index" class="btn btn-outline-secondary btn-sm">
+                                    <i class="fas fa-users me-2"></i>Manage Consumers
+                                </a>
+                                <a asp-action="Edit" asp-route-id="@Model.Product.ProductId" class="btn btn-outline-warning btn-sm">
+                                    <i class="fas fa-edit me-2"></i>Edit Product
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Licenses -->
+            @if (Model.RecentLicenses.Any())
+            {
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-clock me-2"></i>Recent Licenses
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>License ID</th>
+                                        <th>Consumer</th>
+                                        <th>Tier</th>
+                                        <th>Status</th>
+                                        <th>Valid Until</th>
+                                        <th>Created</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var license in Model.RecentLicenses)
+                                    {
+                                        <tr>
+                                            <td><code>@license.LicenseId</code></td>
+                                            <td>@license.ConsumerName</td>
+                                            <td><span class="badge bg-secondary">@license.Tier</span></td>
+                                            <td>
+                                                @if (license.Status == TechWayFit.Licensing.Core.Models.LicenseStatus.Active && license.ValidTo > DateTime.UtcNow)
+                                                {
+                                                    @if (license.IsExpiringSoon)
+                                                    {
+                                                        <span class="badge bg-warning">Expiring Soon</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-success">Active</span>
+                                                    }
+                                                }
+                                                else if (license.ValidTo < DateTime.UtcNow)
+                                                {
+                                                    <span class="badge bg-danger">Expired</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">@license.Status</span>
+                                                }
+                                            </td>
+                                            <td>@license.ValidTo.ToString("MMM dd, yyyy")</td>
+                                            <td>@license.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

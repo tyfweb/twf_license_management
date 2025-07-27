@@ -1,0 +1,133 @@
+/* Custom styles for TechWayFit License Generator */
+
+.border-left-primary {
+    border-left: 4px solid #007bff !important;
+}
+
+.border-left-success {
+    border-left: 4px solid #28a745 !important;
+}
+
+.json-viewer {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    max-height: 400px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+}
+
+/* Hover effects for management cards */
+.hover-card {
+    transition: all 0.3s ease;
+}
+
+.hover-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important;
+}
+
+/* Portal dashboard styles */
+.card-header h5, .card-header h6 {
+    font-weight: 600;
+}
+
+.card-text {
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.list-unstyled li {
+    margin-bottom: 0.25rem;
+}
+
+/* Button hover effects */
+.btn {
+    transition: all 0.2s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+/* Modal enhancements */
+.modal-header {
+    border-bottom: 2px solid var(--bs-primary);
+}
+
+.modal-title {
+    font-weight: 600;
+}
+
+/* Stats display */
+.bg-primary, .bg-success, .bg-info, .bg-warning {
+    background: linear-gradient(135deg, var(--bs-primary) 0%, var(--bs-primary-dark) 100%) !important;
+}
+
+.bg-success {
+    background: linear-gradient(135deg, var(--bs-success) 0%, var(--bs-success-dark) 100%) !important;
+}
+
+.bg-info {
+    background: linear-gradient(135deg, var(--bs-info) 0%, var(--bs-info-dark) 100%) !important;
+}
+
+.bg-warning {
+    background: linear-gradient(135deg, var(--bs-warning) 0%, var(--bs-warning-dark) 100%) !important;
+}
+
+.feature-card {
+    transition: all 0.3s ease;
+}
+
+.feature-card:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+.validation-success {
+    border-left: 4px solid #28a745;
+}
+
+.validation-error {
+    border-left: 4px solid #dc3545;
+}
+
+/* Custom validation styles */
+.is-invalid {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+}
+
+.is-valid {
+    border-color: #28a745 !important;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25) !important;
+}
+
+.tier-badge {
+    font-size: 0.75rem;
+}
+
+.navbar-brand {
+    font-weight: 600;
+}
+
+.card-header h4,
+.card-header h5,
+.card-header h6 {
+    margin-bottom: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .json-viewer {
+        font-size: 0.75rem;
+        max-height: 300px;
+    }
+    
+    .feature-card .card-body {
+        padding: 0.75rem;
+    }
+}

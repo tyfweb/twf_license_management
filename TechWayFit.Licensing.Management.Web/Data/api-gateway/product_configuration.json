@@ -1,0 +1,13 @@
+{
+  "productId": "api-gateway",
+  "productName": "API Gateway",
+  "productType": 0,
+  "version": "1.0",
+  "featureTiers": {},
+  "availableFeatures": [],
+  "defaultLimitations": {},
+  "metadata": {},
+  "isActive": true,
+  "createdAt": "2025-07-24T15:32:52.024994Z",
+  "updatedAt": "2025-07-24T15:32:52.024994Z"
+}

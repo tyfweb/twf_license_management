@@ -1,0 +1,163 @@
+@model TechWayFit.Licensing.WebUI.ViewModels.Product.ProductEditViewModel
+@{
+    ViewData["Title"] = "Create Product";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2>Create New Product</h2>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a asp-controller="License" asp-action="Index">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a asp-controller="Product" asp-action="Index">Products</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Create</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Products
+                    </a>
+                </div>
+            </div>
+
+            <!-- Form -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-plus-circle me-2"></i>Product Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="ProductId" class="form-label"></label>
+                                    <input asp-for="ProductId" class="form-control" placeholder="e.g., api-gateway-basic" />
+                                    <span asp-validation-for="ProductId" class="text-danger"></span>
+                                    <div class="form-text">Unique identifier for the product (no spaces, lowercase recommended)</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="ProductName" class="form-label"></label>
+                                    <input asp-for="ProductName" class="form-control" placeholder="e.g., API Gateway Basic" />
+                                    <span asp-validation-for="ProductName" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label asp-for="ProductType" class="form-label"></label>
+                                    <select asp-for="ProductType" class="form-select" asp-items="Html.GetEnumSelectList<TechWayFit.Licensing.Core.Models.ProductType>()">
+                                        <option value="">Select Product Type</option>
+                                    </select>
+                                    <span asp-validation-for="ProductType" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label asp-for="Version" class="form-label"></label>
+                                    <input asp-for="Version" class="form-control" placeholder="1.0" />
+                                    <span asp-validation-for="Version" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <div class="form-check mt-4">
+                                        <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                                        <label asp-for="IsActive" class="form-check-label"></label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Metadata Section -->
+                        <div class="mb-4">
+                            <h6>Metadata <small class="text-muted">(Optional)</small></h6>
+                            <div id="metadata-container">
+                                @if (Model.Metadata != null && Model.Metadata.Any())
+                                {
+                                    @for (int i = 0; i < Model.Metadata.Count; i++)
+                                    {
+                                        var kvp = Model.Metadata.ElementAt(i);
+                                        <div class="row mb-2 metadata-row">
+                                            <div class="col-md-5">
+                                                <input type="text" name="Metadata[@i].Key" value="@kvp.Key" class="form-control" placeholder="Key" />
+                                            </div>
+                                            <div class="col-md-5">
+                                                <input type="text" name="Metadata[@i].Value" value="@kvp.Value" class="form-control" placeholder="Value" />
+                                            </div>
+                                            <div class="col-md-2">
+                                                <button type="button" class="btn btn-outline-danger btn-sm remove-metadata">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                            <button type="button" id="add-metadata" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-plus me-1"></i>Add Metadata
+                            </button>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Create Product
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+    
+    <script>
+        let metadataIndex = @(Model.Metadata?.Count ?? 0);
+        
+        document.getElementById('add-metadata').addEventListener('click', function() {
+            const container = document.getElementById('metadata-container');
+            const newRow = document.createElement('div');
+            newRow.className = 'row mb-2 metadata-row';
+            newRow.innerHTML = `
+                <div class="col-md-5">
+                    <input type="text" name="Metadata[${metadataIndex}].Key" class="form-control" placeholder="Key" />
+                </div>
+                <div class="col-md-5">
+                    <input type="text" name="Metadata[${metadataIndex}].Value" class="form-control" placeholder="Value" />
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-outline-danger btn-sm remove-metadata">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            container.appendChild(newRow);
+            metadataIndex++;
+        });
+
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-metadata') || e.target.parentElement.classList.contains('remove-metadata')) {
+                const row = e.target.closest('.metadata-row');
+                if (row) {
+                    row.remove();
+                }
+            }
+        });
+    </script>
+}

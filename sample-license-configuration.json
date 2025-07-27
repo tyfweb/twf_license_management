@@ -1,0 +1,21 @@
+{
+  "License": {
+    "licenseData": "eyJsaWNlbnNlSWQiOiJkZW1vLWxpY2Vuc2UtMTIzIiwibGljZW5zZWRUbyI6IlRlY2hXYXlGaXQgRGVtbyIsImNvbnRhY3RQZXJzb24iOiJKb2huIERvZSIsImNvbnRhY3RFbWFpbCI6ImpvaG5AZXhhbXBsZS5jb20iLCJzZWNvbmRhcnlDb250YWN0UGVyc29uIjpudWxsLCJzZWNvbmRhcnlDb250YWN0RW1haWwiOm51bGwsInZhbGlkRnJvbSI6IjIwMjUtMDEtMDFUMDA6MDA6MDBaIiwidmFsaWRUbyI6IjIwMjYtMDEtMDFUMDA6MDA6MDBaIiwiZmVhdHVyZXNJbmNsdWRlZCI6W3sibmFtZSI6IkJhc2ljQXBpR2F0ZXdheSIsImRlc2NyaXB0aW9uIjoiQmFzaWMgQVBJIEdhdGV3YXkgZnVuY3Rpb25hbGl0eSIsImlzRW5hYmxlZCI6dHJ1ZSwiY2F0ZWdvcnkiOjAsImxpbWl0cyI6eyJtYXhVc2FnZVBlck1vbnRoIjoxMDAwMCwibWF4Q29uY3VycmVudFVzYWdlIjoxMH0sImNvbmZpZ3VyYXRpb24iOnt9LCJtaW5pbXVtVGllciI6MCwiYWRkZWRBdCI6IjIwMjUtMDctMjJUMTA6MDA6MDBaIiwiZmVhdHVyZUV4cGlyeSI6bnVsbH1dLCJ0aWVyIjowLCJtYXhBcGlDYWxsc1Blck1vbnRoIjoxMDAwMCwibWF4Q29uY3VycmVudENvbm5lY3Rpb25zIjoxMCwiaXNzdWVkQXQiOiIyMDI1LTA3LTIyVDEwOjAwOjAwWiIsImlzc3VlciI6IlRlY2hXYXlGaXQiLCJ2ZXJzaW9uIjoiMS4wIiwibWV0YWRhdGEiOnt9fQ==",
+    "signature": "SAMPLE_SIGNATURE_REPLACE_WITH_REAL_SIGNATURE",
+    "signatureAlgorithm": "RS256",
+    "publicKeyThumbprint": "sample_thumbprint",
+    "formatVersion": "1.0",
+    "createdAt": "2025-07-22T10:00:00Z",
+    "checksum": "sample_checksum"
+  },
+  "LicenseValidation": {
+    "PublicKey": "-----BEGIN RSA PUBLIC KEY-----\nREPLACE_WITH_REAL_PUBLIC_KEY\n-----END RSA PUBLIC KEY-----",
+    "GracePeriodDays": 30,
+    "AllowGracePeriod": true,
+    "EnableCaching": true,
+    "CacheDurationMinutes": 60,
+    "ValidateSignature": true,
+    "ValidateDates": true,
+    "EnableAuditLogging": true
+  }
+}
