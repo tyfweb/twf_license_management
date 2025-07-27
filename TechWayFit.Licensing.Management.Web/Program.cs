@@ -3,10 +3,15 @@ using TechWayFit.Licensing.Core.Contracts;
 using TechWayFit.Licensing.Core.Services;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Services.Implementations.License;
+using TechWayFit.Licensing.Management.Services.Implementations.Product;
 using TechWayFit.Licensing.WebUI.Models.Authentication;
 using TechWayFit.Licensing.WebUI.Services;
 // using TechWayFit.Licensing.WebUI.Extensions;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
+using TechWayFit.Licensing.Infrastructure.Data.Context;
+using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Product;
+using TechWayFit.Licensing.Infrastructure.Data.Repositories.Product;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -49,6 +54,25 @@ builder.Services.AddRazorPages()
 // Add memory cache for performance
 builder.Services.AddMemoryCache();
 
+// Configure Entity Framework with PostgreSQL (Database First approach)
+builder.Services.AddDbContext<LicensingDbContext>(options =>
+{
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    options.UseNpgsql(connectionString, npgsqlOptions =>
+    {
+        // Database First: Assume database schema exists
+        // No migrations - schema managed via SQL scripts
+        npgsqlOptions.MigrationsAssembly((string?)null);
+    });
+    
+    // Enable sensitive data logging in development
+    if (builder.Environment.IsDevelopment())
+    {
+        options.EnableSensitiveDataLogging();
+        options.EnableDetailedErrors();
+    }
+});
+
 // Configure paths
 var contentRootPath = builder.Environment.ContentRootPath;
 var keyStorePath = Path.Combine(contentRootPath, "Keys");
@@ -66,7 +90,14 @@ Directory.CreateDirectory(dataPath);
 
 // Step 1: Basic services only (for clean build)
 // Step 2: Authentication services will be added here
-// Step 3: Product management services will be added here  
+// Step 3: Product management services - IMPLEMENTED (using real service now)
+
+// Register repositories
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+
+// Register real services (replacing mock)
+builder.Services.AddScoped<IEnterpriseProductService, EnterpriseProductService>();
+
 // Step 4: Consumer management services will be added here
 // Step 5: License management services will be added here
 // Step 6: Audit management services will be added here

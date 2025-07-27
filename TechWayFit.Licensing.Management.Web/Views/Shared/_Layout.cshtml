@@ -3,79 +3,118 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - TechWayFit License Generator</title>
+    <title>@ViewData["Title"] - TechWayFit License Management</title>
+    
+    <!-- External Dependencies -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom Styles -->
     <link href="~/css/site.css" rel="stylesheet">
+    
     <style>
-        .navbar-brand {
-            font-weight: bold;
+        /* Additional inline styles for specific enhancements */
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        .feature-card {
-            border-left: 4px solid #007bff;
+        
+        .navbar-brand {
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        
+        .jumbotron {
+            border-radius: 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .jumbotron::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%), 
+                        linear-gradient(-45deg, rgba(255,255,255,0.1) 25%, transparent 25%), 
+                        linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.1) 75%), 
+                        linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.1) 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+            opacity: 0.3;
+        }
+        
+        .jumbotron-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .step-icon {
+            font-size: 2rem;
             margin-bottom: 1rem;
         }
-        .tier-badge {
-            font-size: 0.8rem;
-        }
-        .json-viewer {
-            background-color: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 0.375rem;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9rem;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        .validation-success {
-            border-left: 4px solid #28a745;
-        }
-        .validation-error {
-            border-left: 4px solid #dc3545;
+        
+        .progress-indicator {
+            height: 4px;
+            background: linear-gradient(90deg, var(--tw-success) 0%, var(--tw-warning) 50%, var(--tw-info) 100%);
+            border-radius: 2px;
+            margin: 2rem 0;
         }
     </style>
 </head>
-<body>
+<body class="bg-light">
     <header>
-        <nav class="navbar navbar-expand-sm navbar-dark bg-primary">
+        <nav class="navbar navbar-expand-lg navbar-dark">
             <div class="container">
-                <a class="navbar-brand" href="@Url.Action("Index", "Home")">
-                    <i class="fas fa-certificate me-2"></i>
-                    TechWayFit License Management
+                <a class="navbar-brand d-flex align-items-center" href="@Url.Action("Index", "Home")">
+                    <i class="fas fa-shield-alt me-2"></i>
+                    <span>TechWayFit</span>
+                    <small class="ms-2 opacity-75">License Management</small>
                 </a>
                 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 
                 <div class="collapse navbar-collapse" id="navbarNav">
-                    <div class="navbar-nav me-auto">
-                        <a class="nav-link" href="@Url.Action("Index", "Home")">
-                            <i class="fas fa-home me-1"></i>Home
-                        </a>
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="@Url.Action("Index", "Home")">
+                                <i class="fas fa-home me-1"></i>Dashboard
+                            </a>
+                        </li>
                         @if (User.Identity?.IsAuthenticated == true)
                         {
-                            <!-- These will be enabled in future steps -->
-                            <a class="nav-link disabled text-muted" href="#" title="Coming in Step 3">
-                                <i class="fas fa-box me-1"></i>Products
-                            </a>
-                            <a class="nav-link disabled text-muted" href="#" title="Coming in Step 4">
-                                <i class="fas fa-users me-1"></i>Consumers
-                            </a>
-                            <a class="nav-link disabled text-muted" href="#" title="Coming in Step 5">
-                                <i class="fas fa-certificate me-1"></i>Licenses
-                            </a>
+                            <li class="nav-item">
+                                <a class="nav-link disabled text-muted" href="#" title="Coming in Step 3">
+                                    <i class="fas fa-box me-1"></i>Products
+                                    <span class="badge bg-warning ms-1">Soon</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link disabled text-muted" href="#" title="Coming in Step 4">
+                                    <i class="fas fa-users me-1"></i>Consumers
+                                    <span class="badge bg-warning ms-1">Soon</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link disabled text-muted" href="#" title="Coming in Step 5">
+                                    <i class="fas fa-certificate me-1"></i>Licenses
+                                    <span class="badge bg-warning ms-1">Soon</span>
+                                </a>
+                            </li>
                         }
-                    </div>
+                    </ul>
                     
-                    <div class="navbar-nav ms-auto">
+                    <div class="navbar-nav">
                         @if (User.Identity?.IsAuthenticated == true)
                         {
                             <div class="navbar-text me-3">
-                                <i class="fas fa-user me-1"></i>
-                                Welcome, <strong>@User.Identity.Name</strong>
-                                <small class="text-light">(@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value)</small>
+                                <i class="fas fa-user-circle me-2"></i>
+                                <strong>@User.Identity.Name</strong>
+                                <small class="ms-1 opacity-75">(@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value)</small>
                             </div>
                             <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
                                 <button type="submit" class="btn btn-outline-light btn-sm">
@@ -94,20 +133,103 @@
             </div>
         </nav>
     </header>
-    <div class="container mt-4">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
+    
+    <!-- Main Content Area -->
+    <main role="main" class="flex-grow-1">
+        @RenderBody()
+    </main>
 
-    <footer class="border-top footer text-muted mt-5">
-        <div class="container text-center py-3">
-            &copy; 2025 - TechWayFit License Generator - Internal Use Only
+    <!-- Enhanced Footer -->
+    <footer class="bg-dark text-light mt-5">
+        <div class="container py-4">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6 class="text-primary mb-3">
+                        <i class="fas fa-shield-alt me-2"></i>TechWayFit License Management
+                    </h6>
+                    <p class="text-muted small mb-0">
+                        Comprehensive license generation, validation, and management system.
+                        Built with security and scalability in mind.
+                    </p>
+                </div>
+                <div class="col-md-3">
+                    <h6 class="mb-3">Quick Links</h6>
+                    <ul class="list-unstyled small">
+                        <li><a href="@Url.Action("Index", "Home")" class="text-light text-decoration-none">Dashboard</a></li>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li><span class="text-muted">Products (Coming Soon)</span></li>
+                            <li><span class="text-muted">Consumers (Coming Soon)</span></li>
+                            <li><span class="text-muted">Licenses (Coming Soon)</span></li>
+                        }
+                        else
+                        {
+                            <li><a href="@Url.Action("Login", "Account")" class="text-light text-decoration-none">Login</a></li>
+                        }
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h6 class="mb-3">System Status</h6>
+                    <div class="small">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Authentication:</span>
+                            <span class="badge bg-success">Active</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Services:</span>
+                            <span class="badge bg-success">Online</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span>Version:</span>
+                            <span class="text-muted">v2.0.0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-3 opacity-25">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <small class="text-muted">
+                        &copy; 2025 TechWayFit. All rights reserved. Internal Use Only.
+                    </small>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <small class="text-muted">
+                        Built with <i class="fas fa-heart text-danger"></i> using ASP.NET Core & Bootstrap
+                    </small>
+                </div>
+            </div>
         </div>
     </footer>
 
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Custom Scripts -->
+    <script>
+        // Enhanced interactions
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add fade-in animation to cards
+            const cards = document.querySelectorAll('.card');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = (index * 0.1) + 's';
+                card.classList.add('fade-in-up');
+            });
+            
+            // Enhanced button hover effects
+            const buttons = document.querySelectorAll('.btn');
+            buttons.forEach(button => {
+                button.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-2px)';
+                });
+                button.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+        });
+    </script>
+    
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

@@ -81,6 +81,7 @@ namespace TechWayFit.Licensing.WebUI.ViewModels.Product
         public LicenseStatus Status { get; set; }
         public DateTime ValidFrom { get; set; }
         public DateTime ValidTo { get; set; }
+        public DateTime ExpiresAt { get; set; }
         public DateTime CreatedAt { get; set; }
         public int DaysUntilExpiry { get; set; }
         public bool IsExpiringSoon => DaysUntilExpiry <= 30 && DaysUntilExpiry >= 0;
@@ -124,6 +125,10 @@ namespace TechWayFit.Licensing.WebUI.ViewModels.Product
         [StringLength(20, ErrorMessage = "Version cannot be longer than 20 characters")]
         public string Version { get; set; } = "1.0";
 
+        [Display(Name = "Description")]
+        [StringLength(1000, ErrorMessage = "Description cannot be longer than 1000 characters")]
+        public string Description { get; set; } = string.Empty;
+
         [Display(Name = "Is Active")]
         public bool IsActive { get; set; } = true;
 
@@ -138,6 +143,9 @@ namespace TechWayFit.Licensing.WebUI.ViewModels.Product
 
         [Display(Name = "Metadata")]
         public Dictionary<string, string> Metadata { get; set; } = new();
+
+        [Display(Name = "Created Date")]
+        public DateTime? CreatedDate { get; set; }
 
         public bool IsEditMode => !string.IsNullOrEmpty(ProductId);
     }
