@@ -1,0 +1,192 @@
+# .gitignore for TechWayFit.Licensing.Core
+
+## .NET Core
+bin/
+obj/
+out/
+
+## Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+## Visual Studio 2015/2017/2019/2022 cache/options directory
+.vs/
+
+## Visual Studio Code
+.vscode/
+
+## Rider
+.idea/
+
+## User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+## Build artifacts
+*.dll
+*.exe
+*.pdb
+*.ilk
+*.meta
+*.obj
+*.iobj
+*.pch
+*.ipdb
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.tmp
+*.tmp_proj
+*.log
+*.tlog
+*.vspscc
+*.vssscc
+.builds
+*.pidb
+*.svclog
+*.scc
+
+## Test results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+*.VisualState.xml
+TestResult.xml
+nunit-*.xml
+TestResults/
+Coverage/
+
+## NuGet packages
+*.nupkg
+*.snupkg
+# NuGet Symbol Packages
+*.symbols.nupkg
+# The packages folder can be ignored because of Package Restore
+**/[Pp]ackages/*
+# except build/, which is used as an MSBuild target.
+!**/[Pp]ackages/build/
+# Uncomment if necessary however generally it will be regenerated when needed
+#!**/[Pp]ackages/repositories.config
+# NuGet v3's project.json files produces more ignoreable files
+*.nuget.props
+*.nuget.targets
+
+## Microsoft Azure Web App publish settings
+PublishScripts/
+
+## Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+## Folder config file
+Desktop.ini
+
+## Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+## Mac
+.DS_Store
+
+## JetBrains Rider
+.idea/
+*.sln.iml
+
+## CodeRush personal settings
+.cr/personal
+
+## Python Tools for Visual Studio (PTVS)
+__pycache__/
+*.pyc
+
+## Cake - Uncomment if you are using it
+# tools/**
+# !tools/packages.config
+
+## Tabs Studio
+*.tss
+
+## Telerik's JustMock configuration file
+*.jmconfig
+
+## BizTalk build output
+*.btp.cs
+*.btm.cs
+*.odx.cs
+*.xsd.cs
+
+## OpenCover UI analysis results
+OpenCover/
+
+## Azure Stream Analytics local run output
+ASALocalRun/
+
+## MSBuild Binary and Structured Log
+*.binlog
+
+## NVidia Nsight GPU debugger configuration file
+*.nvuser
+
+## MFractors (Xamarin productivity tool) working folder
+.mfractor/
+
+## Local History for Visual Studio
+.localhistory/
+
+## BeatPulse healthcheck temp database
+healthchecksdb
+
+## Backup folder for Package Reference Convert tool in Visual Studio 2017
+MigrationBackup/
+
+## Ionide (cross platform F# VS Code tools) working folder
+.ionide/
+
+## Custom ignores for this project
+
+# License files (don't commit actual licenses to public repo)
+*.license
+license/
+licenses/
+
+# Private keys and secrets
+*.key
+*.pem
+*.p12
+*.pfx
+keys/
+secrets/
+
+# Customer-specific data
+customers/
+customer-data/
+
+# Local development files
+local.settings.json
+appsettings.local.json
+.env.local
+
+# Documentation build artifacts
+docs/_site/
+docs/.jekyll-cache/
+
+# Temporary files
+*.tmp
+*.temp
+*~

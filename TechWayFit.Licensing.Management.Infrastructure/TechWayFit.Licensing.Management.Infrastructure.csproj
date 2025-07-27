@@ -20,11 +20,11 @@
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
     <PackageReference Include="Npgsql" Version="9.0.3" />
     <PackageReference Include="System.Text.Json" Version="8.0.5" />
+    <PackageReference Include="TechWayFit.Licensing.Core" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="../TechWayFit.Licensing.Management.Core/TechWayFit.Licensing.Management.Core.csproj" />
-    <ProjectReference Include="..\TechWayFit.Licensing.Core\TechWayFit.Licensing.Core.csproj" />
   </ItemGroup>
 
 </Project>

@@ -16,10 +16,10 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.7" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.7" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.7" />
+    <PackageReference Include="TechWayFit.Licensing.Core" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TechWayFit.Licensing.Core\TechWayFit.Licensing.Core.csproj" />
     <ProjectReference Include="..\TechWayFit.Licensing.Generator\TechWayFit.Licensing.Generator.csproj" />
   </ItemGroup>
 

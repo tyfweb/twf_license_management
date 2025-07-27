@@ -1,0 +1,55 @@
+# GitHub Actions Workflow for TechWayFit.Licensing.Core
+
+name: Build and Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  release:
+    types: [ published ]
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  PROJECT_PATH: 'src/TechWayFit.Licensing.Core/TechWayFit.Licensing.Core.csproj'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+    
+    - name: Restore dependencies
+      run: dotnet restore ${{ env.PROJECT_PATH }}
+    
+    - name: Build
+      run: dotnet build ${{ env.PROJECT_PATH }} --no-restore --configuration Release
+    
+    - name: Test
+      run: dotnet test tests/ --no-build --configuration Release --verbosity normal
+    
+    - name: Pack NuGet
+      if: github.event_name == 'release'
+      run: dotnet pack ${{ env.PROJECT_PATH }} --no-build --configuration Release --output ./artifacts
+    
+    - name: Publish NuGet Package
+      if: github.event_name == 'release'
+      run: dotnet nuget push ./artifacts/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
+
+  security-scan:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Run Security Scan
+      uses: securecodewarrior/github-action-add-sarif@v1
+      with:
+        sarif-file: 'security-scan-results.sarif'
