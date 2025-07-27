@@ -40,20 +40,56 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-dark bg-primary">
             <div class="container">
-                <a class="navbar-brand" href="@Url.Action("Index", "License")">
+                <a class="navbar-brand" href="@Url.Action("Index", "Home")">
                     <i class="fas fa-certificate me-2"></i>
-                    TechWayFit License Generator
+                    TechWayFit License Management
                 </a>
-                <div class="navbar-nav ms-auto">
-                    <a class="nav-link" href="@Url.Action("Index", "License")">
-                        <i class="fas fa-plus me-1"></i>Generate
-                    </a>
-                    <a class="nav-link" href="@Url.Action("Validate", "License")">
-                        <i class="fas fa-check me-1"></i>Validate
-                    </a>
-                    <a class="nav-link" href="@Url.Action("KeyManagement", "License")">
-                        <i class="fas fa-key me-1"></i>Key Management
-                    </a>
+                
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <div class="navbar-nav me-auto">
+                        <a class="nav-link" href="@Url.Action("Index", "Home")">
+                            <i class="fas fa-home me-1"></i>Home
+                        </a>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <!-- These will be enabled in future steps -->
+                            <a class="nav-link disabled text-muted" href="#" title="Coming in Step 3">
+                                <i class="fas fa-box me-1"></i>Products
+                            </a>
+                            <a class="nav-link disabled text-muted" href="#" title="Coming in Step 4">
+                                <i class="fas fa-users me-1"></i>Consumers
+                            </a>
+                            <a class="nav-link disabled text-muted" href="#" title="Coming in Step 5">
+                                <i class="fas fa-certificate me-1"></i>Licenses
+                            </a>
+                        }
+                    </div>
+                    
+                    <div class="navbar-nav ms-auto">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <div class="navbar-text me-3">
+                                <i class="fas fa-user me-1"></i>
+                                Welcome, <strong>@User.Identity.Name</strong>
+                                <small class="text-light">(@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value)</small>
+                            </div>
+                            <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-outline-light btn-sm">
+                                    <i class="fas fa-sign-out-alt me-1"></i>Logout
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <a class="btn btn-outline-light btn-sm" href="@Url.Action("Login", "Account")">
+                                <i class="fas fa-sign-in-alt me-1"></i>Login
+                            </a>
+                        }
+                    </div>
                 </div>
             </div>
         </nav>

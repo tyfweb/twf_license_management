@@ -133,7 +133,7 @@ namespace TechWayFit.Licensing.WebUI.ViewModels.License
         public LicenseModels.License License { get; set; } = new();
         public LicenseModels.Consumer Consumer { get; set; } = new();
         public ProductConfiguration Product { get; set; } = new();
-        public List<LicenseAuditEntry> AuditHistory { get; set; } = new();
+        public List<object> AuditHistory { get; set; } = new(); // TODO: Replace with proper LicenseAuditEntry when available
         public LicenseValidationResult ValidationResult { get; set; } = new();
         public List<LicenseVersionViewModel> VersionHistory { get; set; } = new();
         public bool CanEdit { get; set; }

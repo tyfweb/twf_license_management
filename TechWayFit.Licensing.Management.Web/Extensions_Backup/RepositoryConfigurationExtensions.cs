@@ -3,8 +3,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
 using TechWayFit.Licensing.Core.Contracts;
-using TechWayFit.Licensing.Generator.Repositories;
-using TechWayFit.Licensing.Generator.Repositories;
 
 namespace TechWayFit.Licensing.WebUI.Extensions;
 

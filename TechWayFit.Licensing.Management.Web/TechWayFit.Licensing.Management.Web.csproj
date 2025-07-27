@@ -21,6 +21,18 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TechWayFit.Licensing.Generator\TechWayFit.Licensing.Generator.csproj" />
+    <ProjectReference Include="..\TechWayFit.Licensing.Management.Services\TechWayFit.Licensing.Management.Services.csproj" />
+    <ProjectReference Include="..\TechWayFit.Licensing.Management.Infrastructure\TechWayFit.Licensing.Management.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Controllers/Backup/**/*.cs" />
+    <Compile Remove="Extensions_Backup/**/*.cs" />
+    <Content Remove="Views/Account/**" />
+    <Content Remove="Views/Consumer/**" />
+    <Content Remove="Views/License/**" />
+    <Content Remove="Views/Product/**" />
+    <Content Remove="Views/ProductLicense/**" />
   </ItemGroup>
 
 </Project>

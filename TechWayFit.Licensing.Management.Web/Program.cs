@@ -1,9 +1,11 @@
 using TechWayFit.Licensing.Generator.Services;
 using TechWayFit.Licensing.Core.Contracts;
 using TechWayFit.Licensing.Core.Services;
+using TechWayFit.Licensing.Management.Core.Contracts.Services;
+using TechWayFit.Licensing.Management.Services.Implementations.License;
 using TechWayFit.Licensing.WebUI.Models.Authentication;
 using TechWayFit.Licensing.WebUI.Services;
-using TechWayFit.Licensing.WebUI.Extensions;
+// using TechWayFit.Licensing.WebUI.Extensions;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -57,24 +59,29 @@ Directory.CreateDirectory(keyStorePath);
 Directory.CreateDirectory(dataPath);
 
 // Configure repository type based on configuration
-builder.Services.ConfigureRepositories(builder.Configuration);
+// TODO: Step 1 - Temporarily commented out until we rebuild repository configuration
+// builder.Services.ConfigureRepositories(builder.Configuration);
 
-// Register core services
-builder.Services.AddSingleton<LicenseGenerator>(serviceProvider =>
-{
-    var logger = serviceProvider.GetRequiredService<ILogger<LicenseGenerator>>();
-    return new LicenseGenerator(logger, keyStorePath);
-});
+// TODO: Step-by-step service registration as we build each layer
 
-builder.Services.AddSingleton<IProductService, ProductService>();
-builder.Services.AddSingleton<IConsumerService, ConsumerService>();
-builder.Services.AddSingleton<ILicenseLifecycleService, LicenseLifecycleService>();
-builder.Services.AddSingleton<ILicenseValidationService, LicenseValidationService>();
+// Step 1: Basic services only (for clean build)
+// Step 2: Authentication services will be added here
+// Step 3: Product management services will be added here  
+// Step 4: Consumer management services will be added here
+// Step 5: License management services will be added here
+// Step 6: Audit management services will be added here
+// Step 7: Notification management services will be added here
+
+// Commented out for now - will be added back step by step:
+// builder.Services.AddScoped<ILicenseGenerator, StatelessLicenseGenerator>();
+// builder.Services.AddScoped<IKeyManagementService, KeyManagementService>();
+// builder.Services.AddScoped<IProductLicenseService, ProductLicenseService>();
+// builder.Services.AddSingleton<ILicenseValidationService, LicenseValidationService>();
 
 var app = builder.Build();
 
 // Initialize database if using PostgreSQL
-await app.InitializeDatabaseAsync(builder.Configuration);
+// await app.InitializeDatabaseAsync(builder.Configuration);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -91,6 +98,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=License}/{action=Index}/{id?}");
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
