@@ -1,212 +1,144 @@
+@using TechWayFit.Licensing.Core.Models
 @model TechWayFit.Licensing.WebUI.ViewModels.Product.ProductListViewModel
 @{
     ViewData["Title"] = "Product Management";
     ViewData["Description"] = "Manage software products, tiers, and licensing configurations";
 }
 
-<div class="container-fluid  py-4">
-    <!-- Hero Section -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <div>
-                    <h2 class="mb-1">
-                        <i class="fas fa-cube text-info me-2"></i>
-                        Product Management
-                    </h2>
-                    <p class="text-muted mb-0">
-                        Manage your software products, configure tiers, and define licensing features
-                    </p>
-                </div>
-                <div>
-                    <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary me-2">
-                        <i class="fas fa-arrow-left me-1"></i>
-                        Back to Dashboard
-                    </a>
-                    <a href="@Url.Action("Create", "Product")" class="btn btn-info">
-                        <i class="fas fa-plus me-1"></i>
-                        Add New Product
-                    </a>
-                </div>
+<div class="container-fluid py-4">
+    <!-- Header Section -->
+    <div class="header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="mb-1">Product Management</h2>
+                <p class="text-muted mb-0">Manage your products, versions, and license tiers.</p>
             </div>
+            <button class="btn btn-primary" onclick="window.location.href='@Url.Action("Create", "Product")'">
+                <i class="fas fa-plus me-2"></i>New Product
+            </button>
         </div>
     </div>
 
-    <!-- Statistics Cards -->
+    <!-- Statistics Overview -->
     <div class="row mb-4">
         <div class="col-md-3">
             <div class="stat-card">
-                <div class="stat-card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="stat-icon bg-primary">
-                            <i class="fas fa-cube"></i>
-                        </div>
-                        <div class="ms-3">
-                            <div class="stat-value">@(ViewBag.TotalProducts ?? Model.Products.Count)</div>
-                            <div class="stat-label">Total Products</div>
-                        </div>
-                    </div>
+                <div class="stat-icon">
+                    <i class="fas fa-cube"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number">@(ViewBag.TotalProducts ?? Model.Products.Count)</div>
+                    <div class="stat-label">Total Products</div>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="stat-card">
-                <div class="stat-card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="stat-icon bg-success">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                        <div class="ms-3">
-                            <div class="stat-value">@(ViewBag.ActiveProducts ?? Model.Products.Count(p => p.IsActive))
-                            </div>
-                            <div class="stat-label">Active Products</div>
-                        </div>
-                    </div>
+                <div class="stat-icon text-success">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number">@(ViewBag.ActiveProducts ?? Model.Products.Count(p => p.IsActive))</div>
+                    <div class="stat-label">Active Products</div>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="stat-card">
-                <div class="stat-card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="stat-icon bg-warning">
-                            <i class="fas fa-pause-circle"></i>
-                        </div>
-                        <div class="ms-3">
-                            <div class="stat-value">@(ViewBag.InactiveProducts ?? Model.Products.Count(p =>
-                                                                !p.IsActive))</div>
-                            <div class="stat-label">Inactive Products</div>
-                        </div>
-                    </div>
+                <div class="stat-icon text-primary">
+                    <i class="fas fa-key"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number">@Model.Products.Sum(p => p.LicenseCount)</div>
+                    <div class="stat-label">Total Licenses</div>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="stat-card">
-                <div class="stat-card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="stat-icon bg-info">
-                            <i class="fas fa-certificate"></i>
-                        </div>
-                        <div class="ms-3">
-                            <div class="stat-value">@Model.Products.Sum(p => p.LicenseCount)</div>
-                            <div class="stat-label">Total Licenses</div>
-                        </div>
-                    </div>
+                <div class="stat-icon text-info">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number">@Model.Products.Sum(p => p.ConsumerCount)</div>
+                    <div class="stat-label">Total Consumers</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Search and Filter Section -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <form method="get" class="row g-3">
-                <div class="col-md-6">
-                    <div class="form-floating">
-                        <input type="text" class="form-control" id="searchTerm" name="searchTerm"
-                            value="@Model.SearchTerm" placeholder="Search products...">
-                        <label for="searchTerm">
-                            <i class="fas fa-search me-2"></i>Search products
-                        </label>
-                    </div>
+    <!-- Search and Filter -->
+    <div class="search-section mb-4">
+        <form method="get" class="row g-3 align-items-center">
+            <div class="col-md-6">
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="form-control" name="searchTerm" value="@Model.SearchTerm" placeholder="Search products...">
                 </div>
-                <div class="col-md-3">
-                    <div class="form-check mt-3">
-                        <input class="form-check-input" type="checkbox" id="showInactive" name="showInactive"
-                            value="true" @(Model.ShowInactiveProducts ? "checked" : "")>
-                        <label class="form-check-label" for="showInactive">
-                            Show inactive products
-                        </label>
-                    </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="showInactive" name="showInactive" value="true" @(Model.ShowInactiveProducts ? "checked" : "")>
+                    <label class="form-check-label" for="showInactive">
+                        Include inactive products
+                    </label>
                 </div>
-                <div class="col-md-3">
-                    <button type="submit" class="btn btn-outline-primary w-100">
-                        <i class="fas fa-filter me-2"></i>Filter
-                    </button>
-                </div>
-            </form>
-        </div>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-outline-primary w-100">
+                    <i class="fas fa-filter me-2"></i>Filter
+                </button>
+            </div>
+        </form>
     </div>
 
-    <!-- Products Grid -->
+    <!-- Product Cards -->
     @if (Model.Products.Any())
     {
         <div class="row">
             @foreach (var product in Model.Products)
             {
-                <div class="col-lg-6 col-xl-4 mb-4">
-                    <div class="card product-card h-100">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <div class="d-flex align-items-center">
-                                <i class="fas fa-cube text-primary me-2"></i>
-                                <strong>@product.ProductName</strong>
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="tier-card">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h5 class="mb-0">@product.ProductName</h5>
+                            @if (!string.IsNullOrEmpty(product.Version))
+                            {
+                                <span class="badge bg-primary">v@product.Version</span>
+                            }
+                        </div>
+                        <p class="text-muted mb-3">
+                            @if (product.ProductType != default(ProductType))
+                            {
+                                @($"{product.ProductType} solution")
+                            }
+                            else
+                            {
+                                @("Advanced software solution for your business needs")
+                            }
+                        </p>
+                        <div class="row text-center mb-3">
+                            <div class="col-4">
+                                <div class="fw-bold">@product.TierCount</div>
+                                <small class="text-muted">Tiers</small>
                             </div>
-                            <div class="d-flex align-items-center">
-                                @if (product.IsActive)
-                                {
-                                    <span class="badge bg-success">Active</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-secondary">Inactive</span>
-                                }
+                            <div class="col-4">
+                                <div class="fw-bold">@product.LicenseCount</div>
+                                <small class="text-muted">Licenses</small>
+                            </div>
+                            <div class="col-4">
+                                <div class="fw-bold">@product.FeatureCount</div>
+                                <small class="text-muted">Features</small>
                             </div>
                         </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <small class="text-muted">Product ID</small>
-                                <div class="fw-medium">@product.ProductId</div>
-                            </div>
-
-                            <div class="mb-3">
-                                <small class="text-muted">Type & Version</small>
-                                <div class="d-flex justify-content-between">
-                                    <span class="badge bg-light text-dark">@product.ProductType</span>
-                                    <span class="text-muted">@string.Format("Version {0}", product.Version)</span>
-                                </div>
-                            </div>
-
-                            <div class="row text-center mb-3">
-                                <div class="col-6">
-                                    <div class="border-end">
-                                        <div class="fw-bold text-primary">@product.LicenseCount</div>
-                                        <small class="text-muted">Licenses</small>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="fw-bold text-success">@product.ConsumerCount</div>
-                                    <small class="text-muted">Consumers</small>
-                                </div>
-                            </div>
-
-                            <div class="mb-3">
-                                <small class="text-muted">Created</small>
-                                <div class="small">@product.CreatedAt.ToString("MMM dd, yyyy")</div>
-                            </div>
-                        </div>
-                        <div class="card-footer bg-transparent">
-                            <div class="btn-group w-100" role="group">
-                                <a href="@Url.Action("Details", new { id = product.ProductId })"
-                                    class="btn btn-outline-primary btn-sm">
-                                    <i class="fas fa-eye me-1"></i>View
-                                </a>
-                                <a href="@Url.Action("Edit", new { id = product.ProductId })"
-                                    class="btn btn-outline-secondary btn-sm">
-                                    <i class="fas fa-edit me-1"></i>Edit
-                                </a>
-                                <a href="@Url.Action("Delete", new { id = product.ProductId })"
-                                    class="btn btn-outline-danger btn-sm">
-                                    <i class="fas fa-trash me-1"></i>Delete
-                                </a>
-                            </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-primary btn-sm flex-fill" onclick="window.location.href='@Url.Action("Edit", new { id = product.ProductId })'">Edit</button>
+                            <button class="btn btn-outline-success btn-sm flex-fill" onclick="window.location.href='@Url.Action("Details", new { id = product.ProductId })'">Versions</button>
                         </div>
                     </div>
                 </div>
             }
         </div>
-
-        <!-- Pagination would go here if needed -->
     }
     else
     {
@@ -233,29 +165,170 @@
 </div>
 
 <style>
+    .header {
+        margin-bottom: 2rem;
+    }
+
+    /* Statistics Cards */
+    .stat-card {
+        background: white;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 1.25rem;
+        display: flex;
+        align-items: center;
+        transition: all 0.2s ease-in-out;
+        height: 100%;
+    }
+
+    .stat-card:hover {
+        border-color: #dee2e6;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
     .stat-icon {
-        width: 3rem;
-        height: 3rem;
-        border-radius: var(--tw-radius-full);
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+        background: #f8f9fa;
         display: flex;
         align-items: center;
         justify-content: center;
+        margin-right: 1rem;
+        color: #6c757d;
+        font-size: 1.25rem;
     }
 
-    .stat-icon i {
-        font-size: 2.5rem;
+    .stat-content {
+        flex: 1;
     }
 
-    .stat-value {
-        font-size: 1.875rem;
+    .stat-number {
+        font-size: 1.5rem;
         font-weight: 700;
-        color: var(--tw-gray-900);
+        color: #1a1a1a;
         line-height: 1;
     }
 
     .stat-label {
         font-size: 0.875rem;
-        color: var(--tw-gray-600);
+        color: #6c757d;
         margin-top: 0.25rem;
+    }
+
+    /* Search Section */
+    .search-section {
+        background: white;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 1.25rem;
+    }
+
+    .search-box {
+        position: relative;
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        font-size: 0.875rem;
+    }
+
+    .search-box .form-control {
+        padding-left: 2.5rem;
+        border: 1px solid #e9ecef;
+        border-radius: 6px;
+        font-size: 0.875rem;
+    }
+
+    .search-box .form-control:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.1);
+    }
+
+    .form-check-label {
+        font-size: 0.875rem;
+        color: #495057;
+    }
+
+    /* Product Cards */
+    .tier-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid #e9ecef;
+        transition: all 0.2s ease-in-out;
+        height: 100%;
+    }
+
+    .tier-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        border-color: #dee2e6;
+    }
+
+    .tier-card h5 {
+        font-weight: 600;
+        color: #1a1a1a;
+        font-size: 1.125rem;
+    }
+
+    .tier-card .badge {
+        font-size: 0.75rem;
+        font-weight: 500;
+        padding: 0.375rem 0.75rem;
+    }
+
+    .tier-card .fw-bold {
+        font-weight: 700;
+        color: #1a1a1a;
+        font-size: 1.25rem;
+    }
+
+    .tier-card .btn {
+        font-weight: 500;
+        border-radius: 6px;
+    }
+
+    .tier-card .btn-outline-primary {
+        border-color: #3b82f6;
+        color: #3b82f6;
+    }
+
+    .tier-card .btn-outline-primary:hover {
+        background-color: #3b82f6;
+        border-color: #3b82f6;
+        color: white;
+    }
+
+    .tier-card .btn-outline-success {
+        border-color: #10b981;
+        color: #10b981;
+    }
+
+    .tier-card .btn-outline-success:hover {
+        background-color: #10b981;
+        border-color: #10b981;
+        color: white;
+    }
+
+    /* Premium card variant */
+    .tier-card.premium {
+        border-color: #f59e0b;
+        background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%);
+    }
+
+    /* Responsive adjustments */
+    @@media (max-width: 768px) {
+        .stat-card {
+            margin-bottom: 1rem;
+        }
+        
+        .search-section .row {
+            gap: 1rem;
+        }
     }
 </style>

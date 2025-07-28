@@ -40,6 +40,8 @@ namespace TechWayFit.Licensing.WebUI.ViewModels.Product
         public bool IsActive { get; set; }
         public int LicenseCount { get; set; }
         public int ConsumerCount { get; set; }
+        public int TierCount { get; set; } = 3; // Default to 3 tiers
+        public int FeatureCount { get; set; } = 12; // Default to 12 features
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
     }
