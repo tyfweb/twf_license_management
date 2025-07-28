@@ -113,14 +113,17 @@
 
     <div class="row">
         <div class="col-md-6 col-lg-3 mb-4">
-            <div class="card step-card pending h-100">
+            <div class="card step-card completed h-100">
                 <div class="card-body text-center">
-                    <div class="step-icon text-muted">
+                    <div class="step-icon text-success">
                         <i class="fas fa-certificate"></i>
                     </div>
                     <h5 class="card-title">Step 5: Licenses</h5>
                     <p class="card-text">License generation and management</p>
-                    <span class="badge bg-secondary">⏳ Coming Soon</span>
+                    <span class="badge bg-success">✅ Completed</span>
+                    <div class="mt-2">
+                        <a href="@Url.Action("Index", "License")" class="btn btn-sm btn-primary">Manage Licenses</a>
+                    </div>
                 </div>
             </div>
         </div>

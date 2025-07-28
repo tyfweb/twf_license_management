@@ -1,0 +1,267 @@
+@model TechWayFit.Licensing.WebUI.ViewModels.License.LicenseDetailViewModel
+@{
+    ViewData["Title"] = "License Details";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2>License Details</h2>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a asp-controller="License" asp-action="Index">Licenses</a></li>
+                            <li class="breadcrumb-item active">@Model.License.LicenseId</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div>
+                    @if (Model.CanEdit)
+                    {
+                        <button class="btn btn-outline-primary me-2" onclick="editLicense()">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                    }
+                    @if (Model.CanRenew)
+                    {
+                        <a href="#" class="btn btn-success me-2" onclick="renewLicense()">
+                            <i class="fas fa-sync-alt"></i> Renew
+                        </a>
+                    }
+                    @if (Model.CanSuspend)
+                    {
+                        <button class="btn btn-warning me-2" onclick="suspendLicense()">
+                            <i class="fas fa-pause"></i> Suspend
+                        </button>
+                    }
+                    @if (Model.CanReactivate)
+                    {
+                        <button class="btn btn-info me-2" onclick="reactivateLicense()">
+                            <i class="fas fa-play"></i> Reactivate
+                        </button>
+                    }
+                    @if (Model.CanRevoke)
+                    {
+                        <button class="btn btn-danger" onclick="revokeLicense()">
+                            <i class="fas fa-ban"></i> Revoke
+                        </button>
+                    }
+                </div>
+            </div>
+
+            <!-- License Information -->
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">License Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <strong>License ID:</strong><br>
+                                    <span class="text-muted">@Model.License.LicenseId</span>
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Status:</strong><br>
+                                    <span class="badge @(GetStatusBadgeClass(Model.License.Status))">
+                                        @Model.License.Status
+                                    </span>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <strong>Licensed To:</strong><br>
+                                    <span class="text-muted">@Model.License.LicenseConsumer.Consumer.CompanyName</span>
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Contact Email:</strong><br>
+                                    <span class="text-muted">@Model.License.LicenseConsumer.Consumer.PrimaryContact.Email</span>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <strong>Valid From:</strong><br>
+                                    <span class="text-muted">@Model.License.ValidFrom.ToString("MMM dd, yyyy HH:mm")</span>
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Valid To:</strong><br>
+                                    <span class="text-muted">@Model.License.ValidTo.ToString("MMM dd, yyyy HH:mm")</span>
+                                    @if (Model.License.ValidTo < DateTime.UtcNow)
+                                    {
+                                        <span class="badge bg-danger ms-2">Expired</span>
+                                    }
+                                    else if (Model.License.ValidTo <= DateTime.UtcNow.AddDays(30))
+                                    {
+                                        <span class="badge bg-warning ms-2">Expiring Soon</span>
+                                    }
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <strong>Created:</strong><br>
+                                    <span class="text-muted">@Model.License.CreatedAt.ToString("MMM dd, yyyy HH:mm")</span>
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Status:</strong><br>
+                                    <span class="badge @(GetStatusBadgeClass(Model.License.Status))">
+                                        @Model.License.Status
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (Model.License.Features.Any())
+                    {
+                        <div class="card mt-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Licensed Features</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    @foreach (var feature in Model.License.Features)
+                                    {
+                                        <div class="col-md-6 mb-2">
+                                            <span class="badge bg-success me-2">
+                                                <i class="fas fa-check"></i>
+                                            </span>
+                                            @feature.Name
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="col-md-4">
+                    <!-- Product Information -->
+                    @if (Model.Product != null)
+                    {
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h6 class="mb-0">Product Information</h6>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Name:</strong> @Model.Product.Name</p>
+                                <p><strong>Version:</strong> @Model.Product.Version</p>
+                                <p><strong>Description:</strong> @Model.Product.Description</p>
+                                <a href="@Url.Action("Details", "Product", new { id = Model.Product.ProductId })" class="btn btn-sm btn-outline-primary">
+                                    View Product Details
+                                </a>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Consumer Information -->
+                    @if (Model.Consumer != null)
+                    {
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h6 class="mb-0">Consumer Information</h6>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Organization:</strong> @Model.Consumer.CompanyName</p>
+                                <p><strong>Contact:</strong> @Model.Consumer.PrimaryContact.Name</p>
+                                <p><strong>Email:</strong> @Model.Consumer.PrimaryContact.Email</p>
+                                <a href="@Url.Action("Details", "Consumer", new { id = Model.Consumer.ConsumerId })" class="btn btn-sm btn-outline-primary">
+                                    View Consumer Details
+                                </a>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Quick Actions -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">Quick Actions</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-outline-secondary btn-sm" onclick="downloadLicense()">
+                                    <i class="fas fa-download"></i> Download License
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm" onclick="validateLicense()">
+                                    <i class="fas fa-check-circle"></i> Validate License
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm" onclick="viewAuditLog()">
+                                    <i class="fas fa-history"></i> View Audit Log
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    string GetStatusBadgeClass(TechWayFit.Licensing.Core.Models.LicenseStatus status)
+    {
+        return status switch
+        {
+            TechWayFit.Licensing.Core.Models.LicenseStatus.Active => "bg-success",
+            TechWayFit.Licensing.Core.Models.LicenseStatus.Expired => "bg-danger",
+            TechWayFit.Licensing.Core.Models.LicenseStatus.Suspended => "bg-warning",
+            TechWayFit.Licensing.Core.Models.LicenseStatus.Revoked => "bg-dark",
+            TechWayFit.Licensing.Core.Models.LicenseStatus.Pending => "bg-info",
+            TechWayFit.Licensing.Core.Models.LicenseStatus.GracePeriod => "bg-warning",
+            _ => "bg-secondary"
+        };
+    }
+}
+
+<script>
+    function editLicense() {
+        // TODO: Implement edit functionality
+        alert('Edit functionality will be implemented in a future update.');
+    }
+
+    function renewLicense() {
+        // TODO: Implement renew functionality
+        alert('Renew functionality will be implemented in a future update.');
+    }
+
+    function suspendLicense() {
+        if (confirm('Are you sure you want to suspend this license?')) {
+            // TODO: Implement suspend functionality
+            alert('Suspend functionality will be implemented in a future update.');
+        }
+    }
+
+    function reactivateLicense() {
+        if (confirm('Are you sure you want to reactivate this license?')) {
+            // TODO: Implement reactivate functionality
+            alert('Reactivate functionality will be implemented in a future update.');
+        }
+    }
+
+    function revokeLicense() {
+        if (confirm('Are you sure you want to revoke this license? This action cannot be undone.')) {
+            // TODO: Implement revoke functionality
+            alert('Revoke functionality will be implemented in a future update.');
+        }
+    }
+
+    function downloadLicense() {
+        // TODO: Implement download functionality
+        alert('Download functionality will be implemented in a future update.');
+    }
+
+    function validateLicense() {
+        // TODO: Implement validation functionality
+        alert('Validation functionality will be implemented in a future update.');
+    }
+
+    function viewAuditLog() {
+        // TODO: Implement audit log functionality
+        alert('Audit log functionality will be implemented in a future update.');
+    }
+</script>

@@ -1,4 +1,4 @@
-@model TechWayFit.Licensing.WebUI.Models.LicenseGenerationResultViewModel
+@model TechWayFit.Licensing.WebUI.ViewModels.License.LicenseGenerationResultViewModel
 @{
     ViewData["Title"] = "License Generation Result";
 }

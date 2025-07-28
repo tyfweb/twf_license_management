@@ -1,10 +1,10 @@
-@model TechWayFit.Licensing.WebUI.ViewModels.Dashboard.DashboardViewModel
+@model TechWayFit.Licensing.WebUI.ViewModels.License.LicenseListViewModel
 @{
-    ViewData["Title"] = "License Management Dashboard";
+    ViewData["Title"] = "License Management";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container-fluid">
+<div class="container-fluid py-4">
     <!-- Header Section -->
     <div class="row mb-4">
         <div class="col-12">
@@ -12,435 +12,461 @@
                 <div>
                     <h2 class="mb-1">
                         <i class="fas fa-certificate text-primary me-2"></i>
-                        License Management Portal
+                        License Management
                     </h2>
-                    <p class="text-muted mb-0">Welcome, @User.Identity.Name - Manage all your licensing needs</p>
+                    <p class="text-muted mb-0">Manage and monitor all product licenses</p>
                 </div>
                 <div>
-                    <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-                        <button type="submit" class="btn btn-outline-secondary">
-                            <i class="fas fa-sign-out-alt me-1"></i>
-                            Logout
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Products Section -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-box me-2"></i>
-                        Products Overview
-                    </h5>
-                </div>
-                <div class="card-body">
-                    @if (Model.Products.Any())
-                    {
-                        <div class="row">
-                            @foreach (var product in Model.Products)
-                            {
-                                <div class="col-lg-4 col-md-6 mb-3">
-                                    <div class="card h-100 border-0 shadow-sm product-card" data-product-id="@product.ProductId">
-                                        <div class="card-header @(product.IsActive ? "bg-success" : "bg-secondary") text-white">
-                                            <h6 class="mb-0">
-                                                <i class="fas fa-cube me-1"></i>
-                                                @product.Name
-                                            </h6>
-                                        </div>
-                                        <div class="card-body">
-                                            <p class="card-text small">@product.Description</p>
-                                            <div class="row text-center small">
-                                                <div class="col-4">
-                                                    <div class="bg-light p-2 rounded">
-                                                        <strong>@product.ConsumerCount</strong>
-                                                        <br>Consumers
-                                                    </div>
-                                                </div>
-                                                <div class="col-4">
-                                                    <div class="bg-light p-2 rounded">
-                                                        <strong>@product.LicenseCount</strong>
-                                                        <br>Licenses
-                                                    </div>
-                                                </div>
-                                                <div class="col-4">
-                                                    <div class="bg-light p-2 rounded">
-                                                        <strong>@product.ExpiringLicenses</strong>
-                                                        <br>Expiring
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="card-footer bg-transparent">
-                                            <button class="btn btn-outline-primary btn-sm w-100" onclick="viewProductLicenses('@product.ProductId', '@product.Name')">
-                                                <i class="fas fa-eye me-1"></i>
-                                                View Licenses
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            }
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="text-center py-4">
-                            <i class="fas fa-box fa-3x text-muted mb-3"></i>
-                            <h5 class="text-muted">No Products Found</h5>
-                            <p class="text-muted">Create your first product to get started with licensing.</p>
-                            <a href="@Url.Action("Index", "Product")" class="btn btn-primary">
-                                <i class="fas fa-plus me-1"></i>
-                                Add Product
-                            </a>
-                        </div>
-                    }
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Management Actions Row -->
-    <div class="row mb-4">
-        <!-- License Generation -->
-        <div class="col-lg-4 col-md-6 mb-3">
-            <div class="card h-100 border-0 shadow-sm hover-card">
-                <div class="card-header bg-primary text-white border-0">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-plus-circle me-2"></i>
-                        Generate License
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <p class="card-text text-muted">Create new licenses for products and consumers.</p>
-                    <ul class="list-unstyled small">
-                        <li><i class="fas fa-check text-success me-1"></i> Product-specific licensing</li>
-                        <li><i class="fas fa-check text-success me-1"></i> Feature management</li>
-                        <li><i class="fas fa-check text-success me-1"></i> Tier-based controls</li>
-                    </ul>
-                </div>
-                <div class="card-footer bg-transparent border-0">
-                    <button type="button" class="btn btn-primary w-100" onclick="showLicenseGeneration()">
-                        <i class="fas fa-certificate me-1"></i>
-                        Generate New License
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Product Management -->
-        <div class="col-lg-4 col-md-6 mb-3">
-            <div class="card h-100 border-0 shadow-sm hover-card">
-                <div class="card-header bg-success text-white border-0">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-box me-2"></i>
-                        Product Management
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <p class="card-text text-muted">Manage products, features, and configurations.</p>
-                    <ul class="list-unstyled small">
-                        <li><i class="fas fa-check text-success me-1"></i> Product configuration</li>
-                        <li><i class="fas fa-check text-success me-1"></i> Feature definitions</li>
-                        <li><i class="fas fa-check text-success me-1"></i> Key management</li>
-                    </ul>
-                </div>
-                <div class="card-footer bg-transparent border-0">
-                    <a href="@Url.Action("Index", "Product")" class="btn btn-success w-100">
-                        <i class="fas fa-cogs me-1"></i>
-                        Manage Products
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Consumer Management -->
-        <div class="col-lg-4 col-md-6 mb-3">
-            <div class="card h-100 border-0 shadow-sm hover-card">
-                <div class="card-header bg-info text-white border-0">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-users me-2"></i>
-                        Consumer Management
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <p class="card-text text-muted">Manage license consumers and organizations.</p>
-                    <ul class="list-unstyled small">
-                        <li><i class="fas fa-check text-success me-1"></i> Organization profiles</li>
-                        <li><i class="fas fa-check text-success me-1"></i> Contact management</li>
-                        <li><i class="fas fa-check text-success me-1"></i> License history</li>
-                    </ul>
-                </div>
-                <div class="card-footer bg-transparent border-0">
-                    <a href="@Url.Action("Index", "Consumer")" class="btn btn-info w-100">
-                        <i class="fas fa-users me-1"></i>
-                        Manage Consumers
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Product Licenses Modal -->
-    <div class="modal fade" id="productLicensesModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="fas fa-certificate me-2"></i>
-                        <span id="productLicensesTitle">Product Licenses</span>
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body" id="productLicensesContent">
-                    <!-- Content will be loaded here -->
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" onclick="showLicenseGeneration()">
+                    <a asp-action="Create" class="btn btn-primary">
                         <i class="fas fa-plus me-1"></i>
-                        Generate License
-                    </button>
+                        Create License
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- License Generation Form (Hidden by default) -->
-    <div id="licenseGenerationSection" style="display: none;">
-        <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">
-                    <i class="fas fa-certificate me-2"></i>
-                    Generate New License
-                    <button type="button" class="btn btn-outline-light btn-sm float-end" onclick="hideLicenseGeneration()">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </h5>
-            </div>
-            <div class="card-body">
-                <form asp-controller="License" asp-action="Generate" method="post">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label asp-for="LicenseGenerationModel.LicensedTo" class="form-label">Licensed To *</label>
-                                <input asp-for="LicenseGenerationModel.LicensedTo" class="form-control" placeholder="e.g., Acme Corporation" required />
-                                <span asp-validation-for="LicenseGenerationModel.LicensedTo" class="text-danger"></span>
-                            </div>
+    <!-- Filter Section -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-filter me-2"></i>
+                Filter Licenses
+            </h5>
+        </div>
+        <div class="card-body">
+            <form method="get" asp-action="Index">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label asp-for="Filter.SearchTerm" class="form-label">Search</label>
+                            <input asp-for="Filter.SearchTerm" class="form-control" placeholder="License ID or Consumer name...">
                         </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label asp-for="LicenseGenerationModel.Tier" class="form-label">License Tier *</label>
-                                <select asp-for="LicenseGenerationModel.Tier" class="form-select" id="tierSelect" required>
-                                    <option value="0">Community (Free)</option>
-                                    <option value="1">Professional</option>
-                                    <option value="2">Enterprise</option>
-                                </select>
-                                <span asp-validation-for="LicenseGenerationModel.Tier" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="mb-3">
+                            <label asp-for="Filter.Status" class="form-label">Status</label>
+                            <select asp-for="Filter.Status" class="form-select">
+                                <option value="">All Statuses</option>
+                                <option value="@TechWayFit.Licensing.Core.Models.LicenseStatus.Active">Active</option>
+                                <option value="@TechWayFit.Licensing.Core.Models.LicenseStatus.Expired">Expired</option>
+                                <option value="@TechWayFit.Licensing.Core.Models.LicenseStatus.Suspended">Suspended</option>
+                                <option value="@TechWayFit.Licensing.Core.Models.LicenseStatus.Revoked">Revoked</option>
+                                <option value="@TechWayFit.Licensing.Core.Models.LicenseStatus.Pending">Pending</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="mb-3">
+                            <label asp-for="Filter.Tier" class="form-label">Tier</label>
+                            <select asp-for="Filter.Tier" class="form-select">
+                                <option value="">All Tiers</option>
+                                <option value="@TechWayFit.Licensing.Core.Models.LicenseTier.Community">Community</option>
+                                <option value="@TechWayFit.Licensing.Core.Models.LicenseTier.Professional">Professional</option>
+                                <option value="@TechWayFit.Licensing.Core.Models.LicenseTier.Enterprise">Enterprise</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="mb-3">
+                            <label asp-for="Filter.ValidFromStart" class="form-label">Valid From</label>
+                            <input asp-for="Filter.ValidFromStart" type="date" class="form-control">
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="mb-3">
+                            <label asp-for="Filter.ValidToEnd" class="form-label">Valid To</label>
+                            <input asp-for="Filter.ValidToEnd" type="date" class="form-control">
+                        </div>
+                    </div>
+                    <div class="col-md-1">
+                        <div class="mb-3">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-outline-primary">
+                                    <i class="fas fa-search"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label asp-for="LicenseGenerationModel.ContactPerson" class="form-label">Contact Person *</label>
-                                <input asp-for="LicenseGenerationModel.ContactPerson" class="form-control" placeholder="e.g., John Smith" required />
-                                <span asp-validation-for="LicenseGenerationModel.ContactPerson" class="text-danger"></span>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label asp-for="LicenseGenerationModel.ContactEmail" class="form-label">Contact Email *</label>
-                                <input asp-for="LicenseGenerationModel.ContactEmail" class="form-control" type="email" placeholder="e.g., john@company.com" required />
-                                <span asp-validation-for="LicenseGenerationModel.ContactEmail" class="text-danger"></span>
-                            </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-check">
+                            <input asp-for="Filter.ShowExpiring" class="form-check-input" type="checkbox">
+                            <label asp-for="Filter.ShowExpiring" class="form-check-label">
+                                Show only expiring licenses
+                            </label>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label asp-for="LicenseGenerationModel.ValidFrom" class="form-label">Valid From *</label>
-                                <input asp-for="LicenseGenerationModel.ValidFrom" type="datetime-local" class="form-control" required />
-                                <span asp-validation-for="LicenseGenerationModel.ValidFrom" class="text-danger"></span>
-                            </div>
+                    <div class="col-md-2">
+                        <input asp-for="Filter.ExpiringWithinDays" class="form-control form-control-sm" placeholder="Days">
+                    </div>
+                    <div class="col-md-7">
+                        <a href="@Url.Action("Index")" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-times me-1"></i>Clear Filters
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4>@Model.Pagination.TotalItems</h4>
+                            <p class="mb-0">Total Licenses</p>
                         </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label asp-for="LicenseGenerationModel.ValidTo" class="form-label">Valid To *</label>
-                                <input asp-for="LicenseGenerationModel.ValidTo" type="datetime-local" class="form-control" required />
-                                <span asp-validation-for="LicenseGenerationModel.ValidTo" class="text-danger"></span>
-                            </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-certificate fa-2x"></i>
                         </div>
                     </div>
-                    <div class="text-center">
-                        <button type="submit" class="btn btn-primary btn-lg">
-                            <i class="fas fa-certificate me-2"></i>
-                            Generate License
-                        </button>
-                        <button type="button" class="btn btn-secondary btn-lg ms-2" onclick="hideLicenseGeneration()">
-                            Cancel
-                        </button>
-                    </div>
-                </form>
+                </div>
             </div>
         </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4>@Model.Licenses.Count(l => l.Status == TechWayFit.Licensing.Core.Models.LicenseStatus.Active)</h4>
+                            <p class="mb-0">Active</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4>@Model.Licenses.Count(l => l.DaysUntilExpiry <= 30 && l.DaysUntilExpiry > 0)</h4>
+                            <p class="mb-0">Expiring Soon</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-exclamation-triangle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4>@Model.Licenses.Count(l => l.Status == TechWayFit.Licensing.Core.Models.LicenseStatus.Expired || l.DaysUntilExpiry < 0)</h4>
+                            <p class="mb-0">Expired</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-times-circle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- License Table -->
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>
+                    Licenses (@Model.Pagination.TotalItems total)
+                </h5>
+                <div>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="exportLicenses()">
+                            <i class="fas fa-download me-1"></i>Export
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="refreshPage()">
+                            <i class="fas fa-sync-alt me-1"></i>Refresh
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            @if (Model.Licenses.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>License ID</th>
+                                <th>Consumer</th>
+                                <th>Contact Email</th>
+                                <th>Tier</th>
+                                <th>Status</th>
+                                <th>Valid From</th>
+                                <th>Valid To</th>
+                                <th>Days Until Expiry</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var license in Model.Licenses)
+                            {
+                                <tr class="@(license.DaysUntilExpiry <= 30 && license.DaysUntilExpiry > 0 ? "table-warning" : license.DaysUntilExpiry < 0 ? "table-danger" : "")">
+                                    <td>
+                                        <a asp-action="Details" asp-route-id="@license.LicenseId" class="text-decoration-none">
+                                            <code>@license.LicenseId.Substring(0, Math.Min(8, license.LicenseId.Length))...</code>
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <strong>@license.ConsumerName</strong>
+                                    </td>
+                                    <td>
+                                        <a href="mailto:@license.ContactEmail">@license.ContactEmail</a>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">@license.Tier</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge @license.StatusCssClass">@license.Status</span>
+                                    </td>
+                                    <td>@license.ValidFrom.ToString("MMM dd, yyyy")</td>
+                                    <td>@license.ValidTo.ToString("MMM dd, yyyy")</td>
+                                    <td>
+                                        @if (license.DaysUntilExpiry < 0)
+                                        {
+                                            <span class="text-danger">Expired @Math.Abs(license.DaysUntilExpiry) days ago</span>
+                                        }
+                                        else if (license.DaysUntilExpiry <= 30)
+                                        {
+                                            <span class="text-warning">@license.DaysUntilExpiry days</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-success">@license.DaysUntilExpiry days</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a asp-action="Details" asp-route-id="@license.LicenseId" class="btn btn-outline-primary btn-sm" title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            @if (license.CanRenew)
+                                            {
+                                                <button class="btn btn-outline-success btn-sm" onclick="renewLicense('@license.LicenseId')" title="Renew">
+                                                    <i class="fas fa-sync-alt"></i>
+                                                </button>
+                                            }
+                                            @if (license.CanSuspend)
+                                            {
+                                                <button class="btn btn-outline-warning btn-sm" onclick="suspendLicense('@license.LicenseId')" title="Suspend">
+                                                    <i class="fas fa-pause"></i>
+                                                </button>
+                                            }
+                                            @if (license.CanRevoke)
+                                            {
+                                                <button class="btn btn-outline-danger btn-sm" onclick="revokeLicense('@license.LicenseId')" title="Revoke">
+                                                    <i class="fas fa-ban"></i>
+                                                </button>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-certificate fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No licenses found</h5>
+                    <p class="text-muted">
+                        @if (!string.IsNullOrEmpty(Model.Filter.SearchTerm) || Model.Filter.Status.HasValue)
+                        {
+                            <span>No licenses match your current filters.</span>
+                        }
+                        else
+                        {
+                            <span>No licenses have been created yet.</span>
+                        }
+                    </p>
+                    <a asp-action="Create" class="btn btn-primary">
+                        <i class="fas fa-plus me-1"></i>Create First License
+                    </a>
+                </div>
+            }
+        </div>
+        
+        @if (Model.Pagination.TotalPages > 1)
+        {
+            <div class="card-footer">
+                <!-- Pagination -->
+                <nav aria-label="License pagination">
+                    <ul class="pagination justify-content-center mb-0">
+                        <li class="page-item @(!Model.Pagination.HasPreviousPage ? "disabled" : "")">
+                            <a class="page-link" href="@GetPageUrl(Model.Pagination.CurrentPage - 1)">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                        
+                        @for (int i = Math.Max(1, Model.Pagination.CurrentPage - 2); i <= Math.Min(Model.Pagination.TotalPages, Model.Pagination.CurrentPage + 2); i++)
+                        {
+                            <li class="page-item @(i == Model.Pagination.CurrentPage ? "active" : "")">
+                                <a class="page-link" href="@GetPageUrl(i)">@i</a>
+                            </li>
+                        }
+                        
+                        <li class="page-item @(!Model.Pagination.HasNextPage ? "disabled" : "")">
+                            <a class="page-link" href="@GetPageUrl(Model.Pagination.CurrentPage + 1)">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                
+                <div class="text-center mt-2">
+                    <small class="text-muted">
+                        Showing @((Model.Pagination.CurrentPage - 1) * Model.Pagination.PageSize + 1) to 
+                        @Math.Min(Model.Pagination.CurrentPage * Model.Pagination.PageSize, Model.Pagination.TotalItems) 
+                        of @Model.Pagination.TotalItems licenses
+                    </small>
+                </div>
+            </div>
+        }
     </div>
 </div>
 
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-    <script>
-        function viewProductLicenses(productId, productName) {
-            $('#productLicensesTitle').text(productName + ' - Licenses');
+@functions {
+    private string GetPageUrl(int page)
+    {
+        var queryDict = new Dictionary<string, string>();
+        
+        if (!string.IsNullOrEmpty(Model.Filter.SearchTerm))
+            queryDict.Add("Filter.SearchTerm", Model.Filter.SearchTerm);
             
-            // Show loading state
-            $('#productLicensesContent').html(`
-                <div class="text-center py-4">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <p class="mt-2">Loading licenses for ${productName}...</p>
-                </div>
-            `);
+        if (Model.Filter.Status.HasValue)
+            queryDict.Add("Filter.Status", Model.Filter.Status.Value.ToString());
             
-            // Show modal
-            $('#productLicensesModal').modal('show');
+        if (Model.Filter.Tier.HasValue)
+            queryDict.Add("Filter.Tier", Model.Filter.Tier.Value.ToString());
             
-            // Load product licenses via AJAX
-            fetch(`/ProductLicense/GetProductLicenses?productId=${encodeURIComponent(productId)}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        let content = `
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <h6><i class="fas fa-users me-1"></i> Consumers (${data.consumers.length})</h6>
-                                </div>
-                                <div class="col-md-6">
-                                    <h6><i class="fas fa-certificate me-1"></i> Licenses</h6>
-                                </div>
-                            </div>
-                        `;
-                        
-                        if (data.consumers.length > 0) {
-                            data.consumers.forEach(consumer => {
-                                const activeLicenses = consumer.licenses.filter(l => l.isActive && !l.isExpired).length;
-                                const expiredLicenses = consumer.licenses.filter(l => l.isExpired).length;
-                                
-                                content += `
-                                    <div class="card mb-2">
-                                        <div class="card-header">
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <h6 class="mb-0">${consumer.consumer.organizationName}</h6>
-                                                <div>
-                                                    <span class="badge bg-success">${activeLicenses} Active</span>
-                                                    ${expiredLicenses > 0 ? `<span class="badge bg-danger ms-1">${expiredLicenses} Expired</span>` : ''}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="card-body">
-                                            <p class="small text-muted mb-2">Contact: ${consumer.consumer.primaryContactPerson} (${consumer.consumer.primaryContactEmail})</p>
-                                `;
-                                
-                                if (consumer.licenses.length > 0) {
-                                    content += '<div class="row">';
-                                    consumer.licenses.forEach(license => {
-                                        const statusClass = license.isExpired ? 'bg-danger' : (license.isActive ? 'bg-success' : 'bg-secondary');
-                                        const statusText = license.isExpired ? 'Expired' : (license.isActive ? 'Active' : 'Inactive');
-                                        
-                                        content += `
-                                            <div class="col-md-6 mb-2">
-                                                <div class="small border rounded p-2">
-                                                    <div class="d-flex justify-content-between">
-                                                        <strong>${license.tier}</strong>
-                                                        <span class="badge ${statusClass}">${statusText}</span>
-                                                    </div>
-                                                    <div class="text-muted">
-                                                        Valid: ${new Date(license.validFrom).toLocaleDateString()} - ${new Date(license.validTo).toLocaleDateString()}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        `;
-                                    });
-                                    content += '</div>';
-                                } else {
-                                    content += '<p class="text-muted small">No licenses found for this consumer.</p>';
-                                }
-                                
-                                content += '</div></div>';
-                            });
-                        } else {
-                            content += `
-                                <div class="text-center py-4">
-                                    <i class="fas fa-users fa-2x text-muted mb-2"></i>
-                                    <p class="text-muted">No consumers found for this product.</p>
-                                    <a href="/Consumer" class="btn btn-outline-primary btn-sm">Add Consumer</a>
-                                </div>
-                            `;
-                        }
-                        
-                        $('#productLicensesContent').html(content);
-                    } else {
-                        $('#productLicensesContent').html(`
-                            <div class="alert alert-warning">
-                                <i class="fas fa-exclamation-triangle me-2"></i>
-                                ${data.message || 'Failed to load product licenses'}
-                            </div>
-                        `);
-                    }
-                })
-                .catch(error => {
-                    $('#productLicensesContent').html(`
-                        <div class="alert alert-danger">
-                            <i class="fas fa-exclamation-circle me-2"></i>
-                            Error loading product licenses. Please try again.
-                        </div>
-                    `);
-                });
-        }
-        
-        function showLicenseGeneration() {
-            // Hide modal if open
-            $('#productLicensesModal').modal('hide');
+        if (Model.Filter.ValidFromStart.HasValue)
+            queryDict.Add("Filter.ValidFromStart", Model.Filter.ValidFromStart.Value.ToString("yyyy-MM-dd"));
             
-            // Show license generation form
-            $('#licenseGenerationSection').show();
-            $('html, body').animate({
-                scrollTop: $('#licenseGenerationSection').offset().top - 100
-            }, 500);
+        if (Model.Filter.ValidToEnd.HasValue)
+            queryDict.Add("Filter.ValidToEnd", Model.Filter.ValidToEnd.Value.ToString("yyyy-MM-dd"));
+            
+        if (Model.Filter.ShowExpiring)
+        {
+            queryDict.Add("Filter.ShowExpiring", "true");
+            queryDict.Add("Filter.ExpiringWithinDays", Model.Filter.ExpiringWithinDays.ToString());
         }
         
-        function hideLicenseGeneration() {
-            $('#licenseGenerationSection').hide();
-        }
+        queryDict.Add("page", page.ToString());
         
-        // Add hover effects
-        $('.product-card').hover(
-            function() { $(this).addClass('border-primary'); },
-            function() { $(this).removeClass('border-primary'); }
-        );
+        var queryString = string.Join("&", queryDict.Select(kvp => $"{Uri.EscapeDataString(kvp.Key)}={Uri.EscapeDataString(kvp.Value)}"));
         
-        $('.hover-card').hover(
-            function() { $(this).css('transform', 'translateY(-2px)'); },
-            function() { $(this).css('transform', 'translateY(0)'); }
-        );
-    </script>
-    
-    <style>
-        .product-card {
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .hover-card {
-            transition: all 0.3s ease;
-        }
-        
-        .card {
-            border-radius: 10px;
-        }
-    </style>
+        return Url.Action("Index") + "?" + queryString;
+    }
 }
+
+@section Scripts {
+    <script>
+        function renewLicense(licenseId) {
+            if (confirm('Are you sure you want to renew this license?')) {
+                // TODO: Implement renew functionality
+                alert('Renew functionality will be implemented in a future update.');
+            }
+        }
+
+        function suspendLicense(licenseId) {
+            if (confirm('Are you sure you want to suspend this license?')) {
+                // TODO: Implement suspend functionality
+                alert('Suspend functionality will be implemented in a future update.');
+            }
+        }
+
+        function revokeLicense(licenseId) {
+            if (confirm('Are you sure you want to revoke this license? This action cannot be undone.')) {
+                // TODO: Implement revoke functionality
+                alert('Revoke functionality will be implemented in a future update.');
+            }
+        }
+
+        function exportLicenses() {
+            // TODO: Implement export functionality
+            alert('Export functionality will be implemented in a future update.');
+        }
+
+        function refreshPage() {
+            window.location.reload();
+        }
+
+        // Auto-submit form when expiring checkbox is changed
+        document.querySelector('input[name="Filter.ShowExpiring"]').addEventListener('change', function() {
+            if (this.checked) {
+                this.closest('form').submit();
+            }
+        });
+    </script>
+}
+
+<style>
+    .table th {
+        border-top: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    .table td {
+        vertical-align: middle;
+        font-size: 0.9rem;
+    }
+    
+    .badge-success {
+        background-color: #198754 !important;
+    }
+    
+    .badge-danger {
+        background-color: #dc3545 !important;
+    }
+    
+    .badge-warning {
+        background-color: #ffc107 !important;
+        color: #000 !important;
+    }
+    
+    .badge-dark {
+        background-color: #212529 !important;
+    }
+    
+    .badge-info {
+        background-color: #0dcaf0 !important;
+        color: #000 !important;
+    }
+    
+    .badge-secondary {
+        background-color: #6c757d !important;
+    }
+    
+    .card {
+        border-radius: 10px;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+    
+    .btn-group .btn {
+        border-radius: 0.25rem;
+        margin: 0 1px;
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+</style>

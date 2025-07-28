@@ -31,8 +31,7 @@
 
   <ItemGroup>
     <Compile Remove="Controllers/Backup/**/*.cs" />
-    <Compile Remove="Extensions_Backup/**/*.cs" /> 
-    <Content Remove="Views/License/**" /> 
+    <Compile Remove="Extensions_Backup/**/*.cs" />  
     <Content Remove="Views/ProductLicense/**" />
   </ItemGroup>
 

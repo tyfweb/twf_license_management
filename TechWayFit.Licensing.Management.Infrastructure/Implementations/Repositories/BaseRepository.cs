@@ -217,6 +217,8 @@ public partial class BaseRepository<TEntity> : IBaseRepository<TEntity>
         return entity;
     }
 
+
+   
     protected IQueryable<TEntity> ApplyIncludes(IQueryable<TEntity> query, params Expression<Func<TEntity, object>>[] includes)
     {
         if (includes != null)
@@ -232,4 +234,5 @@ public partial class BaseRepository<TEntity> : IBaseRepository<TEntity>
     {
         return query;
     }
+ 
 }

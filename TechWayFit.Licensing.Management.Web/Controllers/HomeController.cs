@@ -29,6 +29,14 @@ namespace TechWayFit.Licensing.WebUI.Controllers
         }
 
         /// <summary>
+        /// Bootstrap test page to verify CSS classes
+        /// </summary>
+        public IActionResult BootstrapTest()
+        {
+            return View();
+        }
+
+        /// <summary>
         /// Error page
         /// </summary>
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

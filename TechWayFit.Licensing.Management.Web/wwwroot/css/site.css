@@ -112,11 +112,17 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .card-header {
-  background: linear-gradient(135deg, var(--tw-primary) 0%, var(--tw-primary-dark) 100%);
-  color: white;
+  /* background: linear-gradient(135deg, var(--tw-primary) 0%, var(--tw-primary-dark) 100%); */
+  /* color: white; */
   border-bottom: none;
   padding: var(--tw-spacing-lg);
   font-weight: 600;
+}
+
+/* Default card header style when no Bootstrap bg-* class is applied */
+.card-header:not([class*="bg-"]) {
+  background: linear-gradient(135deg, var(--tw-primary) 0%, var(--tw-primary-dark) 100%);
+  color: white;
 }
 
 .card-body {
@@ -237,6 +243,8 @@ h1, h2, h3, h4, h5, h6 {
   letter-spacing: 0.025em;
 }
 
+/* Custom background gradients - commented out to allow Bootstrap bg-* classes to work */
+/*
 .bg-success {
   background: linear-gradient(135deg, var(--tw-success) 0%, #1e7e34 100%) !important;
 }
@@ -244,6 +252,7 @@ h1, h2, h3, h4, h5, h6 {
 .bg-primary {
   background: linear-gradient(135deg, var(--tw-primary) 0%, var(--tw-primary-dark) 100%) !important;
 }
+*/
 
 /* =====================================================
    Custom Component Classes
@@ -422,7 +431,8 @@ h1, h2, h3, h4, h5, h6 {
     font-weight: 600;
 }
 
-/* Stats display */
+/* Stats display - commented out to allow Bootstrap bg-* classes to work */
+/*
 .bg-primary, .bg-success, .bg-info, .bg-warning {
     background: linear-gradient(135deg, var(--bs-primary) 0%, var(--bs-primary-dark) 100%) !important;
 }
@@ -438,6 +448,29 @@ h1, h2, h3, h4, h5, h6 {
 .bg-warning {
     background: linear-gradient(135deg, var(--bs-warning) 0%, var(--bs-warning-dark) 100%) !important;
 }
+*/
+
+/* Optional: Custom gradient versions (use bg-gradient-* classes instead of bg-*) */
+.bg-gradient-primary {
+  background: linear-gradient(135deg, var(--tw-primary) 0%, var(--tw-primary-dark) 100%) !important;
+  color: white;
+}
+
+.bg-gradient-success {
+  background: linear-gradient(135deg, var(--tw-success) 0%, #1e7e34 100%) !important;
+  color: white;
+}
+
+.bg-gradient-info {
+  background: linear-gradient(135deg, var(--tw-info) 0%, #0b7285 100%) !important;
+  color: white;
+}
+
+.bg-gradient-secondary {
+  background: linear-gradient(135deg, var(--tw-secondary) 0%, #545b62 100%) !important;
+  color: white;
+}
+*/
 
 .feature-card {
     transition: all 0.3s ease;

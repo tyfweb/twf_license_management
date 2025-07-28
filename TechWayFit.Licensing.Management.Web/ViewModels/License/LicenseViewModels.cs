@@ -1,6 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 using TechWayFit.Licensing.Core.Models;
+using TechWayFit.Licensing.Management.Core.Models.License;
+using TechWayFit.Licensing.Management.Core.Models.Consumer;
 using LicenseModels = TechWayFit.Licensing.Core.Models;
+using TechWayFit.Licensing.Management.Core.Models.Product;
 
 namespace TechWayFit.Licensing.WebUI.ViewModels.License
 {
@@ -130,9 +133,9 @@ namespace TechWayFit.Licensing.WebUI.ViewModels.License
     /// </summary>
     public class LicenseDetailViewModel
     {
-        public LicenseModels.License License { get; set; } = new();
-        public LicenseModels.Consumer Consumer { get; set; } = new();
-        public ProductConfiguration Product { get; set; } = new();
+        public ProductLicense License { get; set; } = new();
+        public ConsumerAccount Consumer { get; set; } = new();
+        public EnterpriseProduct Product { get; set; } = new();
         public List<object> AuditHistory { get; set; } = new(); // TODO: Replace with proper LicenseAuditEntry when available
         public LicenseValidationResult ValidationResult { get; set; } = new();
         public List<LicenseVersionViewModel> VersionHistory { get; set; } = new();

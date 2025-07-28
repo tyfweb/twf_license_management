@@ -133,5 +133,16 @@ public class ProductLicenseRepository : BaseRepository<ProductLicenseEntity>, IP
                 .ToDictionaryAsync(group => group.Key, group => group.Count(), cancellationToken),
             LicensesByStatus = licenseCountGroupByStatus
         };
-    } 
+    }
+    /// <summary>
+    /// Get license by its unique identifier with all related data
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public Task<ProductLicenseEntity?> GetByIdWithAllIncludesAsync(string id, CancellationToken cancellationToken = default)
+    {
+        return _dbSet.Include(l => l.Product).Include(l => l.Consumer)
+                      .FirstOrDefaultAsync(l => l.LicenseId == id, cancellationToken);
+    }
 }

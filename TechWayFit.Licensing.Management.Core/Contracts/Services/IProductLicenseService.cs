@@ -71,6 +71,19 @@ public interface IProductLicenseService
         LicenseStatus? status = null,
         int pageNumber = 1,
         int pageSize = 50);
+    /// <summary>
+    /// Gets all licenses with optional filtering
+    /// </summary>
+    /// <param name="status"></param>
+    /// <param name="searchTerm"></param>
+    /// <param name="pageNumber"></param>
+    /// <param name="pageSize"></param>
+    /// <returns></returns>
+    Task<IEnumerable<ProductLicense>> GetLicensesAsync(
+        LicenseStatus? status = null,
+        string? searchTerm = null,
+        int pageNumber = 1,
+        int pageSize = 50);
 
     /// <summary>
     /// Gets licenses for a product

@@ -20,10 +20,6 @@ public class ProductLicense
     public ProductConsumer LicenseConsumer { get; set; } = new();
 
     /// <summary>
-    /// Licensed product details
-    /// </summary>
-    public EnterpriseProduct LicensedProduct { get; set; } = new EnterpriseProduct();
-    /// <summary>
     /// Features included in this license
     /// </summary>
     public IEnumerable<ProductFeature> Features { get; set; } = new List<ProductFeature>();
@@ -104,7 +100,7 @@ public class ProductLicense
         return new TechWayFit.Licensing.Core.Models.License
         {
             LicenseId = LicenseId,
-            ProductId = LicensedProduct.ProductId,
+            ProductId = LicenseConsumer.Product.ProductId,
             // Update this line to use the correct property from LicenseConsumer, e.g. LicenseConsumer.Consumer.ConsumerId if Consumer is a property of ProductConsumer
             ConsumerId = LicenseConsumer.Consumer.ConsumerId,
             ValidFrom = ValidFrom,
@@ -129,10 +125,10 @@ public class ProductLicense
             Issuer = IssuedBy,
             SecondaryContactEmail = LicenseConsumer.Consumer.SecondaryContact?.Email,
             SecondaryContactPerson = LicenseConsumer.Consumer.SecondaryContact?.Name,
-            Version = LicensedProduct.Version,
-            ProductVersion = SemanticVersion.Parse(LicensedProduct.Version).ToVersion(),
-            //MaxSupportedVersion = SemanticVersion.Parse(LicensedProduct.MaxSupportedVersion).ToVersion(),
-           //Tier = LicensedProduct.Tier,
+            Version = LicenseConsumer.Product.Version,
+            ProductVersion = SemanticVersion.Parse(LicenseConsumer.Product.Version).ToVersion(),
+            //MaxSupportedVersion = SemanticVersion.Parse(LicenseConsumer.Product.MaxSupportedVersion).ToVersion(),
+           //Tier = LicenseConsumer.Product.Tier,
         };
     }
 }

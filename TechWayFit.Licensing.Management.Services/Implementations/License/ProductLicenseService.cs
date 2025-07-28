@@ -229,10 +229,13 @@ public class ProductLicenseService : IProductLicenseService
 
     public async Task<ProductLicense?> GetLicenseByIdAsync(string licenseId)
     {
-        // TODO: Implement
-        _logger.LogWarning("GetLicenseByIdAsync not implemented");
-        await Task.CompletedTask;
-        return null;
+        var response = await _productLicenseRepository.GetByIdWithAllIncludesAsync(licenseId);
+        if (response == null)
+        {
+            _logger.LogWarning("License with ID {LicenseId} not found", licenseId);
+            return null;
+        }
+        return response.ToModel();
     }
 
     public async Task<IEnumerable<ProductLicense>> GetLicensesByConsumerAsync(string consumerId, LicenseStatus? status = null, int pageNumber = 1, int pageSize = 50)
@@ -488,6 +491,30 @@ public class ProductLicenseService : IProductLicenseService
         }
 
         return features;
+    }
+
+    public async Task<IEnumerable<ProductLicense>> GetLicensesAsync(LicenseStatus? status = null, string? searchTerm = null, int pageNumber = 1, int pageSize = 50)
+    {
+        SearchRequest<ProductLicenseEntity> searchRequest = new SearchRequest<ProductLicenseEntity>
+        {
+            Filters = new List<Expression<Func<ProductLicenseEntity, bool>>>(),
+            Page = pageNumber,
+            PageSize = pageSize
+        };
+
+        if (status.HasValue)
+        {
+            searchRequest.Filters.Add(license => license.Status == status.Value.ToString());
+        }
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            searchRequest.Filters.Add(license => license.Consumer.CompanyName.Contains(searchTerm) ||
+            license.Product.Name.Contains(searchTerm));
+        }
+
+        return await _productLicenseRepository.SearchAsync(searchRequest)
+            .ContinueWith(task => task.Result.Results.Select(license => license.ToModel()).ToList());
     }
 
     #endregion

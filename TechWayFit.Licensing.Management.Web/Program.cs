@@ -122,15 +122,14 @@ builder.Services.AddScoped<IEnterpriseProductService, EnterpriseProductService>(
 // Step 4: Consumer management services - IMPLEMENTING NOW
 builder.Services.AddScoped<IConsumerAccountService, ConsumerAccountService>();
 
-// Step 5: License management services will be added here
+// Step 5: License management services
+builder.Services.AddScoped<ILicenseGenerator, StatelessLicenseGenerator>();
+builder.Services.AddScoped<IKeyManagementService, KeyManagementService>();
+builder.Services.AddScoped<IProductLicenseService, ProductLicenseService>();
+builder.Services.AddSingleton<ILicenseValidationService, LicenseValidationService>();
+
 // Step 6: Audit management services will be added here
 // Step 7: Notification management services will be added here
-
-// Commented out for now - will be added back step by step:
- builder.Services.AddScoped<ILicenseGenerator, StatelessLicenseGenerator>();
- builder.Services.AddScoped<IKeyManagementService, KeyManagementService>();
- builder.Services.AddScoped<IProductLicenseService, ProductLicenseService>();
- builder.Services.AddSingleton<ILicenseValidationService, LicenseValidationService>();
 
 var app = builder.Build();
 

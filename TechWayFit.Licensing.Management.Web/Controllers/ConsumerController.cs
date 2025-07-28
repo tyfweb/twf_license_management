@@ -4,6 +4,7 @@ using TechWayFit.Licensing.Core.Contracts;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Core.Models.Consumer;
 using TechWayFit.Licensing.Management.Core.Models.License;
+using TechWayFit.Licensing.Management.Web.Extensions;
 using TechWayFit.Licensing.WebUI.ViewModels.Consumer;
 
 namespace TechWayFit.Licensing.WebUI.Controllers;
@@ -213,19 +214,7 @@ public class ConsumerController : Controller
         }).ToList(); 
         return new ConsumerDetailViewModel
         {
-            Consumer = new Core.Models.Consumer
-            {
-                ConsumerId = consumer.ConsumerId,
-                OrganizationName = consumer.CompanyName,
-                ContactPerson = consumer.PrimaryContact?.Name ?? string.Empty,
-                ContactEmail = consumer.PrimaryContact?.Email ?? string.Empty,
-                SecondaryContactPerson = consumer.SecondaryContact?.Name,
-                SecondaryContactEmail = consumer.SecondaryContact?.Email,
-                Address = consumer.Address.ToString(),
-                IsActive = consumer.IsActive,
-                CreatedAt = consumer.CreatedAt
-
-            },
+            Consumer = consumer.ConvertToConsumerModel(),
             Licenses = licenseSummary,
             Statistics = new ConsumerStatisticsViewModel
             {

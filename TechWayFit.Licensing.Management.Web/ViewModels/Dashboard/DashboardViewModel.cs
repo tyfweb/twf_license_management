@@ -1,4 +1,5 @@
 using TechWayFit.Licensing.WebUI.Models;
+using TechWayFit.Licensing.WebUI.ViewModels.License;
 
 namespace TechWayFit.Licensing.WebUI.ViewModels.Dashboard
 {

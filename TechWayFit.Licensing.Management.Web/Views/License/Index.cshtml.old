@@ -4,7 +4,7 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container-fluid">
+<div class="container-fluid py-4">
     <!-- Header Section -->
     <div class="row mb-4">
         <div class="col-12">
@@ -14,7 +14,7 @@
                         <i class="fas fa-certificate text-primary me-2"></i>
                         License Management Portal
                     </h2>
-                    <p class="text-muted mb-0">Welcome, @User.Identity.Name - Manage all your licensing needs</p>
+                    <p class="text-muted mb-0">Welcome, @(User?.Identity?.Name ?? "User") - Manage all your licensing needs</p>
                 </div>
                 <div>
                     <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
@@ -46,7 +46,7 @@
                             {
                                 <div class="col-lg-4 col-md-6 mb-3">
                                     <div class="card h-100 border-0 shadow-sm product-card" data-product-id="@product.ProductId">
-                                        <div class="card-header @(product.IsActive ? "bg-success" : "bg-secondary") text-white">
+                                        <div class="card-header @(product.IsActive ? "bg-success text-white" : "bg-secondary text-white")">
                                             <h6 class="mb-0">
                                                 <i class="fas fa-cube me-1"></i>
                                                 @product.Name
@@ -309,28 +309,102 @@
             // Show modal
             $('#productLicensesModal').modal('show');
             
-            // Load product licenses (placeholder for now)
-            setTimeout(() => {
-                $('#productLicensesContent').html(`
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle me-2"></i>
-                        License listing for <strong>${productName}</strong> is being implemented.
-                        <br>This will show all consumers and their licenses for this product.
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h6>Consumers</h6>
-                            <p class="text-muted">No consumers found for this product.</p>
-                            <a href="/Consumer" class="btn btn-sm btn-outline-primary">Add Consumer</a>
+            // Load product licenses via AJAX
+            fetch(`/ProductLicense/GetProductLicenses?productId=${encodeURIComponent(productId)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        let content = `
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-users me-1"></i> Consumers (${data.consumers.length})</h6>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-certificate me-1"></i> Licenses</h6>
+                                </div>
+                            </div>
+                        `;
+                        
+                        if (data.consumers.length > 0) {
+                            data.consumers.forEach(consumer => {
+                                const activeLicenses = consumer.licenses.filter(l => l.isActive && !l.isExpired).length;
+                                const expiredLicenses = consumer.licenses.filter(l => l.isExpired).length;
+                                
+                                content += `
+                                    <div class="card mb-2">
+                                        <div class="card-header">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <h6 class="mb-0">${consumer.consumer.organizationName}</h6>
+                                                <div>
+                                                    <span class="badge bg-success">${activeLicenses} Active</span>
+                                                    ${expiredLicenses > 0 ? `<span class="badge bg-danger ms-1">${expiredLicenses} Expired</span>` : ''}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="small text-muted mb-2">Contact: ${consumer.consumer.primaryContactPerson} (${consumer.consumer.primaryContactEmail})</p>
+                                `;
+                                
+                                if (consumer.licenses.length > 0) {
+                                    content += '<div class="row">';
+                                    consumer.licenses.forEach(license => {
+                                        const statusClass = license.isExpired ? 'bg-danger' : (license.isActive ? 'bg-success' : 'bg-secondary');
+                                        const statusText = license.isExpired ? 'Expired' : (license.isActive ? 'Active' : 'Inactive');
+                                        
+                                        content += `
+                                            <div class="col-md-6 mb-2">
+                                                <div class="small border rounded p-2">
+                                                    <div class="d-flex justify-content-between">
+                                                        <strong>${license.tier}</strong>
+                                                        <span class="badge ${statusClass}">${statusText}</span>
+                                                    </div>
+                                                    <div class="text-muted">
+                                                        Valid: ${new Date(license.validFrom).toLocaleDateString()} - ${new Date(license.validTo).toLocaleDateString()}
+                                                    </div>
+                                                    <div class="mt-2">
+                                                        <a href="/License/Details/${license.licenseId}" class="btn btn-outline-primary btn-sm">
+                                                            <i class="fas fa-eye me-1"></i>View Details
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        `;
+                                    });
+                                    content += '</div>';
+                                } else {
+                                    content += '<p class="text-muted small">No licenses found for this consumer.</p>';
+                                }
+                                
+                                content += '</div></div>';
+                            });
+                        } else {
+                            content += `
+                                <div class="text-center py-4">
+                                    <i class="fas fa-users fa-2x text-muted mb-2"></i>
+                                    <p class="text-muted">No consumers found for this product.</p>
+                                    <a href="/Consumer" class="btn btn-outline-primary btn-sm">Add Consumer</a>
+                                </div>
+                            `;
+                        }
+                        
+                        $('#productLicensesContent').html(content);
+                    } else {
+                        $('#productLicensesContent').html(`
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                ${data.message || 'Failed to load product licenses'}
+                            </div>
+                        `);
+                    }
+                })
+                .catch(error => {
+                    $('#productLicensesContent').html(`
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            Error loading product licenses. Please try again.
                         </div>
-                        <div class="col-md-6">
-                            <h6>Recent Licenses</h6>
-                            <p class="text-muted">No licenses generated yet.</p>
-                            <button class="btn btn-sm btn-outline-success" onclick="showLicenseGeneration()">Generate License</button>
-                        </div>
-                    </div>
-                `);
-            }, 1000);
+                    `);
+                });
         }
         
         function showLicenseGeneration() {
