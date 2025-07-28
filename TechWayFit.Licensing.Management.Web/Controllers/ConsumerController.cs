@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TechWayFit.Licensing.Core.Contracts;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Core.Models.Consumer;
+using TechWayFit.Licensing.Management.Core.Models.License;
 using TechWayFit.Licensing.WebUI.ViewModels.Consumer;
 
 namespace TechWayFit.Licensing.WebUI.Controllers;
@@ -13,12 +15,15 @@ namespace TechWayFit.Licensing.WebUI.Controllers;
 public class ConsumerController : Controller
 {
     private readonly IConsumerAccountService _consumerAccountService;
+    private readonly IProductLicenseService _productLicenseService; 
     private readonly ILogger<ConsumerController> _logger;
 
     public ConsumerController(
         IConsumerAccountService consumerAccountService,
+        IProductLicenseService productLicenseService,
         ILogger<ConsumerController> logger)
     {
+        _productLicenseService = productLicenseService ?? throw new ArgumentNullException(nameof(productLicenseService));
         _consumerAccountService = consumerAccountService ?? throw new ArgumentNullException(nameof(consumerAccountService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
@@ -26,53 +31,53 @@ public class ConsumerController : Controller
     /// <summary>
     /// Display list of consumer accounts
     /// </summary>
-        public async Task<IActionResult> Index(ConsumerFilterViewModel filter)
+    public async Task<IActionResult> Index(ConsumerFilterViewModel filter)
+    {
+        try
         {
-            try
+            _logger.LogInformation("Getting consumer list with filter: SearchTerm={SearchTerm}, Status={Status}",
+                filter.SearchTerm, filter.Status);
+
+            var consumers = await _consumerAccountService.GetConsumerAccountsAsync(
+                status: filter.Status,
+                isActive: filter.IsActive,
+                searchTerm: filter.SearchTerm,
+                pageNumber: filter.PageNumber,
+                pageSize: filter.PageSize);
+
+            var totalCount = await _consumerAccountService.GetConsumerAccountCountAsync(
+                status: filter.Status,
+                isActive: filter.IsActive,
+                searchTerm: filter.SearchTerm);
+
+            // Map to view models
+            var consumerViewModels = consumers.Select(MapToViewModel).ToList();
+
+            // Create list view model
+            var listViewModel = new ConsumerListViewModel
             {
-                _logger.LogInformation("Getting consumer list with filter: SearchTerm={SearchTerm}, Status={Status}", 
-                    filter.SearchTerm, filter.Status);
-
-                var consumers = await _consumerAccountService.GetConsumerAccountsAsync(
-                    status: filter.Status,
-                    isActive: filter.IsActive,
-                    searchTerm: filter.SearchTerm,
-                    pageNumber: filter.PageNumber,
-                    pageSize: filter.PageSize);
-
-                var totalCount = await _consumerAccountService.GetConsumerAccountCountAsync(
-                    status: filter.Status,
-                    isActive: filter.IsActive,
-                    searchTerm: filter.SearchTerm);
-
-                // Map to view models
-                var consumerViewModels = consumers.Select(MapToViewModel).ToList();
-
-                // Create list view model
-                var listViewModel = new ConsumerListViewModel
+                SearchTerm = filter.SearchTerm ?? string.Empty,
+                Consumers = consumerViewModels,
+                Filter = filter,
+                Pagination = new PaginationViewModel
                 {
-                    SearchTerm = filter.SearchTerm ?? string.Empty,
-                    Consumers = consumerViewModels,
-                    Filter = filter,
-                    Pagination = new PaginationViewModel
-                    {
-                        CurrentPage = filter.PageNumber,
-                        PageSize = filter.PageSize,
-                        TotalItems = totalCount
-                    }
-                };
+                    CurrentPage = filter.PageNumber,
+                    PageSize = filter.PageSize,
+                    TotalItems = totalCount
+                }
+            };
 
-                return View(listViewModel);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving consumer list");
-                TempData["ErrorMessage"] = "Unable to load consumers at this time. Please try again later.";
-                return RedirectToAction("Index", "Home");
-            }
-        }    /// <summary>
-    /// Display consumer account details
-    /// </summary>
+            return View(listViewModel);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving consumer list");
+            TempData["ErrorMessage"] = "Unable to load consumers at this time. Please try again later.";
+            return RedirectToAction("Index", "Home");
+        }
+    }    /// <summary>
+         /// Display consumer account details
+         /// </summary>
     public async Task<IActionResult> Details(string id)
     {
         if (string.IsNullOrWhiteSpace(id))
@@ -83,12 +88,14 @@ public class ConsumerController : Controller
         try
         {
             var consumer = await _consumerAccountService.GetConsumerAccountByIdAsync(id);
+            var licenses = await _productLicenseService.GetLicensesByConsumerAsync(id);
+            var statistics= await _productLicenseService.GetLicenseUsageStatisticsAsync(consumerId: id);
             if (consumer == null)
             {
                 return NotFound($"Consumer account with ID '{id}' not found");
             }
 
-            var viewModel = MapToViewModel(consumer);
+            var viewModel = MapToConsumerDetailsViewModel(consumer,licenses, statistics);
             return View(viewModel);
         }
         catch (Exception ex)
@@ -189,6 +196,45 @@ public class ConsumerController : Controller
             CreatedOn = consumer.CreatedAt,
             UpdatedBy = string.Empty, // Not available in domain model 
             UpdatedOn = null // Not available in domain model
+        };
+    }
+    private static ConsumerDetailViewModel MapToConsumerDetailsViewModel(ConsumerAccount consumer,
+    IEnumerable<ProductLicense> licenses, LicenseUsageStatistics statistics)
+    {
+        var licenseSummary = licenses.Select(l => new LicenseSummaryViewModel
+        {
+            LicenseId = l.LicenseCode,
+            ProductName = l.LicenseConsumer.Product?.Name ?? "Unknown Product",
+            Tier = Core.Models.LicenseTier.Custom, // Assuming tier is not available in the license model
+            Status = l.Status,
+            ValidFrom = l.ValidFrom,
+            ValidTo = l.ValidTo,
+            CreatedAt = l.CreatedAt            
+        }).ToList(); 
+        return new ConsumerDetailViewModel
+        {
+            Consumer = new Core.Models.Consumer
+            {
+                ConsumerId = consumer.ConsumerId,
+                OrganizationName = consumer.CompanyName,
+                ContactPerson = consumer.PrimaryContact?.Name ?? string.Empty,
+                ContactEmail = consumer.PrimaryContact?.Email ?? string.Empty,
+                SecondaryContactPerson = consumer.SecondaryContact?.Name,
+                SecondaryContactEmail = consumer.SecondaryContact?.Email,
+                Address = consumer.Address.ToString(),
+                IsActive = consumer.IsActive,
+                CreatedAt = consumer.CreatedAt
+
+            },
+            Licenses = licenseSummary,
+            Statistics = new ConsumerStatisticsViewModel
+            {
+                TotalLicenses = statistics.TotalLicenses,
+                ActiveLicenses = statistics.ActiveLicenses,
+                ExpiredLicenses = statistics.ExpiredLicenses
+                
+            }
+        
         };
     }
 }

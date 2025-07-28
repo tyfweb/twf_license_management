@@ -138,4 +138,13 @@ public class SemanticVersion
     /// Gets the stable version (1.0.0-stable).
     /// </summary>
     public static SemanticVersion Stable => new SemanticVersion(1, 0, 0, "stable");
+
+    public static SemanticVersion FromVersion(Version version)
+    {
+        return new SemanticVersion(version.Major, version.Minor, version.Build, version.Revision > 0 ? version.Revision.ToString() : string.Empty);
+    }
+    public Version ToVersion()
+    {
+        return new Version(Major, Minor, Patch, string.IsNullOrEmpty(PreRelease) ? 0 : int.Parse(PreRelease));
+    }
 }

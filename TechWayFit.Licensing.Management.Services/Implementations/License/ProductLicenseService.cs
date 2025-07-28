@@ -13,6 +13,7 @@ using TechWayFit.Licensing.Management.Core.Models.License;
 using System.Text.Json;
 using CoreModels = TechWayFit.Licensing.Core.Models;
 using ManagementModels = TechWayFit.Licensing.Management.Core.Models.License;
+using TechWayFit.Licensing.Core.Models;
 
 namespace TechWayFit.Licensing.Management.Services.Implementations.License;
 
@@ -43,7 +44,7 @@ public class ProductLicenseService : IProductLicenseService
     /// </summary>
     public async Task<ProductLicense> GenerateLicenseAsync(LicenseGenerationRequest request, string generatedBy)
     {
-        _logger.LogInformation("Generating license for product: {ProductId}, consumer: {ConsumerId}", 
+        _logger.LogInformation("Generating license for product: {ProductId}, consumer: {ConsumerId}",
             request.ProductId, request.ConsumerId);
 
         // Input validation
@@ -61,7 +62,7 @@ public class ProductLicenseService : IProductLicenseService
                 _logger.LogInformation("No private key found for product {ProductId}, generating new key pair", request.ProductId);
                 var publicKey = await _keyManagementService.GenerateKeyPairForProductAsync(request.ProductId);
                 privateKey = await _keyManagementService.GetPrivateKeyAsync(request.ProductId);
-                _logger.LogInformation("Generated new key pair for product {ProductId}, public key length: {PublicKeyLength}", 
+                _logger.LogInformation("Generated new key pair for product {ProductId}, public key length: {PublicKeyLength}",
                     request.ProductId, publicKey.Length);
             }
 
@@ -74,22 +75,22 @@ public class ProductLicenseService : IProductLicenseService
                 ValidTo = request.ExpiryDate ?? DateTime.UtcNow.AddYears(1),
                 CustomData = request.Metadata ?? new Dictionary<string, object>(),
                 PrivateKeyPem = privateKey,
-                
+
                 // Map tier information
                 Tier = MapTierFromRequest(request.TierId),
                 MaxApiCallsPerMonth = request.MaxUsers, // Map MaxUsers to API calls if applicable
                 MaxConcurrentConnections = request.MaxDevices, // Map MaxDevices to connections if applicable
-                
+
                 // Map features from request properties
                 Features = MapFeaturesFromRequest(request),
-                
+
                 // TODO: Map additional fields when needed:
                 // ProductName, ContactPerson, ContactEmail, etc.
             };
 
             // Generate cryptographically signed license
             var signedLicense = await _licenseGenerator.GenerateLicenseAsync(generationRequest);
-            
+
             var licenseId = Guid.NewGuid().ToString();
 
             // Create license entity for database storage
@@ -101,7 +102,7 @@ public class ProductLicenseService : IProductLicenseService
                 LicenseKey = signedLicense.LicenseData, // Store the signed license data
                 ValidFrom = generationRequest.ValidFrom,
                 ValidTo = generationRequest.ValidTo,
-                Status = ManagementModels.LicenseStatus.Active.ToString(),
+                Status = LicenseStatus.Active.ToString(),
                 MetadataJson = SerializeMetadata(request.Metadata ?? new Dictionary<string, object>()),
                 CreatedBy = generatedBy,
                 CreatedOn = DateTime.UtcNow,
@@ -115,10 +116,10 @@ public class ProductLicenseService : IProductLicenseService
 
             // Save to repository
             var createdEntity = await _productLicenseRepository.AddAsync(licenseEntity);
-            
+
             // Map to model
             var result = createdEntity.ToModel();
-            
+
             _logger.LogInformation("Successfully generated cryptographically signed license with ID: {LicenseId}", result.LicenseId);
             return result;
         }
@@ -141,7 +142,7 @@ public class ProductLicenseService : IProductLicenseService
         {
             // TODO: Implement GetByLicenseKeyAsync in repository
             _logger.LogWarning("GetLicenseByKeyAsync using search - GetByLicenseKeyAsync repository method missing");
-            
+
             var searchRequest = new SearchRequest<ProductLicenseEntity>
             {
                 Filters = new List<Expression<Func<ProductLicenseEntity, bool>>>
@@ -149,10 +150,10 @@ public class ProductLicenseService : IProductLicenseService
                     l => l.LicenseKey == licenseKey
                 }
             };
-            
+
             var searchResult = await _productLicenseRepository.SearchAsync(searchRequest);
             var entity = searchResult.Results.FirstOrDefault();
-            
+
             return entity?.ToModel();
         }
         catch (Exception ex)
@@ -178,82 +179,33 @@ public class ProductLicenseService : IProductLicenseService
 
             if (license == null)
             {
-                return new LicenseValidationResult
-                {
-                    IsValid = false,
-                    ErrorMessage = "License not found",
-                    ValidationDetails = new Dictionary<string, object>
-                    {
-                        ["licenseKey"] = licenseKey,
-                        ["productId"] = productId,
-                        ["validatedAt"] = DateTime.UtcNow
-                    }
-                };
+                return LicenseValidationResult.Failure(LicenseStatus.NotFound, "License not found");
             }
 
             // Check product match
             if (license.LicenseConsumer?.Product?.ProductId != productId)
             {
-                return new LicenseValidationResult
-                {
-                    IsValid = false,
-                    ErrorMessage = "License not valid for this product",
-                    License = license,
-                    ValidationDetails = new Dictionary<string, object>
-                    {
-                        ["expectedProductId"] = productId,
-                        ["actualProductId"] = license.LicenseConsumer?.Product?.ProductId ?? "unknown",
-                        ["validatedAt"] = DateTime.UtcNow
-                    }
-                };
+                return LicenseValidationResult.Failure(LicenseStatus.NotFound,
+                "License does not match the specified product");
             }
 
             // Check license status and validity
             var now = DateTime.UtcNow;
             if (license.Status != LicenseStatus.Active || now < license.ValidFrom || now > license.ValidTo)
             {
-                return new LicenseValidationResult
-                {
-                    IsValid = false,
-                    ErrorMessage = $"License is not active or expired. Status: {license.Status}, Valid: {license.ValidFrom:yyyy-MM-dd} to {license.ValidTo:yyyy-MM-dd}",
-                    License = license,
-                    ValidationDetails = new Dictionary<string, object>
-                    {
-                        ["status"] = license.Status.ToString(),
-                        ["validFrom"] = license.ValidFrom,
-                        ["validTo"] = license.ValidTo,
-                        ["currentDate"] = now,
-                        ["validatedAt"] = DateTime.UtcNow
-                    }
-                };
+                return LicenseValidationResult.Failure(LicenseStatus.Expired,
+                    "License is not active or is outside the valid date range");
             }
 
             // License is valid
-            return new LicenseValidationResult
-            {
-                IsValid = true,
-                License = license,
-                ValidationDetails = new Dictionary<string, object>
-                {
-                    ["validatedAt"] = DateTime.UtcNow,
-                    ["status"] = license.Status.ToString()
-                }
-            };
+            return LicenseValidationResult.Success(license.ToLicenseModel());
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error validating license: {LicenseKey}", licenseKey);
-            
-            return new LicenseValidationResult
-            {
-                IsValid = false,
-                ErrorMessage = "License validation failed due to system error",
-                ValidationDetails = new Dictionary<string, object>
-                {
-                    ["error"] = ex.Message,
-                    ["validatedAt"] = DateTime.UtcNow
-                }
-            };
+
+            return LicenseValidationResult.Failure(LicenseStatus.ServiceUnavailable, 
+                    "An error occurred while validating the license. Please try again later.");
         }
     }
 
@@ -285,10 +237,17 @@ public class ProductLicenseService : IProductLicenseService
 
     public async Task<IEnumerable<ProductLicense>> GetLicensesByConsumerAsync(string consumerId, LicenseStatus? status = null, int pageNumber = 1, int pageSize = 50)
     {
-        // TODO: Implement when repository methods are available
-        _logger.LogWarning("GetLicensesByConsumerAsync not implemented");
-        await Task.CompletedTask;
-        return Enumerable.Empty<ProductLicense>();
+        var response = await _productLicenseRepository.GetByConsumerIdAsync(consumerId);
+        if (response == null || !response.Any())
+        {
+            return Enumerable.Empty<ProductLicense>();
+        }
+        var productLicenses = response.Select(l => l.ToModel()).ToList();
+        return productLicenses
+            .Where(l => !status.HasValue || l.Status == status.Value)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
     }
 
     public async Task<IEnumerable<ProductLicense>> GetLicensesByProductAsync(string productId, LicenseStatus? status = null, int pageNumber = 1, int pageSize = 50)
@@ -483,7 +442,7 @@ public class ProductLicenseService : IProductLicenseService
         {
             features.Add(new LicenseFeature
             {
-                Name = "Virtualization", 
+                Name = "Virtualization",
                 Description = "Allows application to run in virtualized environments"
             });
         }

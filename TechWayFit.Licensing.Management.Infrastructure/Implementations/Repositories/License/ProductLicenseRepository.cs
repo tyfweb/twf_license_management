@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using TechWayFit.Licensing.Core.Helpers;
+using TechWayFit.Licensing.Core.Models;
 using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.License;
 using TechWayFit.Licensing.Infrastructure.Data.Context;
 using TechWayFit.Licensing.Infrastructure.Models.Entities.License;

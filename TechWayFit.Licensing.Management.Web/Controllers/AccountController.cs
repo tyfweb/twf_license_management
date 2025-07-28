@@ -6,6 +6,7 @@ using TechWayFit.Licensing.WebUI.Services;
 
 namespace TechWayFit.Licensing.WebUI.Controllers
 {
+    
     public class AccountController : Controller
     {
         private readonly Services.IAuthenticationService _authService;
@@ -45,7 +46,7 @@ namespace TechWayFit.Licensing.WebUI.Controllers
             }
 
             var isValid = await _authService.ValidateUserAsync(model.Username, model.Password);
-            
+
             if (isValid)
             {
                 var user = await _authService.GetUserAsync(model.Username);

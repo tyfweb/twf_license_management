@@ -54,6 +54,21 @@ public abstract class BaseAuditEntity
         };
         return System.Text.Json.JsonSerializer.Deserialize<T>(json, options) ?? throw new InvalidOperationException("Deserialization failed");
     }
+    protected static Dictionary<string, string> FromDictJson(string? json)
+    {
+        json ??= "{}"; // Default to empty JSON if null
+        if (string.IsNullOrWhiteSpace(json))
+            return default!; // Return default value for T if json is empty or whitespace
+        var options = new System.Text.Json.JsonSerializerOptions
+        {
+            PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
+            PropertyNameCaseInsensitive = true
+        };
+        var dictOfObj = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(json, options);
+        if (dictOfObj == null)
+            return new Dictionary<string, string>(); // Return empty dictionary if deserialization fails
+        return dictOfObj.ToDictionary(kvp => kvp.Key, kvp => kvp.Value?.ToString() ?? string.Empty);        
+    }
 
     public static T ToEnum<T>(string? value) where T : struct, Enum
     {

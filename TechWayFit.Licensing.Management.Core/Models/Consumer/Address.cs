@@ -26,4 +26,9 @@ public class Address
     /// Country of the consumer
     /// </summary>
     public string Country { get; set; } = string.Empty;
+
+    public override string ToString()
+    {
+        return $"{Street}, {City}, {State} {PostalCode}, {Country}".Trim(' ', ',');
+    }
 }

@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using TechWayFit.Licensing.Core.Models;
 using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Audit;
 using TechWayFit.Licensing.Infrastructure.Models.Entities.Audit;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;

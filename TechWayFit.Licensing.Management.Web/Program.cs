@@ -15,6 +15,12 @@ using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Product;
 using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Consumer;
 using TechWayFit.Licensing.Infrastructure.Data.Repositories.Product;
 using TechWayFit.Licensing.Infrastructure.Data.Repositories.Consumer;
+using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Audit;
+using TechWayFit.Licensing.Infrastructure.Implementations.Repositories.Audit;
+using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.License;
+using TechWayFit.Licensing.Infrastructure.Data.Repositories.License;
+using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Notification;
+using TechWayFit.Licensing.Infrastructure.Data.Repositories.Notification;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -100,6 +106,15 @@ Directory.CreateDirectory(dataPath);
 // Register repositories
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IConsumerAccountRepository, ConsumerAccountRepository>();
+builder.Services.AddScoped<IProductFeatureRepository, ProductFeatureRepository>();
+builder.Services.AddScoped<IAuditEntryRepository, AuditEntryRepository>();
+builder.Services.AddScoped<IProductLicenseRepository, ProductLicenseRepository>();
+builder.Services.AddScoped<INotificationHistoryRepository, NotificationHistoryRepository>();
+builder.Services.AddScoped<INotificationTemplateRepository, NotificationTemplateRepository>();
+builder.Services.AddScoped<IProductTierRepository, ProductTierRepository>();
+builder.Services.AddScoped<IProductVersionRepository, ProductVersionRepository>(); 
+
+
 
 // Register real services (replacing mock)
 builder.Services.AddScoped<IEnterpriseProductService, EnterpriseProductService>();
@@ -112,10 +127,10 @@ builder.Services.AddScoped<IConsumerAccountService, ConsumerAccountService>();
 // Step 7: Notification management services will be added here
 
 // Commented out for now - will be added back step by step:
-// builder.Services.AddScoped<ILicenseGenerator, StatelessLicenseGenerator>();
-// builder.Services.AddScoped<IKeyManagementService, KeyManagementService>();
-// builder.Services.AddScoped<IProductLicenseService, ProductLicenseService>();
-// builder.Services.AddSingleton<ILicenseValidationService, LicenseValidationService>();
+ builder.Services.AddScoped<ILicenseGenerator, StatelessLicenseGenerator>();
+ builder.Services.AddScoped<IKeyManagementService, KeyManagementService>();
+ builder.Services.AddScoped<IProductLicenseService, ProductLicenseService>();
+ builder.Services.AddSingleton<ILicenseValidationService, LicenseValidationService>();
 
 var app = builder.Build();
 

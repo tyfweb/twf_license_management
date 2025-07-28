@@ -46,26 +46,27 @@
                                     <span asp-validation-for="OrganizationName" class="text-danger"></span>
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                        </div>
+
+                        <!-- Contact Information -->
+                        <h6 class="text-primary mb-3">Contact Information</h6>
+                        <div class="row">
+                            
+                            <div class="col-md-4">
                                 <div class="mb-3">
                                     <label asp-for="ContactPerson" class="form-label"></label>
                                     <input asp-for="ContactPerson" class="form-control" placeholder="Primary Contact Name" />
                                     <span asp-validation-for="ContactPerson" class="text-danger"></span>
                                 </div>
                             </div>
-                        </div>
-
-                        <!-- Contact Information -->
-                        <h6 class="text-primary mb-3">Contact Information</h6>
-                        <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="mb-3">
                                     <label asp-for="ContactEmail" class="form-label"></label>
                                     <input asp-for="ContactEmail" class="form-control" type="email" placeholder="contact@example.com" />
                                     <span asp-validation-for="ContactEmail" class="text-danger"></span>
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="mb-3">
                                     <label asp-for="ContactPhone" class="form-label"></label>
                                     <input asp-for="ContactPhone" class="form-control" type="tel" placeholder="+1 (555) 123-4567" />
@@ -74,8 +75,35 @@
                             </div>
                         </div>
 
+                        <!-- Contact Information -->
+                        <h6 class="text-primary mb-3">Secondary Contact Information <small class="text-muted">(Optional)</small></h6>
+                        <div class="row">
+                            
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label asp-for="SecondaryContactPerson" class="form-label"></label>
+                                    <input asp-for="SecondaryContactPerson" class="form-control" placeholder="Secondary Contact Name" />
+                                    <span asp-validation-for="SecondaryContactPerson" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label asp-for="SecondaryContactEmail" class="form-label"></label>
+                                    <input asp-for="SecondaryContactEmail" class="form-control" type="email" placeholder="contact@example.com" />
+                                    <span asp-validation-for="SecondaryContactEmail" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label asp-for="SecondaryContactPhone" class="form-label"></label>
+                                    <input asp-for="SecondaryContactPhone" class="form-control" type="tel" placeholder="+1 (555) 123-4567" />
+                                    <span asp-validation-for="SecondaryContactPhone" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Address Information -->
-                        <h6 class="text-primary mb-3">Address Information <small class="text-muted">(Optional)</small></h6>
+                        <h6 class="text-primary mb-3">Address Information </h6>
                         <div class="row">
                             <div class="col-12">
                                 <div class="mb-3">

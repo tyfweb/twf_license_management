@@ -8,7 +8,7 @@
 -- DATABASE CONNECTION
 -- =============================================
 -- Connect to the correct database
-\c techwayfit_licensing;
+
 
 -- =============================================
 -- USER CREATION (run only if user doesn't exist)
@@ -29,7 +29,7 @@
 GRANT USAGE ON SCHEMA public TO twf_license_user;
 
 -- Grant connect permission to database
-GRANT CONNECT ON DATABASE techwayfit_licensing TO twf_license_user;
+GRANT CONNECT ON DATABASE twf_license_management TO twf_license_user;
 
 -- =============================================
 -- TABLE PERMISSIONS - ALL CURRENT TABLES
