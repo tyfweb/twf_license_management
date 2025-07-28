@@ -4,6 +4,7 @@ using TechWayFit.Licensing.Management.Core.Models.Product;
 using TechWayFit.Licensing.Management.Core.Models.Consumer;
 using System.ComponentModel.DataAnnotations.Schema;
 using TechWayFit.Licensing.Infrastructure.Models.Entities.Products;
+using TechWayFit.Licensing.Core.Models;
 
 namespace TechWayFit.Licensing.Infrastructure.Models.Entities.License;
 
@@ -147,8 +148,13 @@ public class ProductLicenseEntity : BaseAuditEntity
             LicenseId = LicenseId,
             LicenseConsumer = new ProductConsumer
             {
-                Product = new EnterpriseProduct { ProductId = ProductId },
-                Consumer = new ConsumerAccount { ConsumerId = ConsumerId }
+                Product = Product?.ToModel()?? new EnterpriseProduct(){
+                    ProductId = ProductId
+                },
+                Consumer = Consumer?.ToModel()?? new ConsumerAccount()
+                {
+                    ConsumerId = ConsumerId
+                }
             },
             ValidFrom = ValidFrom,
             LicenseCode = LicenseCode,
@@ -163,8 +169,9 @@ public class ProductLicenseEntity : BaseAuditEntity
             IssuedBy = IssuedBy,
             RevokedAt = RevokedAt,
             RevocationReason = RevocationReason,
-            Metadata = FromJson<Dictionary<string, string>>(MetadataJson),
-            Features = Features.Select(f => f.ToModel()).ToList()
+            Metadata = FromDictJson(MetadataJson),
+            Features = Features.Select(f => f.ToModel()).ToList(),
+            CreatedAt = CreatedOn
         };
     }
     #endregion

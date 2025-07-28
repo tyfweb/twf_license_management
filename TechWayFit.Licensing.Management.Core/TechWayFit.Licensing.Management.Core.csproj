@@ -13,5 +13,9 @@
     <Folder Include="Models/Report/" />
     <Folder Include="Models/Services/" />
   </ItemGroup>
+  <ItemGroup>
+  
+    <PackageReference Include="TechWayFit.Licensing.Core" Version="1.0.0" />
+  </ItemGroup>
 
 </Project>

@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Consumer;
 using TechWayFit.Licensing.Infrastructure.Data.Entities.Consumer;
@@ -223,10 +224,9 @@ public class ConsumerAccountService : IConsumerAccountService
             
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
+               
                 searchRequest.Filters.Add(e => 
-                    e.CompanyName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
-                    e.PrimaryContactName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
-                    e.PrimaryContactEmail.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+                    EF.Functions.Like(e.CompanyName, $"%{searchTerm}%"));
             }
 
             searchRequest.Page = pageNumber;
@@ -267,9 +267,7 @@ public class ConsumerAccountService : IConsumerAccountService
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
                 searchRequest.Filters.Add(e => 
-                    e.CompanyName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
-                    e.PrimaryContactName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
-                    e.PrimaryContactEmail.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+                     EF.Functions.Like(e.CompanyName, $"%{searchTerm}%"));
             }
 
             var searchResult = await _consumerAccountRepository.SearchAsync(searchRequest);

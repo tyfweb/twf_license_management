@@ -1,3 +1,6 @@
+using TechWayFit.Licensing.Core.Models;
+using TechWayFit.Licensing.Management.Core.Models.Audit;
+using TechWayFit.Licensing.Management.Core.Models.Common;
 using TechWayFit.Licensing.Management.Core.Models.Consumer;
 using TechWayFit.Licensing.Management.Core.Models.Product;
 
@@ -94,14 +97,42 @@ public class ProductLicense
     /// Remaining days until the license expires
     /// </summary>
     public int DaysUntilExpiry => Math.Max(0, (ValidTo - DateTime.UtcNow).Days);
-}
-public enum LicenseStatus
-{
-    Inactive,
-    Active,
-    Expired,
-    Suspended,
-    Revoked,
-    Pending,
-    Unknown
+
+
+    public TechWayFit.Licensing.Core.Models.License ToLicenseModel()
+    {
+        return new TechWayFit.Licensing.Core.Models.License
+        {
+            LicenseId = LicenseId,
+            ProductId = LicensedProduct.ProductId,
+            // Update this line to use the correct property from LicenseConsumer, e.g. LicenseConsumer.Consumer.ConsumerId if Consumer is a property of ProductConsumer
+            ConsumerId = LicenseConsumer.Consumer.ConsumerId,
+            ValidFrom = ValidFrom,
+            ValidTo = ValidTo,
+            CreatedAt = CreatedAt,
+            Status = Status,
+            RevokedAt = RevokedAt,
+            RevocationReason = RevocationReason,
+            Metadata = Metadata,
+            FeaturesIncluded = Features.Select(f => new LicenseFeature
+            {
+                Id = f.FeatureId,
+                Name = f.Name,
+                Description = f.Description,
+                IsCurrentlyValid = f.IsEnabled
+            }).ToList(),
+            LicensedTo = LicenseConsumer.Consumer.CompanyName,
+            ContactEmail = LicenseConsumer.Consumer.PrimaryContact.Email,
+            ContactPerson = LicenseConsumer.Consumer.PrimaryContact.Name,
+            CreatedBy = IssuedBy,
+            IssuedAt = KeyGeneratedAt,
+            Issuer = IssuedBy,
+            SecondaryContactEmail = LicenseConsumer.Consumer.SecondaryContact?.Email,
+            SecondaryContactPerson = LicenseConsumer.Consumer.SecondaryContact?.Name,
+            Version = LicensedProduct.Version,
+            ProductVersion = SemanticVersion.Parse(LicensedProduct.Version).ToVersion(),
+            //MaxSupportedVersion = SemanticVersion.Parse(LicensedProduct.MaxSupportedVersion).ToVersion(),
+           //Tier = LicensedProduct.Tier,
+        };
+    }
 }

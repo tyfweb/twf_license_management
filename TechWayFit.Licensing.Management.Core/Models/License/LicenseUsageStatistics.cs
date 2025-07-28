@@ -1,3 +1,5 @@
+using TechWayFit.Licensing.Core.Models;
+
 namespace TechWayFit.Licensing.Management.Core.Models.License;
 
 /// <summary>

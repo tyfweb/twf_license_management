@@ -4,6 +4,7 @@ using TechWayFit.Licensing.Management.Core.Models.Product;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.WebUI.ViewModels.Product;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 
 namespace TechWayFit.Licensing.WebUI.Controllers
 {
@@ -11,6 +12,7 @@ namespace TechWayFit.Licensing.WebUI.Controllers
     /// Product Management Controller - Step 3 Implementation
     /// Handles product CRUD operations, tier management, and feature configuration
     /// </summary>
+    [Authorize]
     public class ProductController : Controller
     {
         private readonly ILogger<ProductController> _logger;
