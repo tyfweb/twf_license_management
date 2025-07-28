@@ -28,6 +28,20 @@ namespace TechWayFit.Licensing.WebUI.ViewModels.Consumer
         [Display(Name = "Contact Phone")]
         public string ContactPhone { get; set; } = string.Empty;
 
+
+        [StringLength(100, ErrorMessage = "Contact person cannot exceed 100 characters")]
+        [Display(Name = "Secondary Contact Person")]
+        public string? SecondaryContactPerson { get; set; } = string.Empty;
+
+        [EmailAddress(ErrorMessage = "Invalid email address")]
+        [StringLength(255, ErrorMessage = "Email cannot exceed 255 characters")]
+        [Display(Name = "Secondary Contact Email")]
+        public string? SecondaryContactEmail { get; set; } = string.Empty;
+
+        [StringLength(20, ErrorMessage = "Phone number cannot exceed 20 characters")]
+        [Display(Name = "Secondary Contact Phone")]
+        public string? SecondaryContactPhone { get; set; } = string.Empty;
+
         [StringLength(500, ErrorMessage = "Address cannot exceed 500 characters")]
         [Display(Name = "Address")]
         public string Address { get; set; } = string.Empty;
