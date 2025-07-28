@@ -8,6 +8,15 @@ namespace TechWayFit.Licensing.WebUI.ViewModels.Dashboard
         public List<ProductSummaryViewModel> Products { get; set; } = new();
         public LicenseGenerationViewModel LicenseGenerationModel { get; set; } = new();
         public DashboardStatsViewModel Stats { get; set; } = new();
+        
+        // Dashboard metrics properties
+        public int TotalLicenses => Stats.TotalLicenses;
+        public int ActiveLicenses { get; set; }
+        public int ExpiringLicenses => Stats.ExpiringLicenses;
+        public int TotalConsumers => Stats.TotalConsumers;
+        
+        // Recent activity
+        public List<LicenseItemViewModel> RecentLicenses { get; set; } = new();
     }
 
     public class ProductSummaryViewModel

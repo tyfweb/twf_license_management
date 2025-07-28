@@ -1,116 +1,357 @@
+@using TechWayFit.Licensing.Core.Models
 @model TechWayFit.Licensing.WebUI.ViewModels.License.LicenseListViewModel
 @{
     ViewData["Title"] = "License Management";
-    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container-fluid py-4">
-    <!-- Header Section -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
+<!-- License Management Header -->
+<div class="licensehub-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="mb-1">License Management</h2>
+            <p class="licensehub-text-muted mb-0">Track and manage all your software licenses.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <div class="input-group" style="width: 300px;">
+                <input type="text" class="licensehub-form-control" placeholder="Search licenses..." 
+                       data-search-target=".licensehub-table tbody td">
+                <button class="licensehub-btn licensehub-btn-outline-primary" type="button">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            <a href="@Url.Action("Create")" class="licensehub-btn licensehub-btn-primary">
+                <i class="fas fa-plus me-2"></i>New License
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- License Stats -->
+<div class="row mb-4">
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="licensehub-stats-card">
+            <div class="d-flex align-items-center justify-content-between">
                 <div>
-                    <h2 class="mb-1">
-                        <i class="fas fa-certificate text-primary me-2"></i>
-                        License Management
-                    </h2>
-                    <p class="text-muted mb-0">Manage and monitor all product licenses</p>
+                    <div class="licensehub-stats-number">@(Model?.Licenses?.Count() ?? 0)</div>
+                    <p class="licensehub-stats-label">Total Licenses</p>
                 </div>
-                <div>
-                    <a asp-action="Create" class="btn btn-primary">
-                        <i class="fas fa-plus me-1"></i>
-                        Create License
-                    </a>
+                <div class="licensehub-stats-icon">
+                    <i class="fas fa-key"></i>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Filter Section -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0">
-                <i class="fas fa-filter me-2"></i>
-                Filter Licenses
-            </h5>
-        </div>
-        <div class="card-body">
-            <form method="get" asp-action="Index">
-                <div class="row">
-                    <div class="col-md-3">
-                        <div class="mb-3">
-                            <label asp-for="Filter.SearchTerm" class="form-label">Search</label>
-                            <input asp-for="Filter.SearchTerm" class="form-control" placeholder="License ID or Consumer name...">
-                        </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="licensehub-stats-card success">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="licensehub-stats-number" style="color: var(--success-color);">
+                        @(Model?.Licenses?.Count(l => l.Status == LicenseStatus.Active) ?? 0)
                     </div>
-                    <div class="col-md-2">
-                        <div class="mb-3">
-                            <label asp-for="Filter.Status" class="form-label">Status</label>
-                            <select asp-for="Filter.Status" class="form-select">
-                                <option value="">All Statuses</option>
-                                <option value="@TechWayFit.Licensing.Core.Models.LicenseStatus.Active">Active</option>
-                                <option value="@TechWayFit.Licensing.Core.Models.LicenseStatus.Expired">Expired</option>
-                                <option value="@TechWayFit.Licensing.Core.Models.LicenseStatus.Suspended">Suspended</option>
-                                <option value="@TechWayFit.Licensing.Core.Models.LicenseStatus.Revoked">Revoked</option>
-                                <option value="@TechWayFit.Licensing.Core.Models.LicenseStatus.Pending">Pending</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-2">
-                        <div class="mb-3">
-                            <label asp-for="Filter.Tier" class="form-label">Tier</label>
-                            <select asp-for="Filter.Tier" class="form-select">
-                                <option value="">All Tiers</option>
-                                <option value="@TechWayFit.Licensing.Core.Models.LicenseTier.Community">Community</option>
-                                <option value="@TechWayFit.Licensing.Core.Models.LicenseTier.Professional">Professional</option>
-                                <option value="@TechWayFit.Licensing.Core.Models.LicenseTier.Enterprise">Enterprise</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-2">
-                        <div class="mb-3">
-                            <label asp-for="Filter.ValidFromStart" class="form-label">Valid From</label>
-                            <input asp-for="Filter.ValidFromStart" type="date" class="form-control">
-                        </div>
-                    </div>
-                    <div class="col-md-2">
-                        <div class="mb-3">
-                            <label asp-for="Filter.ValidToEnd" class="form-label">Valid To</label>
-                            <input asp-for="Filter.ValidToEnd" type="date" class="form-control">
-                        </div>
-                    </div>
-                    <div class="col-md-1">
-                        <div class="mb-3">
-                            <label class="form-label">&nbsp;</label>
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-outline-primary">
-                                    <i class="fas fa-search"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                    <p class="licensehub-stats-label">Active</p>
                 </div>
-                <div class="row">
-                    <div class="col-md-3">
-                        <div class="form-check">
-                            <input asp-for="Filter.ShowExpiring" class="form-check-input" type="checkbox">
-                            <label asp-for="Filter.ShowExpiring" class="form-check-label">
-                                Show only expiring licenses
-                            </label>
-                        </div>
+                <div class="licensehub-stats-icon" style="color: var(--success-color);">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="licensehub-stats-card warning">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="licensehub-stats-number" style="color: var(--warning-color);">
+                        @(Model?.Licenses?.Count(l => l.DaysUntilExpiry <= 30 && l.DaysUntilExpiry > 0) ?? 0)
                     </div>
-                    <div class="col-md-2">
-                        <input asp-for="Filter.ExpiringWithinDays" class="form-control form-control-sm" placeholder="Days">
+                    <p class="licensehub-stats-label">Expiring Soon</p>
+                </div>
+                <div class="licensehub-stats-icon" style="color: var(--warning-color);">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="licensehub-stats-card danger">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="licensehub-stats-number" style="color: var(--danger-color);">
+                        @(Model?.Licenses?.Count(l => l.Status == LicenseStatus.Expired) ?? 0)
                     </div>
-                    <div class="col-md-7">
-                        <a href="@Url.Action("Index")" class="btn btn-outline-secondary btn-sm">
-                            <i class="fas fa-times me-1"></i>Clear Filters
+                    <p class="licensehub-stats-label">Expired</p>
+                </div>
+                <div class="licensehub-stats-icon" style="color: var(--danger-color);">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filter Section -->
+<div class="licensehub-search-container mb-4">
+    <form method="get" asp-action="Index">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="licensehub-form-group">
+                    <label asp-for="Filter.SearchTerm" class="licensehub-form-label">Search Term</label>
+                    <input asp-for="Filter.SearchTerm" class="licensehub-form-control" placeholder="License ID or Consumer name...">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="licensehub-form-group">
+                    <label asp-for="Filter.Status" class="licensehub-form-label">Status</label>
+                    <select asp-for="Filter.Status" class="licensehub-form-control">
+                        <option value="">All Statuses</option>
+                        <option value="Active">Active</option>
+                        <option value="Expired">Expired</option>
+                        <option value="Suspended">Suspended</option>
+                        <option value="GracePeriod">Grace Period</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="licensehub-form-group">
+                    <label asp-for="Filter.ValidFromStart" class="licensehub-form-label">Valid From</label>
+                    <input asp-for="Filter.ValidFromStart" type="date" class="licensehub-form-control">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="licensehub-form-group">
+                    <label asp-for="Filter.ValidToStart" class="licensehub-form-label">Valid To</label>
+                    <input asp-for="Filter.ValidToStart" type="date" class="licensehub-form-control">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="licensehub-form-group">
+                    <label class="licensehub-form-label">&nbsp;</label>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="licensehub-btn licensehub-btn-primary">
+                            <i class="fas fa-filter me-1"></i>Filter
+                        </button>
+                        <a href="@Url.Action("Index")" class="licensehub-btn licensehub-btn-secondary">
+                            <i class="fas fa-times me-1"></i>Clear
                         </a>
                     </div>
                 </div>
-            </form>
+            </div>
         </div>
+    </form>
+</div>
+
+<!-- License Table -->
+<div class="licensehub-table-container">
+    <div class="table-responsive">
+        <table class="licensehub-table">
+            <thead>
+                <tr>
+                    <th>License ID</th>
+                    <th>Consumer</th>
+                    <th>Contact</th>
+                    <th>Tier</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Expires</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model?.Licenses?.Any() == true)
+                {
+                    @foreach (var license in Model.Licenses)
+                    {
+                        <tr data-href="@Url.Action("Details", new { id = license.LicenseId })">
+                            <td>
+                                <span class="text-monospace small">@license.LicenseId.Substring(0, 8)...</span>
+                            </td>
+                            <td>
+                                <div class="fw-semibold">@license.ConsumerName</div>
+                            </td>
+                            <td>
+                                <small class="licensehub-text-muted">@license.ContactEmail</small>
+                            </td>
+                            <td>
+                                @{
+                                    var tierClass = license.Tier switch
+                                    {
+                                        LicenseTier.Enterprise => "success",
+                                        LicenseTier.Professional => "info",
+                                        _ => "secondary"
+                                    };
+                                }
+                                <span class="licensehub-badge @tierClass">@license.Tier</span>
+                            </td>
+                            <td>
+                                @{
+                                    var statusClass = license.Status switch
+                                    {
+                                        LicenseStatus.Active => "success",
+                                        LicenseStatus.Expired => "danger",
+                                        LicenseStatus.Suspended => "warning",
+                                        LicenseStatus.GracePeriod => "warning",
+                                        _ => "secondary"
+                                    };
+                                }
+                                <span class="licensehub-badge @statusClass">@license.Status</span>
+                            </td>
+                            <td>
+                                <span data-bs-toggle="tooltip" title="@license.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")">
+                                    @license.CreatedAt.ToString("MMM dd, yyyy")
+                                </span>
+                            </td>
+                            <td>
+                                @{
+                                    var expiryClass = license.DaysUntilExpiry <= 0 ? "licensehub-text-danger" :
+                                                    license.DaysUntilExpiry <= 30 ? "licensehub-text-warning" : "";
+                                }
+                                <span class="@expiryClass" data-bs-toggle="tooltip" title="@license.ValidTo.ToString("yyyy-MM-dd HH:mm:ss")">
+                                    @if (license.DaysUntilExpiry <= 0)
+                                    {
+                                        <span>Expired</span>
+                                    }
+                                    else if (license.DaysUntilExpiry <= 30)
+                                    {
+                                        <span>@license.DaysUntilExpiry days</span>
+                                    }
+                                    else
+                                    {
+                                        <span>@license.ValidTo.ToString("MMM dd, yyyy")</span>
+                                    }
+                                </span>
+                            </td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <a href="@Url.Action("Details", new { id = license.LicenseId })" 
+                                       class="licensehub-btn licensehub-btn-outline-primary licensehub-btn-sm"
+                                       data-bs-toggle="tooltip" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    @if (license.CanRenew)
+                                    {
+                                        <button class="licensehub-btn licensehub-btn-outline-success licensehub-btn-sm"
+                                                data-bs-toggle="tooltip" title="Renew License"
+                                                onclick="renewLicense('@license.LicenseId')">
+                                            <i class="fas fa-redo"></i>
+                                        </button>
+                                    }
+                                    @if (license.CanSuspend)
+                                    {
+                                        <button class="licensehub-btn licensehub-btn-outline-warning licensehub-btn-sm"
+                                                data-bs-toggle="tooltip" title="Suspend License"
+                                                onclick="suspendLicense('@license.LicenseId')">
+                                            <i class="fas fa-pause"></i>
+                                        </button>
+                                    }
+                                    @if (license.CanRevoke)
+                                    {
+                                        <button class="licensehub-btn licensehub-btn-outline-danger licensehub-btn-sm"
+                                                data-bs-toggle="tooltip" title="Revoke License"
+                                                onclick="revokeLicense('@license.LicenseId')">
+                                            <i class="fas fa-ban"></i>
+                                        </button>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="8" class="text-center py-4">
+                            <div class="licensehub-text-muted">
+                                <i class="fas fa-inbox fa-2x mb-3 d-block"></i>
+                                @if (Model?.Filter != null && (!string.IsNullOrEmpty(Model.Filter.SearchTerm) || Model.Filter.Status.HasValue))
+                                {
+                                    <p>No licenses found matching your filter criteria.</p>
+                                    <a href="@Url.Action("Index")" class="licensehub-btn licensehub-btn-outline-primary licensehub-btn-sm">
+                                        <i class="fas fa-times me-1"></i>Clear Filters
+                                    </a>
+                                }
+                                else
+                                {
+                                    <p>No licenses found.</p>
+                                    <a href="@Url.Action("Create")" class="licensehub-btn licensehub-btn-primary licensehub-btn-sm">
+                                        <i class="fas fa-plus me-1"></i>Create Your First License
+                                    </a>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
     </div>
+
+    <!-- Pagination -->
+    @if (Model?.Pagination != null && Model.Pagination.TotalPages > 1)
+    {
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <div class="licensehub-text-muted">
+                Showing @((Model.Pagination.CurrentPage - 1) * Model.Pagination.PageSize + 1) to 
+                @(Math.Min(Model.Pagination.CurrentPage * Model.Pagination.PageSize, Model.Pagination.TotalItems)) of 
+                @Model.Pagination.TotalItems licenses
+            </div>
+            <nav>
+                <ul class="pagination pagination-sm">
+                    @if (Model.Pagination.CurrentPage > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="@Url.Action("Index", new { page = Model.Pagination.CurrentPage - 1 })">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                    }
+                    
+                    @for (int i = Math.Max(1, Model.Pagination.CurrentPage - 2); 
+                          i <= Math.Min(Model.Pagination.TotalPages, Model.Pagination.CurrentPage + 2); 
+                          i++)
+                    {
+                        <li class="page-item @(i == Model.Pagination.CurrentPage ? "active" : "")">
+                            <a class="page-link" href="@Url.Action("Index", new { page = i })">@i</a>
+                        </li>
+                    }
+                    
+                    @if (Model.Pagination.CurrentPage < Model.Pagination.TotalPages)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="@Url.Action("Index", new { page = Model.Pagination.CurrentPage + 1 })">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function renewLicense(licenseId) {
+            if (confirm('Are you sure you want to renew this license?')) {
+                // Implement license renewal logic
+                window.location.href = '@Url.Action("Create")?renew=' + licenseId;
+            }
+        }
+
+        function suspendLicense(licenseId) {
+            if (confirm('Are you sure you want to suspend this license?')) {
+                // Implement license suspension logic
+                // You would typically make an AJAX call here
+                console.log('Suspending license:', licenseId);
+            }
+        }
+
+        function revokeLicense(licenseId) {
+            if (confirm('Are you sure you want to revoke this license? This action cannot be undone.')) {
+                // Implement license revocation logic
+                // You would typically make an AJAX call here
+                console.log('Revoking license:', licenseId);
+            }
+        }
+    </script>
+}
 
     <!-- Summary Stats -->
     <div class="row mb-4">

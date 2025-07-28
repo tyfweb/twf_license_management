@@ -17,13 +17,19 @@ namespace TechWayFit.Licensing.WebUI.Controllers
     {
         private readonly ILogger<ProductController> _logger;
         private readonly IEnterpriseProductService _productService;
+        private readonly IProductLicenseService _licenseService;
+        private readonly IConsumerAccountService _consumerService;
 
         public ProductController(
-            ILogger<ProductController> logger, 
-            IEnterpriseProductService productService)
+            ILogger<ProductController> logger,
+            IEnterpriseProductService productService,
+            IProductLicenseService licenseService,
+            IConsumerAccountService consumerService)
         {
             _logger = logger;
             _productService = productService ?? throw new ArgumentNullException(nameof(productService));
+            _licenseService = licenseService ?? throw new ArgumentNullException(nameof(licenseService));
+            _consumerService = consumerService ?? throw new ArgumentNullException(nameof(consumerService));
         }
 
         /// <summary>
@@ -52,18 +58,18 @@ namespace TechWayFit.Licensing.WebUI.Controllers
 
                 var viewModel = new ProductListViewModel
                 {
-                    Products = products.Select(p => new ProductItemViewModel
+                    Products = (await Task.WhenAll(products.Select(async p => new ProductItemViewModel
                     {
                         ProductId = p.ProductId,
                         ProductName = p.ProductName,
                         ProductType = p.ProductType,
                         Version = p.Version,
                         IsActive = p.IsActive,
-                        LicenseCount = GetLicenseCount(p.ProductId),
-                        ConsumerCount = GetConsumerCount(p.ProductId),
+                        LicenseCount = await GetLicenseCountAsync(p.ProductId),
+                        ConsumerCount = await GetConsumerCountAsync(p.ProductId),
                         CreatedAt = p.CreatedAt,
                         UpdatedAt = p.UpdatedAt
-                    }).ToList(),
+                    }))).ToList(),
                     SearchTerm = searchTerm,
                     ShowInactiveProducts = showInactive
                 };
@@ -345,7 +351,7 @@ namespace TechWayFit.Licensing.WebUI.Controllers
                 }
 
                 // Check if product has active licenses
-                var licenseCount = GetLicenseCount(id);
+                var licenseCount = await GetLicenseCountAsync(id);
                 if (licenseCount > 0)
                 {
                     TempData["ErrorMessage"] = $"Cannot delete product '{product.ProductName}' because it has {licenseCount} active licenses. Please revoke all licenses first.";
@@ -428,18 +434,20 @@ namespace TechWayFit.Licensing.WebUI.Controllers
             await _productService.DeleteProductAsync(productId, "system");
         }
 
-        private int GetLicenseCount(string productId)
+        private async Task<int> GetLicenseCountAsync(string productId)
         {
+            var licenses = await _licenseService.GetLicensesByProductAsync(productId);
             // TODO: Implement actual license counting logic
             // For now, return a random number for demonstration
-            return new Random().Next(0, 10);
+            return licenses.Count();
         }
 
-        private int GetConsumerCount(string productId)
+        private async Task<int> GetConsumerCountAsync(string productId)
         {
+            var consumers = await _consumerService.GetConsumersByProductAsync(productId);
             // TODO: Implement actual consumer counting logic
             // For now, return a random number for demonstration
-            return new Random().Next(0, 5);
+            return consumers.Count();
         }
 
         private async Task<List<ConsumerSummaryViewModel>> GetProductConsumersAsync(string productId)

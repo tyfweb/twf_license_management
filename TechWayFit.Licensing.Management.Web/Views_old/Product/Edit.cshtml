@@ -1,0 +1,406 @@
+@model TechWayFit.Licensing.WebUI.ViewModels.Product.ProductEditViewModel
+@{
+    ViewData["Title"] = "Edit Product";
+    ViewData["Description"] = $"Edit product configuration for {Model.ProductName}";
+}
+
+<style>
+.setting-item {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--bs-border-color);
+}
+
+.setting-item:last-child {
+    border-bottom: none;
+}
+
+.setting-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--bs-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.25rem;
+    display: block;
+}
+
+.setting-value {
+    font-size: 0.875rem;
+    color: var(--bs-body-color);
+}
+
+.change-history {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.change-item {
+    padding: 0.75rem;
+    background: var(--bs-light);
+    border-radius: var(--bs-border-radius);
+    border-left: 4px solid var(--bs-primary);
+}
+
+.change-date {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--bs-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.25rem;
+}
+
+.change-event {
+    font-size: 0.875rem;
+    color: var(--bs-body-color);
+    display: flex;
+    align-items: center;
+}
+
+.metadata-row {
+    background: var(--bs-light);
+    border-radius: var(--bs-border-radius);
+    padding: 0.75rem;
+    margin-bottom: 0.75rem !important;
+}
+
+.metadata-row:hover {
+    background: var(--bs-gray-100);
+}
+</style>
+<div class="container-fluid py-4">
+    <!-- Hero Section -->
+    <div class="mb-4">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="hero-title">
+                    <i class="fas fa-edit text-primary me-3"></i>
+                    Edit Product
+                </h1>
+                <p class="hero-subtitle">
+                    Update product configuration and settings for @Model.ProductName
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <div class="btn-group" role="group">
+                    <a href="@Url.Action("Details", new { id = Model.ProductId })" class="btn btn-outline-secondary">
+                        <i class="fas fa-eye me-2"></i>View Details
+                    </a>
+                    <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Products
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form method="post" asp-action="Edit" class="needs-validation" novalidate>
+        <input type="hidden" asp-for="ProductId" />
+        
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Basic Information Card -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-info-circle text-primary me-2"></i>
+                            Basic Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input asp-for="ProductId" class="form-control" placeholder="Product ID" readonly />
+                                    <label asp-for="ProductId">Product ID</label>
+                                    <div class="form-text">Product ID cannot be changed after creation</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input asp-for="ProductName" class="form-control" placeholder="Product Name" />
+                                    <label asp-for="ProductName">Product Name</label>
+                                    <span asp-validation-for="ProductName" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-floating mb-3">
+                                    <select asp-for="ProductType" class="form-select" asp-items="Html.GetEnumSelectList<TechWayFit.Licensing.Core.Models.ProductType>()">
+                                        <option value="">Select Type</option>
+                                    </select>
+                                    <label asp-for="ProductType">Product Type</label>
+                                    <span asp-validation-for="ProductType" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-floating mb-3">
+                                    <input asp-for="Version" class="form-control" placeholder="Version" />
+                                    <label asp-for="Version">Version</label>
+                                    <span asp-validation-for="Version" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check mt-3">
+                                    <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                                    <label asp-for="IsActive" class="form-check-label">
+                                        Product is Active
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">Description</label>
+                            <textarea asp-for="Description" class="form-control" rows="3" placeholder="Describe the product and its capabilities..."></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Metadata Card -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-tags text-primary me-2"></i>
+                            Metadata & Settings
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="metadata-container">
+                            @if (Model.Metadata != null && Model.Metadata.Any())
+                            {
+                                @for (int i = 0; i < Model.Metadata.Count; i++)
+                                {
+                                    var kvp = Model.Metadata.ElementAt(i);
+                                    <div class="row mb-2 metadata-row">
+                                        <div class="col-md-5">
+                                            <input type="text" name="Metadata[@i].Key" value="@kvp.Key" class="form-control" placeholder="Key" />
+                                        </div>
+                                        <div class="col-md-5">
+                                            <input type="text" name="Metadata[@i].Value" value="@kvp.Value" class="form-control" placeholder="Value" />
+                                        </div>
+                                        <div class="col-md-2">
+                                            <button type="button" class="btn btn-outline-danger btn-sm remove-metadata">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        </div>
+                        <button type="button" id="add-metadata" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-plus me-1"></i>Add Metadata
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Change History Card -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-history text-primary me-2"></i>
+                            Change History
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="change-history">
+                            <div class="change-item">
+                                <div class="change-date">@DateTime.Now.ToString("MMM dd, yyyy")</div>
+                                <div class="change-event">
+                                    <i class="fas fa-edit text-warning me-2"></i>
+                                    Product being edited
+                                </div>
+                            </div>
+                            @if (Model.CreatedDate.HasValue)
+                            {
+                                <div class="change-item">
+                                    <div class="change-date">@Model.CreatedDate.Value.ToString("MMM dd, yyyy")</div>
+                                    <div class="change-event">
+                                        <i class="fas fa-plus-circle text-success me-2"></i>
+                                        Product created
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Save Actions Card -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-save text-primary me-2"></i>
+                            Save Changes
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Update Product
+                            </button>
+                            <a href="@Url.Action("Details", new { id = Model.ProductId })" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>Cancel Changes
+                            </a>
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Note:</strong> Changes will be saved immediately and may affect existing licenses.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Current Settings Card -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-cog text-primary me-2"></i>
+                            Current Settings
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="setting-item">
+                            <label class="setting-label">Product ID</label>
+                            <div class="setting-value">@Model.ProductId</div>
+                        </div>
+                        <div class="setting-item">
+                            <label class="setting-label">Current Version</label>
+                            <div class="setting-value">@Model.Version</div>
+                        </div>
+                        <div class="setting-item">
+                            <label class="setting-label">Product Type</label>
+                            <div class="setting-value">@Model.ProductType</div>
+                        </div>
+                        <div class="setting-item">
+                            <label class="setting-label">Status</label>
+                            <div class="setting-value">
+                                @if (Model.IsActive)
+                                {
+                                    <span class="badge bg-success">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Inactive</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Help Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-question-circle text-info me-2"></i>
+                            Edit Guidelines
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="small">
+                            <div class="mb-2">
+                                <strong>Product ID:</strong> Cannot be changed once created.
+                            </div>
+                            <div class="mb-2">
+                                <strong>Version Updates:</strong> Consider impact on existing licenses.
+                            </div>
+                            <div class="mb-2">
+                                <strong>Status Changes:</strong> Deactivating may affect license validation.
+                            </div>
+                            <div class="mb-2">
+                                <strong>Metadata:</strong> Custom properties for additional product information.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+     <script>
+        let metadataIndex = @(Model.Metadata?.Count ?? 0);
+        
+        document.getElementById('add-metadata').addEventListener('click', function() {
+            const container = document.getElementById('metadata-container');
+            const newRow = document.createElement('div');
+            newRow.className = 'row mb-2 metadata-row';
+            newRow.innerHTML = `
+                <div class="col-md-5">
+                    <input type="text" name="Metadata[${metadataIndex}].Key" class="form-control" placeholder="Key" />
+                </div>
+                <div class="col-md-5">
+                    <input type="text" name="Metadata[${metadataIndex}].Value" class="form-control" placeholder="Value" />
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-outline-danger btn-sm remove-metadata">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            container.appendChild(newRow);
+            metadataIndex++;
+        });
+
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-metadata') || e.target.parentElement.classList.contains('remove-metadata')) {
+                const row = e.target.closest('.metadata-row');
+                if (row) {
+                    row.remove();
+                }
+            }
+        });
+
+        // Form validation enhancement
+        (function() {
+            'use strict';
+            window.addEventListener('load', function() {
+                var forms = document.getElementsByClassName('needs-validation');
+                var validation = Array.prototype.filter.call(forms, function(form) {
+                    form.addEventListener('submit', function(event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+
+        // Auto-save warning
+        let formChanged = false;
+        document.querySelectorAll('input, select, textarea').forEach(element => {
+            element.addEventListener('change', function() {
+                formChanged = true;
+            });
+        });
+
+        window.addEventListener('beforeunload', function(e) {
+            if (formChanged) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+
+        // Form submission handling
+        document.querySelector('form').addEventListener('submit', function() {
+            formChanged = false;
+        });
+    </script>
+   
+}

@@ -1,0 +1,1555 @@
+/* LicenseHub Design System CSS */
+:root {
+    /* Primary Colors */
+    --primary-color: #2563eb;
+    --primary-hover: #1d4ed8;
+    --primary-light: #dbeafe;
+    
+    /* Status Colors */
+    --success-color: #059669;
+    --warning-color: #d97706;
+    --danger-color: #dc2626;
+    --info-color: #0891b2;
+    
+    /* Neutral Colors */
+    --dark-color: #1e293b;
+    --dark-secondary: #334155;
+    --light-bg: #f8fafc;
+    --white: #ffffff;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+    
+    /* Sidebar Colors */
+    --sidebar-bg-start: #2d3748;
+    --sidebar-bg-end: #334155;
+    --sidebar-text: rgba(255, 255, 255, 0.8);
+    --sidebar-text-active: #ffffff;
+    --sidebar-hover: rgba(255, 255, 255, 0.1);
+    
+    /* Border and Shadow */
+    --border-color: #e2e8f0;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    
+    /* Spacing */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    
+    /* Border Radius */
+    --radius-sm: 0.25rem;
+    --radius: 0.5rem;
+    --radius-lg: 1rem;
+    
+    /* Transitions */
+    --transition: all 0.3s ease;
+    --transition-fast: all 0.15s ease;
+}
+
+/* Base Styles */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--light-bg);
+    margin: 0;
+    padding: 0;
+    color: var(--gray-800);
+    line-height: 1.6;
+}
+
+/* Sidebar Styles */
+.licensehub-sidebar {
+    background: linear-gradient(135deg, var(--sidebar-bg-start) 0%, var(--sidebar-bg-end) 100%);
+    min-height: 100vh;
+    width: 280px;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 1000;
+    transition: var(--transition);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.licensehub-sidebar-brand {
+    padding: var(--spacing-lg);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.licensehub-sidebar-brand h4 {
+    color: var(--sidebar-text-active);
+    margin: 0;
+    font-weight: 700;
+    font-size: 1.25rem;
+}
+
+.licensehub-sidebar-nav {
+    padding: var(--spacing-md) 0;
+    flex: 1;
+}
+
+.licensehub-nav-item {
+    margin: var(--spacing-xs) var(--spacing-md);
+}
+
+.licensehub-nav-link {
+    color: var(--sidebar-text);
+    padding: 0.75rem var(--spacing-md);
+    border-radius: var(--radius);
+    transition: var(--transition);
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+}
+
+.licensehub-nav-link:hover,
+.licensehub-nav-link.active {
+    background: var(--sidebar-hover);
+    color: var(--sidebar-text-active);
+    transform: translateX(4px);
+}
+
+.licensehub-nav-link i {
+    width: 20px;
+    margin-right: 0.75rem;
+    font-size: 1rem;
+}
+
+/* User Authentication Section */
+.licensehub-sidebar-user {
+    margin-top: auto;
+    padding: var(--spacing-lg);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.licensehub-user-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+    padding: var(--spacing-sm);
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-md);
+}
+
+.licensehub-user-avatar {
+    flex-shrink: 0;
+    margin-right: var(--spacing-sm);
+}
+
+.licensehub-user-avatar i {
+    font-size: 2rem;
+    color: var(--sidebar-text);
+}
+
+.licensehub-user-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.licensehub-user-name {
+    font-weight: 600;
+    color: var(--sidebar-text-active);
+    font-size: 0.875rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.licensehub-user-role {
+    font-size: 0.75rem;
+    color: var(--sidebar-text);
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    margin-top: 2px;
+}
+
+.licensehub-logout-form {
+    margin: 0;
+}
+
+.licensehub-btn-logout {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--sidebar-text);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.licensehub-btn-logout:hover {
+    background: rgba(220, 38, 38, 0.2);
+    border-color: rgba(220, 38, 38, 0.4);
+    color: #fca5a5;
+}
+
+.licensehub-btn-logout i {
+    margin-right: var(--spacing-xs);
+    font-size: 0.875rem;
+}
+
+.licensehub-login-section {
+    text-align: center;
+}
+
+.licensehub-login-prompt {
+    margin-bottom: var(--spacing-md);
+    color: var(--sidebar-text);
+    font-size: 0.875rem;
+}
+
+.licensehub-login-prompt i {
+    margin-right: var(--spacing-xs);
+    opacity: 0.7;
+}
+
+.licensehub-btn-login {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--primary-600);
+    border: 1px solid var(--primary-500);
+    color: white;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.licensehub-btn-login:hover {
+    background: var(--primary-700);
+    border-color: var(--primary-600);
+    color: white;
+    text-decoration: none;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+}
+
+.licensehub-btn-login i {
+    margin-right: var(--spacing-xs);
+    font-size: 0.875rem;
+}
+
+/* Main Content Area */
+.licensehub-main-content {
+    margin-left: 280px;
+    padding: var(--spacing-xl);
+    min-height: 100vh;
+}
+
+/* Header Styles */
+.licensehub-header {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+    box-shadow: var(--shadow);
+}
+
+.licensehub-header h1,
+.licensehub-header h2 {
+    margin: 0 0 var(--spacing-xs) 0;
+    color: var(--gray-900);
+    font-weight: 700;
+}
+
+.licensehub-header .text-muted {
+    color: var(--gray-600);
+    margin: 0;
+}
+
+/* Stats Card Styles */
+.licensehub-stats-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow);
+    border-left: 4px solid var(--primary-color);
+    transition: var(--transition);
+    margin-bottom: var(--spacing-lg);
+}
+
+.licensehub-stats-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.licensehub-stats-card.success {
+    border-left-color: var(--success-color);
+}
+
+.licensehub-stats-card.warning {
+    border-left-color: var(--warning-color);
+}
+
+.licensehub-stats-card.danger {
+    border-left-color: var(--danger-color);
+}
+
+.licensehub-stats-card.info {
+    border-left-color: var(--info-color);
+}
+
+.licensehub-stats-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    line-height: 1;
+    margin-bottom: var(--spacing-xs);
+}
+
+.licensehub-stats-label {
+    color: var(--gray-600);
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin: 0;
+}
+
+.licensehub-stats-icon {
+    font-size: 2rem;
+    color: var(--primary-color);
+    opacity: 0.2;
+}
+
+/* Table Container */
+.licensehub-table-container {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow);
+    margin-bottom: var(--spacing-xl);
+}
+
+.licensehub-table-container h5 {
+    margin: 0 0 var(--spacing-md) 0;
+    color: var(--gray-900);
+    font-weight: 600;
+}
+
+/* Enhanced Table Styles */
+.licensehub-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+}
+
+.licensehub-table thead th {
+    background: var(--gray-50);
+    color: var(--gray-700);
+    font-weight: 600;
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 2px solid var(--border-color);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.licensehub-table tbody td {
+    padding: 1rem 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--gray-800);
+    vertical-align: middle;
+}
+
+.licensehub-table tbody tr {
+    transition: var(--transition-fast);
+}
+
+.licensehub-table tbody tr:hover {
+    background: var(--gray-50);
+}
+
+.licensehub-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Badge Styles */
+.licensehub-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.licensehub-badge.success {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.licensehub-badge.warning {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.licensehub-badge.danger {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.licensehub-badge.info {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.licensehub-badge.secondary {
+    background: var(--gray-100);
+    color: var(--gray-700);
+}
+
+/* Button Styles */
+.licensehub-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.5rem;
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    line-height: 1;
+}
+
+.licensehub-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.licensehub-btn-primary {
+    background: var(--primary-color);
+    color: var(--white);
+    border-color: var(--primary-color);
+}
+
+.licensehub-btn-primary:hover {
+    background: var(--primary-hover);
+    border-color: var(--primary-hover);
+    color: var(--white);
+}
+
+.licensehub-btn-outline-primary {
+    background: transparent;
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.licensehub-btn-outline-primary:hover {
+    background: var(--primary-color);
+    color: var(--white);
+}
+
+.licensehub-btn-success {
+    background: var(--success-color);
+    color: var(--white);
+    border-color: var(--success-color);
+}
+
+.licensehub-btn-success:hover {
+    background: #047857;
+    border-color: #047857;
+    color: var(--white);
+}
+
+.licensehub-btn-warning {
+    background: var(--warning-color);
+    color: var(--white);
+    border-color: var(--warning-color);
+}
+
+.licensehub-btn-warning:hover {
+    background: #b45309;
+    border-color: #b45309;
+    color: var(--white);
+}
+
+.licensehub-btn-danger {
+    background: var(--danger-color);
+    color: var(--white);
+    border-color: var(--danger-color);
+}
+
+.licensehub-btn-danger:hover {
+    background: #b91c1c;
+    border-color: #b91c1c;
+    color: var(--white);
+}
+
+.licensehub-btn-secondary {
+    background: var(--gray-600);
+    color: var(--white);
+    border-color: var(--gray-600);
+}
+
+.licensehub-btn-secondary:hover {
+    background: var(--gray-700);
+    border-color: var(--gray-700);
+    color: var(--white);
+}
+
+.licensehub-btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.8125rem;
+}
+
+.licensehub-btn i {
+    margin-right: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.licensehub-btn i:last-child {
+    margin-right: 0;
+    margin-left: 0.5rem;
+}
+
+/* Form Styles */
+.licensehub-form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    font-size: 0.875rem;
+    transition: var(--transition-fast);
+    background: var(--white);
+}
+
+.licensehub-form-control:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.licensehub-form-label {
+    display: block;
+    font-weight: 500;
+    color: var(--gray-700);
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.licensehub-form-group {
+    margin-bottom: var(--spacing-md);
+}
+
+/* Card Styles */
+.licensehub-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow);
+    margin-bottom: var(--spacing-lg);
+}
+
+.licensehub-tier-card {
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    transition: var(--transition);
+    background: var(--white);
+    margin-bottom: var(--spacing-lg);
+}
+
+.licensehub-tier-card:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.licensehub-tier-card.premium {
+    border-color: var(--warning-color);
+}
+
+.licensehub-tier-card.enterprise {
+    border-color: var(--success-color);
+}
+
+/* Search and Filter Styles */
+.licensehub-search-container {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+    box-shadow: var(--shadow);
+}
+
+.licensehub-input-group {
+    display: flex;
+    width: 100%;
+}
+
+.licensehub-input-group .licensehub-form-control {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-right: none;
+}
+
+.licensehub-input-group-append {
+    display: flex;
+}
+
+.licensehub-input-group-append .licensehub-btn {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+/* Alert Styles */
+.licensehub-alert {
+    padding: var(--spacing-md);
+    border-radius: var(--radius);
+    border: 1px solid transparent;
+    margin-bottom: var(--spacing-md);
+}
+
+.licensehub-alert-success {
+    background: #d1fae5;
+    border-color: #a7f3d0;
+    color: #065f46;
+}
+
+.licensehub-alert-warning {
+    background: #fef3c7;
+    border-color: #fde68a;
+    color: #92400e;
+}
+
+.licensehub-alert-danger {
+    background: #fee2e2;
+    border-color: #fecaca;
+    color: #991b1b;
+}
+
+.licensehub-alert-info {
+    background: #dbeafe;
+    border-color: #bfdbfe;
+    color: #1e40af;
+}
+
+/* Dropdown Styles */
+.licensehub-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.licensehub-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    min-width: 160px;
+    padding: 0.5rem 0;
+    margin: 0.125rem 0 0;
+    background: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+}
+
+.licensehub-dropdown-item {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 1rem;
+    clear: both;
+    font-weight: 400;
+    color: var(--gray-800);
+    text-align: inherit;
+    text-decoration: none;
+    white-space: nowrap;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+}
+
+.licensehub-dropdown-item:hover {
+    background: var(--gray-50);
+    color: var(--gray-900);
+}
+
+/* Modal Styles */
+.licensehub-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1050;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.licensehub-modal-content {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xl);
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.licensehub-modal-header {
+    padding: var(--spacing-lg);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: between;
+}
+
+.licensehub-modal-title {
+    margin: 0;
+    font-weight: 600;
+    color: var(--gray-900);
+}
+
+.licensehub-modal-body {
+    padding: var(--spacing-lg);
+}
+
+.licensehub-modal-footer {
+    padding: var(--spacing-lg);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: var(--spacing-sm);
+    justify-content: flex-end;
+}
+
+/* Utility Classes */
+.licensehub-text-muted {
+    color: var(--gray-600) !important;
+}
+
+.licensehub-text-primary {
+    color: var(--primary-color) !important;
+}
+
+.licensehub-text-success {
+    color: var(--success-color) !important;
+}
+
+.licensehub-text-warning {
+    color: var(--warning-color) !important;
+}
+
+.licensehub-text-danger {
+    color: var(--danger-color) !important;
+}
+
+.licensehub-bg-light {
+    background-color: var(--gray-50) !important;
+}
+
+.licensehub-border {
+    border: 1px solid var(--border-color) !important;
+}
+
+.licensehub-rounded {
+    border-radius: var(--radius) !important;
+}
+
+.licensehub-shadow {
+    box-shadow: var(--shadow) !important;
+}
+
+.licensehub-shadow-lg {
+    box-shadow: var(--shadow-lg) !important;
+}
+
+/* Grid System */
+.licensehub-row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -0.75rem;
+}
+
+.licensehub-col {
+    flex: 1;
+    padding: 0 0.75rem;
+}
+
+.licensehub-col-1 { flex: 0 0 8.333333%; }
+.licensehub-col-2 { flex: 0 0 16.666667%; }
+.licensehub-col-3 { flex: 0 0 25%; }
+.licensehub-col-4 { flex: 0 0 33.333333%; }
+.licensehub-col-6 { flex: 0 0 50%; }
+.licensehub-col-8 { flex: 0 0 66.666667%; }
+.licensehub-col-9 { flex: 0 0 75%; }
+.licensehub-col-12 { flex: 0 0 100%; }
+
+/* Spacing Utilities */
+.licensehub-m-0 { margin: 0 !important; }
+.licensehub-m-1 { margin: var(--spacing-xs) !important; }
+.licensehub-m-2 { margin: var(--spacing-sm) !important; }
+.licensehub-m-3 { margin: var(--spacing-md) !important; }
+.licensehub-m-4 { margin: var(--spacing-lg) !important; }
+.licensehub-m-5 { margin: var(--spacing-xl) !important; }
+
+.licensehub-mb-0 { margin-bottom: 0 !important; }
+.licensehub-mb-1 { margin-bottom: var(--spacing-xs) !important; }
+.licensehub-mb-2 { margin-bottom: var(--spacing-sm) !important; }
+.licensehub-mb-3 { margin-bottom: var(--spacing-md) !important; }
+.licensehub-mb-4 { margin-bottom: var(--spacing-lg) !important; }
+.licensehub-mb-5 { margin-bottom: var(--spacing-xl) !important; }
+
+.licensehub-p-0 { padding: 0 !important; }
+.licensehub-p-1 { padding: var(--spacing-xs) !important; }
+.licensehub-p-2 { padding: var(--spacing-sm) !important; }
+.licensehub-p-3 { padding: var(--spacing-md) !important; }
+.licensehub-p-4 { padding: var(--spacing-lg) !important; }
+.licensehub-p-5 { padding: var(--spacing-xl) !important; }
+
+/* Flexbox Utilities */
+.licensehub-d-flex { display: flex !important; }
+.licensehub-justify-content-between { justify-content: space-between !important; }
+.licensehub-justify-content-center { justify-content: center !important; }
+.licensehub-align-items-center { align-items: center !important; }
+.licensehub-align-items-start { align-items: flex-start !important; }
+.licensehub-gap-1 { gap: var(--spacing-xs) !important; }
+.licensehub-gap-2 { gap: var(--spacing-sm) !important; }
+.licensehub-gap-3 { gap: var(--spacing-md) !important; }
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .licensehub-sidebar {
+        width: 100%;
+        transform: translateX(-100%);
+    }
+    
+    .licensehub-sidebar.show {
+        transform: translateX(0);
+    }
+    
+    .licensehub-main-content {
+        margin-left: 0;
+        padding: var(--spacing-md);
+    }
+    
+    .licensehub-row {
+        margin: 0;
+    }
+    
+    .licensehub-col {
+        padding: 0;
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .licensehub-col-md-6,
+    .licensehub-col-md-4,
+    .licensehub-col-md-3 {
+        flex: 0 0 100%;
+    }
+    
+    .licensehub-table-container {
+        overflow-x: auto;
+    }
+    
+    .licensehub-modal-content {
+        width: 95%;
+        margin: var(--spacing-md);
+    }
+}
+
+@media (max-width: 576px) {
+    .licensehub-main-content {
+        padding: var(--spacing-sm);
+    }
+    
+    .licensehub-header {
+        padding: var(--spacing-md);
+    }
+    
+    .licensehub-stats-card,
+    .licensehub-table-container,
+    .licensehub-card {
+        padding: var(--spacing-md);
+    }
+    
+    .licensehub-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.8125rem;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .licensehub-sidebar {
+        display: none;
+    }
+    
+    .licensehub-main-content {
+        margin-left: 0;
+    }
+    
+    .licensehub-btn {
+        display: none;
+    }
+}
+
+/* ===============================================
+   LOGIN PAGE STYLES
+   =============================================== */
+
+/* Login Page Body */
+.licensehub-login-page {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-800) 100%);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Login Page Body Styling */
+.licensehub-login-page {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    background: linear-gradient(135deg, var(--primary-500) 0%, #1e40af 50%, #1e3a8a 100%);
+    overflow-x: hidden;
+}
+
+/* Login Container */
+.licensehub-login-container {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: linear-gradient(135deg, var(--primary-500) 0%, #1e40af 50%, #1e3a8a 100%);
+    overflow: hidden;
+}
+
+/* Background Pattern */
+.licensehub-login-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        url('data:image/svg+xml,<svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><g fill="%23ffffff" fill-opacity="0.08"><circle cx="40" cy="40" r="2"/></g></svg>') repeat,
+        url('data:image/svg+xml,<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><g fill="%23ffffff" fill-opacity="0.03"><polygon points="60,0 120,60 60,120 0,60"/></g></svg>') repeat;
+    z-index: 1;
+    animation: backgroundMove 20s ease-in-out infinite;
+}
+
+@keyframes backgroundMove {
+    0%, 100% { transform: translateX(0) translateY(0); }
+    25% { transform: translateX(-10px) translateY(-5px); }
+    50% { transform: translateX(5px) translateY(-10px); }
+    75% { transform: translateX(-5px) translateY(5px); }
+}
+
+.licensehub-pattern-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.15) 0%, transparent 60%),
+        radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 80%, rgba(255, 255, 255, 0.12) 0%, transparent 55%),
+        radial-gradient(circle at 90% 70%, rgba(255, 255, 255, 0.08) 0%, transparent 45%);
+}
+
+/* Login Form Container */
+.licensehub-login-form-container {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 500px;
+    animation: slideInUp 0.8s ease-out;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.licensehub-login-form {
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(32px);
+    border-radius: 32px;
+    padding: 3.5rem;
+    box-shadow: 
+        0 40px 100px rgba(0, 0, 0, 0.2),
+        0 0 0 1px rgba(255, 255, 255, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.7);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.licensehub-login-form::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.6), rgba(255,255,255,0.2));
+    border-radius: 34px;
+    z-index: -1;
+}
+
+/* Login Header */
+.licensehub-login-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.licensehub-login-logo {
+    width: 96px;
+    height: 96px;
+    background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-700) 100%);
+    border-radius: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 2rem;
+    box-shadow: 
+        0 20px 40px rgba(59, 130, 246, 0.4),
+        0 0 0 4px rgba(255, 255, 255, 0.2),
+        inset 0 2px 0 rgba(255, 255, 255, 0.3);
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.licensehub-login-logo::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.1));
+    border-radius: 32px;
+    z-index: -1;
+}
+
+.licensehub-login-logo:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 
+        0 25px 50px rgba(59, 130, 246, 0.5),
+        0 0 0 4px rgba(255, 255, 255, 0.3),
+        inset 0 2px 0 rgba(255, 255, 255, 0.4);
+}
+
+.licensehub-login-logo i {
+    font-size: 2.5rem;
+    color: white;
+    text-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
+}
+
+.licensehub-login-title {
+    font-size: 2.75rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--gray-900), #374151, #1f2937);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0 0 1rem 0;
+    letter-spacing: -0.05em;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.licensehub-login-subtitle {
+    font-size: 1.2rem;
+    color: var(--gray-600);
+    margin: 0;
+    font-weight: 500;
+    opacity: 0.9;
+}
+
+/* Form Styles */
+.licensehub-form {
+    margin-bottom: 2.5rem;
+}
+
+.licensehub-form-group {
+    margin-bottom: 2rem;
+}
+
+.licensehub-form-label {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--gray-800);
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.licensehub-input-wrapper {
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.licensehub-form-control {
+    width: 100%;
+    padding: 1.25rem 1.25rem 1.25rem 3.75rem;
+    border: 2.5px solid #e5e7eb;
+    border-radius: 20px;
+    font-size: 1.125rem;
+    background: #fafbfc;
+    color: var(--gray-900);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.licensehub-form-control::placeholder {
+    color: #9ca3af;
+    font-weight: 400;
+}
+
+.licensehub-form-control:focus,
+.licensehub-input-wrapper.focused .licensehub-form-control {
+    border-color: var(--primary-500);
+    background: white;
+    box-shadow: 
+        0 0 0 4px rgba(59, 130, 246, 0.15),
+        0 8px 32px rgba(59, 130, 246, 0.12);
+    transform: translateY(-2px);
+}
+
+.licensehub-input-icon {
+    position: absolute;
+    left: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    font-size: 1.125rem;
+}
+
+.licensehub-input-wrapper.focused .licensehub-input-icon {
+    color: var(--primary-500);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.licensehub-field-error {
+    display: block;
+    font-size: 0.875rem;
+    color: var(--danger-600);
+    margin-top: 0.75rem;
+    font-weight: 600;
+    padding-left: 1rem;
+}
+
+/* Checkbox Styles */
+.licensehub-checkbox-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 1rem;
+    color: var(--gray-700);
+    font-weight: 500;
+    margin: 2rem 0;
+    padding: 0.75rem;
+    border-radius: 16px;
+    transition: all 0.3s ease;
+}
+
+.licensehub-checkbox-label:hover {
+    background: rgba(59, 130, 246, 0.05);
+}
+
+.licensehub-checkbox {
+    display: none;
+}
+
+.licensehub-checkbox-custom {
+    width: 24px;
+    height: 24px;
+    border: 3px solid var(--gray-300);
+    border-radius: 8px;
+    margin-right: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    flex-shrink: 0;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.licensehub-checkbox:checked + .licensehub-checkbox-custom {
+    background: var(--primary-500);
+    border-color: var(--primary-500);
+    transform: scale(1.1);
+    box-shadow: 
+        0 4px 12px rgba(59, 130, 246, 0.4),
+        0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.licensehub-checkbox:checked + .licensehub-checkbox-custom::after {
+    content: '\f00c';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    color: white;
+    font-size: 0.875rem;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.licensehub-checkbox-text {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Button Styles */
+.licensehub-btn-full {
+    width: 100%;
+    padding: 1.5rem 2rem;
+    font-size: 1.125rem;
+    font-weight: 700;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    outline: none;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+    overflow: hidden;
+    margin-top: 2rem;
+}
+
+.licensehub-btn-primary {
+    background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
+    color: white;
+    box-shadow: 
+        0 8px 32px rgba(59, 130, 246, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.licensehub-btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.6s;
+}
+
+.licensehub-btn-primary:hover::before {
+    left: 100%;
+}
+
+.licensehub-btn-primary:hover {
+    background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%);
+    transform: translateY(-3px);
+    box-shadow: 
+        0 12px 40px rgba(59, 130, 246, 0.6),
+        0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+
+.licensehub-btn-primary:active {
+    transform: translateY(-1px);
+}
+
+.licensehub-btn-primary:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2);
+}
+
+/* Demo Credentials */
+.licensehub-demo-credentials {
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    border: 2px solid #e2e8f0;
+    border-radius: 24px;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.licensehub-demo-credentials::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-500), #1e40af);
+}
+
+.licensehub-demo-header {
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--gray-800);
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.licensehub-demo-header i {
+    color: var(--primary-500);
+    font-size: 1.25rem;
+}
+
+.licensehub-demo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+}
+
+.licensehub-demo-card {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 20px;
+    padding: 1.75rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.licensehub-demo-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-500), #1e40af);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.licensehub-demo-card:hover::before {
+    transform: scaleX(1);
+}
+
+.licensehub-demo-card:hover {
+    border-color: var(--primary-500);
+    transform: translateY(-4px);
+    box-shadow: 
+        0 16px 40px rgba(59, 130, 246, 0.2),
+        0 4px 16px rgba(59, 130, 246, 0.1);
+}
+
+.licensehub-demo-role {
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: var(--primary-600);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 1rem;
+}
+
+.licensehub-demo-username,
+.licensehub-demo-password {
+    font-family: 'SFMono-Regular', 'Monaco', 'Consolas', monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--gray-800);
+    margin: 0.5rem 0;
+    padding: 0.5rem;
+    background: #f3f4f6;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+/* Security Notice */
+.licensehub-security-notice {
+    text-align: center;
+    font-size: 1rem;
+    color: #0369a1;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+    border: 2px solid #bae6fd;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(3, 105, 161, 0.15);
+}
+
+.licensehub-security-notice i {
+    color: var(--primary-500);
+    font-size: 1.25rem;
+}
+
+/* Alert Styles for Login */
+.licensehub-alert {
+    padding: 1.5rem;
+    border-radius: 20px;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: flex-start;
+    font-size: 1rem;
+    font-weight: 600;
+    gap: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.licensehub-alert::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #dc2626, #ef4444);
+}
+
+.licensehub-alert-danger {
+    background: linear-gradient(135deg, #fef2f2, #fde8e8);
+    border: 2px solid #fca5a5;
+    color: var(--danger-700);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15);
+}
+
+.licensehub-alert i {
+    font-size: 1.25rem;
+    margin-top: 0.125rem;
+}
+
+.licensehub-alert .text-danger {
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+}
+
+.licensehub-alert ul {
+    margin: 0;
+    padding-left: 1.5rem;
+    list-style: none;
+}
+
+.licensehub-alert li {
+    margin-bottom: 0.5rem;
+    position: relative;
+}
+
+.licensehub-alert li::before {
+    content: '•';
+    color: #dc2626;
+    font-weight: bold;
+    position: absolute;
+    left: -1rem;
+}
+
+/* Responsive Design for Login */
+@media (max-width: 768px) {
+    .licensehub-login-container {
+        padding: 1.5rem;
+    }
+    
+    .licensehub-login-form {
+        padding: 2.5rem 2rem;
+        border-radius: 28px;
+        margin: 1rem;
+    }
+    
+    .licensehub-login-logo {
+        width: 80px;
+        height: 80px;
+        border-radius: 24px;
+    }
+    
+    .licensehub-login-logo i {
+        font-size: 2rem;
+    }
+    
+    .licensehub-login-title {
+        font-size: 2.25rem;
+    }
+    
+    .licensehub-demo-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .licensehub-form-control {
+        padding: 1rem 1rem 1rem 3.25rem;
+        font-size: 1rem;
+    }
+    
+    .licensehub-btn-full {
+        padding: 1.25rem 1.5rem;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .licensehub-login-form {
+        padding: 2rem 1.5rem;
+        margin: 0.5rem;
+    }
+    
+    .licensehub-login-title {
+        font-size: 2rem;
+    }
+    
+    .licensehub-login-subtitle {
+        font-size: 1rem;
+    }
+}

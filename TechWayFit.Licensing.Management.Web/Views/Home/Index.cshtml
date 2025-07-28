@@ -1,259 +1,278 @@
+@using TechWayFit.Licensing.Core.Models
+@model TechWayFit.Licensing.WebUI.ViewModels.Dashboard.DashboardViewModel
 @{
-    ViewData["Title"] = "Dashboard - TechWayFit License Management";
+    ViewData["Title"] = "Dashboard Overview";
 }
 
-<!-- Hero Section -->
-<section class="hero-section jumbotron bg-primary text-white text-center py-5 mb-0" 
-         style="background: linear-gradient(135deg, #007bff 0%, #0056b3 50%, #004085 100%) !important; color: white !important;">
-    <div class="container hero-content">
-        <div class="jumbotron-content">
-            <h1 class="display-4 mb-3" style="color: white !important;">
-                <i class="fas fa-shield-alt me-3"></i>
-                TechWayFit License Management
-            </h1>
-            <p class="lead mb-4" style="color: white !important;">
-                Comprehensive license generation, validation, and management system
-            </p>
-            <div class="progress-indicator"></div>
-            <p class="mb-0" style="color: white !important;">
-                <i class="fas fa-rocket me-2"></i>
-                Step-by-step implementation in progress...
-            </p>
+<!-- Dashboard Header -->
+<div class="licensehub-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="mb-1">Dashboard Overview</h2>
+            <p class="licensehub-text-muted mb-0">Welcome back! Here's what's happening with your licenses.</p>
         </div>
+        <a href="@Url.Action("Create", "License")" class="licensehub-btn licensehub-btn-primary">
+            <i class="fas fa-plus me-2"></i>New License
+        </a>
     </div>
-</section>
+</div>
 
-<!-- Main Dashboard Content -->
-<div class="container-fluid py-5">
-    <!-- Implementation Steps Overview -->
-    <div class="row mb-5">
-        <div class="col-12">
-            <h2 class="text-center mb-4 text-gradient-primary">Implementation Roadmap</h2>
-        </div>
-        
-        <!-- Step Cards Grid -->
-        <div class="col-md-6 col-lg-3 mb-4">
-            <div class="card step-card completed h-100">
-                <div class="card-body text-center">
-                    <div class="step-icon text-success">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <h5 class="card-title">Step 1: Foundation</h5>
-                    <p class="card-text">Clean build and project structure</p>
-                    <span class="badge bg-success">✅ Completed</span>
+<!-- Stats Cards -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="licensehub-stats-card">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="licensehub-stats-number">@(Model?.TotalLicenses ?? 0)</div>
+                    <p class="licensehub-stats-label">Total Licenses</p>
                 </div>
-            </div>
-        </div>
-        
-        <div class="col-md-6 col-lg-3 mb-4">
-            <div class="card step-card @(ViewBag.IsAuthenticated ? "completed" : "in-progress") h-100">
-                <div class="card-body text-center">
-                    <div class="step-icon @(ViewBag.IsAuthenticated ? "text-success" : "text-warning")">
-                        <i class="fas fa-@(ViewBag.IsAuthenticated ? "check-circle" : "user-shield")"></i>
-                    </div>
-                    <h5 class="card-title">Step 2: Authentication</h5>
-                    <p class="card-text">User login and access control</p>
-                    @if (ViewBag.IsAuthenticated)
-                    {
-                        <span class="badge bg-success">✅ Completed</span>
-                        <div class="mt-2">
-                            <small class="text-success">
-                                <strong>@ViewBag.Username</strong> (@ViewBag.UserRole)
-                            </small>
-                        </div>
-                    }
-                    else
-                    {
-                        <span class="badge bg-warning">🔄 Available</span>
-                        <div class="mt-2">
-                            <a href="@Url.Action("Login", "Account")" class="btn btn-sm btn-outline-primary">
-                                <i class="fas fa-sign-in-alt me-1"></i> Login
-                            </a>
-                        </div>
-                    }
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-6 col-lg-3 mb-4">
-            <div class="card step-card completed h-100">
-                <div class="card-body text-center">
-                    <div class="step-icon text-success">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <h5 class="card-title">Step 3: Products</h5>
-                    <p class="card-text">Product, tiers, features & versions</p>
-                    <span class="badge bg-success">✅ Completed</span>
-                    <div class="mt-2">
-                        <a href="@Url.Action("Index", "Product")" class="btn btn-sm btn-outline-success">
-                            <i class="fas fa-box me-1"></i> Manage Products
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-6 col-lg-3 mb-4">
-            <div class="card step-card completed h-100">
-                <div class="card-body text-center">
-                    <div class="step-icon text-success">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <h5 class="card-title">Step 4: Consumers</h5>
-                    <p class="card-text">Customer and client management</p>
-                    <span class="badge bg-success">✅ Completed</span>
-                    <a href="@Url.Action("Index", "Consumer")" class="btn btn-outline-success btn-sm mt-2">
-                        <i class="fas fa-external-link-alt me-1"></i>
-                        Manage Consumers
-                    </a>
+                <div class="licensehub-stats-icon">
+                    <i class="fas fa-key"></i>
                 </div>
             </div>
         </div>
     </div>
-
-    <div class="row">
-        <div class="col-md-6 col-lg-3 mb-4">
-            <div class="card step-card completed h-100">
-                <div class="card-body text-center">
-                    <div class="step-icon text-success">
-                        <i class="fas fa-certificate"></i>
-                    </div>
-                    <h5 class="card-title">Step 5: Licenses</h5>
-                    <p class="card-text">License generation and management</p>
-                    <span class="badge bg-success">✅ Completed</span>
-                    <div class="mt-2">
-                        <a href="@Url.Action("Index", "License")" class="btn btn-sm btn-primary">Manage Licenses</a>
-                    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="licensehub-stats-card success">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="licensehub-stats-number" style="color: var(--success-color);">@(Model?.ActiveLicenses ?? 0)</div>
+                    <p class="licensehub-stats-label">Active Licenses</p>
                 </div>
-            </div>
-        </div>
-        
-        <div class="col-md-6 col-lg-3 mb-4">
-            <div class="card step-card pending h-100">
-                <div class="card-body text-center">
-                    <div class="step-icon text-muted">
-                        <i class="fas fa-clipboard-list"></i>
-                    </div>
-                    <h5 class="card-title">Step 6: Audit</h5>
-                    <p class="card-text">Audit trails and logging</p>
-                    <span class="badge bg-secondary">⏳ Coming Soon</span>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-6 col-lg-3 mb-4">
-            <div class="card step-card pending h-100">
-                <div class="card-body text-center">
-                    <div class="step-icon text-muted">
-                        <i class="fas fa-bell"></i>
-                    </div>
-                    <h5 class="card-title">Step 7: Notifications</h5>
-                    <p class="card-text">Alerts and communication</p>
-                    <span class="badge bg-secondary">⏳ Coming Soon</span>
+                <div class="licensehub-stats-icon" style="color: var(--success-color);">
+                    <i class="fas fa-check-circle"></i>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Detailed Progress Section -->
-    <div class="row">
-        <!-- Step 1 Details -->
-        <div class="col-12 mb-4">
-            <div class="card status-card-completed shadow-medium">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-check-circle text-success me-2"></i>
-                        Step 1: Clean Build Foundation
-                    </h5>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="licensehub-stats-card warning">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="licensehub-stats-number" style="color: var(--warning-color);">@(Model?.ExpiringLicenses ?? 0)</div>
+                    <p class="licensehub-stats-label">Expiring Soon</p>
                 </div>
-                <div class="card-body">
-                    <p class="text-success mb-3">
-                        <strong>✅ COMPLETED:</strong> All controllers have been backed up and minimal infrastructure is in place.
-                        The system builds successfully and is ready for step-by-step implementation.
-                    </p>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <ul class="list-unstyled">
-                                <li><i class="fas fa-check text-success me-2"></i>Controllers backed up to Controllers/Backup/</li>
-                                <li><i class="fas fa-check text-success me-2"></i>Minimal HomeController created</li>
-                                <li><i class="fas fa-check text-success me-2"></i>Service registrations simplified</li>
-                            </ul>
-                        </div>
-                        <div class="col-md-6">
-                            <ul class="list-unstyled">
-                                <li><i class="fas fa-check text-success me-2"></i>Legacy Extensions removed</li>
-                                <li><i class="fas fa-check text-success me-2"></i>Project references added</li>
-                                <li><i class="fas fa-check text-success me-2"></i><strong>Clean build achieved</strong></li>
-                            </ul>
-                        </div>
-                    </div>
+                <div class="licensehub-stats-icon" style="color: var(--warning-color);">
+                    <i class="fas fa-exclamation-triangle"></i>
                 </div>
             </div>
         </div>
-
-        <!-- Step 2 Details -->
-        <div class="col-12 mb-4">
-            <div class="card @(ViewBag.IsAuthenticated ? "status-card-completed" : "status-card-in-progress") shadow-medium">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        @if (ViewBag.IsAuthenticated)
-                        {
-                            <i class="fas fa-check-circle text-success me-2"></i>
-                            <span class="text-success">Step 2: Authentication System</span>
-                        }
-                        else
-                        {
-                            <i class="fas fa-clock text-warning me-2"></i>
-                            <span class="text-warning">Step 2: Authentication System</span>
-                        }
-                    </h5>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="licensehub-stats-card info">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="licensehub-stats-number" style="color: var(--info-color);">@(Model?.TotalConsumers ?? 0)</div>
+                    <p class="licensehub-stats-label">Consumers</p>
                 </div>
-                <div class="card-body">
-                    @if (ViewBag.IsAuthenticated)
-                    {
-                        <p class="text-success mb-3">
-                            <strong>✅ COMPLETED:</strong> User authentication is working successfully.
-                            Welcome, <strong>@ViewBag.Username</strong>!
-                        </p>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <ul class="list-unstyled">
-                                    <li><i class="fas fa-check text-success me-2"></i>Cookie-based authentication configured</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>Login/logout functionality implemented</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>User roles and authorization working</li>
-                                </ul>
-                            </div>
-                            <div class="col-md-6">
-                                <ul class="list-unstyled">
-                                    <li><i class="fas fa-check text-success me-2"></i>Authentication UI integrated</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>Demo users available</li>
-                                    <li><i class="fas fa-user-check text-success me-2"></i><strong>Logged in as: @ViewBag.Username (@ViewBag.UserRole)</strong></li>
-                                </ul>
-                            </div>
-                        </div>
-                    }
-                    else
-                    {
-                        <p class="text-warning mb-3">
-                            <strong>🔄 AVAILABLE:</strong> Authentication system is ready. Please log in to test the functionality.
-                        </p>
-                        <div class="row">
-                            <div class="col-md-8">
-                                <ul class="list-unstyled">
-                                    <li><i class="fas fa-check text-success me-2"></i>Login page available at <a href="@Url.Action("Login", "Account")" class="text-primary">/Account/Login</a></li>
-                                    <li><i class="fas fa-key text-info me-2"></i>Demo credentials: <code>admin/admin123</code> (Administrator)</li>
-                                    <li><i class="fas fa-key text-info me-2"></i>Demo credentials: <code>manager/manager123</code> (Manager)</li>
-                                </ul>
-                            </div>
-                            <div class="col-md-4 text-end">
-                                <a href="@Url.Action("Login", "Account")" class="btn btn-primary btn-lg">
-                                    <i class="fas fa-sign-in-alt me-2"></i>Login Now
-                                </a>
-                            </div>
-                        </div>
-                    }
+                <div class="licensehub-stats-icon" style="color: var(--info-color);">
+                    <i class="fas fa-users"></i>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Recent Activity -->
+<div class="licensehub-table-container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0">Recent License Activity</h5>
+        <a href="@Url.Action("Index", "License")" class="licensehub-btn licensehub-btn-outline-primary licensehub-btn-sm">
+            View All
+        </a>
+    </div>
+    <div class="table-responsive">
+        <table class="licensehub-table">
+            <thead>
+                <tr>
+                    <th>License ID</th>
+                    <th>Consumer</th>
+                    <th>Product</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Expires</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model?.RecentLicenses?.Any() == true)
+                {
+                    @foreach (var license in Model.RecentLicenses.Take(10))
+                    {
+                        <tr data-href="@Url.Action("Details", "License", new { id = license.LicenseId })">
+                            <td>
+                                <span class="text-monospace small">@license.LicenseId.Substring(0, 8)...</span>
+                            </td>
+                            <td>
+                                <div>
+                                    <div class="fw-semibold">@license.ConsumerName</div>
+                                    <small class="licensehub-text-muted">@license.ContactEmail</small>
+                                </div>
+                            </td>
+                            <td>@license.ConsumerName</td>
+                            <td>
+                                @{
+                                    var statusClass = license.Status switch
+                                    {
+                                        LicenseStatus.Active => "success",
+                                        LicenseStatus.Expired => "danger",
+                                        LicenseStatus.Suspended => "warning",
+                                        LicenseStatus.GracePeriod => "warning",
+                                        _ => "secondary"
+                                    };
+                                }
+                                <span class="licensehub-badge @statusClass">@license.Status</span>
+                            </td>
+                            <td>
+                                <span data-bs-toggle="tooltip" title="@license.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")">
+                                    @license.CreatedAt.ToString("MMM dd, yyyy")
+                                </span>
+                            </td>
+                            <td>
+                                @{
+                                    var expiryClass = license.DaysUntilExpiry <= 0 ? "licensehub-text-danger" :
+                                                    license.DaysUntilExpiry <= 30 ? "licensehub-text-warning" : "";
+                                }
+                                <span class="@expiryClass" data-bs-toggle="tooltip" title="@license.ValidTo.ToString("yyyy-MM-dd HH:mm:ss")">
+                                    @if (license.DaysUntilExpiry <= 0)
+                                    {
+                                        <span>Expired</span>
+                                    }
+                                    else if (license.DaysUntilExpiry <= 30)
+                                    {
+                                        <span>@license.DaysUntilExpiry days</span>
+                                    }
+                                    else
+                                    {
+                                        <span>@license.ValidTo.ToString("MMM dd, yyyy")</span>
+                                    }
+                                </span>
+                            </td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <a href="@Url.Action("Details", "License", new { id = license.LicenseId })" 
+                                       class="licensehub-btn licensehub-btn-outline-primary licensehub-btn-sm"
+                                       data-bs-toggle="tooltip" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    @if (license.CanRenew)
+                                    {
+                                        <button class="licensehub-btn licensehub-btn-outline-success licensehub-btn-sm"
+                                                data-bs-toggle="tooltip" title="Renew License"
+                                                onclick="renewLicense('@license.LicenseId')">
+                                            <i class="fas fa-redo"></i>
+                                        </button>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="text-center py-4">
+                            <div class="licensehub-text-muted">
+                                <i class="fas fa-inbox fa-2x mb-3 d-block"></i>
+                                No recent license activity found.
+                                <div class="mt-2">
+                                    <a href="@Url.Action("Create", "License")" class="licensehub-btn licensehub-btn-primary licensehub-btn-sm">
+                                        <i class="fas fa-plus me-1"></i>Create Your First License
+                                    </a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mt-4">
+    <div class="col-md-6 mb-4">
+        <div class="licensehub-card">
+            <h5 class="mb-3">Quick Actions</h5>
+            <div class="d-grid gap-2">
+                <a href="@Url.Action("Create", "License")" class="licensehub-btn licensehub-btn-primary">
+                    <i class="fas fa-plus me-2"></i>Generate New License
+                </a>
+                <a href="@Url.Action("Validate", "License")" class="licensehub-btn licensehub-btn-outline-primary">
+                    <i class="fas fa-check-circle me-2"></i>Validate License
+                </a>
+                <a href="@Url.Action("Index", "Consumer")" class="licensehub-btn licensehub-btn-outline-primary">
+                    <i class="fas fa-users me-2"></i>Manage Consumers
+                </a>
+                <a href="@Url.Action("Index", "Product")" class="licensehub-btn licensehub-btn-outline-primary">
+                    <i class="fas fa-box me-2"></i>Manage Products
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="licensehub-card">
+            <h5 class="mb-3">System Health</h5>
+            <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <small class="licensehub-text-muted">License Generation</small>
+                    <small class="licensehub-text-success">Operational</small>
+                </div>
+                <div class="progress" style="height: 4px;">
+                    <div class="progress-bar bg-success" style="width: 100%"></div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <small class="licensehub-text-muted">Validation Service</small>
+                    <small class="licensehub-text-success">Operational</small>
+                </div>
+                <div class="progress" style="height: 4px;">
+                    <div class="progress-bar bg-success" style="width: 100%"></div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <small class="licensehub-text-muted">Database</small>
+                    <small class="licensehub-text-success">Operational</small>
+                </div>
+                <div class="progress" style="height: 4px;">
+                    <div class="progress-bar bg-success" style="width: 100%"></div>
+                </div>
+            </div>
+            <div class="mt-3">
+                <small class="licensehub-text-muted">
+                    <i class="fas fa-clock me-1"></i>Last updated: @DateTime.Now.ToString("HH:mm:ss")
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function renewLicense(licenseId) {
+            if (confirm('Are you sure you want to renew this license?')) {
+                // Implement license renewal logic
+                window.location.href = '@Url.Action("Create", "License")?renew=' + licenseId;
+            }
+        }
+
+        // Auto-refresh dashboard every 30 seconds
+        setInterval(function() {
+            // Update the timestamp
+            const timestamp = document.querySelector('.licensehub-text-muted small');
+            if (timestamp) {
+                timestamp.innerHTML = '<i class="fas fa-clock me-1"></i>Last updated: ' + new Date().toLocaleTimeString();
+            }
+        }, 30000);
+
+        // Initialize tooltips
+        document.addEventListener('DOMContentLoaded', function() {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+    </script>
+}
