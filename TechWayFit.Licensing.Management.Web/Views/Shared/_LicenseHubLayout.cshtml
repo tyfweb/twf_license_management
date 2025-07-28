@@ -19,92 +19,144 @@
     <!-- LicenseHub Custom CSS -->
     <link rel="stylesheet" href="~/css/licensehub.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    
+    <!-- Custom CSS for Bootstrap Enhancement -->
+    <style>
+        /* Enhanced navigation styling */
+        .licensehub-nav-link {
+            color: rgba(255, 255, 255, 0.8) !important;
+            border-radius: 8px !important;
+            margin-bottom: 4px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .licensehub-nav-link:hover {
+            color: white !important;
+            background: rgba(255, 255, 255, 0.1) !important;
+            transform: translateX(4px);
+        }
+        
+        .licensehub-nav-link.active {
+            color: white !important;
+            background: rgba(255, 255, 255, 0.15) !important;
+            transform: translateX(4px);
+        }
+        
+        /* Sidebar responsive enhancements */
+        @@media (max-width: 767.98px) {
+            .licensehub-sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .licensehub-sidebar.show {
+                transform: translateX(0);
+            }
+        }
+        
+        /* Button hover effects */
+        .btn-outline-light:hover {
+            background: rgba(220, 38, 38, 0.2) !important;
+            border-color: rgba(220, 38, 38, 0.4) !important;
+            color: #fca5a5 !important;
+        }
+    </style>
 </head>
 <body>
     <!-- Mobile Menu Toggle -->
-    <button class="d-md-none btn btn-primary position-fixed" style="top: 1rem; left: 1rem; z-index: 1051;" onclick="toggleSidebar()">
+    <button class="d-md-none btn btn-primary position-fixed shadow-sm" 
+            style="top: 1rem; left: 1rem; z-index: 1051; border-radius: 8px;" 
+            onclick="toggleSidebar()"
+            data-bs-toggle="tooltip" 
+            data-bs-placement="right" 
+            title="Toggle Menu">
         <i class="fas fa-bars"></i>
     </button>
 
     <!-- Sidebar Navigation -->
-    <div class="licensehub-sidebar" id="sidebar">
-        <div class="licensehub-sidebar-brand">
-            <h4><i class="fas fa-shield-alt me-2"></i>LicenseHub</h4>
+    <div class="licensehub-sidebar d-flex flex-column" id="sidebar">
+        <div class="licensehub-sidebar-brand p-3 border-bottom border-light border-opacity-25">
+            <h4 class="text-white mb-0 fw-bold">
+                <i class="fas fa-shield-alt me-2"></i>LicenseHub
+            </h4>
         </div>
-        <nav class="licensehub-sidebar-nav">
-            <div class="licensehub-nav-item">
-                <a class="licensehub-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")" 
-                   asp-controller="Home" asp-action="Index">
-                    <i class="fas fa-home"></i>Dashboard
-                </a>
-            </div>
-            <div class="licensehub-nav-item">
-                <a class="licensehub-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Product" ? "active" : "")" 
-                   asp-controller="Product" asp-action="Index">
-                    <i class="fas fa-box"></i>Products
-                </a>
-            </div>
-            <div class="licensehub-nav-item">
-                <a class="licensehub-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "License" ? "active" : "")" 
-                   asp-controller="License" asp-action="Index">
-                    <i class="fas fa-key"></i>Licenses
-                </a>
-            </div>
-            <div class="licensehub-nav-item">
-                <a class="licensehub-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Consumer" ? "active" : "")" 
-                   asp-controller="Consumer" asp-action="Index">
-                    <i class="fas fa-users"></i>Consumers
-                </a>
-            </div>
-            <div class="licensehub-nav-item">
-                <a class="licensehub-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Notification" ? "active" : "")" 
-                   asp-controller="Notification" asp-action="Index">
-                    <i class="fas fa-bell"></i>Notifications
-                </a>
-            </div>
-            <div class="licensehub-nav-item">
-                <a class="licensehub-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Audit" ? "active" : "")" 
-                   asp-controller="Audit" asp-action="Index">
-                    <i class="fas fa-clipboard-list"></i>Audit Logs
-                </a>
-            </div>
-            <div class="licensehub-nav-item">
-                <a class="licensehub-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Settings" ? "active" : "")" 
-                   asp-controller="Settings" asp-action="Index">
-                    <i class="fas fa-cog"></i>Settings
-                </a>
-            </div>
+        <nav class="licensehub-sidebar-nav flex-fill">
+            <ul class="nav nav-pills flex-column gap-1">
+                <li class="nav-item">
+                    <a class="nav-link licensehub-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")" 
+                       asp-controller="Home" asp-action="Index">
+                        <i class="fas fa-home me-2"></i>Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link licensehub-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Product" ? "active" : "")" 
+                       asp-controller="Product" asp-action="Index">
+                        <i class="fas fa-box me-2"></i>Products
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link licensehub-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "License" ? "active" : "")" 
+                       asp-controller="License" asp-action="Index">
+                        <i class="fas fa-key me-2"></i>Licenses
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link licensehub-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Consumer" ? "active" : "")" 
+                       asp-controller="Consumer" asp-action="Index">
+                        <i class="fas fa-users me-2"></i>Consumers
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link licensehub-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Notification" ? "active" : "")" 
+                       asp-controller="Notification" asp-action="Index">
+                        <i class="fas fa-bell me-2"></i>Notifications
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link licensehub-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Audit" ? "active" : "")" 
+                       asp-controller="Audit" asp-action="Index">
+                        <i class="fas fa-clipboard-list me-2"></i>Audit Logs
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link licensehub-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Settings" ? "active" : "")" 
+                       asp-controller="Settings" asp-action="Index">
+                        <i class="fas fa-cog me-2"></i>Settings
+                    </a>
+                </li>
+            </ul>
         </nav>
         
         <!-- User Authentication Section -->
-        <div class="licensehub-sidebar-user">
+        <div class="licensehub-sidebar-user mt-auto p-3 border-top border-light border-opacity-25">
             @if (User.Identity?.IsAuthenticated == true)
             {
-                <div class="licensehub-user-info">
-                    <div class="licensehub-user-avatar">
-                        <i class="fas fa-user-circle"></i>
+                <div class="licensehub-user-info d-flex align-items-center mb-3 p-2 bg-white bg-opacity-10 rounded">
+                    <div class="licensehub-user-avatar me-2">
+                        <i class="fas fa-user-circle fs-2 text-white text-opacity-75"></i>
                     </div>
-                    <div class="licensehub-user-details">
-                        <div class="licensehub-user-name">@User.Identity.Name</div>
-                        <div class="licensehub-user-role">@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value</div>
+                    <div class="licensehub-user-details flex-fill">
+                        <div class="licensehub-user-name text-white fw-semibold small text-truncate">@User.Identity.Name</div>
+                        <div class="licensehub-user-role text-white text-opacity-75 text-uppercase small">@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value</div>
                     </div>
                 </div>
                 <form asp-controller="Account" asp-action="Logout" method="post" class="licensehub-logout-form">
-                    <button type="submit" class="licensehub-btn licensehub-btn-logout" title="Logout">
-                        <i class="fas fa-sign-out-alt"></i>
+                    <button type="submit" class="btn btn-outline-light btn-sm w-100 d-flex align-items-center justify-content-center" title="Logout">
+                        <i class="fas fa-sign-out-alt me-2"></i>
                         <span>Logout</span>
                     </button>
                 </form>
             }
             else
             {
-                <div class="licensehub-login-section">
-                    <div class="licensehub-login-prompt">
-                        <i class="fas fa-lock text-muted"></i>
+                <div class="licensehub-login-section text-center">
+                    <div class="licensehub-login-prompt mb-3 text-white text-opacity-75 small">
+                        <i class="fas fa-lock me-1"></i>
                         <span>Not logged in</span>
                     </div>
-                    <a href="@Url.Action("Login", "Account")" class="licensehub-btn licensehub-btn-login">
-                        <i class="fas fa-sign-in-alt"></i>
+                    <a href="@Url.Action("Login", "Account")" class="btn btn-primary btn-sm w-100 d-flex align-items-center justify-content-center">
+                        <i class="fas fa-sign-in-alt me-2"></i>
                         <span>Login</span>
                     </a>
                 </div>
@@ -114,10 +166,11 @@
 
     <!-- Main Content Area -->
     <div class="licensehub-main-content">
+        <div class="container-fluid p-4">
         <!-- Success/Error Messages -->
         @if (TempData["SuccessMessage"] != null)
         {
-            <div class="licensehub-alert licensehub-alert-success alert-dismissible fade show" role="alert">
+            <div class="alert alert-success alert-dismissible fade show d-flex align-items-center" role="alert">
                 <i class="fas fa-check-circle me-2"></i>
                 @TempData["SuccessMessage"]
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -126,7 +179,7 @@
 
         @if (TempData["ErrorMessage"] != null)
         {
-            <div class="licensehub-alert licensehub-alert-danger alert-dismissible fade show" role="alert">
+            <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center" role="alert">
                 <i class="fas fa-exclamation-circle me-2"></i>
                 @TempData["ErrorMessage"]
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -135,7 +188,7 @@
 
         @if (TempData["WarningMessage"] != null)
         {
-            <div class="licensehub-alert licensehub-alert-warning alert-dismissible fade show" role="alert">
+            <div class="alert alert-warning alert-dismissible fade show d-flex align-items-center" role="alert">
                 <i class="fas fa-exclamation-triangle me-2"></i>
                 @TempData["WarningMessage"]
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -144,7 +197,7 @@
 
         @if (TempData["InfoMessage"] != null)
         {
-            <div class="licensehub-alert licensehub-alert-info alert-dismissible fade show" role="alert">
+            <div class="alert alert-info alert-dismissible fade show d-flex align-items-center" role="alert">
                 <i class="fas fa-info-circle me-2"></i>
                 @TempData["InfoMessage"]
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -155,6 +208,7 @@
         <main role="main">
             @RenderBody()
         </main>
+        </div>
     </div>
 
     <!-- Scripts -->
@@ -192,11 +246,18 @@
             });
         });
 
-        // Initialize tooltips
+        // Initialize tooltips and popovers
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize tooltips
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
             var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
                 return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+            
+            // Initialize popovers
+            var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+            var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+                return new bootstrap.Popover(popoverTriggerEl);
             });
         });
 
