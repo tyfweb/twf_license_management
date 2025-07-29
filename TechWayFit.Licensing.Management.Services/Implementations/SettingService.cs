@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Caching.Memory;
 using System.Text.Json;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Core.Models.Settings;
@@ -9,33 +10,55 @@ using TechWayFit.Licensing.Infrastructure.Models.Entities.Settings;
 namespace TechWayFit.Licensing.Management.Services.Implementations
 {
     /// <summary>
-    /// Service implementation for managing application settings
+    /// Service implementation for managing application settings with caching
     /// </summary>
     public class SettingService : ISettingService
     {
         private readonly ISettingRepository _settingRepository;
         private readonly IConfiguration _configuration;
         private readonly ILogger<SettingService> _logger;
+        private readonly IMemoryCache _cache;
+        
+        // Cache configuration
+        private const string CACHE_KEY_ALL_SETTINGS = "settings_all";
+        private const string CACHE_KEY_PREFIX = "setting_";
+        private readonly TimeSpan CACHE_EXPIRATION = TimeSpan.FromMinutes(30);
 
         public SettingService(
             ISettingRepository settingRepository,
             IConfiguration configuration,
-            ILogger<SettingService> logger)
+            ILogger<SettingService> logger,
+            IMemoryCache cache)
         {
             _settingRepository = settingRepository;
             _configuration = configuration;
             _logger = logger;
+            _cache = cache;
         }
 
         public async Task<Dictionary<string, IEnumerable<Setting>>> GetAllSettingsGroupedAsync()
         {
             try
             {
+                // Try to get from cache first
+                if (_cache.TryGetValue(CACHE_KEY_ALL_SETTINGS, out Dictionary<string, IEnumerable<Setting>>? cachedSettings))
+                {
+                    _logger.LogDebug("Retrieved all settings from cache");
+                    return cachedSettings!;
+                }
+
+                // Not in cache, fetch from database
                 var entities = await _settingRepository.GetAllGroupedByCategoryAsync();
-                return entities.ToDictionary(
+                var settings = entities.ToDictionary(
                     kvp => kvp.Key,
                     kvp => kvp.Value.Select(e => e.ToModel())
                 );
+
+                // Cache the result
+                _cache.Set(CACHE_KEY_ALL_SETTINGS, settings, CACHE_EXPIRATION);
+                _logger.LogDebug("Cached all settings for {CacheExpiration} minutes", CACHE_EXPIRATION.TotalMinutes);
+
+                return settings;
             }
             catch (Exception ex)
             {
@@ -96,6 +119,10 @@ namespace TechWayFit.Licensing.Management.Services.Implementations
 
                 // Use the SetValueAsync method which handles the update
                 var updatedEntity = await _settingRepository.SetValueAsync(entity.Category, entity.Key, value, updatedBy);
+                
+                // Invalidate cache
+                InvalidateCache();
+                
                 return updatedEntity.ToModel();
             }
             catch (Exception ex)
@@ -110,6 +137,10 @@ namespace TechWayFit.Licensing.Management.Services.Implementations
             try
             {
                 var entities = await _settingRepository.UpdateMultipleAsync(settings, updatedBy);
+                
+                // Invalidate cache
+                InvalidateCache();
+                
                 return entities.Select(e => e.ToModel()).ToList();
             }
             catch (Exception ex)
@@ -124,6 +155,13 @@ namespace TechWayFit.Licensing.Management.Services.Implementations
             try
             {
                 var entity = await _settingRepository.ResetToDefaultAsync(settingId, updatedBy);
+                
+                // Invalidate cache if reset was successful
+                if (entity != null)
+                {
+                    InvalidateCache();
+                }
+                
                 return entity?.ToModel();
             }
             catch (Exception ex)
@@ -138,6 +176,10 @@ namespace TechWayFit.Licensing.Management.Services.Implementations
             try
             {
                 var entities = await _settingRepository.ResetCategoryToDefaultAsync(category, updatedBy);
+                
+                // Invalidate cache
+                InvalidateCache();
+                
                 return entities.Select(e => e.ToModel()).ToList();
             }
             catch (Exception ex)
@@ -379,6 +421,15 @@ namespace TechWayFit.Licensing.Management.Services.Implementations
             }
 
             return data;
+        }
+
+        /// <summary>
+        /// Invalidates all cached settings
+        /// </summary>
+        private void InvalidateCache()
+        {
+            _cache.Remove(CACHE_KEY_ALL_SETTINGS);
+            _logger.LogDebug("Settings cache invalidated");
         }
     }
 }

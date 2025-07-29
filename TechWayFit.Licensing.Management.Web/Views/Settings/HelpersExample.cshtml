@@ -1,0 +1,183 @@
+@using TechWayFit.Licensing.Management.Web.Extensions
+@{
+    ViewData["Title"] = "Settings Helper Usage Examples";
+}
+
+<h2>Settings Helper Usage Examples</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <h3>Using HTML Helper in Views</h3>
+        <div class="card">
+            <div class="card-body">
+                <h5>Application Information</h5>
+                <p><strong>App Name:</strong> @Html.AppName()</p>
+                <p><strong>Company:</strong> @Html.CompanyName()</p>
+                <p><strong>Version:</strong> @Html.AppVersion()</p>
+                <p><strong>Logo URL:</strong> @Html.LogoUrl()</p>
+                
+                <h5>Custom Settings</h5>
+                <p><strong>Session Timeout:</strong> @(Html.SettingAs<int>("Security", "SessionTimeoutMinutes", 30)) minutes</p>
+                <p><strong>Dark Mode Enabled:</strong> @Html.IsSettingEnabled("UI", "EnableDarkMode")</p>
+                <p><strong>Items Per Page:</strong> @Html.Setting("UI", "ItemsPerPage", "25")</p>
+                
+                <h5>Conditional Rendering</h5>
+                @if (Html.IsSettingEnabled("Notification", "EmailNotificationsEnabled"))
+                {
+                    <div class="alert alert-info">
+                        Email notifications are enabled
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-warning">
+                        Email notifications are disabled
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <h3>HTML Template Examples</h3>
+        <div class="card">
+            <div class="card-body">
+                <h5>Logo Usage</h5>
+                <img src="@Html.LogoUrl()" alt="@Html.CompanyName()" style="max-height: 50px;" />
+                
+                <h5>Footer Example</h5>
+                <footer class="mt-3 pt-3 border-top">
+                    <p>&copy; @DateTime.Now.Year @Html.CompanyName() - @Html.AppName() v@Html.AppVersion()</p>
+                </footer>
+                
+                <h5>Theme Class Example</h5>
+                <div class="@(Html.IsSettingEnabled("UI", "EnableDarkMode") ? "dark-theme" : "light-theme")">
+                    This div will have different CSS classes based on theme setting
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <h3>Controller Usage Examples (C# Code)</h3>
+        <div class="card">
+            <div class="card-body">
+                <pre><code>
+// In a Controller:
+public class HomeController : Controller
+{
+    private readonly SettingsHelper _settingsHelper;
+    
+    public HomeController(SettingsHelper settingsHelper)
+    {
+        _settingsHelper = settingsHelper;
+    }
+    
+    public async Task&lt;IActionResult&gt; Index()
+    {
+        // Get application name
+        var appName = await _settingsHelper.App.GetNameAsync();
+        
+        // Get session timeout
+        var sessionTimeout = await _settingsHelper.System.GetSessionTimeoutAsync();
+        
+        // Check if feature is enabled
+        var isDarkModeEnabled = await _settingsHelper.UI.IsDarkModeEnabledAsync();
+        
+        // Get email settings
+        var smtpServer = await _settingsHelper.Email.GetSmtpServerAsync();
+        var smtpPort = await _settingsHelper.Email.GetSmtpPortAsync();
+        
+        // Get security settings
+        var minPasswordLength = await _settingsHelper.Security.GetPasswordMinLengthAsync();
+        var requireUppercase = await _settingsHelper.Security.RequireUppercaseAsync();
+        
+        // Get license settings
+        var defaultDuration = await _settingsHelper.License.GetDefaultDurationDaysAsync();
+        var gracePeriod = await _settingsHelper.License.GetGracePeriodDaysAsync();
+        
+        // Get custom setting
+        var customSetting = await _settingsHelper.GetSettingAsync("Custom", "MyKey", "defaultValue");
+        var customBool = await _settingsHelper.GetSettingAsAsync&lt;bool&gt;("Custom", "MyBoolKey", false);
+        
+        // Get all settings in a category
+        var systemSettings = await _settingsHelper.GetCategorySettingsAsync("System");
+        
+        return View();
+    }
+}
+                </code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <h3>Available Categories and Common Settings</h3>
+        <div class="row">
+            <div class="col-md-3">
+                <h5>System</h5>
+                <ul>
+                    <li>ApplicationName</li>
+                    <li>ApplicationVersion</li>
+                    <li>CompanyName</li>
+                    <li>CompanyLogo</li>
+                    <li>FaviconUrl</li>
+                </ul>
+            </div>
+            <div class="col-md-3">
+                <h5>Security</h5>
+                <ul>
+                    <li>SessionTimeoutMinutes</li>
+                    <li>PasswordMinLength</li>
+                    <li>RequireUppercase</li>
+                    <li>RequireLowercase</li>
+                    <li>RequireNumbers</li>
+                    <li>RequireSymbols</li>
+                </ul>
+            </div>
+            <div class="col-md-3">
+                <h5>Email</h5>
+                <ul>
+                    <li>SmtpServer</li>
+                    <li>SmtpPort</li>
+                    <li>SmtpUsername</li>
+                    <li>SmtpPassword</li>
+                    <li>FromAddress</li>
+                    <li>FromName</li>
+                    <li>EnableSsl</li>
+                </ul>
+            </div>
+            <div class="col-md-3">
+                <h5>UI</h5>
+                <ul>
+                    <li>DefaultTheme</li>
+                    <li>ItemsPerPage</li>
+                    <li>EnableDarkMode</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <h5>License</h5>
+                <ul>
+                    <li>DefaultDurationDays</li>
+                    <li>GracePeriodDays</li>
+                    <li>AutoRenewEnabled</li>
+                    <li>MaxActivationsPerLicense</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h5>Notification</h5>
+                <ul>
+                    <li>EmailNotificationsEnabled</li>
+                    <li>LicenseExpiryNotificationDays</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
