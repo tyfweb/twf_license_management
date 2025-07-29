@@ -32,8 +32,7 @@
 
     <div class="row">
         <!-- Main Content -->
-        <div class="col-lg-8">
-            <!-- Consumer Information Form -->
+        <div class="col-lg-8">            <!-- Consumer Information Form -->
             <div class="edit-section">
                 <div class="section-header">
                     <h2 class="section-title">
@@ -41,65 +40,58 @@
                     </h2>
                     <p class="section-description">Update the consumer's organization and contact details</p>
                 </div>
-                
-                <form asp-action="Edit" asp-route-id="@Model.ConsumerId" method="post">
-                    <input type="hidden" asp-for="ConsumerId" />
-                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-                    
-                    <!-- Consumer ID Display -->
-                    <div class="alert alert-info mb-4">
-                        <i class="fas fa-info-circle me-2"></i>
-                        <strong>Consumer ID:</strong> @Model.ConsumerId
-                    </div>
+                    <form asp-action="Edit" asp-route-id="@Model.ConsumerId" method="post">
+                        <input type="hidden" asp-for="ConsumerId" />
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        
+                        <!-- Consumer ID Display -->
+                        <div class="alert alert-info mb-4">
+                            <strong>Consumer ID:</strong> @Model.ConsumerId
+                        </div>
 
-                    <!-- Organization Information -->
-                    <div class="form-section">
-                        <h5 class="form-section-title">Organization Details</h5>
+                        <!-- Organization Information -->
+                        <h6 class="text-primary mb-3">Organization Details</h6>
                         <div class="row">
                             <div class="col-md-6">
-                                <div class="form-group">
+                                <div class="mb-3">
                                     <label asp-for="OrganizationName" class="form-label"></label>
                                     <input asp-for="OrganizationName" class="form-control" placeholder="Company or Organization Name" />
                                     <span asp-validation-for="OrganizationName" class="text-danger"></span>
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="form-group">
+                                <div class="mb-3">
                                     <label asp-for="ContactPerson" class="form-label"></label>
                                     <input asp-for="ContactPerson" class="form-control" placeholder="Primary Contact Name" />
                                     <span asp-validation-for="ContactPerson" class="text-danger"></span>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Contact Information -->
-                    <div class="form-section">
-                        <h5 class="form-section-title">Contact Information</h5>
+                        <!-- Contact Information -->
+                        <h6 class="text-primary mb-3">Contact Information</h6>
                         <div class="row">
                             <div class="col-md-6">
-                                <div class="form-group">
+                                <div class="mb-3">
                                     <label asp-for="ContactEmail" class="form-label"></label>
                                     <input asp-for="ContactEmail" class="form-control" type="email" placeholder="contact@example.com" />
                                     <span asp-validation-for="ContactEmail" class="text-danger"></span>
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="form-group">
+                                <div class="mb-3">
                                     <label asp-for="ContactPhone" class="form-label"></label>
                                     <input asp-for="ContactPhone" class="form-control" type="tel" placeholder="+1 (555) 123-4567" />
                                     <span asp-validation-for="ContactPhone" class="text-danger"></span>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Address Information -->
-                    <div class="form-section">
-                        <h5 class="form-section-title">Address Information <small class="text-muted">(Optional)</small></h5>
+                        <!-- Address Information -->
+                        <h6 class="text-primary mb-3">Address Information <small class="text-muted">(Optional)</small></h6>
                         <div class="row">
                             <div class="col-12">
-                                <div class="form-group">
+                                <div class="mb-3">
                                     <label asp-for="Address" class="form-label"></label>
                                     <input asp-for="Address" class="form-control" placeholder="Street Address" />
                                     <span asp-validation-for="Address" class="text-danger"></span>
@@ -108,21 +100,21 @@
                         </div>
                         <div class="row">
                             <div class="col-md-4">
-                                <div class="form-group">
+                                <div class="mb-3">
                                     <label asp-for="City" class="form-label"></label>
                                     <input asp-for="City" class="form-control" placeholder="City" />
                                     <span asp-validation-for="City" class="text-danger"></span>
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <div class="form-group">
+                                <div class="mb-3">
                                     <label asp-for="State" class="form-label"></label>
                                     <input asp-for="State" class="form-control" placeholder="State/Province" />
                                     <span asp-validation-for="State" class="text-danger"></span>
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <div class="form-group">
+                                <div class="mb-3">
                                     <label asp-for="PostalCode" class="form-label"></label>
                                     <input asp-for="PostalCode" class="form-control" placeholder="Postal Code" />
                                     <span asp-validation-for="PostalCode" class="text-danger"></span>
@@ -131,14 +123,14 @@
                         </div>
                         <div class="row">
                             <div class="col-md-6">
-                                <div class="form-group">
+                                <div class="mb-3">
                                     <label asp-for="Country" class="form-label"></label>
                                     <input asp-for="Country" class="form-control" placeholder="Country" />
                                     <span asp-validation-for="Country" class="text-danger"></span>
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="form-group">
+                                <div class="mb-3">
                                     <div class="form-check mt-4">
                                         <input asp-for="IsActive" class="form-check-input" type="checkbox" />
                                         <label asp-for="IsActive" class="form-check-label"></label>
@@ -146,69 +138,25 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Notes -->
-                    <div class="form-section">
-                        <h5 class="form-section-title">Additional Notes</h5>
+                        <!-- Notes -->
                         <div class="row">
                             <div class="col-12">
-                                <div class="form-group">
+                                <div class="mb-4">
                                     <label asp-for="Notes" class="form-label"></label>
                                     <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Additional notes or comments"></textarea>
                                     <span asp-validation-for="Notes" class="text-danger"></span>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="form-actions">
                         <div class="d-flex justify-content-between">
-                            <a asp-action="Details" asp-route-id="@Model.ConsumerId" class="btn btn-secondary">
-                                <i class="fas fa-times me-2"></i>Cancel
-                            </a>
+                            <a asp-action="Details" asp-route-id="@Model.ConsumerId" class="btn btn-secondary">Cancel</a>
                             <button type="submit" class="btn btn-warning">
                                 <i class="fas fa-save me-2"></i>Update Consumer
                             </button>
                         </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Sidebar -->
-        <div class="col-lg-4">
-            <div class="sidebar-section">
-                <div class="section-header">
-                    <h3 class="section-title">
-                        <i class="fas fa-bolt me-2"></i>Quick Actions
-                    </h3>
-                </div>
-                
-                <div class="quick-actions">
-                    <a asp-action="Details" asp-route-id="@Model.ConsumerId" class="action-btn">
-                        <i class="fas fa-eye"></i>
-                        <div class="action-content">
-                            <div class="action-title">View Details</div>
-                            <div class="action-description">See complete consumer information</div>
-                        </div>
-                    </a>
-                    
-                    <a asp-controller="License" asp-action="Create" asp-route-consumerId="@Model.ConsumerId" class="action-btn">
-                        <i class="fas fa-plus-circle"></i>
-                        <div class="action-content">
-                            <div class="action-title">Generate License</div>
-                            <div class="action-description">Create new license for this consumer</div>
-                        </div>
-                    </a>
-                    
-                    <a asp-controller="License" asp-action="Index" asp-route-consumerId="@Model.ConsumerId" class="action-btn">
-                        <i class="fas fa-history"></i>
-                        <div class="action-content">
-                            <div class="action-title">License History</div>
-                            <div class="action-description">View all licenses for this consumer</div>
-                        </div>
-                    </a>
+                    </form>
                 </div>
             </div>
         </div>

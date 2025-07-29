@@ -3,308 +3,334 @@
     ViewData["Title"] = "Consumer Details";
 }
 
+<link rel="stylesheet" href="~/css/product-management.css" />
+
 <div class="container-fluid">
+    <!-- Header Section -->
+    <div class="header-section">
+        <div class="d-flex justify-content-between align-items-start">
+            <div class="header-content">
+                <h1 class="page-title">
+                    <i class="fas fa-building me-2"></i>@Model.Consumer.CompanyName
+                </h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a asp-controller="License" asp-action="Index">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a asp-controller="Consumer" asp-action="Index">Consumers</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">@Model.Consumer.CompanyName</li>
+                    </ol>
+                </nav>
+                <!-- Status Badge -->
+                <div class="status-badge">
+                    @if (Model.Consumer.IsActive)
+                    {
+                        <span class="badge bg-success fs-6">
+                            <i class="fas fa-check-circle me-1"></i>Active Consumer
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary fs-6">
+                            <i class="fas fa-ban me-1"></i>Inactive Consumer
+                        </span>
+                    }
+                </div>
+            </div>
+            <div class="header-actions">
+                <a asp-action="Index" class="btn btn-secondary me-2">
+                    <i class="fas fa-list me-2"></i>All Consumers
+                </a>
+                <a asp-action="Edit" asp-route-id="@Model.Consumer.ConsumerId" class="btn btn-warning me-2">
+                    <i class="fas fa-edit me-2"></i>Edit
+                </a>
+                <button type="button" class="btn btn-danger" onclick="showDeleteModal()">
+                    <i class="fas fa-trash me-2"></i>Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div class="row">
-        <div class="col-12">
-            <!-- Header -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h2>Consumer Details</h2>
-                    <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a asp-controller="License" asp-action="Index">Dashboard</a></li>
-                            <li class="breadcrumb-item"><a asp-controller="Consumer" asp-action="Index">Consumers</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">@Model.Consumer.OrganizationName</li>
-                        </ol>
-                    </nav>
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Consumer Information -->
+            <div class="edit-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-info-circle me-2"></i>Consumer Information
+                    </h2>
+                    <p class="section-description">Organization and contact details</p>
                 </div>
-                <div>
-                    <a asp-action="Index" class="btn btn-secondary me-2">
-                        <i class="fas fa-list me-2"></i>All Consumers
-                    </a>
-                    <a asp-action="Edit" asp-route-id="@Model.Consumer.ConsumerId" class="btn btn-warning me-2">
-                        <i class="fas fa-edit me-2"></i>Edit
-                    </a>
-                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                        <i class="fas fa-trash me-2"></i>Delete
-                    </button>
-                </div>
-            </div>
-
-            <!-- Status Badge -->
-            <div class="mb-3">
-                @if (Model.Consumer.IsActive)
-                {
-                    <span class="badge bg-success fs-6">
-                        <i class="fas fa-check-circle me-1"></i>Active Consumer
-                    </span>
-                }
-                else
-                {
-                    <span class="badge bg-secondary fs-6">
-                        <i class="fas fa-ban me-1"></i>Inactive Consumer
-                    </span>
-                }
-            </div>
-
-            <div class="row">
-                <!-- Consumer Information -->
-                <div class="col-md-8">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">
-                                <i class="fas fa-building me-2"></i>Consumer Information
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label class="form-label text-muted">Consumer ID</label>
-                                        <div class="fw-bold">@Model.Consumer.ConsumerId</div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label text-muted">Organization Name</label>
-                                        <div class="fw-bold">@Model.Consumer.OrganizationName</div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label text-muted">Contact Person</label>
-                                        <div>@(Model.Consumer.ContactPerson ?? "Not specified")</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label class="form-label text-muted">Contact Email</label>
-                                        <div>
-                                            @if (!string.IsNullOrEmpty(Model.Consumer.ContactEmail))
-                                            {
-                                                <a href="mailto:@Model.Consumer.ContactEmail">@Model.Consumer.ContactEmail</a>
-                                            }
-                                            else
-                                            {
-                                                <span class="text-muted">Not specified</span>
-                                            }
-                                        </div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label text-muted">Contact Phone</label>
-                                        <div>
-                                            @if (!string.IsNullOrEmpty(Model.Consumer.PhoneNumber))
-                                            {
-                                                <a href="tel:@Model.Consumer.PhoneNumber">@Model.Consumer.PhoneNumber</a>
-                                            }
-                                            else
-                                            {
-                                                <span class="text-muted">Not specified</span>
-                                            }
-                                        </div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label text-muted">Status</label>
-                                        <div>
-                                            @if (Model.Consumer.IsActive)
-                                            {
-                                                <span class="badge bg-success">Active</span>
-                                            }
-                                            else
-                                            {
-                                                <span class="badge bg-secondary">Inactive</span>
-                                            }
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label class="info-label">Consumer ID</label>
+                        <div class="info-value">
+                            <code>@Model.Consumer.ConsumerId</code>
                         </div>
                     </div>
-
-                    <!-- Address Information -->
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">
-                                <i class="fas fa-map-marker-alt me-2"></i>Address Information
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            @if (!string.IsNullOrEmpty(Model.Consumer.Address))
+                    <div class="info-item">
+                        <label class="info-label">Organization Name</label>
+                        <div class="info-value fw-bold">@Model.Consumer.CompanyName</div>
+                    </div>
+                    <div class="info-item">
+                        <label class="info-label">Contact Person</label>
+                        <div class="info-value">@(Model.Consumer.PrimaryContact?.Name ?? "Not specified")</div>
+                    </div>
+                    <div class="info-item">
+                        <label class="info-label">Contact Email</label>
+                        <div class="info-value">
+                            @if (!string.IsNullOrEmpty(Model.Consumer.PrimaryContact?.Email))
                             {
-                                <div class="row">
-                                    <div class="col-12">
-                                        <div>@Model.Consumer.Address</div>
-                                    </div>
-                                </div>
+                                <a href="mailto:@Model.Consumer.PrimaryContact.Email" class="link-primary">
+                                    <i class="fas fa-envelope me-1"></i>@Model.Consumer.PrimaryContact.Email
+                                </a>
                             }
                             else
                             {
-                                <div class="text-muted">No address information provided</div>
+                                <span class="text-muted">Not specified</span>
                             }
                         </div>
                     </div>
-
-                    <!-- Notes -->
-                    @if (Model.Consumer.Metadata.ContainsKey("Notes") && !string.IsNullOrEmpty(Model.Consumer.Metadata["Notes"]))
-                    {
-                        <div class="card mb-4">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">
-                                    <i class="fas fa-sticky-note me-2"></i>Notes
-                                </h5>
-                            </div>
-                            <div class="card-body">
-                                <p class="mb-0">@Model.Consumer.Metadata["Notes"]</p>
-                            </div>
-                        </div>
-                    }
-                </div>
-
-                <!-- License Statistics -->
-                <div class="col-md-4">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">
-                                <i class="fas fa-chart-bar me-2"></i>License Statistics
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row text-center">
-                                <div class="col-6">
-                                    <div class="border-end">
-                                        <h4 class="text-primary mb-1">@Model.Statistics.TotalLicenses</h4>
-                                        <small class="text-muted">Total Licenses</small>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <h4 class="text-success mb-1">@Model.Statistics.ActiveLicenses</h4>
-                                    <small class="text-muted">Active Licenses</small>
-                                </div>
-                            </div>
-                            <hr>
-                            <div class="row text-center">
-                                <div class="col-6">
-                                    <div class="border-end">
-                                        <h4 class="text-warning mb-1">@Model.Statistics.ExpiredLicenses</h4>
-                                        <small class="text-muted">Expired</small>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <h4 class="text-secondary mb-1">@(Model.Statistics.TotalLicenses - Model.Statistics.ActiveLicenses - Model.Statistics.ExpiredLicenses)</h4>
-                                    <small class="text-muted">Other</small>
-                                </div>
-                            </div>
+                    <div class="info-item">
+                        <label class="info-label">Contact Phone</label>
+                        <div class="info-value">
+                            @if (!string.IsNullOrEmpty(Model.Consumer.PrimaryContact?.Phone))
+                            {
+                                <a href="tel:@Model.Consumer.PrimaryContact.Phone" class="link-primary">
+                                    <i class="fas fa-phone me-1"></i>@Model.Consumer.PrimaryContact.Phone
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Not specified</span>
+                            }
                         </div>
                     </div>
-
-                    <!-- Quick Actions -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">
-                                <i class="fas fa-bolt me-2"></i>Quick Actions
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="d-grid gap-2">
-                                <a href="#" class="btn btn-primary">
-                                    <i class="fas fa-plus me-2"></i>Generate License
-                                </a>
-                                <a href="#" class="btn btn-info">
-                                    <i class="fas fa-history me-2"></i>View All Licenses
-                                </a>
-                                <a asp-action="Edit" asp-route-id="@Model.Consumer.ConsumerId" class="btn btn-warning">
-                                    <i class="fas fa-edit me-2"></i>Edit Consumer
-                                </a>
-                            </div>
+                    <div class="info-item">
+                        <label class="info-label">Status</label>
+                        <div class="info-value">
+                            @if (Model.Consumer.IsActive)
+                            {
+                                <span class="badge bg-success">Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Inactive</span>
+                            }
                         </div>
                     </div>
                 </div>
             </div>
 
+            <!-- Address Information -->
+            <div class="edit-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-map-marker-alt me-2"></i>Address Information
+                    </h2>
+                    <p class="section-description">Physical location details</p>
+                </div>                @if (!string.IsNullOrEmpty(Model.Consumer.Address?.Street) ||
+                     !string.IsNullOrEmpty(Model.Consumer.Address?.City) ||
+                     !string.IsNullOrEmpty(Model.Consumer.Address?.State) ||
+                     !string.IsNullOrEmpty(Model.Consumer.Address?.PostalCode) ||
+                     !string.IsNullOrEmpty(Model.Consumer.Address?.Country))
+                {
+                    <div class="address-display">
+                        @if (!string.IsNullOrEmpty(Model.Consumer.Address?.Street))
+                        {
+                            <div class="address-line">@Model.Consumer.Address.Street</div>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.Consumer.Address?.City) || !string.IsNullOrEmpty(Model.Consumer.Address?.State) || !string.IsNullOrEmpty(Model.Consumer.Address?.PostalCode))
+                        {
+                            <div class="address-line">
+                                @Model.Consumer.Address?.City@(!string.IsNullOrEmpty(Model.Consumer.Address?.State) && !string.IsNullOrEmpty(Model.Consumer.Address?.City) ? ", " : "")@Model.Consumer.Address?.State@(!string.IsNullOrEmpty(Model.Consumer.Address?.PostalCode) ? " " + Model.Consumer.Address.PostalCode : "")
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.Consumer.Address?.Country))
+                        {
+                            <div class="address-line">@Model.Consumer.Address.Country</div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="empty-state">
+                        <i class="fas fa-map-marker-alt fa-2x text-muted mb-2"></i>
+                        <p class="text-muted">No address information provided</p>
+                    </div>
+                }
+            </div>
+
+            <!-- Notes -->
+            @if (!string.IsNullOrEmpty(Model.Consumer.Notes))
+            {
+                <div class="edit-section">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <i class="fas fa-sticky-note me-2"></i>Notes
+                        </h2>
+                        <p class="section-description">Additional information</p>
+                    </div>
+                    
+                    <div class="notes-content">
+                        <p class="mb-0">@Model.Consumer.Notes</p>
+                    </div>
+                </div>
+            }
+
             <!-- License History -->
-            @if (Model.Licenses != null && Model.Licenses.Any())
-            {
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="card-title mb-0">
-                            <i class="fas fa-history me-2"></i>Recent License History
-                        </h5>
-                        <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
+            <div class="edit-section">
+                <div class="section-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="section-title">
+                                <i class="fas fa-history me-2"></i>Recent License History
+                            </h2>
+                            <p class="section-description">Latest licenses generated for this consumer</p>
+                        </div>
+                        @if (Model.Licenses != null && Model.Licenses.Any())
+                        {
+                            <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
+                        }
                     </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
+                </div>
+                
+                @if (Model.Licenses != null && Model.Licenses.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover modern-table">
+                            <thead>
+                                <tr>
+                                    <th>License ID</th>
+                                    <th>Product</th>
+                                    <th>Status</th>
+                                    <th>Valid From</th>
+                                    <th>Valid To</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var license in Model.Licenses.Take(5))
+                                {
                                     <tr>
-                                        <th>License ID</th>
-                                        <th>Product</th>
-                                        <th>Status</th>
-                                        <th>Valid From</th>
-                                        <th>Valid To</th>
-                                        <th>Actions</th>
+                                        <td>
+                                            <code class="license-id">@license.LicenseId</code>
+                                        </td>
+                                        <td class="fw-medium">@license.ProductName</td>
+                                        <td>
+                                            @switch (license.Status.ToString().ToLower())
+                                            {
+                                                case "active":
+                                                    <span class="badge bg-success">Active</span>
+                                                    break;
+                                                case "expired":
+                                                    <span class="badge bg-warning">Expired</span>
+                                                    break;
+                                                case "revoked":
+                                                    <span class="badge bg-danger">Revoked</span>
+                                                    break;
+                                                default:
+                                                    <span class="badge bg-secondary">@license.Status</span>
+                                                    break;
+                                            }
+                                        </td>
+                                        <td>@license.ValidFrom.ToString("MMM dd, yyyy")</td>
+                                        <td>@license.ValidTo.ToString("MMM dd, yyyy")</td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="#" class="btn btn-outline-primary btn-sm" title="View License">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-outline-secondary btn-sm" title="Download">
+                                                    <i class="fas fa-download"></i>
+                                                </a>
+                                            </div>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var license in Model.Licenses.Take(5))
-                                    {
-                                        <tr>
-                                            <td>
-                                                <code>@license.LicenseId</code>
-                                            </td>
-                                            <td>@license.ProductName</td>
-                                            <td>
-                                                @switch (license.Status.ToString().ToLower())
-                                                {
-                                                    case "active":
-                                                        <span class="badge bg-success">Active</span>
-                                                        break;
-                                                    case "expired":
-                                                        <span class="badge bg-warning">Expired</span>
-                                                        break;
-                                                    case "revoked":
-                                                        <span class="badge bg-danger">Revoked</span>
-                                                        break;
-                                                    default:
-                                                        <span class="badge bg-secondary">@license.Status</span>
-                                                        break;
-                                                }
-                                            </td>
-                                            <td>@license.ValidFrom.ToString("MMM dd, yyyy")</td>
-                                            <td>@license.ValidTo.ToString("MMM dd, yyyy")</td>
-                                            <td>
-                                                <div class="btn-group btn-group-sm">
-                                                    <a href="#" class="btn btn-outline-primary btn-sm" title="View License">
-                                                        <i class="fas fa-eye"></i>
-                                                    </a>
-                                                    <a href="#" class="btn btn-outline-secondary btn-sm" title="Download">
-                                                        <i class="fas fa-download"></i>
-                                                    </a>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="empty-state">
+                        <i class="fas fa-certificate fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No Licenses Generated</h5>
+                        <p class="text-muted">This consumer doesn't have any licenses yet.</p>
+                        <a href="#" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Generate First License
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- License Statistics -->
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <i class="fas fa-chart-bar me-2"></i>License Statistics
+                    </h3>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card primary">
+                        <div class="stat-value">@Model.Statistics.TotalLicenses</div>
+                        <div class="stat-label">Total Licenses</div>
+                    </div>
+                    <div class="stat-card success">
+                        <div class="stat-value">@Model.Statistics.ActiveLicenses</div>
+                        <div class="stat-label">Active Licenses</div>
+                    </div>
+                    <div class="stat-card warning">
+                        <div class="stat-value">@Model.Statistics.ExpiredLicenses</div>
+                        <div class="stat-label">Expired</div>
+                    </div>
+                    <div class="stat-card secondary">
+                        <div class="stat-value">@(Model.Statistics.TotalLicenses - Model.Statistics.ActiveLicenses - Model.Statistics.ExpiredLicenses)</div>
+                        <div class="stat-label">Other</div>
                     </div>
                 </div>
-            }
-            else
-            {
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">
-                            <i class="fas fa-history me-2"></i>License History
-                        </h5>
-                    </div>
-                    <div class="card-body text-center">
-                        <div class="py-4">
-                            <i class="fas fa-certificate fa-3x text-muted mb-3"></i>
-                            <h5 class="text-muted">No Licenses Generated</h5>
-                            <p class="text-muted">This consumer doesn't have any licenses yet.</p>
-                            <a href="#" class="btn btn-primary">
-                                <i class="fas fa-plus me-2"></i>Generate First License
-                            </a>
-                        </div>
-                    </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <i class="fas fa-bolt me-2"></i>Quick Actions
+                    </h3>
                 </div>
-            }
+                
+                <div class="quick-actions">
+                    <a href="#" class="action-btn">
+                        <i class="fas fa-plus-circle"></i>
+                        <div class="action-content">
+                            <div class="action-title">Generate License</div>
+                            <div class="action-description">Create new license for this consumer</div>
+                        </div>
+                    </a>
+                    
+                    <a href="#" class="action-btn">
+                        <i class="fas fa-history"></i>
+                        <div class="action-content">
+                            <div class="action-title">View All Licenses</div>
+                            <div class="action-description">See complete license history</div>
+                        </div>
+                    </a>
+                    
+                    <a asp-action="Edit" asp-route-id="@Model.Consumer.ConsumerId" class="action-btn">
+                        <i class="fas fa-edit"></i>
+                        <div class="action-content">
+                            <div class="action-title">Edit Consumer</div>
+                            <div class="action-description">Update organization details</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -320,7 +346,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <p>Are you sure you want to delete the consumer <strong>@Model.Consumer.OrganizationName</strong>?</p>
+                <p>Are you sure you want to delete the consumer <strong>@Model.Consumer.CompanyName</strong>?</p>
                 @if (Model.Statistics.ActiveLicenses > 0)
                 {
                     <div class="alert alert-warning">
@@ -342,3 +368,10 @@
         </div>
     </div>
 </div>
+
+<script>
+function showDeleteModal() {
+    const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    modal.show();
+}
+</script>

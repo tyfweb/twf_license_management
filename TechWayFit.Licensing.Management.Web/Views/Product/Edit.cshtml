@@ -4,6 +4,10 @@
     ViewData["Description"] = $"Edit product configuration for {Model.ProductName}";
 }
 
+@section Styles {
+    <link rel="stylesheet" href="~/css/product-management.css" />
+}
+
 <div class="container-fluid py-4">
     <!-- Header Section -->
     <div class="header">
@@ -236,279 +240,16 @@
     </form>
 </div>
 
-<style>
-    .header {
-        margin-bottom: 2rem;
-    }
-
-    /* Section Styling */
-    .edit-section, .sidebar-section {
-        background: white;
-        border: 1px solid #e9ecef;
-        border-radius: 12px;
-        overflow: hidden;
-        transition: all 0.2s ease-in-out;
-    }
-
-    .edit-section:hover, .sidebar-section:hover {
-        border-color: #dee2e6;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    }
-
-    .section-header {
-        background: #f8f9fa;
-        border-bottom: 1px solid #e9ecef;
-        padding: 1rem 1.5rem;
-        margin: 0;
-    }
-
-    .section-header h5 {
-        margin: 0;
-        font-weight: 600;
-        color: #1a1a1a;
-        font-size: 1rem;
-    }
-
-    .section-header i {
-        color: #3b82f6;
-    }
-
-    .section-content {
-        padding: 1.5rem;
-    }
-
-    /* Form Styling */
-    .form-group {
-        margin-bottom: 1rem;
-    }
-
-    .form-label {
-        font-weight: 500;
-        color: #374151;
-        margin-bottom: 0.5rem;
-        font-size: 0.875rem;
-    }
-
-    .form-control, .form-select {
-        border: 1px solid #e9ecef;
-        border-radius: 6px;
-        padding: 0.625rem 0.75rem;
-        font-size: 0.875rem;
-        transition: all 0.2s ease-in-out;
-    }
-
-    .form-control:focus, .form-select:focus {
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.1);
-    }
-
-    .form-control[readonly] {
-        background-color: #f8f9fa;
-        color: #6c757d;
-    }
-
-    .form-text {
-        font-size: 0.75rem;
-        color: #6c757d;
-        margin-top: 0.25rem;
-    }
-
-    .form-check {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .form-check-input {
-        margin: 0;
-    }
-
-    .form-check-label {
-        font-size: 0.875rem;
-        color: #374151;
-        margin: 0;
-    }
-
-    /* Button Styling */
-    .btn {
-        font-weight: 500;
-        border-radius: 6px;
-        padding: 0.625rem 1.25rem;
-        font-size: 0.875rem;
-        transition: all 0.2s ease-in-out;
-    }
-
-    .btn-primary {
-        background-color: #3b82f6;
-        border-color: #3b82f6;
-    }
-
-    .btn-primary:hover {
-        background-color: #2563eb;
-        border-color: #2563eb;
-    }
-
-    .btn-outline-secondary {
-        border-color: #e9ecef;
-        color: #6c757d;
-    }
-
-    .btn-outline-secondary:hover {
-        background-color: #f8f9fa;
-        border-color: #dee2e6;
-        color: #495057;
-    }
-
-    .btn-outline-danger {
-        border-color: #dc3545;
-        color: #dc3545;
-    }
-
-    .btn-outline-danger:hover {
-        background-color: #dc3545;
-        border-color: #dc3545;
-        color: white;
-    }
-
-    .btn-outline-primary {
-        border-color: #3b82f6;
-        color: #3b82f6;
-    }
-
-    .btn-outline-primary:hover {
-        background-color: #3b82f6;
-        border-color: #3b82f6;
-        color: white;
-    }
-
-    /* Metadata Rows */
-    .metadata-row {
-        background: #f8f9fa;
-        border-radius: 6px;
-        padding: 0.75rem;
-        border: 1px solid #e9ecef;
-        transition: all 0.2s ease-in-out;
-    }
-
-    .metadata-row:hover {
-        background: #f1f3f4;
-        border-color: #dee2e6;
-    }
-
-    /* Setting Items */
-    .setting-item {
-        padding: 0.75rem 0;
-        border-bottom: 1px solid #e9ecef;
-    }
-
-    .setting-item:last-child {
-        border-bottom: none;
-    }
-
-    .setting-label {
-        font-size: 0.75rem;
-        font-weight: 600;
-        color: #6c757d;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 0.25rem;
-        display: block;
-    }
-
-    .setting-value {
-        font-size: 0.875rem;
-        color: #1a1a1a;
-        font-weight: 500;
-    }
-
-    /* Change History */
-    .change-history {
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-    }
-
-    .change-item {
-        padding: 0.75rem;
-        background: #f8f9fa;
-        border-radius: 6px;
-        border-left: 4px solid #3b82f6;
-        transition: all 0.2s ease-in-out;
-    }
-
-    .change-item:hover {
-        background: #f1f3f4;
-    }
-
-    .change-date {
-        font-size: 0.75rem;
-        font-weight: 600;
-        color: #6c757d;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 0.25rem;
-    }
-
-    .change-event {
-        font-size: 0.875rem;
-        color: #1a1a1a;
-        display: flex;
-        align-items: center;
-    }
-
-    /* Alert Styling */
-    .alert-info {
-        background-color: #e1f5fe;
-        border-color: #b3e5fc;
-        color: #0277bd;
-        border-radius: 6px;
-        font-size: 0.875rem;
-    }
-
-    .alert-danger {
-        background-color: #ffebee;
-        border-color: #ffcdd2;
-        color: #c62828;
-        border-radius: 6px;
-        font-size: 0.875rem;
-    }
-
-    /* Badge Styling */
-    .badge {
-        font-size: 0.75rem;
-        font-weight: 500;
-        padding: 0.375rem 0.75rem;
-        border-radius: 4px;
-    }
-
-    /* Responsive adjustments */
-    @@media (max-width: 768px) {
-        .header .d-flex {
-            flex-direction: column;
-            gap: 1rem;
-        }
-        
-        .section-header, .section-content {
-            padding: 1rem;
-        }
-        
-        .metadata-row {
-            margin-bottom: 1rem;
-        }
-    }
-</style>
-
-
-
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")
-     <script>
+    
+    <script>
         let metadataIndex = @(Model.Metadata?.Count ?? 0);
         
         document.getElementById('add-metadata').addEventListener('click', function() {
             const container = document.getElementById('metadata-container');
             const newRow = document.createElement('div');
-            newRow.className = 'row mb-2 metadata-row';
+            newRow.className = 'row mb-3 metadata-row';
             newRow.innerHTML = `
                 <div class="col-md-5">
                     <input type="text" name="Metadata[${metadataIndex}].Key" class="form-control" placeholder="Key" />
@@ -572,5 +313,5 @@
             formChanged = false;
         });
     </script>
-   
 }
+

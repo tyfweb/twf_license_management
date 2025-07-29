@@ -4,246 +4,229 @@
     ViewData["Title"] = "Dashboard Overview";
 }
 
-<!-- Dashboard Header -->
-<div class="licensehub-header">
-    <div class="d-flex justify-content-between align-items-center">
-        <div>
-            <h2 class="mb-1">Dashboard Overview</h2>
-            <p class="licensehub-text-muted mb-0">Welcome back! Here's what's happening with your licenses.</p>
-        </div>
-        <a href="@Url.Action("Create", "License")" class="licensehub-btn licensehub-btn-primary">
-            <i class="fas fa-plus me-2"></i>New License
-        </a>
-    </div>
-</div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/product-management.css" />
+}
 
-<!-- Stats Cards -->
-<div class="row mb-4">
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="licensehub-stats-card">
-            <div class="d-flex align-items-center justify-content-between">
-                <div>
-                    <div class="licensehub-stats-number">@(Model?.TotalLicenses ?? 0)</div>
-                    <p class="licensehub-stats-label">Total Licenses</p>
-                </div>
-                <div class="licensehub-stats-icon">
-                    <i class="fas fa-key"></i>
-                </div>
+<div class="container-fluid py-4">
+    <!-- Header Section -->
+    <div class="header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="mb-1">Dashboard Overview</h2>
+                <p class="text-muted mb-0">Welcome back! Here's what's happening with your licenses.</p>
             </div>
+            <a href="@Url.Action("Create", "License")" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>New License
+            </a>
         </div>
     </div>
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="licensehub-stats-card success">
-            <div class="d-flex align-items-center justify-content-between">
-                <div>
-                    <div class="licensehub-stats-number" style="color: var(--success-color);">@(Model?.ActiveLicenses ?? 0)</div>
-                    <p class="licensehub-stats-label">Active Licenses</p>
-                </div>
-                <div class="licensehub-stats-icon" style="color: var(--success-color);">
-                    <i class="fas fa-check-circle"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="licensehub-stats-card warning">
-            <div class="d-flex align-items-center justify-content-between">
-                <div>
-                    <div class="licensehub-stats-number" style="color: var(--warning-color);">@(Model?.ExpiringLicenses ?? 0)</div>
-                    <p class="licensehub-stats-label">Expiring Soon</p>
-                </div>
-                <div class="licensehub-stats-icon" style="color: var(--warning-color);">
-                    <i class="fas fa-exclamation-triangle"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="licensehub-stats-card info">
-            <div class="d-flex align-items-center justify-content-between">
-                <div>
-                    <div class="licensehub-stats-number" style="color: var(--info-color);">@(Model?.TotalConsumers ?? 0)</div>
-                    <p class="licensehub-stats-label">Consumers</p>
-                </div>
-                <div class="licensehub-stats-icon" style="color: var(--info-color);">
-                    <i class="fas fa-users"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
-<!-- Recent Activity -->
-<div class="licensehub-table-container">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="mb-0">Recent License Activity</h5>
-        <a href="@Url.Action("Index", "License")" class="licensehub-btn licensehub-btn-outline-primary licensehub-btn-sm">
-            View All
-        </a>
-    </div>
-    <div class="table-responsive">
-        <table class="licensehub-table">
-            <thead>
-                <tr>
-                    <th>License ID</th>
-                    <th>Consumer</th>
-                    <th>Product</th>
-                    <th>Status</th>
-                    <th>Created</th>
-                    <th>Expires</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (Model?.RecentLicenses?.Any() == true)
-                {
-                    @foreach (var license in Model.RecentLicenses.Take(10))
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Statistics Overview -->
+            <div class="edit-section mb-4">
+                <div class="section-header">
+                    <h5><i class="fas fa-chart-bar me-2"></i>License Statistics</h5>
+                </div>
+                <div class="section-content">
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-value">@(Model?.TotalLicenses ?? 0)</div>
+                            <div class="stat-label">Total Licenses</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value text-success">@(Model?.ActiveLicenses ?? 0)</div>
+                            <div class="stat-label">Active Licenses</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value text-warning">@(Model?.ExpiringLicenses ?? 0)</div>
+                            <div class="stat-label">Expiring Soon</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value text-info">@(Model?.TotalConsumers ?? 0)</div>
+                            <div class="stat-label">Consumers</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent License Activity -->
+            <div class="edit-section mb-4">
+                <div class="section-header">
+                    <div class="d-flex justify-content-between align-items-center w-100">
+                        <h5><i class="fas fa-clock me-2"></i>Recent License Activity</h5>
+                        <a href="@Url.Action("Index", "License")" class="btn btn-sm btn-outline-primary">
+                            View All
+                        </a>
+                    </div>
+                </div>
+                <div class="section-content">
+                    @if (Model?.RecentLicenses?.Any() == true)
                     {
-                        <tr data-href="@Url.Action("Details", "License", new { id = license.LicenseId })">
-                            <td>
-                                <span class="text-monospace small">@license.LicenseId.Substring(0, 8)...</span>
-                            </td>
-                            <td>
-                                <div>
-                                    <div class="fw-semibold">@license.ConsumerName</div>
-                                    <small class="licensehub-text-muted">@license.ContactEmail</small>
-                                </div>
-                            </td>
-                            <td>@license.ConsumerName</td>
-                            <td>
-                                @{
-                                    var statusClass = license.Status switch
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>License ID</th>
+                                        <th>Consumer</th>
+                                        <th>Product</th>
+                                        <th>Status</th>
+                                        <th>Created</th>
+                                        <th>Expires</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var license in Model.RecentLicenses.Take(10))
                                     {
-                                        LicenseStatus.Active => "success",
-                                        LicenseStatus.Expired => "danger",
-                                        LicenseStatus.Suspended => "warning",
-                                        LicenseStatus.GracePeriod => "warning",
-                                        _ => "secondary"
-                                    };
-                                }
-                                <span class="licensehub-badge @statusClass">@license.Status</span>
-                            </td>
-                            <td>
-                                <span data-bs-toggle="tooltip" title="@license.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")">
-                                    @license.CreatedAt.ToString("MMM dd, yyyy")
-                                </span>
-                            </td>
-                            <td>
-                                @{
-                                    var expiryClass = license.DaysUntilExpiry <= 0 ? "licensehub-text-danger" :
-                                                    license.DaysUntilExpiry <= 30 ? "licensehub-text-warning" : "";
-                                }
-                                <span class="@expiryClass" data-bs-toggle="tooltip" title="@license.ValidTo.ToString("yyyy-MM-dd HH:mm:ss")">
-                                    @if (license.DaysUntilExpiry <= 0)
-                                    {
-                                        <span>Expired</span>
+                                        <tr>
+                                            <td>
+                                                <code class="small">@license.LicenseId.Substring(0, 8)...</code>
+                                            </td>
+                                            <td>
+                                                <div>
+                                                    <div class="fw-semibold">@license.ConsumerName</div>
+                                                    <small class="text-muted">@license.ContactEmail</small>
+                                                </div>
+                                            </td>
+                                            <td>@license.ConsumerName</td>
+                                            <td>
+                                                @{
+                                                    var statusBadge = license.Status switch
+                                                    {
+                                                        LicenseStatus.Active => "bg-success",
+                                                        LicenseStatus.Expired => "bg-danger",
+                                                        LicenseStatus.Suspended => "bg-warning",
+                                                        LicenseStatus.GracePeriod => "bg-warning",
+                                                        _ => "bg-secondary"
+                                                    };
+                                                }
+                                                <span class="badge @statusBadge">@license.Status</span>
+                                            </td>
+                                            <td>@license.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                            <td>
+                                                @{
+                                                    var expiryClass = license.DaysUntilExpiry <= 0 ? "text-danger" :
+                                                                    license.DaysUntilExpiry <= 30 ? "text-warning" : "";
+                                                }
+                                                <span class="@expiryClass">
+                                                    @if (license.DaysUntilExpiry <= 0)
+                                                    {
+                                                        <span>Expired</span>
+                                                    }
+                                                    else if (license.DaysUntilExpiry <= 30)
+                                                    {
+                                                        <span>@license.DaysUntilExpiry days</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span>@license.ValidTo.ToString("MMM dd, yyyy")</span>
+                                                    }
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-1">
+                                                    <a href="@Url.Action("Details", "License", new { id = license.LicenseId })" 
+                                                       class="btn btn-sm btn-outline-primary"
+                                                       data-bs-toggle="tooltip" title="View Details">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    @if (license.CanRenew)
+                                                    {
+                                                        <button class="btn btn-sm btn-outline-success"
+                                                                data-bs-toggle="tooltip" title="Renew License"
+                                                                onclick="renewLicense('@license.LicenseId')">
+                                                            <i class="fas fa-redo"></i>
+                                                        </button>
+                                                    }
+                                                </div>
+                                            </td>
+                                        </tr>
                                     }
-                                    else if (license.DaysUntilExpiry <= 30)
-                                    {
-                                        <span>@license.DaysUntilExpiry days</span>
-                                    }
-                                    else
-                                    {
-                                        <span>@license.ValidTo.ToString("MMM dd, yyyy")</span>
-                                    }
-                                </span>
-                            </td>
-                            <td>
-                                <div class="d-flex gap-1">
-                                    <a href="@Url.Action("Details", "License", new { id = license.LicenseId })" 
-                                       class="licensehub-btn licensehub-btn-outline-primary licensehub-btn-sm"
-                                       data-bs-toggle="tooltip" title="View Details">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    @if (license.CanRenew)
-                                    {
-                                        <button class="licensehub-btn licensehub-btn-outline-success licensehub-btn-sm"
-                                                data-bs-toggle="tooltip" title="Renew License"
-                                                onclick="renewLicense('@license.LicenseId')">
-                                            <i class="fas fa-redo"></i>
-                                        </button>
-                                    }
-                                </div>
-                            </td>
-                        </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     }
-                }
-                else
-                {
-                    <tr>
-                        <td colspan="7" class="text-center py-4">
-                            <div class="licensehub-text-muted">
-                                <i class="fas fa-inbox fa-2x mb-3 d-block"></i>
-                                No recent license activity found.
-                                <div class="mt-2">
-                                    <a href="@Url.Action("Create", "License")" class="licensehub-btn licensehub-btn-primary licensehub-btn-sm">
-                                        <i class="fas fa-plus me-1"></i>Create Your First License
-                                    </a>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-</div>
-
-<!-- Quick Actions -->
-<div class="row mt-4">
-    <div class="col-md-6 mb-4">
-        <div class="licensehub-card">
-            <h5 class="mb-3">Quick Actions</h5>
-            <div class="d-grid gap-2">
-                <a href="@Url.Action("Create", "License")" class="licensehub-btn licensehub-btn-primary">
-                    <i class="fas fa-plus me-2"></i>Generate New License
-                </a>
-                <a href="@Url.Action("Validate", "License")" class="licensehub-btn licensehub-btn-outline-primary">
-                    <i class="fas fa-check-circle me-2"></i>Validate License
-                </a>
-                <a href="@Url.Action("Index", "Consumer")" class="licensehub-btn licensehub-btn-outline-primary">
-                    <i class="fas fa-users me-2"></i>Manage Consumers
-                </a>
-                <a href="@Url.Action("Index", "Product")" class="licensehub-btn licensehub-btn-outline-primary">
-                    <i class="fas fa-box me-2"></i>Manage Products
-                </a>
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                            <h6 class="text-muted">No recent license activity found</h6>
+                            <p class="text-muted mb-3">Get started by creating your first license</p>
+                            <a href="@Url.Action("Create", "License")" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Create Your First License
+                            </a>
+                        </div>
+                    }
+                </div>
             </div>
         </div>
-    </div>
-    <div class="col-md-6 mb-4">
-        <div class="licensehub-card">
-            <h5 class="mb-3">System Health</h5>
-            <div class="mb-3">
-                <div class="d-flex justify-content-between align-items-center mb-1">
-                    <small class="licensehub-text-muted">License Generation</small>
-                    <small class="licensehub-text-success">Operational</small>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Quick Actions -->
+            <div class="sidebar-section mb-4">
+                <div class="section-header">
+                    <h5><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
                 </div>
-                <div class="progress" style="height: 4px;">
-                    <div class="progress-bar bg-success" style="width: 100%"></div>
-                </div>
-            </div>
-            <div class="mb-3">
-                <div class="d-flex justify-content-between align-items-center mb-1">
-                    <small class="licensehub-text-muted">Validation Service</small>
-                    <small class="licensehub-text-success">Operational</small>
-                </div>
-                <div class="progress" style="height: 4px;">
-                    <div class="progress-bar bg-success" style="width: 100%"></div>
-                </div>
-            </div>
-            <div class="mb-3">
-                <div class="d-flex justify-content-between align-items-center mb-1">
-                    <small class="licensehub-text-muted">Database</small>
-                    <small class="licensehub-text-success">Operational</small>
-                </div>
-                <div class="progress" style="height: 4px;">
-                    <div class="progress-bar bg-success" style="width: 100%"></div>
+                <div class="section-content">
+                    <div class="d-grid gap-2">
+                        <a href="@Url.Action("Create", "License")" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Generate New License
+                        </a>
+                        <a href="@Url.Action("Validate", "License")" class="btn btn-outline-primary">
+                            <i class="fas fa-check-circle me-2"></i>Validate License
+                        </a>
+                        <a href="@Url.Action("Index", "Consumer")" class="btn btn-outline-secondary">
+                            <i class="fas fa-users me-2"></i>Manage Consumers
+                        </a>
+                        <a href="@Url.Action("Index", "Product")" class="btn btn-outline-secondary">
+                            <i class="fas fa-box me-2"></i>Manage Products
+                        </a>
+                    </div>
                 </div>
             </div>
-            <div class="mt-3">
-                <small class="licensehub-text-muted">
-                    <i class="fas fa-clock me-1"></i>Last updated: @DateTime.Now.ToString("HH:mm:ss")
-                </small>
+
+            <!-- System Health -->
+            <div class="sidebar-section mb-4">
+                <div class="section-header">
+                    <h5><i class="fas fa-heartbeat me-2"></i>System Health</h5>
+                </div>
+                <div class="section-content">
+                    <div class="health-status-item mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="health-label">License Generation</span>
+                            <span class="badge bg-success">Operational</span>
+                        </div>
+                        <div class="progress" style="height: 4px;">
+                            <div class="progress-bar bg-success" style="width: 100%"></div>
+                        </div>
+                    </div>
+                    <div class="health-status-item mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="health-label">Validation Service</span>
+                            <span class="badge bg-success">Operational</span>
+                        </div>
+                        <div class="progress" style="height: 4px;">
+                            <div class="progress-bar bg-success" style="width: 100%"></div>
+                        </div>
+                    </div>
+                    <div class="health-status-item mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="health-label">Database</span>
+                            <span class="badge bg-success">Operational</span>
+                        </div>
+                        <div class="progress" style="height: 4px;">
+                            <div class="progress-bar bg-success" style="width: 100%"></div>
+                        </div>
+                    </div>
+                    <div class="mt-3 pt-3 border-top">
+                        <small class="text-muted">
+                            <i class="fas fa-clock me-1"></i>Last updated: <span id="last-updated">@DateTime.Now.ToString("HH:mm:ss")</span>
+                        </small>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -253,23 +236,21 @@
     <script>
         function renewLicense(licenseId) {
             if (confirm('Are you sure you want to renew this license?')) {
-                // Implement license renewal logic
                 window.location.href = '@Url.Action("Create", "License")?renew=' + licenseId;
             }
         }
 
-        // Auto-refresh dashboard every 30 seconds
+        // Auto-refresh timestamp every 30 seconds
         setInterval(function() {
-            // Update the timestamp
-            const timestamp = document.querySelector('.licensehub-text-muted small');
-            if (timestamp) {
-                timestamp.innerHTML = '<i class="fas fa-clock me-1"></i>Last updated: ' + new Date().toLocaleTimeString();
+            const timestampElement = document.getElementById('last-updated');
+            if (timestampElement) {
+                timestampElement.textContent = new Date().toLocaleTimeString();
             }
         }, 30000);
 
         // Initialize tooltips
         document.addEventListener('DOMContentLoaded', function() {
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
             tooltipTriggerList.map(function (tooltipTriggerEl) {
                 return new bootstrap.Tooltip(tooltipTriggerEl);
             });

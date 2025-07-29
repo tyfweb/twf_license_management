@@ -70,7 +70,9 @@
                 </div>
             </div>
         </div>
-    </div>    <!-- Quick Actions -->
+    </div>
+
+    <!-- Quick Actions -->
     <div class="row mb-3">
         <div class="col-12">
             <div class="sidebar-section">
@@ -95,7 +97,9 @@
                 </div>
             </div>
         </div>
-    </div>    <!-- Search and Filter Section -->
+    </div>
+
+    <!-- Search and Filter Section -->
     <div class="row g-2 mb-3">
         <div class="col-12">
             <div class="search-section">
@@ -281,9 +285,9 @@
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
-                                    <tbody>                                        @foreach (var license in Model.Licenses)
+                                    <tbody>
+                                        @foreach (var license in Model.Licenses)
                                         {
-                                            <span>
                                             @{
                                                 var rowClass = license.DaysUntilExpiry <= 0 ? "table-danger" :
                                                              license.DaysUntilExpiry <= 30 && license.DaysUntilExpiry > 0 ? "table-warning" : "";
@@ -295,7 +299,7 @@
                                                     _ => "bg-secondary"
                                                 };
                                                 
-                                                var statusClass = license.Status switch
+                                                var listStatusClass = license.Status switch
                                                 {
                                                     LicenseStatus.Active => "bg-success",
                                                     LicenseStatus.Expired => "bg-danger",
@@ -307,7 +311,6 @@
                                                 var expiryClass = license.DaysUntilExpiry <= 0 ? "text-danger" :
                                                                 license.DaysUntilExpiry <= 30 ? "text-warning" : "";
                                             }
-                                            </span>
                                             <tr class="@rowClass">
                                                 <td>
                                                     <a href="@Url.Action("Details", "License", new { id = license.LicenseId })" class="text-decoration-none">
@@ -332,7 +335,7 @@
                                                     <span class="badge @tierClass">@license.Tier</span>
                                                 </td>
                                                 <td>
-                                                    <span class="badge @statusClass">@license.Status</span>
+                                                    <span class="badge @listStatusClass">@license.Status</span>
                                                 </td>
                                                 <td>
                                                     <span data-bs-toggle="tooltip" title="@license.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")">
@@ -455,8 +458,6 @@
     </div>
 </div>
 
-
-
 @section Scripts {
     <script>
         // View switching functionality
@@ -563,5 +564,3 @@
         return Url.Action("Index") + "?" + queryString;
     }
 }
- 
-

@@ -1,3 +1,5 @@
+using TechWayFit.Licensing.Management.Core.Models.Consumer;
+
 namespace TechWayFit.Licensing.WebUI.ViewModels.Consumer
 {
     /// <summary>
@@ -5,7 +7,7 @@ namespace TechWayFit.Licensing.WebUI.ViewModels.Consumer
     /// </summary>
     public class ConsumerDetailViewModel
     {
-        public Core.Models.Consumer Consumer { get; set; } = new();
+        public ConsumerAccount Consumer { get; set; } = new();
         public List<LicenseSummaryViewModel> Licenses { get; set; } = new();
         public ConsumerStatisticsViewModel Statistics { get; set; } = new();
     }

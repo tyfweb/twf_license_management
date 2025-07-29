@@ -54,14 +54,15 @@
                 transform: translateX(0);
             }
         }
-        
-        /* Button hover effects */
+          /* Button hover effects */
         .btn-outline-light:hover {
             background: rgba(220, 38, 38, 0.2) !important;
             border-color: rgba(220, 38, 38, 0.4) !important;
             color: #fca5a5 !important;
         }
     </style>
+    
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
     <!-- Mobile Menu Toggle -->

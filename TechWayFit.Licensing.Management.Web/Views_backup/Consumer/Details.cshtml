@@ -14,7 +14,7 @@
                         <ol class="breadcrumb">
                             <li class="breadcrumb-item"><a asp-controller="License" asp-action="Index">Dashboard</a></li>
                             <li class="breadcrumb-item"><a asp-controller="Consumer" asp-action="Index">Consumers</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">@Model.Consumer.OrganizationName</li>
+                            <li class="breadcrumb-item active" aria-current="page">@Model.Consumer.CompanyName</li>
                         </ol>
                     </nav>
                 </div>
@@ -65,20 +65,20 @@
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label text-muted">Organization Name</label>
-                                        <div class="fw-bold">@Model.Consumer.OrganizationName</div>
+                                        <div class="fw-bold">@Model.Consumer.CompanyName</div>
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label text-muted">Contact Person</label>
-                                        <div>@(Model.Consumer.ContactPerson ?? "Not specified")</div>
+                                        <div>@(Model.Consumer.PrimaryContact?.Name ?? "Not specified")</div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label class="form-label text-muted">Contact Email</label>
                                         <div>
-                                            @if (!string.IsNullOrEmpty(Model.Consumer.ContactEmail))
+                                            @if (!string.IsNullOrEmpty(Model.Consumer.PrimaryContact?.Email))
                                             {
-                                                <a href="mailto:@Model.Consumer.ContactEmail">@Model.Consumer.ContactEmail</a>
+                                                <a href="mailto:@Model.Consumer.PrimaryContact.Email">@Model.Consumer.PrimaryContact.Email</a>
                                             }
                                             else
                                             {
@@ -89,9 +89,9 @@
                                     <div class="mb-3">
                                         <label class="form-label text-muted">Contact Phone</label>
                                         <div>
-                                            @if (!string.IsNullOrEmpty(Model.Consumer.PhoneNumber))
+                                            @if (!string.IsNullOrEmpty(Model.Consumer.PrimaryContact?.Phone))
                                             {
-                                                <a href="tel:@Model.Consumer.PhoneNumber">@Model.Consumer.PhoneNumber</a>
+                                                <a href="tel:@Model.Consumer.PrimaryContact.Phone">@Model.Consumer.PrimaryContact.Phone</a>
                                             }
                                             else
                                             {
@@ -125,11 +125,11 @@
                             </h5>
                         </div>
                         <div class="card-body">
-                            @if (!string.IsNullOrEmpty(Model.Consumer.Address))
+                            @if (Model.Consumer.Address != null && !string.IsNullOrEmpty(Model.Consumer.Address.ToString()))
                             {
                                 <div class="row">
                                     <div class="col-12">
-                                        <div>@Model.Consumer.Address</div>
+                                        <div>@Model.Consumer.Address.ToString()</div>
                                     </div>
                                 </div>
                             }
@@ -141,7 +141,7 @@
                     </div>
 
                     <!-- Notes -->
-                    @if (Model.Consumer.Metadata.ContainsKey("Notes") && !string.IsNullOrEmpty(Model.Consumer.Metadata["Notes"]))
+                    @* @if (Model.Consumer.Metadata.ContainsKey("Notes") && !string.IsNullOrEmpty(Model.Consumer.Metadata["Notes"]))
                     {
                         <div class="card mb-4">
                             <div class="card-header">
@@ -153,7 +153,7 @@
                                 <p class="mb-0">@Model.Consumer.Metadata["Notes"]</p>
                             </div>
                         </div>
-                    }
+                    } *@
                 </div>
 
                 <!-- License Statistics -->
@@ -320,7 +320,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <p>Are you sure you want to delete the consumer <strong>@Model.Consumer.OrganizationName</strong>?</p>
+                <p>Are you sure you want to delete the consumer <strong>@Model.Consumer.CompanyName</strong>?</p>
                 @if (Model.Statistics.ActiveLicenses > 0)
                 {
                     <div class="alert alert-warning">

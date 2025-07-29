@@ -3,251 +3,331 @@
     ViewData["Title"] = "Consumer Management";
 }
 
-<div class="container-fluid py-4">
+@section Styles {
+    <link rel="stylesheet" href="~/css/product-management.css" />
+}
+
+<div class="container-fluid py-3">
     <!-- Header Section -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <div>
-                    <h2 class="mb-1">
-                        <i class="fas fa-users text-info me-2"></i>
-                        Consumer Management
-                    </h2>
-                    <p class="text-muted mb-0">Manage license consumers and their organizational details</p>
+    <div class="header mb-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="mb-1">Consumer Management</h2>
+                <p class="text-muted mb-0">Manage your consumers, organizations and license assignments.</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="@Url.Action("Create", "Consumer")" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>New Consumer
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row g-2 mb-3">
+        <div class="col-sm-6 col-lg-3">
+            <div class="stats-card">
+                <div class="stats-icon">
+                    <i class="fas fa-users"></i>
                 </div>
-                <div>
-                    <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary me-2">
-                        <i class="fas fa-arrow-left me-1"></i>
-                        Back to Dashboard
-                    </a>
-                    <a href="@Url.Action("Create", "Consumer")" class="btn btn-info">
-                        <i class="fas fa-plus me-1"></i>
-                        Add New Consumer
-                    </a>
+                <div class="stats-content">
+                    <div class="stats-number">@(Model?.Consumers?.Count ?? 0)</div>
+                    <div class="stats-label">Total Consumers</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="stats-card stats-card-success">
+                <div class="stats-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stats-content">
+                    <div class="stats-number">@(Model?.Consumers?.Count(c => c.IsActive) ?? 0)</div>
+                    <div class="stats-label">Active Consumers</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="stats-card">
+                <div class="stats-icon">
+                    <i class="fas fa-certificate"></i>
+                </div>
+                <div class="stats-content">
+                    <div class="stats-number">0</div>
+                    <div class="stats-label">Total Licenses</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="stats-card">
+                <div class="stats-icon">
+                    <i class="fas fa-building"></i>
+                </div>
+                <div class="stats-content">
+                    <div class="stats-number">0</div>
+                    <div class="stats-label">Total Organizations</div>
+                </div>
+            </div>
+        </div>    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <h5><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+                </div>
+                <div class="section-content">
+                    <div class="row g-2">
+                        <div class="col-sm-6 col-lg-3">
+                            <button type="button" class="btn btn-outline-primary w-100" onclick="exportConsumers()">
+                                <i class="fas fa-download me-2"></i>Export Consumers
+                            </button>
+                        </div>
+                        <div class="col-sm-6 col-lg-3">
+                            <button type="button" class="btn btn-outline-secondary w-100" onclick="importConsumers()">
+                                <i class="fas fa-upload me-2"></i>Import Consumers
+                            </button>
+                        </div>
+                        <div class="col-sm-6 col-lg-3">
+                            <button type="button" class="btn btn-outline-info w-100" onclick="bulkEmail()">
+                                <i class="fas fa-envelope me-2"></i>Bulk Email
+                            </button>
+                        </div>
+                        <div class="col-sm-6 col-lg-3">
+                            <button type="button" class="btn btn-outline-success w-100" onclick="generateReport()">
+                                <i class="fas fa-chart-bar me-2"></i>Generate Report
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Search and Filter Section -->
-    <div class="row mb-4">
+    <div class="row g-2 mb-3">
         <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <form method="get" class="row g-3">
-                        <div class="col-md-4">
-                            <label class="form-label">Search Organizations</label>
-                            <input type="text" name="SearchTerm" class="form-control" placeholder="Organization name or contact..." 
-                                   value="@Model.SearchTerm">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Status</label>
-                            <select name="Status" class="form-select">
-                                <option value="">All Status</option>
-                                <option value="Active">Active</option>
-                                <option value="Inactive">Inactive</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Sort By</label>
-                            <select name="sort" class="form-select">
-                                <option value="name">Organization Name</option>
-                                <option value="email">Contact Email</option>
-                                <option value="created">Date Created</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2 d-flex align-items-end">
-                            <button type="submit" class="btn btn-primary w-100">
-                                <i class="fas fa-search me-1"></i>
-                                Search
-                            </button>
-                        </div>
-                    </form>
-                </div>
+            <div class="search-section">
+                <form method="get" class="d-flex gap-2 align-items-end">
+                    <div class="flex-grow-1">
+                        <input type="text" name="SearchTerm" class="form-control" placeholder="Search consumers..." value="@Model.SearchTerm">
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="IncludeInactive" id="includeInactive">
+                        <label class="form-check-label" for="includeInactive">
+                            Include inactive consumers
+                        </label>
+                    </div>
+                    <div class="filter-button">
+                        <button type="button" class="btn btn-outline-primary">
+                            <i class="fas fa-sliders-h me-1"></i>Filter
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 
-    <!-- Consumers Grid -->
+    <!-- Consumer Directory -->
     <div class="row">
         <div class="col-12">
-            <div class="card">
-                <div class="card-header bg-info text-white">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-list me-2"></i>
-                        Consumer Directory
-                    </h5>
+            <div class="edit-section">
+                <div class="section-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-users me-2"></i>Consumer Directory</h5>
+                        <div class="btn-group" role="group" aria-label="View toggle">
+                            <button type="button" class="btn btn-outline-secondary btn-sm active" id="gridViewBtn" onclick="switchView('grid')">
+                                <i class="fas fa-th-large me-1"></i>Grid
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="listViewBtn" onclick="switchView('list')">
+                                <i class="fas fa-list me-1"></i>List
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
+                <div class="section-content">
                     @if (Model?.Consumers != null && Model.Consumers.Any())
-                    {
-                        <div class="row">
-                            @foreach (var consumer in Model.Consumers)
-                            {
-                                <div class="col-lg-6 col-xl-4 mb-4">
-                                    <div class="card h-100 border-0 shadow-sm hover-card">
-                                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                                            <div>
-                                                <h6 class="card-title mb-0">
-                                                    <i class="fas fa-building text-info me-1"></i>
-                                                    @consumer.OrganizationName
-                                                </h6>
-                                                <small class="text-muted">ID: @consumer.ConsumerId</small>
-                                            </div>
-                                            @if (consumer.IsActive)
-                                            {
-                                                <span class="badge bg-success">Active</span>
-                                            }
-                                            else
-                                            {
-                                                <span class="badge bg-secondary">Inactive</span>
-                                            }
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="mb-2">
-                                                <strong>Contact Person:</strong><br>
-                                                <i class="fas fa-user text-muted me-1"></i>
-                                                @consumer.ContactPerson
-                                            </div>
-                                            <div class="mb-2">
-                                                <strong>Email:</strong><br>
-                                                <i class="fas fa-envelope text-muted me-1"></i>
-                                                <a href="mailto:@consumer.ContactEmail" class="text-decoration-none">
-                                                    @consumer.ContactEmail
-                                                </a>
-                                            </div>
-                                        </div>
-                                        <div class="card-footer bg-transparent">
-                                            <div class="d-flex justify-content-between">
-                                                <div class="btn-group">
-                                                    <a href="@Url.Action("Details", "Consumer", new { id = consumer.ConsumerId })" 
-                                                       class="btn btn-outline-primary btn-sm">
-                                                        <i class="fas fa-eye me-1"></i>
-                                                        View
-                                                    </a>
-                                                    <a href="@Url.Action("Edit", "Consumer", new { id = consumer.ConsumerId })" 
-                                                       class="btn btn-outline-secondary btn-sm">
-                                                        <i class="fas fa-edit me-1"></i>
-                                                        Edit
-                                                    </a>
+                    {                        <!-- Grid View -->
+                        <div id="gridView" class="view-container">
+                            <div class="row g-2">
+                                @foreach (var consumer in Model.Consumers)
+                                {
+                                    <div class="col-sm-6 col-lg-4 col-xl-3">
+                                        <div class="consumer-card">
+                                            <div class="consumer-card-header">
+                                                <div class="consumer-info">
+                                                    <h6 class="consumer-name">
+                                                        <i class="fas fa-building me-2"></i>@consumer.OrganizationName
+                                                    </h6>
                                                 </div>
-                                                <div class="btn-group">
-                                                    <button type="button" class="btn btn-outline-info btn-sm" 
-                                                            onclick="viewLicenses('@consumer.ConsumerId')">
-                                                        <i class="fas fa-certificate me-1"></i>
-                                                        Licenses
+                                                @if (consumer.IsActive)
+                                                {
+                                                    <span class="badge bg-success">Active</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">Inactive</span>
+                                                }
+                                            </div>
+                                            <div class="consumer-card-body">
+                                                <div class="consumer-detail">
+                                                    <label class="detail-label">Consumer ID</label>
+                                                    <div class="detail-value">
+                                                        <i class="fas fa-id-card me-1"></i>@consumer.ConsumerId
+                                                    </div>
+                                                </div>
+                                                <div class="consumer-detail">
+                                                    <label class="detail-label">Contact Person</label>
+                                                    <div class="detail-value">
+                                                        <i class="fas fa-user me-1"></i>@consumer.ContactPerson
+                                                    </div>
+                                                </div>
+                                                <div class="consumer-detail">
+                                                    <label class="detail-label">Email</label>
+                                                    <div class="detail-value">
+                                                        <i class="fas fa-envelope me-1"></i>
+                                                        <a href="mailto:@consumer.ContactEmail" class="text-decoration-none">
+                                                            @consumer.ContactEmail
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>                                            <div class="consumer-card-actions">
+                                                <div class="d-flex justify-content-between gap-1">
+                                                    <a href="@Url.Action("Details", "Consumer", new { id = consumer.ConsumerId })" class="btn btn-sm btn-outline-primary flex-fill text-center">
+                                                        <i class="fas fa-eye"></i>
+                                                        <span class="d-none d-lg-inline ms-1">View</span>
+                                                    </a>
+                                                    <a href="@Url.Action("Edit", "Consumer", new { id = consumer.ConsumerId })" class="btn btn-sm btn-outline-secondary flex-fill text-center">
+                                                        <i class="fas fa-edit"></i>
+                                                        <span class="d-none d-lg-inline ms-1">Edit</span>
+                                                    </a>
+                                                    <button type="button" class="btn btn-sm btn-outline-info flex-fill text-center" onclick="viewLicenses('@consumer.ConsumerId')">
+                                                        <i class="fas fa-certificate"></i>
+                                                        <span class="d-none d-lg-inline ms-1">Licenses</span>
                                                     </button>
-                                                    <button type="button" class="btn btn-outline-danger btn-sm" 
-                                                            onclick="confirmDelete('@consumer.ConsumerId', '@consumer.OrganizationName')">
-                                                        <i class="fas fa-trash me-1"></i>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger flex-fill text-center" onclick="confirmDelete('@consumer.ConsumerId', '@consumer.OrganizationName')">
+                                                        <i class="fas fa-trash"></i>
+                                                        <span class="d-none d-lg-inline ms-1">Delete</span>
                                                     </button>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            }
+                                }
+                            </div>
+                        </div>
+
+                        <!-- List View -->
+                        <div id="listView" class="view-container" style="display: none;">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Organization</th>
+                                            <th>Contact Person</th>
+                                            <th>Email</th>
+                                            <th>Active Licenses</th>
+                                            <th>Total Spent</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var consumer in Model.Consumers)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="fas fa-building me-2 text-muted"></i>
+                                                        <div>
+                                                            <div class="fw-semibold">@consumer.OrganizationName</div>
+                                                            <small class="text-muted">ID: @consumer.ConsumerId</small>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="fas fa-user me-2 text-muted"></i>
+                                                        @consumer.ContactPerson
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <a href="mailto:@consumer.ContactEmail" class="text-decoration-none">
+                                                        <i class="fas fa-envelope me-1 text-muted"></i>
+                                                        @consumer.ContactEmail
+                                                    </a>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-primary rounded-pill">0</span>
+                                                </td>
+                                                <td>
+                                                    <span class="fw-semibold">$0.00</span>
+                                                </td>
+                                                <td>
+                                                    @if (consumer.IsActive)
+                                                    {
+                                                        <span class="badge bg-success">Active</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-secondary">Inactive</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <div class="btn-group" role="group">
+                                                        <a href="@Url.Action("Details", "Consumer", new { id = consumer.ConsumerId })" class="btn btn-outline-primary btn-sm" title="View Details">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                        <a href="@Url.Action("Edit", "Consumer", new { id = consumer.ConsumerId })" class="btn btn-outline-secondary btn-sm" title="Edit">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                        <button type="button" class="btn btn-outline-info btn-sm" title="View Licenses" onclick="viewLicenses('@consumer.ConsumerId')">
+                                                            <i class="fas fa-certificate"></i>
+                                                        </button>
+                                                        <button type="button" class="btn btn-outline-danger btn-sm" title="Delete" onclick="confirmDelete('@consumer.ConsumerId', '@consumer.OrganizationName')">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     }
                     else
                     {
                         <div class="text-center py-5">
                             <i class="fas fa-users fa-3x text-muted mb-3"></i>
-                            <h4 class="text-muted">No Consumers Found</h4>
-                            <p class="text-muted">Get started by adding your first consumer organization.</p>
-                            <a href="@Url.Action("Create", "Consumer")" class="btn btn-info">
-                                <i class="fas fa-plus me-1"></i>
-                                Add First Consumer
+                            <h6 class="text-muted">No consumers found</h6>
+                            <p class="text-muted mb-3">Start by adding your first consumer organization</p>
+                            <a href="@Url.Action("Create", "Consumer")" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Add First Consumer
                             </a>
                         </div>
-                    }
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Statistics Cards -->
-    <div class="row mt-4">
-        <div class="col-md-3">
-            <div class="card bg-primary text-white">
-                <div class="card-body text-center">
-                    <i class="fas fa-users fa-2x mb-2"></i>
-                    <h4>@(Model?.Consumers?.Count ?? 0)</h4>
-                    <small>Total Consumers</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-success text-white">
-                <div class="card-body text-center">
-                    <i class="fas fa-check-circle fa-2x mb-2"></i>
-                    <h4>@(Model?.Consumers?.Count(c => c.IsActive) ?? 0)</h4>
-                    <small>Active Consumers</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-warning text-dark">
-                <div class="card-body text-center">
-                    <i class="fas fa-pause-circle fa-2x mb-2"></i>
-                    <h4>@(Model?.Consumers?.Count(c => !c.IsActive) ?? 0)</h4>
-                    <small>Inactive Consumers</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-info text-white">
-                <div class="card-body text-center">
-                    <i class="fas fa-certificate fa-2x mb-2"></i>
-                    <h4>0</h4>
-                    <small>Total Licenses</small>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Quick Actions -->
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card bg-light">
-                <div class="card-body">
-                    <h6 class="card-title">
-                        <i class="fas fa-bolt text-warning me-1"></i>
-                        Quick Actions
-                    </h6>
-                    <div class="btn-group">
-                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="exportConsumers()">
-                            <i class="fas fa-download me-1"></i>
-                            Export Consumers
-                        </button>
-                        <button type="button" class="btn btn-outline-info btn-sm" onclick="importConsumers()">
-                            <i class="fas fa-upload me-1"></i>
-                            Import Consumers
-                        </button>
-                        <button type="button" class="btn btn-outline-success btn-sm" onclick="bulkEmail()">
-                            <i class="fas fa-envelope me-1"></i>
-                            Bulk Email
-                        </button>
-                    </div>
-                </div>
+                    }                </div>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteModal" tabindex="-1">
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title">Confirm Delete</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>Confirm Delete
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <p>Are you sure you want to delete the consumer "<strong id="deleteConsumerName"></strong>"?</p>
                 <div class="alert alert-warning">
-                    <i class="fas fa-exclamation-triangle me-1"></i>
-                    This action cannot be undone and will affect all associated licenses.
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Warning:</strong> This action cannot be undone and will affect all associated licenses.
                 </div>
             </div>
             <div class="modal-footer">
@@ -255,8 +335,7 @@
                 <form id="deleteForm" method="post" style="display: inline;">
                     @Html.AntiForgeryToken()
                     <button type="submit" class="btn btn-danger">
-                        <i class="fas fa-trash me-1"></i>
-                        Delete Consumer
+                        <i class="fas fa-trash me-2"></i>Delete Consumer
                     </button>
                 </form>
             </div>
@@ -266,14 +345,41 @@
 
 @section Scripts {
     <script>
+        // View switching functionality
+        function switchView(viewType) {
+            const gridView = document.getElementById('gridView');
+            const listView = document.getElementById('listView');
+            const gridBtn = document.getElementById('gridViewBtn');
+            const listBtn = document.getElementById('listViewBtn');
+
+            if (viewType === 'grid') {
+                gridView.style.display = 'block';
+                listView.style.display = 'none';
+                gridBtn.classList.add('active');
+                listBtn.classList.remove('active');
+                localStorage.setItem('consumerViewType', 'grid');
+            } else {
+                gridView.style.display = 'none';
+                listView.style.display = 'block';
+                gridBtn.classList.remove('active');
+                listBtn.classList.add('active');
+                localStorage.setItem('consumerViewType', 'list');
+            }
+        }
+
+        // Initialize view based on saved preference
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedView = localStorage.getItem('consumerViewType') || 'grid';
+            switchView(savedView);
+        });
+
         function confirmDelete(consumerId, consumerName) {
-            $('#deleteConsumerName').text(consumerName);
-            $('#deleteForm').attr('action', '@Url.Action("Delete", "Consumer")/' + consumerId);
-            $('#deleteModal').modal('show');
+            document.getElementById('deleteConsumerName').textContent = consumerName;
+            document.getElementById('deleteForm').setAttribute('action', '@Url.Action("Delete", "Consumer")/' + consumerId);
+            new bootstrap.Modal(document.getElementById('deleteModal')).show();
         }
 
         function viewLicenses(consumerId) {
-            // Navigate to licenses filtered by consumer
             window.location.href = '@Url.Action("Index", "License")?consumerId=' + consumerId;
         }
 
@@ -283,10 +389,8 @@
 
         function importConsumers() {
             alert('Import functionality will be implemented in future updates.');
-        }
-
-        function bulkEmail() {
-            alert('Bulk email functionality will be implemented in future updates.');
+        }        function generateReport() {
+            alert('Report generation functionality will be implemented in future updates.');
         }
     </script>
 }

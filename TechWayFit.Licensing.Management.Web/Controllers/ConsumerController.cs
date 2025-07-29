@@ -211,10 +211,9 @@ public class ConsumerController : Controller
             ValidFrom = l.ValidFrom,
             ValidTo = l.ValidTo,
             CreatedAt = l.CreatedAt            
-        }).ToList(); 
-        return new ConsumerDetailViewModel
+        }).ToList();        return new ConsumerDetailViewModel
         {
-            Consumer = consumer.ConvertToConsumerModel(),
+            Consumer = consumer,
             Licenses = licenseSummary,
             Statistics = new ConsumerStatisticsViewModel
             {
