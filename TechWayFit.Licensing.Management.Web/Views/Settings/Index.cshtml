@@ -1,0 +1,1601 @@
+@model TechWayFit.Licensing.Management.Web.ViewModels.Settings.SettingsIndexViewModel
+@using TechWayFit.Licensing.Management.Web.ViewModels.Settings
+@{
+    ViewData["Title"] = "System Settings";
+    ViewData["Description"] = "Manage system settings and configuration";
+}
+
+@section Styles {
+    <style>
+        .settings-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .settings-card {
+            background: var(--bs-white);
+            border: 1px solid var(--bs-border-color);
+            border-radius: 0.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            margin-bottom: 1.5rem;
+        }
+
+        .settings-header {
+            background: linear-gradient(135deg, var(--bs-primary), var(--bs-primary-dark, #0d47a1));
+            color: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem 0.5rem 0 0;
+            margin-bottom: 0;
+        }
+
+        .category-tabs {
+            border-bottom: 1px solid var(--bs-border-color);
+            background: var(--bs-light);
+            padding: 0;
+        }
+
+        .category-tab {
+            background: none;
+            border: none;
+            padding: 1rem 1.5rem;
+            color: var(--bs-secondary);
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .category-tab:hover {
+            background: rgba(var(--bs-primary-rgb), 0.1);
+            color: var(--bs-primary);
+        }
+
+        .category-tab.active {
+            background: white;
+            color: var(--bs-primary);
+            border-bottom-color: var(--bs-primary);
+        }
+
+        .settings-content {
+            padding: 0;
+        }
+
+        .setting-item {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--bs-border-color);
+            transition: background-color 0.2s ease;
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-item:hover {
+            background: var(--bs-light);
+        }
+
+        .setting-label {
+            font-weight: 600;
+            color: var(--bs-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .setting-description {
+            color: var(--bs-secondary);
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        .setting-value {
+            min-height: 2.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .setting-controls {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .btn-setting {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.875rem;
+            border-radius: 0.25rem;
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-box input {
+            padding-left: 2.5rem;
+            border-radius: 2rem;
+            border: 2px solid var(--bs-border-color);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--bs-secondary);
+        }
+
+        .settings-toolbar {
+            background: var(--bs-light);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--bs-border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .setting-modified {
+            border-left: 4px solid var(--bs-warning);
+            background: rgba(var(--bs-warning-rgb), 0.1);
+        }
+
+        .setting-modified .setting-label::after {
+            content: " (Modified)";
+            color: var(--bs-warning);
+            font-weight: normal;
+            font-size: 0.75rem;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid var(--bs-border-color);
+            border-radius: 50%;
+            border-top-color: var(--bs-primary);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @@keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .validation-error {
+            color: var(--bs-danger);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .setting-type-badge {
+            background: var(--bs-info);
+            color: white;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 1rem;
+            margin-left: 0.5rem;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 3rem;
+            color: var(--bs-secondary);
+        }
+
+        .no-results i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        @@media (max-width: 768px) {
+            .settings-toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .category-tabs {
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+
+            .category-tab {
+                display: inline-block;
+                white-space: nowrap;
+            }
+
+            .setting-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+}
+
+<div class="settings-container">
+    <div class="settings-card">
+        <div class="settings-header">
+            <h1 class="mb-0">
+                <i class="fas fa-cogs me-2"></i>
+                System Settings
+            </h1>
+            <p class="mb-0 mt-2 opacity-75">Configure system behavior and preferences</p>
+        </div>
+
+        <div class="settings-toolbar">
+            <div class="search-box flex-grow-1" style="max-width: 400px;">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchSettings" class="form-control" placeholder="Search settings...">
+            </div>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-outline-success btn-sm" id="saveAllBtn" disabled>
+                    <i class="fas fa-save me-1"></i>
+                    Save All Changes
+                </button>
+                <button type="button" class="btn btn-outline-warning btn-sm" id="resetAllBtn">
+                    <i class="fas fa-undo me-1"></i>
+                    Reset All
+                </button>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" id="exportBtn">
+                            <i class="fas fa-download me-2"></i>Export Settings
+                        </a></li>
+                        <li><a class="dropdown-item" href="#" id="importBtn">
+                            <i class="fas fa-upload me-2"></i>Import Settings
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="#" id="resetToDefaultsBtn">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Reset to Defaults
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="category-tabs">
+            @if (Model.Categories?.Any() == true)
+            {
+                @foreach (var category in Model.Categories)
+                {
+                    <button type="button" class="category-tab @(category == Model.Categories.First() ? "active" : "")" 
+                            data-category="@category">
+                        @category.Replace("_", " ")
+                    </button>
+                }
+            }
+        </div>
+
+        <div class="settings-content" id="settingsContent">
+            @if (Model.SettingsGrouped?.Any() == true)
+            {
+                @foreach (var category in Model.Categories ?? new List<string>())
+                {
+                    var categorySettings = Model.SettingsGrouped.ContainsKey(category) 
+                        ? Model.SettingsGrouped[category] 
+                        : new List<SettingViewModel>();
+                    <div class="category-content @(category == Model.Categories?.FirstOrDefault() ? "" : "d-none")" 
+                         data-category="@category">
+                        @if (categorySettings.Any())
+                        {
+                            @foreach (var setting in categorySettings)
+                            {
+                                <div class="setting-item @(setting.IsModified ? "setting-modified" : "")" 
+                                     data-setting-key="@setting.Key" 
+                                     data-category="@setting.Category">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="setting-label">
+                                                @setting.Key
+                                                <span class="setting-type-badge">@setting.DataType</span>
+                                            </div>
+                                            @if (!string.IsNullOrEmpty(setting.Description))
+                                            {
+                                                <div class="setting-description">@setting.Description</div>
+                                            }
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="setting-value">
+                                                @if (setting.DataType.ToLower() == "boolean")
+                                                {
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input setting-input" 
+                                                               type="checkbox" 
+                                                               id="setting_@setting.Key" 
+                                                               @(setting.Value.ToLower() == "true" ? "checked" : "")
+                                                               data-original="@setting.Value"
+                                                               data-key="@setting.Key">
+                                                        <label class="form-check-label" for="setting_@setting.Key">
+                                                            @(setting.Value.ToLower() == "true" ? "Enabled" : "Disabled")
+                                                        </label>
+                                                    </div>
+                                                }
+                                                else if (setting.DataType.ToLower() == "integer" || setting.DataType.ToLower() == "decimal")
+                                                {
+                                                    <input type="number" 
+                                                           class="form-control setting-input" 
+                                                           id="setting_@setting.Key" 
+                                                           value="@setting.Value" 
+                                                           data-original="@setting.Value"
+                                                           data-key="@setting.Key"
+                                                           @(setting.DataType.ToLower() == "decimal" ? "step=0.01" : "")>
+                                                }
+                                                else
+                                                {
+                                                    <input type="text" 
+                                                           class="form-control setting-input" 
+                                                           id="setting_@setting.Key" 
+                                                           value="@setting.Value" 
+                                                           data-original="@setting.Value"
+                                                           data-key="@setting.Key">
+                                                }
+                                                <div class="setting-controls mt-2">
+                                                    <button type="button" 
+                                                            class="btn btn-success btn-setting save-setting-btn" 
+                                                            data-key="@setting.Key"
+                                                            style="display: none;">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                    <button type="button" 
+                                                            class="btn btn-secondary btn-setting cancel-setting-btn" 
+                                                            data-key="@setting.Key"
+                                                            style="display: none;">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                    <button type="button" 
+                                                            class="btn btn-warning btn-setting reset-setting-btn" 
+                                                            data-key="@setting.Key">
+                                                        <i class="fas fa-undo"></i>
+                                                    </button>
+                                                </div>
+                                                <div class="validation-error" id="error_@setting.Key" style="display: none;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="no-results">
+                                <i class="fas fa-cog"></i>
+                                <p>No settings found in this category.</p>
+                            </div>
+                        }
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="no-results">
+                    <i class="fas fa-search"></i>
+                    <p>No settings found.</p>
+                    <small class="text-muted">Check your search criteria or contact administrator.</small>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999;">
+    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 2rem; border-radius: 0.5rem; text-align: center;">
+        <div class="loading-spinner mb-2"></div>
+        <p class="mb-0">Processing...</p>
+    </div>
+</div>
+
+<!-- Import Modal -->
+<div class="modal fade" id="importModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Import Settings</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="importFile" class="form-label">Select settings file (JSON)</label>
+                    <input type="file" class="form-control" id="importFile" accept=".json">
+                </div>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Import will overwrite existing settings with matching keys.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmImportBtn" disabled>Import</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            let modifiedSettings = new Set();
+            let originalValues = new Map();
+
+            // Initialize original values
+            $('.setting-input').each(function() {
+                const key = $(this).data('key');
+                const value = $(this).data('original');
+                originalValues.set(key, value);
+            });
+
+            // Category tab switching
+            $('.category-tab').click(function() {
+                const category = $(this).data('category');
+                
+                $('.category-tab').removeClass('active');
+                $(this).addClass('active');
+                
+                $('.category-content').addClass('d-none');
+                $(`.category-content[data-category="${category}"]`).removeClass('d-none');
+            });
+
+            // Search functionality
+            $('#searchSettings').on('input', function() {
+                const searchTerm = $(this).val().toLowerCase();
+                
+                if (searchTerm === '') {
+                    $('.setting-item').show();
+                    $('.no-results').hide();
+                } else {
+                    let hasResults = false;
+                    $('.setting-item').each(function() {
+                        const key = $(this).data('setting-key').toLowerCase();
+                        const description = $(this).find('.setting-description').text().toLowerCase();
+                        
+                        if (key.includes(searchTerm) || description.includes(searchTerm)) {
+                            $(this).show();
+                            hasResults = true;
+                        } else {
+                            $(this).hide();
+                        }
+                    });
+                    
+                    $('.no-results').toggle(!hasResults);
+                }
+            });
+
+            // Setting value change tracking
+            $('.setting-input').on('input change', function() {
+                const key = $(this).data('key');
+                const currentValue = $(this).is(':checkbox') ? $(this).is(':checked').toString() : $(this).val();
+                const originalValue = originalValues.get(key);
+                
+                const isModified = currentValue !== originalValue;
+                const settingItem = $(this).closest('.setting-item');
+                
+                if (isModified) {
+                    modifiedSettings.add(key);
+                    settingItem.addClass('setting-modified');
+                    settingItem.find('.save-setting-btn, .cancel-setting-btn').show();
+                } else {
+                    modifiedSettings.delete(key);
+                    settingItem.removeClass('setting-modified');
+                    settingItem.find('.save-setting-btn, .cancel-setting-btn').hide();
+                }
+                
+                // Update checkbox label
+                if ($(this).is(':checkbox')) {
+                    const label = $(this).next('label');
+                    label.text($(this).is(':checked') ? 'Enabled' : 'Disabled');
+                }
+                
+                updateSaveAllButton();
+            });
+
+            // Save individual setting
+            $('.save-setting-btn').click(function() {
+                const key = $(this).data('key');
+                saveSetting(key);
+            });
+
+            // Cancel individual setting
+            $('.cancel-setting-btn').click(function() {
+                const key = $(this).data('key');
+                resetSetting(key);
+            });
+
+            // Reset individual setting
+            $('.reset-setting-btn').click(function() {
+                const key = $(this).data('key');
+                if (confirm(`Reset "${key}" to its default value?`)) {
+                    resetSettingToDefault(key);
+                }
+            });
+
+            // Save all changes
+            $('#saveAllBtn').click(function() {
+                if (modifiedSettings.size > 0) {
+                    saveAllSettings();
+                }
+            });
+
+            // Reset all
+            $('#resetAllBtn').click(function() {
+                if (confirm('Reset all modified settings to their original values?')) {
+                    resetAllSettings();
+                }
+            });
+
+            // Export settings
+            $('#exportBtn').click(function() {
+                exportSettings();
+            });
+
+            // Import settings
+            $('#importBtn').click(function() {
+                $('#importModal').modal('show');
+            });
+
+            $('#importFile').change(function() {
+                $('#confirmImportBtn').prop('disabled', !this.files.length);
+            });
+
+            $('#confirmImportBtn').click(function() {
+                importSettings();
+            });
+
+            // Reset to defaults
+            $('#resetToDefaultsBtn').click(function() {
+                if (confirm('Reset ALL settings to their default values? This cannot be undone.')) {
+                    resetToDefaults();
+                }
+            });
+
+            function updateSaveAllButton() {
+                $('#saveAllBtn').prop('disabled', modifiedSettings.size === 0);
+            }
+
+            function saveSetting(key) {
+                const input = $(`.setting-input[data-key="${key}"]`);
+                const value = input.is(':checkbox') ? input.is(':checked').toString() : input.val();
+                
+                showLoading();
+                
+                $.ajax({
+                    url: '@Url.Action("UpdateSetting")',
+                    method: 'POST',
+                    data: {
+                        key: key,
+                        value: value
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            originalValues.set(key, value);
+                            modifiedSettings.delete(key);
+                            
+                            const settingItem = input.closest('.setting-item');
+                            settingItem.removeClass('setting-modified');
+                            settingItem.find('.save-setting-btn, .cancel-setting-btn').hide();
+                            
+                            updateSaveAllButton();
+                            showToast('Setting saved successfully', 'success');
+                        } else {
+                            showError(key, response.message || 'Failed to save setting');
+                        }
+                    },
+                    error: function() {
+                        showError(key, 'Failed to save setting');
+                    },
+                    complete: function() {
+                        hideLoading();
+                    }
+                });
+            }
+
+            function resetSetting(key) {
+                const input = $(`.setting-input[data-key="${key}"]`);
+                const originalValue = originalValues.get(key);
+                
+                if (input.is(':checkbox')) {
+                    input.prop('checked', originalValue.toLowerCase() === 'true');
+                    input.next('label').text(originalValue.toLowerCase() === 'true' ? 'Enabled' : 'Disabled');
+                } else {
+                    input.val(originalValue);
+                }
+                
+                modifiedSettings.delete(key);
+                const settingItem = input.closest('.setting-item');
+                settingItem.removeClass('setting-modified');
+                settingItem.find('.save-setting-btn, .cancel-setting-btn').hide();
+                
+                updateSaveAllButton();
+            }
+
+            function resetSettingToDefault(key) {
+                showLoading();
+                
+                $.ajax({
+                    url: '@Url.Action("ResetSetting")',
+                    method: 'POST',
+                    data: { key: key },
+                    success: function(response) {
+                        if (response.success) {
+                            location.reload();
+                        } else {
+                            showError(key, response.message || 'Failed to reset setting');
+                        }
+                    },
+                    error: function() {
+                        showError(key, 'Failed to reset setting');
+                    },
+                    complete: function() {
+                        hideLoading();
+                    }
+                });
+            }
+
+            function saveAllSettings() {
+                const updates = Array.from(modifiedSettings).map(key => {
+                    const input = $(`.setting-input[data-key="${key}"]`);
+                    const value = input.is(':checkbox') ? input.is(':checked').toString() : input.val();
+                    return { key: key, value: value };
+                });
+                
+                showLoading();
+                
+                $.ajax({
+                    url: '@Url.Action("BulkUpdate")',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(updates),
+                    success: function(response) {
+                        if (response.success) {
+                            location.reload();
+                        } else {
+                            showToast(response.message || 'Some settings failed to save', 'warning');
+                        }
+                    },
+                    error: function() {
+                        showToast('Failed to save settings', 'error');
+                    },
+                    complete: function() {
+                        hideLoading();
+                    }
+                });
+            }
+
+            function resetAllSettings() {
+                modifiedSettings.forEach(key => resetSetting(key));
+                modifiedSettings.clear();
+                updateSaveAllButton();
+            }
+
+            function exportSettings() {
+                window.location.href = '@Url.Action("ExportSettings")';
+            }
+
+            function importSettings() {
+                const fileInput = document.getElementById('importFile');
+                if (!fileInput.files.length) return;
+                
+                const formData = new FormData();
+                formData.append('file', fileInput.files[0]);
+                
+                showLoading();
+                
+                $.ajax({
+                    url: '@Url.Action("ImportSettings")',
+                    method: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        if (response.success) {
+                            $('#importModal').modal('hide');
+                            showToast('Settings imported successfully', 'success');
+                            setTimeout(() => location.reload(), 1000);
+                        } else {
+                            showToast(response.message || 'Failed to import settings', 'error');
+                        }
+                    },
+                    error: function() {
+                        showToast('Failed to import settings', 'error');
+                    },
+                    complete: function() {
+                        hideLoading();
+                    }
+                });
+            }
+
+            function resetToDefaults() {
+                showLoading();
+                
+                $.ajax({
+                    url: '@Url.Action("ResetToDefaults")',
+                    method: 'POST',
+                    success: function(response) {
+                        if (response.success) {
+                            showToast('All settings reset to defaults', 'success');
+                            setTimeout(() => location.reload(), 1000);
+                        } else {
+                            showToast(response.message || 'Failed to reset settings', 'error');
+                        }
+                    },
+                    error: function() {
+                        showToast('Failed to reset settings', 'error');
+                    },
+                    complete: function() {
+                        hideLoading();
+                    }
+                });
+            }
+
+            function showError(key, message) {
+                $(`#error_${key}`).text(message).show();
+                setTimeout(() => $(`#error_${key}`).hide(), 5000);
+            }
+
+            function showLoading() {
+                $('#loadingOverlay').show();
+            }
+
+            function hideLoading() {
+                $('#loadingOverlay').hide();
+            }
+
+            function showToast(message, type = 'info') {
+                // Simple toast implementation - you can replace with your preferred toast library
+                const alertClass = type === 'success' ? 'alert-success' : 
+                                 type === 'error' ? 'alert-danger' : 
+                                 type === 'warning' ? 'alert-warning' : 'alert-info';
+                
+                const toast = $(`<div class="alert ${alertClass} alert-dismissible fade show position-fixed" style="top: 20px; right: 20px; z-index: 10000;">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>`);
+                
+                $('body').append(toast);
+                setTimeout(() => toast.alert('close'), 5000);
+            }
+        });
+    </script>
+}
+        }
+        
+        .settings-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+        
+        .settings-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 6px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            display: block;
+        }
+        
+        .category-tabs {
+            border-bottom: 2px solid #e2e8f0;
+            margin-bottom: 2rem;
+        }
+        
+        .category-tab {
+            padding: 0.75rem 1.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .category-tab:hover {
+            background-color: #f7fafc;
+        }
+        
+        .category-tab.active {
+            border-bottom-color: #4299e1;
+            color: #4299e1;
+            font-weight: 600;
+        }
+        
+        .category-badge {
+            background: #e2e8f0;
+            color: #4a5568;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            margin-left: 0.5rem;
+        }
+        
+        .category-tab.active .category-badge {
+            background: #4299e1;
+            color: white;
+        }
+        
+        .settings-section {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+        
+        .section-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            background: #f7fafc;
+            border-radius: 8px 8px 0 0;
+        }
+        
+        .section-title {
+            margin: 0;
+            color: #2d3748;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        .settings-grid {
+            padding: 1.5rem;
+        }
+        
+        .setting-item {
+            display: grid;
+            grid-template-columns: 1fr 2fr auto;
+            gap: 1rem;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid #f7fafc;
+        }
+        
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+        
+        .setting-label {
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .setting-description {
+            font-size: 0.875rem;
+            color: #718096;
+            margin-top: 0.25rem;
+        }
+        
+        .setting-input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .setting-input:focus {
+            outline: none;
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+        }
+        
+        .setting-input:disabled {
+            background-color: #f7fafc;
+            color: #a0aec0;
+            cursor: not-allowed;
+        }
+        
+        .setting-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn-icon {
+            padding: 0.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.875rem;
+        }
+        
+        .btn-reset {
+            background: #fed7d7;
+            color: #c53030;
+        }
+        
+        .btn-reset:hover {
+            background: #feb2b2;
+        }
+        
+        .btn-save {
+            background: #c6f6d5;
+            color: #2f855a;
+        }
+        
+        .btn-save:hover {
+            background: #9ae6b4;
+        }
+        
+        .btn-save:disabled {
+            background: #e2e8f0;
+            color: #a0aec0;
+            cursor: not-allowed;
+        }
+        
+        .setting-modified {
+            border-left: 4px solid #f6ad55;
+            padding-left: calc(1rem - 4px);
+        }
+        
+        .setting-readonly {
+            background-color: #f9f9f9;
+        }
+        
+        .search-container {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #a0aec0;
+        }
+        
+        .config-section {
+            background: #f8f9ff;
+            border: 1px solid #e6e8ff;
+        }
+        
+        .config-item {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 1rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e6e8ff;
+        }
+        
+        .config-item:last-child {
+            border-bottom: none;
+        }
+        
+        .config-key {
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            color: #553c9a;
+            font-weight: 600;
+        }
+        
+        .config-value {
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            color: #2d3748;
+            background: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 3px;
+            border: 1px solid #e6e8ff;
+        }
+        
+        .alert {
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+        }
+        
+        .alert-success {
+            background: #c6f6d5;
+            color: #2f855a;
+            border: 1px solid #9ae6b4;
+        }
+        
+        .alert-error {
+            background: #fed7d7;
+            color: #c53030;
+            border: 1px solid #feb2b2;
+        }
+        
+        .toolbar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            background: white;
+            color: #4a5568;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn:hover {
+            background: #f7fafc;
+            border-color: #a0aec0;
+        }
+        
+        .btn-primary {
+            background: #4299e1;
+            color: white;
+            border-color: #4299e1;
+        }
+        
+        .btn-primary:hover {
+            background: #3182ce;
+            border-color: #3182ce;
+        }
+        
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 50%;
+            border-top-color: #4299e1;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @@keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        @@media (max-width: 768px) {
+            .setting-item {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+                align-items: start;
+            }
+            
+            .settings-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .category-tabs {
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+        }
+    </style>
+}
+
+<div class="settings-container">
+    <!-- Header -->
+    <div class="settings-header">
+        <h1>System Settings</h1>
+        <p>Manage your application configuration and system settings</p>
+        <div class="settings-stats">
+            <div class="stat-card">
+                <span class="stat-number">@Model.TotalSettings</span>
+                <span>Total Settings</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">@Model.ModifiedSettings</span>
+                <span>Modified</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">@Model.ReadOnlySettings</span>
+                <span>Read-Only</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">@Model.Categories.Count</span>
+                <span>Categories</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alerts -->
+    <div id="alertContainer"></div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <button type="button" class="btn btn-primary" onclick="saveAllChanges()">
+            <i class="fas fa-save"></i>
+            Save All Changes
+        </button>
+        <button type="button" class="btn" onclick="validateAllSettings()">
+            <i class="fas fa-check-circle"></i>
+            Validate All
+        </button>
+        <a href="@Url.Action("Backup")" class="btn">
+            <i class="fas fa-download"></i>
+            Backup Settings
+        </a>
+        <button type="button" class="btn" onclick="resetAllModified()">
+            <i class="fas fa-undo"></i>
+            Reset Modified
+        </button>
+    </div>
+
+    <!-- Search -->
+    <div class="search-container">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" class="search-input" id="searchInput" placeholder="Search settings by name or description..." oninput="filterSettings(this.value)">
+    </div>
+
+    <!-- Category Tabs -->
+    <div class="category-tabs">
+        <button class="category-tab active" data-category="all" onclick="showCategory('all', this)">
+            All Settings
+            <span class="category-badge">@Model.TotalSettings</span>
+        </button>
+        @foreach (var category in Model.Categories)
+        {
+            <button class="category-tab" data-category="@category" onclick="showCategory('@category', this)">
+                @category
+                <span class="category-badge">@Model.GetCategorySettingsCount(category)</span>
+            </button>
+        }
+        <button class="category-tab" data-category="config" onclick="showCategory('config', this)">
+            Configuration
+            <span class="category-badge">@Model.ConfigurationSettings.Count</span>
+        </button>
+    </div>
+
+    <!-- Settings Sections -->
+    <div id="settingsContent">
+        @foreach (var categoryGroup in Model.SettingsGrouped.OrderBy(g => g.Key))
+        {
+            <div class="settings-section" data-category="@categoryGroup.Key">
+                <div class="section-header">
+                    <h3 class="section-title">
+                        @categoryGroup.Key
+                        @if (Model.GetCategoryModifiedCount(categoryGroup.Key) > 0)
+                        {
+                            <span class="category-badge">@Model.GetCategoryModifiedCount(categoryGroup.Key) modified</span>
+                        }
+                    </h3>
+                </div>
+                <div class="settings-grid">
+                    @foreach (var setting in categoryGroup.Value.OrderBy(s => s.SortOrder))
+                    {
+                        <div class="setting-item @(setting.IsModified ? "setting-modified" : "") @(setting.IsReadOnly ? "setting-readonly" : "")" 
+                             data-setting-id="@setting.SettingId" 
+                             data-search-text="@($"{setting.DisplayName} {setting.Description} {setting.Category} {setting.Key}".ToLower())">
+                            <div>
+                                <div class="setting-label">
+                                    @setting.DisplayName
+                                    @if (setting.IsRequired)
+                                    {
+                                        <span class="text-red-500">*</span>
+                                    }
+                                    @if (setting.IsModified)
+                                    {
+                                        <span class="text-orange-500" title="Modified from default">●</span>
+                                    }
+                                </div>
+                                @if (!string.IsNullOrEmpty(setting.Description))
+                                {
+                                    <div class="setting-description">@setting.Description</div>
+                                }
+                                <div class="setting-description">
+                                    <small>Key: @setting.FullKey | Type: @setting.DataType</small>
+                                </div>
+                            </div>
+                            <div>
+                                @if (setting.DataType.ToLower() == "boolean" || setting.DataType.ToLower() == "bool")
+                                {
+                                    <input type="checkbox" 
+                                           class="setting-input" 
+                                           data-setting-id="@setting.SettingId"
+                                           @(string.Equals(setting.Value, "true", StringComparison.OrdinalIgnoreCase) ? "checked" : "")
+                                           @(setting.IsReadOnly ? "disabled" : "")
+                                           onchange="markAsChanged(this)" />
+                                }
+                                else if (setting.InputType == "textarea")
+                                {
+                                    <textarea class="setting-input" 
+                                              rows="3"
+                                              data-setting-id="@setting.SettingId"
+                                              @(setting.IsReadOnly ? "readonly" : "")
+                                              onchange="markAsChanged(this)"
+                                              placeholder="@setting.DefaultValue">@setting.Value</textarea>
+                                }
+                                else
+                                {
+                                    <input type="@setting.InputType" 
+                                           class="setting-input" 
+                                           data-setting-id="@setting.SettingId"
+                                           value="@setting.Value"
+                                           @(setting.IsReadOnly ? "readonly" : "")
+                                           @if (setting.InputType == "number")
+                                           {
+                                               @:step="any"
+                                           }
+                                           onchange="markAsChanged(this)"
+                                           placeholder="@setting.DefaultValue" />
+                                }
+                                @if (!string.IsNullOrEmpty(setting.ValidationPattern))
+                                {
+                                    <small class="text-gray-500">Pattern: @setting.ValidationPattern</small>
+                                }
+                            </div>
+                            <div class="setting-actions">
+                                @if (!setting.IsReadOnly)
+                                {
+                                    <button type="button" class="btn-icon btn-save" 
+                                            onclick="saveSetting('@setting.SettingId')" 
+                                            title="Save this setting"
+                                            disabled>
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button type="button" class="btn-icon btn-reset" 
+                                            onclick="resetSetting('@setting.SettingId')" 
+                                            title="Reset to default value">
+                                        <i class="fas fa-undo"></i>
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- Configuration Section -->
+        <div class="settings-section config-section hidden" data-category="config">
+            <div class="section-header">
+                <h3 class="section-title">Application Configuration (Read-Only)</h3>
+            </div>
+            <div class="settings-grid">
+                @foreach (var configGroup in Model.ConfigurationSettings)
+                {
+                    <div class="config-item">
+                        <div class="config-key">@configGroup.Key</div>
+                        <div class="config-value">
+                            @if (configGroup.Value is Dictionary<string, object> dict)
+                            {
+                                <details>
+                                    <summary>@dict.Count items</summary>
+                                    @foreach (var item in dict)
+                                    {
+                                        <div style="margin-left: 1rem; padding: 0.25rem 0;">
+                                            <span class="config-key">@item.Key:</span>
+                                            <span class="config-value">@item.Value</span>
+                                        </div>
+                                    }
+                                </details>
+                            }
+                            else
+                            {
+                                @configGroup.Value?.ToString()
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let changedSettings = new Set();
+        let currentCategory = 'all';
+
+        // Show/hide categories
+        function showCategory(category, element) {
+            // Update active tab
+            document.querySelectorAll('.category-tab').forEach(tab => tab.classList.remove('active'));
+            element.classList.add('active');
+            
+            currentCategory = category;
+            
+            // Show/hide sections
+            const sections = document.querySelectorAll('.settings-section');
+            sections.forEach(section => {
+                if (category === 'all') {
+                    section.classList.remove('hidden');
+                } else if (category === 'config') {
+                    section.classList.add('hidden');
+                } else {
+                    const sectionCategory = section.getAttribute('data-category');
+                    section.classList.toggle('hidden', sectionCategory !== category);
+                }
+            });
+            
+            // Show config section if selected
+            const configSection = document.querySelector('.config-section');
+            if (category === 'config') {
+                configSection.classList.remove('hidden');
+            } else {
+                configSection.classList.add('hidden');
+            }
+        }
+
+        // Filter settings based on search
+        function filterSettings(searchTerm) {
+            const term = searchTerm.toLowerCase();
+            const items = document.querySelectorAll('.setting-item');
+            
+            items.forEach(item => {
+                const searchText = item.getAttribute('data-search-text');
+                const matches = !term || searchText.includes(term);
+                item.classList.toggle('hidden', !matches);
+            });
+            
+            // Hide empty sections
+            const sections = document.querySelectorAll('.settings-section');
+            sections.forEach(section => {
+                const visibleItems = section.querySelectorAll('.setting-item:not(.hidden)');
+                const shouldHide = currentCategory !== 'all' && visibleItems.length === 0;
+                section.classList.toggle('hidden', shouldHide);
+            });
+        }
+
+        // Mark setting as changed
+        function markAsChanged(input) {
+            const settingId = input.getAttribute('data-setting-id');
+            changedSettings.add(settingId);
+            
+            // Enable save button for this setting
+            const saveBtn = input.closest('.setting-item').querySelector('.btn-save');
+            if (saveBtn) {
+                saveBtn.disabled = false;
+            }
+            
+            // Add visual indicator
+            input.closest('.setting-item').classList.add('setting-modified');
+        }
+
+        // Save individual setting
+        async function saveSetting(settingId) {
+            const item = document.querySelector(`[data-setting-id="${settingId}"]`);
+            const input = item.querySelector('.setting-input');
+            
+            let value = input.value;
+            if (input.type === 'checkbox') {
+                value = input.checked;
+            }
+            
+            try {
+                const response = await fetch('@Url.Action("UpdateSetting")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify({
+                        settingId: settingId,
+                        value: value
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('Setting updated successfully', 'success');
+                    changedSettings.delete(settingId);
+                    item.querySelector('.btn-save').disabled = true;
+                    item.classList.remove('setting-modified');
+                } else {
+                    showAlert(result.message || 'Error updating setting', 'error');
+                }
+            } catch (error) {
+                showAlert('Error updating setting', 'error');
+                console.error('Error:', error);
+            }
+        }
+
+        // Reset setting to default
+        async function resetSetting(settingId) {
+            if (!confirm('Are you sure you want to reset this setting to its default value?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('@Url.Action("ResetSetting")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: `settingId=${encodeURIComponent(settingId)}`
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('Setting reset to default value', 'success');
+                    
+                    // Update the input with the new value
+                    const item = document.querySelector(`[data-setting-id="${settingId}"]`);
+                    const input = item.querySelector('.setting-input');
+                    
+                    if (input.type === 'checkbox') {
+                        input.checked = result.setting.value === 'true';
+                    } else {
+                        input.value = result.setting.value || '';
+                    }
+                    
+                    changedSettings.delete(settingId);
+                    item.querySelector('.btn-save').disabled = true;
+                    item.classList.remove('setting-modified');
+                } else {
+                    showAlert(result.message || 'Error resetting setting', 'error');
+                }
+            } catch (error) {
+                showAlert('Error resetting setting', 'error');
+                console.error('Error:', error);
+            }
+        }
+
+        // Save all changed settings
+        async function saveAllChanges() {
+            if (changedSettings.size === 0) {
+                showAlert('No changes to save', 'error');
+                return;
+            }
+            
+            const settings = [];
+            changedSettings.forEach(settingId => {
+                const item = document.querySelector(`[data-setting-id="${settingId}"]`);
+                const input = item.querySelector('.setting-input');
+                
+                let value = input.value;
+                if (input.type === 'checkbox') {
+                    value = input.checked;
+                }
+                
+                settings.push({
+                    settingId: settingId,
+                    value: value
+                });
+            });
+            
+            try {
+                const response = await fetch('@Url.Action("UpdateMultipleSettings")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify(settings)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert(result.message, 'success');
+                    changedSettings.clear();
+                    
+                    // Disable all save buttons and remove modified indicators
+                    document.querySelectorAll('.btn-save').forEach(btn => btn.disabled = true);
+                    document.querySelectorAll('.setting-modified').forEach(item => item.classList.remove('setting-modified'));
+                } else {
+                    showAlert(result.message || 'Error saving settings', 'error');
+                }
+            } catch (error) {
+                showAlert('Error saving settings', 'error');
+                console.error('Error:', error);
+            }
+        }
+
+        // Validate all settings
+        async function validateAllSettings() {
+            try {
+                const response = await fetch('@Url.Action("ValidateAll")');
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert(result.message, 'success');
+                } else {
+                    let errorMessage = result.message;
+                    if (result.errors && Object.keys(result.errors).length > 0) {
+                        errorMessage += '\n\nErrors:\n';
+                        for (const [settingId, error] of Object.entries(result.errors)) {
+                            errorMessage += `- ${error}\n`;
+                        }
+                    }
+                    showAlert(errorMessage, 'error');
+                }
+            } catch (error) {
+                showAlert('Error validating settings', 'error');
+                console.error('Error:', error);
+            }
+        }
+
+        // Reset all modified settings
+        function resetAllModified() {
+            if (changedSettings.size === 0) {
+                showAlert('No modified settings to reset', 'error');
+                return;
+            }
+            
+            if (!confirm(`Are you sure you want to reset all ${changedSettings.size} modified settings?`)) {
+                return;
+            }
+            
+            changedSettings.forEach(settingId => {
+                const item = document.querySelector(`[data-setting-id="${settingId}"]`);
+                const input = item.querySelector('.setting-input');
+                const defaultValue = input.getAttribute('placeholder');
+                
+                if (input.type === 'checkbox') {
+                    input.checked = defaultValue === 'true';
+                } else {
+                    input.value = defaultValue || '';
+                }
+                
+                item.querySelector('.btn-save').disabled = true;
+                item.classList.remove('setting-modified');
+            });
+            
+            changedSettings.clear();
+            showAlert('All modified settings have been reset', 'success');
+        }
+
+        // Show alert message
+        function showAlert(message, type) {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertClass = type === 'success' ? 'alert-success' : 'alert-error';
+            
+            const alertHtml = `
+                <div class="alert ${alertClass}">
+                    ${message}
+                    <button type="button" class="float-right" onclick="this.parentElement.remove()">×</button>
+                </div>
+            `;
+            
+            alertContainer.innerHTML = alertHtml;
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                const alert = alertContainer.querySelector('.alert');
+                if (alert) {
+                    alert.remove();
+                }
+            }, 5000);
+        }
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add CSRF token to all forms
+            const token = document.querySelector('input[name="__RequestVerificationToken"]');
+            if (!token) {
+                document.body.insertAdjacentHTML('afterbegin', '@Html.AntiForgeryToken()');
+            }
+        });
+    </script>
+}

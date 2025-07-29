@@ -284,6 +284,172 @@ namespace TechWayFit.Licensing.WebUI.Controllers
         }
 
         /// <summary>
+        /// Download License Key - Generate and download license file
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> Download(string id)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(id))
+                {
+                    TempData["ErrorMessage"] = "License ID is required.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Get the license details
+                var license = await _licenseService.GetLicenseByIdAsync(id);
+                if (license == null)
+                {
+                    TempData["ErrorMessage"] = "License not found.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Check if license is valid for download
+                if (license.Status != LicenseStatus.Active)
+                {
+                    TempData["ErrorMessage"] = "Only active licenses can be downloaded.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Generate license file content
+                var licenseFileContent = GenerateLicenseFileContent(license);
+                var fileName = $"License_{license.LicenseCode}_{DateTime.UtcNow:yyyyMMdd}.lic";
+
+                // Log the download action
+                _logger.LogInformation("License {LicenseId} downloaded by user", id);
+
+                // Return file for download
+                var fileBytes = System.Text.Encoding.UTF8.GetBytes(licenseFileContent);
+                return File(fileBytes, "application/octet-stream", fileName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error downloading license {LicenseId}", id);
+                TempData["ErrorMessage"] = "An error occurred while downloading the license.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        /// <summary>
+        /// Download License as JSON format
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> DownloadJson(string id)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(id))
+                {
+                    TempData["ErrorMessage"] = "License ID is required.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                var license = await _licenseService.GetLicenseByIdAsync(id);
+                if (license == null)
+                {
+                    TempData["ErrorMessage"] = "License not found.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                if (license.Status != LicenseStatus.Active)
+                {
+                    TempData["ErrorMessage"] = "Only active licenses can be downloaded.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Generate JSON license content
+                var licenseJson = GenerateLicenseJsonContent(license);
+                var fileName = $"License_{license.LicenseCode}_{DateTime.UtcNow:yyyyMMdd}.json";
+
+                _logger.LogInformation("License {LicenseId} downloaded as JSON by user", id);
+
+                var fileBytes = System.Text.Encoding.UTF8.GetBytes(licenseJson);
+                return File(fileBytes, "application/json", fileName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error downloading license JSON {LicenseId}", id);
+                TempData["ErrorMessage"] = "An error occurred while downloading the license.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        /// <summary>
+        /// Download License as ZIP bundle containing both formats
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> DownloadZip(string id)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(id))
+                {
+                    TempData["ErrorMessage"] = "License ID is required.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                var license = await _licenseService.GetLicenseByIdAsync(id);
+                if (license == null)
+                {
+                    TempData["ErrorMessage"] = "License not found.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                if (license.Status != LicenseStatus.Active)
+                {
+                    TempData["ErrorMessage"] = "Only active licenses can be downloaded.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Generate both license formats
+                var licenseFileContent = GenerateLicenseFileContent(license);
+                var licenseJsonContent = GenerateLicenseJsonContent(license);
+                
+                // Create ZIP file in memory
+                using var memoryStream = new MemoryStream();
+                using (var archive = new System.IO.Compression.ZipArchive(memoryStream, System.IO.Compression.ZipArchiveMode.Create, true))
+                {
+                    // Add .lic file
+                    var licenseEntry = archive.CreateEntry($"License_{license.LicenseCode}.lic");
+                    using (var licenseStream = licenseEntry.Open())
+                    {
+                        var licenseBytes = System.Text.Encoding.UTF8.GetBytes(licenseFileContent);
+                        await licenseStream.WriteAsync(licenseBytes, 0, licenseBytes.Length);
+                    }
+
+                    // Add .json file
+                    var jsonEntry = archive.CreateEntry($"License_{license.LicenseCode}.json");
+                    using (var jsonStream = jsonEntry.Open())
+                    {
+                        var jsonBytes = System.Text.Encoding.UTF8.GetBytes(licenseJsonContent);
+                        await jsonStream.WriteAsync(jsonBytes, 0, jsonBytes.Length);
+                    }
+
+                    // Add README file with instructions
+                    var readmeEntry = archive.CreateEntry("README.txt");
+                    using (var readmeStream = readmeEntry.Open())
+                    {
+                        var readmeContent = GenerateReadmeContent(license);
+                        var readmeBytes = System.Text.Encoding.UTF8.GetBytes(readmeContent);
+                        await readmeStream.WriteAsync(readmeBytes, 0, readmeBytes.Length);
+                    }
+                }
+
+                var fileName = $"License_{license.LicenseCode}_{DateTime.UtcNow:yyyyMMdd}.zip";
+                _logger.LogInformation("License {LicenseId} downloaded as ZIP bundle by user", id);
+
+                return File(memoryStream.ToArray(), "application/zip", fileName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error downloading license ZIP {LicenseId}", id);
+                TempData["ErrorMessage"] = "An error occurred while downloading the license bundle.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        /// <summary>
         /// Show license validation form
         /// </summary>
         public IActionResult Validate()
@@ -322,6 +488,207 @@ namespace TechWayFit.Licensing.WebUI.Controllers
         }
 
         #region Private Helper Methods
+
+        /// <summary>
+        /// Generate license file content in proprietary format
+        /// </summary>
+        private string GenerateLicenseFileContent(ProductLicense license)
+        {
+            var content = new System.Text.StringBuilder();
+            content.AppendLine("=== TechWayFit License File ===");
+            content.AppendLine($"License ID: {license.LicenseId}");
+            content.AppendLine($"License Code: {license.LicenseCode}");
+            content.AppendLine($"Product: {license.LicenseConsumer.Product.Name}");
+            content.AppendLine($"Version: {license.LicenseConsumer.Product.Version}");
+            content.AppendLine($"Licensed To: {license.LicenseConsumer.Consumer.CompanyName}");
+            content.AppendLine($"Contact: {license.LicenseConsumer.Consumer.PrimaryContact.Name}");
+            content.AppendLine($"Email: {license.LicenseConsumer.Consumer.PrimaryContact.Email}");
+            content.AppendLine($"Valid From: {license.ValidFrom:yyyy-MM-dd HH:mm:ss} UTC");
+            content.AppendLine($"Valid To: {license.ValidTo:yyyy-MM-dd HH:mm:ss} UTC");
+            content.AppendLine($"Status: {license.Status}");
+            content.AppendLine($"Issued By: {license.IssuedBy}");
+            content.AppendLine($"Generated: {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} UTC");
+            content.AppendLine();
+            
+            content.AppendLine("=== Features ===");
+            foreach (var feature in license.Features)
+            {
+                content.AppendLine($"- {feature.Name}: {(feature.IsEnabled ? "Enabled" : "Disabled")}");
+                if (!string.IsNullOrEmpty(feature.Description))
+                {
+                    content.AppendLine($"  Description: {feature.Description}");
+                }
+            }
+            content.AppendLine();
+            
+            content.AppendLine("=== License Key ===");
+            content.AppendLine($"Key: {license.LicenseKey}");
+            content.AppendLine($"Signature: {license.LicenseSignature}");
+            content.AppendLine($"Encryption: {license.Encryption}");
+            content.AppendLine($"Signature Algorithm: {license.Signature}");
+            content.AppendLine();
+            
+            if (license.Metadata.Any())
+            {
+                content.AppendLine("=== Metadata ===");
+                foreach (var meta in license.Metadata)
+                {
+                    content.AppendLine($"{meta.Key}: {meta.Value}");
+                }
+                content.AppendLine();
+            }
+            
+            content.AppendLine("=== Important Notice ===");
+            content.AppendLine("This license file is protected by copyright law and international treaties.");
+            content.AppendLine("Unauthorized reproduction or distribution is prohibited.");
+            content.AppendLine("This license is valid only for the specified product version and licensed entity.");
+            content.AppendLine("=======================================");
+            
+            return content.ToString();
+        }
+
+        /// <summary>
+        /// Generate license content in JSON format
+        /// </summary>
+        private string GenerateLicenseJsonContent(ProductLicense license)
+        {
+            var licenseData = new
+            {
+                LicenseInfo = new
+                {
+                    LicenseId = license.LicenseId,
+                    LicenseCode = license.LicenseCode,
+                    Status = license.Status.ToString(),
+                    GeneratedAt = DateTime.UtcNow,
+                    ValidFrom = license.ValidFrom,
+                    ValidTo = license.ValidTo,
+                    IssuedBy = license.IssuedBy,
+                    CreatedAt = license.CreatedAt
+                },
+                Product = new
+                {
+                    Name = license.LicenseConsumer.Product.Name,
+                    ProductId = license.LicenseConsumer.Product.ProductId,
+                    Version = license.LicenseConsumer.Product.Version,
+                    Description = license.LicenseConsumer.Product.Description
+                },
+                Licensee = new
+                {
+                    CompanyName = license.LicenseConsumer.Consumer.CompanyName,
+                    ConsumerId = license.LicenseConsumer.Consumer.ConsumerId,
+                    PrimaryContact = new
+                    {
+                        Name = license.LicenseConsumer.Consumer.PrimaryContact.Name,
+                        Email = license.LicenseConsumer.Consumer.PrimaryContact.Email,
+                        Phone = license.LicenseConsumer.Consumer.PrimaryContact.Phone
+                    },
+                    SecondaryContact = license.LicenseConsumer.Consumer.SecondaryContact != null ? new
+                    {
+                        Name = license.LicenseConsumer.Consumer.SecondaryContact.Name,
+                        Email = license.LicenseConsumer.Consumer.SecondaryContact.Email,
+                        Phone = license.LicenseConsumer.Consumer.SecondaryContact.Phone
+                    } : null
+                },
+                Features = license.Features.Select(f => new
+                {
+                    FeatureId = f.FeatureId,
+                    Name = f.Name,
+                    Description = f.Description,
+                    IsEnabled = f.IsEnabled,
+                    Code = f.Code
+                }),
+                Security = new
+                {
+                    LicenseKey = license.LicenseKey,
+                    Signature = license.LicenseSignature,
+                    PublicKey = license.PublicKey,
+                    Encryption = license.Encryption,
+                    SignatureAlgorithm = license.Signature
+                },
+                Metadata = license.Metadata,
+                Notice = new
+                {
+                    Copyright = "This license file is protected by copyright law and international treaties.",
+                    Warning = "Unauthorized reproduction or distribution is prohibited.",
+                    Validity = "This license is valid only for the specified product version and licensed entity."
+                }
+            };
+
+            return System.Text.Json.JsonSerializer.Serialize(licenseData, new System.Text.Json.JsonSerializerOptions
+            {
+                WriteIndented = true,
+                PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase
+            });
+        }
+
+        /// <summary>
+        /// Generate README content for ZIP download
+        /// </summary>
+        private string GenerateReadmeContent(ProductLicense license)
+        {
+            var content = new System.Text.StringBuilder();
+            content.AppendLine("TechWayFit License Package");
+            content.AppendLine("==========================");
+            content.AppendLine();
+            content.AppendLine($"License ID: {license.LicenseId}");
+            content.AppendLine($"License Code: {license.LicenseCode}");
+            content.AppendLine($"Product: {license.LicenseConsumer.Product.Name}");
+            content.AppendLine($"Licensed To: {license.LicenseConsumer.Consumer.CompanyName}");
+            content.AppendLine($"Generated: {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} UTC");
+            content.AppendLine();
+            content.AppendLine("Package Contents:");
+            content.AppendLine("================");
+            content.AppendLine();
+            content.AppendLine($"1. License_{license.LicenseCode}.lic");
+            content.AppendLine("   - Standard license file format");
+            content.AppendLine("   - Use this for most software integrations");
+            content.AppendLine("   - Human-readable format with all license details");
+            content.AppendLine();
+            content.AppendLine($"2. License_{license.LicenseCode}.json");
+            content.AppendLine("   - JSON format for API integrations");
+            content.AppendLine("   - Machine-readable structured data");
+            content.AppendLine("   - Ideal for automated license validation");
+            content.AppendLine();
+            content.AppendLine("3. README.txt (this file)");
+            content.AppendLine("   - Package information and usage instructions");
+            content.AppendLine();
+            content.AppendLine("Usage Instructions:");
+            content.AppendLine("==================");
+            content.AppendLine();
+            content.AppendLine("1. Extract all files to your application directory");
+            content.AppendLine("2. Use the appropriate format based on your integration needs:");
+            content.AppendLine("   - .lic file: For traditional license file validation");
+            content.AppendLine("   - .json file: For REST API or modern application integration");
+            content.AppendLine();
+            content.AppendLine("3. Implement license validation in your application using the");
+            content.AppendLine("   TechWayFit License Validation SDK or your custom validation logic");
+            content.AppendLine();
+            content.AppendLine("Important Notes:");
+            content.AppendLine("===============");
+            content.AppendLine();
+            content.AppendLine("- Keep these license files secure and do not share them publicly");
+            content.AppendLine("- The license is valid only for the specified product and entity");
+            content.AppendLine("- Contact support if you need to transfer or modify the license");
+            content.AppendLine("- Both files contain the same license information in different formats");
+            content.AppendLine();
+            content.AppendLine("Support:");
+            content.AppendLine("========");
+            content.AppendLine();
+            content.AppendLine("For technical support or license-related questions:");
+            if (!string.IsNullOrEmpty(license.LicenseConsumer.Product.SupportEmail))
+            {
+                content.AppendLine($"Email: {license.LicenseConsumer.Product.SupportEmail}");
+            }
+            if (!string.IsNullOrEmpty(license.LicenseConsumer.Product.SupportPhone))
+            {
+                content.AppendLine($"Phone: {license.LicenseConsumer.Product.SupportPhone}");
+            }
+            content.AppendLine();
+            content.AppendLine("© TechWayFit - All rights reserved");
+            content.AppendLine("This license package is protected by copyright law.");
+            
+            return content.ToString();
+        }
 
         /// <summary>
         /// Populate dropdowns for license creation form

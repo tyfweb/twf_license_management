@@ -5,6 +5,7 @@ using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Services.Implementations.License;
 using TechWayFit.Licensing.Management.Services.Implementations.Product;
 using TechWayFit.Licensing.Management.Services.Implementations.Consumer;
+using TechWayFit.Licensing.Management.Services.Implementations;
 using TechWayFit.Licensing.WebUI.Models.Authentication;
 using TechWayFit.Licensing.WebUI.Services;
 // using TechWayFit.Licensing.WebUI.Extensions;
@@ -21,6 +22,9 @@ using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.License;
 using TechWayFit.Licensing.Infrastructure.Data.Repositories.License;
 using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Notification;
 using TechWayFit.Licensing.Infrastructure.Data.Repositories.Notification;
+using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Settings;
+using TechWayFit.Licensing.Infrastructure.Data.Repositories.Settings;
+using TechWayFit.Licensing.Infrastructure.Contracts.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -113,8 +117,7 @@ builder.Services.AddScoped<INotificationHistoryRepository, NotificationHistoryRe
 builder.Services.AddScoped<INotificationTemplateRepository, NotificationTemplateRepository>();
 builder.Services.AddScoped<IProductTierRepository, ProductTierRepository>();
 builder.Services.AddScoped<IProductVersionRepository, ProductVersionRepository>(); 
-
-
+builder.Services.AddScoped<TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Settings.ISettingRepository, TechWayFit.Licensing.Infrastructure.Data.Repositories.Settings.SettingRepository>();
 
 // Register real services (replacing mock)
 builder.Services.AddScoped<IEnterpriseProductService, EnterpriseProductService>();
@@ -128,8 +131,11 @@ builder.Services.AddScoped<IKeyManagementService, KeyManagementService>();
 builder.Services.AddScoped<IProductLicenseService, ProductLicenseService>();
 builder.Services.AddSingleton<ILicenseValidationService, LicenseValidationService>();
 
-// Step 6: Audit management services will be added here
-// Step 7: Notification management services will be added here
+// Step 6: Settings management services
+builder.Services.AddScoped<ISettingService, SettingService>();
+
+// Step 7: Audit management services will be added here
+// Step 8: Notification management services will be added here
 
 var app = builder.Build();
 

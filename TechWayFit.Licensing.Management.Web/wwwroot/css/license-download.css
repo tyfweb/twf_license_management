@@ -1,0 +1,156 @@
+/* License Download Styles */
+
+.download-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: white;
+}
+
+.download-section .section-header h5 {
+    color: white;
+    margin-bottom: 0.5rem;
+}
+
+.download-section .section-content {
+    padding: 0;
+}
+
+.download-options {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.download-option {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 1rem;
+    flex: 1;
+    min-width: 200px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    color: white;
+    display: block;
+}
+
+.download-option:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: translateY(-2px);
+    color: white;
+    text-decoration: none;
+}
+
+.download-option-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    display: block;
+    opacity: 0.9;
+}
+
+.download-option-title {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    font-size: 1rem;
+}
+
+.download-option-description {
+    font-size: 0.875rem;
+    opacity: 0.8;
+    margin: 0;
+}
+
+/* Download Button Dropdown Styling */
+.btn-download-dropdown {
+    border-color: #17a2b8;
+    color: #17a2b8;
+}
+
+.btn-download-dropdown:hover {
+    background-color: #17a2b8;
+    border-color: #17a2b8;
+    color: white;
+}
+
+.download-dropdown-menu {
+    min-width: 220px;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    padding: 0.5rem 0;
+}
+
+.download-dropdown-item {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+    border: none;
+    background: none;
+}
+
+.download-dropdown-item:hover {
+    background: #f8f9fa;
+    color: #495057;
+}
+
+.download-dropdown-item i {
+    width: 20px;
+    text-align: center;
+}
+
+/* Success notification for downloads */
+.download-success-alert {
+    background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+    border: none;
+    color: #155724;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.download-success-alert .alert-icon {
+    font-size: 1.25rem;
+    margin-right: 0.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .download-options {
+        flex-direction: column;
+    }
+    
+    .download-option {
+        min-width: auto;
+    }
+    
+    .download-dropdown-menu {
+        min-width: 180px;
+    }
+}
+
+/* License file preview styling */
+.license-preview {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1rem;
+    font-family: 'Courier New', monospace;
+    font-size: 0.875rem;
+    max-height: 300px;
+    overflow-y: auto;
+    white-space: pre-line;
+    color: #495057;
+}
+
+.license-preview-header {
+    background: #e9ecef;
+    margin: -1rem -1rem 1rem -1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 8px 8px 0 0;
+    font-weight: 600;
+    color: #495057;
+    border-bottom: 1px solid #dee2e6;
+}

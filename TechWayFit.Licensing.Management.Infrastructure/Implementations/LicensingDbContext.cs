@@ -6,6 +6,7 @@ using TechWayFit.Licensing.Infrastructure.Models.Entities.Notification;
 using TechWayFit.Licensing.Infrastructure.Models.Entities.Products;
 using TechWayFit.Licensing.Infrastructure.Models.Entities.License;
 using TechWayFit.Licensing.Infrastructure.Models.Entities.Consumer;
+using TechWayFit.Licensing.Infrastructure.Models.Entities.Settings;
 
 namespace TechWayFit.Licensing.Infrastructure.Data.Context;
 
@@ -40,6 +41,9 @@ public class LicensingDbContext : DbContext
     public DbSet<NotificationTemplateEntity> NotificationTemplates { get; set; }
     public DbSet<NotificationHistoryEntity> NotificationHistory { get; set; }
 
+    // Settings related entities
+    public DbSet<SettingEntity> Settings { get; set; }
+
     #endregion
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -55,6 +59,7 @@ public class LicensingDbContext : DbContext
         ConfigureLicenseEntities(modelBuilder);
         
         ConfigureNotificationEntities(modelBuilder);
+        ConfigureSettingsEntities(modelBuilder);
 
         // Configure indexes
         ConfigureIndexes(modelBuilder);
@@ -403,6 +408,86 @@ public class LicensingDbContext : DbContext
     {
         // Additional performance indexes can be added here
         // These are indexes that span multiple entities or are for specific query patterns
+    }
+
+    /// <summary>
+    /// Configure Settings related entities
+    /// </summary>
+    /// <param name="modelBuilder">The model builder</param>
+    private static void ConfigureSettingsEntities(ModelBuilder modelBuilder)
+    {
+        // Configure SettingEntity
+        modelBuilder.Entity<SettingEntity>(entity =>
+        {
+            entity.HasKey(e => e.SettingId);
+
+            entity.Property(e => e.SettingId)
+                .HasMaxLength(36)
+                .IsRequired();
+
+            entity.Property(e => e.Category)
+                .HasMaxLength(100)
+                .IsRequired();
+
+            entity.Property(e => e.Key)
+                .HasMaxLength(100)
+                .IsRequired();
+
+            entity.Property(e => e.Value)
+                .HasMaxLength(4000);
+
+            entity.Property(e => e.DefaultValue)
+                .HasMaxLength(4000);
+
+            entity.Property(e => e.DataType)
+                .HasMaxLength(50)
+                .IsRequired();
+
+            entity.Property(e => e.DisplayName)
+                .HasMaxLength(200)
+                .IsRequired();
+
+            entity.Property(e => e.Description)
+                .HasMaxLength(1000);
+
+            entity.Property(e => e.GroupName)
+                .HasMaxLength(100);
+
+            entity.Property(e => e.ValidationRules)
+                .HasMaxLength(2000);
+
+            entity.Property(e => e.PossibleValues)
+                .HasMaxLength(2000);
+
+            entity.Property(e => e.ValueSource)
+                .HasMaxLength(50)
+                .IsRequired();
+
+            entity.Property(e => e.Tags)
+                .HasMaxLength(500);
+
+            entity.Property(e => e.Environment)
+                .HasMaxLength(50)
+                .IsRequired();
+
+            entity.Property(e => e.IntroducedInVersion)
+                .HasMaxLength(20);
+
+            entity.Property(e => e.DeprecationMessage)
+                .HasMaxLength(500);
+
+            // Unique constraint on Category + Key combination
+            entity.HasIndex(e => new { e.Category, e.Key })
+                .IsUnique();
+
+            // Performance indexes
+            entity.HasIndex(e => e.Category);
+            entity.HasIndex(e => e.Environment);
+            entity.HasIndex(e => new { e.Category, e.DisplayOrder });
+
+            // Computed column for FullKey (ignored since it's a computed property)
+            entity.Ignore(e => e.FullKey);
+        });
     }
 
     /// <summary>
