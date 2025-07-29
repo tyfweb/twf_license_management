@@ -285,32 +285,28 @@
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
-                                        @foreach (var license in Model.Licenses)
+                                    <tbody>                                        @foreach (var license in Model.Licenses)
                                         {
-                                            @{
-                                                var rowClass = license.DaysUntilExpiry <= 0 ? "table-danger" :
-                                                             license.DaysUntilExpiry <= 30 && license.DaysUntilExpiry > 0 ? "table-warning" : "";
-                                                
-                                                var tierClass = license.Tier switch
-                                                {
-                                                    LicenseTier.Enterprise => "bg-success",
-                                                    LicenseTier.Professional => "bg-info",
-                                                    _ => "bg-secondary"
-                                                };
-                                                
-                                                var listStatusClass = license.Status switch
-                                                {
-                                                    LicenseStatus.Active => "bg-success",
-                                                    LicenseStatus.Expired => "bg-danger",
-                                                    LicenseStatus.Suspended => "bg-warning",
-                                                    LicenseStatus.GracePeriod => "bg-warning",
-                                                    _ => "bg-secondary"
-                                                };
-                                                
-                                                var expiryClass = license.DaysUntilExpiry <= 0 ? "text-danger" :
-                                                                license.DaysUntilExpiry <= 30 ? "text-warning" : "";
-                                            }
+                                            var rowClass = license.DaysUntilExpiry <= 0 ? "table-danger" :
+                                                         license.DaysUntilExpiry <= 30 && license.DaysUntilExpiry > 0 ? "table-warning" : "";
+                                            
+                                            var tierClass = license.Tier switch
+                                            {
+                                                LicenseTier.Enterprise => "bg-success",
+                                                LicenseTier.Professional => "bg-info",
+                                                _ => "bg-secondary"
+                                            };
+                                              var listStatusClass = license.Status switch
+                                            {
+                                                LicenseStatus.Active => "bg-success",
+                                                LicenseStatus.Expired => "bg-danger",
+                                                LicenseStatus.Suspended => "bg-warning",
+                                                LicenseStatus.GracePeriod => "bg-warning",
+                                                _ => "bg-secondary"
+                                            };
+                                            
+                                            var expiryClass = license.DaysUntilExpiry <= 0 ? "text-danger" :
+                                                            license.DaysUntilExpiry <= 30 ? "text-warning" : "";
                                             <tr class="@rowClass">
                                                 <td>
                                                     <a href="@Url.Action("Details", "License", new { id = license.LicenseId })" class="text-decoration-none">

@@ -191,7 +191,7 @@
                         </div>
                         @if (Model.Licenses != null && Model.Licenses.Any())
                         {
-                            <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
+                            <a href="@Url.Action("Index", "License", new { consumerId = Model.Consumer.ConsumerId })" class="btn btn-sm btn-outline-primary">View All</a>
                         }
                     </div>
                 </div>
@@ -237,14 +237,12 @@
                                         </td>
                                         <td>@license.ValidFrom.ToString("MMM dd, yyyy")</td>
                                         <td>@license.ValidTo.ToString("MMM dd, yyyy")</td>
-                                        <td>
-                                            <div class="btn-group btn-group-sm">
-                                                <a href="#" class="btn btn-outline-primary btn-sm" title="View License">
+                                        <td>                                            <div class="btn-group btn-group-sm">
+                                                <a href="@Url.Action("Details", "License", new { id = license.LicenseId })" class="btn btn-outline-primary btn-sm" title="View License">
                                                     <i class="fas fa-eye"></i>
-                                                </a>
-                                                <a href="#" class="btn btn-outline-secondary btn-sm" title="Download">
-                                                    <i class="fas fa-download"></i>
-                                                </a>
+                                                </a>                                <button class="btn btn-outline-secondary btn-sm" title="Download" onclick="downloadLicense('@license.LicenseId')">
+                                    <i class="fas fa-download"></i>
+                                </button>
                                             </div>
                                         </td>
                                     </tr>
@@ -258,8 +256,7 @@
                     <div class="empty-state">
                         <i class="fas fa-certificate fa-3x text-muted mb-3"></i>
                         <h5 class="text-muted">No Licenses Generated</h5>
-                        <p class="text-muted">This consumer doesn't have any licenses yet.</p>
-                        <a href="#" class="btn btn-primary">
+                        <p class="text-muted">This consumer doesn't have any licenses yet.</p>                        <a asp-controller="License" asp-action="Create" asp-route-consumerId="@Model.Consumer.ConsumerId" class="btn btn-primary">
                             <i class="fas fa-plus me-2"></i>Generate First License
                         </a>
                     </div>
@@ -306,15 +303,14 @@
                 </div>
                 
                 <div class="quick-actions">
-                    <a href="#" class="action-btn">
+                    <a asp-controller="License" asp-action="Create" asp-route-consumerId="@Model.Consumer.ConsumerId" class="action-btn">
                         <i class="fas fa-plus-circle"></i>
                         <div class="action-content">
                             <div class="action-title">Generate License</div>
                             <div class="action-description">Create new license for this consumer</div>
                         </div>
                     </a>
-                    
-                    <a href="#" class="action-btn">
+                      <a href="@Url.Action("Index", "License", new { consumerId = Model.Consumer.ConsumerId })" class="action-btn">
                         <i class="fas fa-history"></i>
                         <div class="action-content">
                             <div class="action-title">View All Licenses</div>
@@ -373,5 +369,10 @@
 function showDeleteModal() {
     const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
     modal.show();
+}
+
+function downloadLicense(licenseId) {
+    // TODO: Implement license download functionality
+    alert('Download functionality for license ' + licenseId + ' will be implemented in a future update.');
 }
 </script>

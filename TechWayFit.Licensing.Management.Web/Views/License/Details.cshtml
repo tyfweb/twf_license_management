@@ -3,94 +3,202 @@
     ViewData["Title"] = "License Details";
 }
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <!-- Header -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h2>License Details</h2>
-                    <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a asp-controller="License" asp-action="Index">Licenses</a></li>
-                            <li class="breadcrumb-item active">@Model.License.LicenseId</li>
-                        </ol>
-                    </nav>
+@section Styles {
+    <link rel="stylesheet" href="~/css/product-management.css" />
+}
+
+<div class="container-fluid py-3">
+    <!-- Header Section -->
+    <div class="header mb-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <div class="d-flex align-items-center mb-2">
+                    <a href="@Url.Action("Index", "License")" class="btn btn-outline-secondary me-3">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Licenses
+                    </a>
+                    <h2 class="mb-0">License Details</h2>
                 </div>
-                <div>
-                    @if (Model.CanEdit)
-                    {
-                        <button class="btn btn-outline-primary me-2" onclick="editLicense()">
-                            <i class="fas fa-edit"></i> Edit
-                        </button>
-                    }
-                    @if (Model.CanRenew)
-                    {
-                        <a href="#" class="btn btn-success me-2" onclick="renewLicense()">
-                            <i class="fas fa-sync-alt"></i> Renew
-                        </a>
-                    }
-                    @if (Model.CanSuspend)
-                    {
-                        <button class="btn btn-warning me-2" onclick="suspendLicense()">
-                            <i class="fas fa-pause"></i> Suspend
-                        </button>
-                    }
-                    @if (Model.CanReactivate)
-                    {
-                        <button class="btn btn-info me-2" onclick="reactivateLicense()">
-                            <i class="fas fa-play"></i> Reactivate
-                        </button>
-                    }
-                    @if (Model.CanRevoke)
-                    {
-                        <button class="btn btn-danger" onclick="revokeLicense()">
-                            <i class="fas fa-ban"></i> Revoke
-                        </button>
-                    }
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a asp-controller="License" asp-action="Index">Licenses</a></li>
+                        <li class="breadcrumb-item active">@Model.License.LicenseId.Substring(0, Math.Min(8, Model.License.LicenseId.Length))...</li>
+                    </ol>
+                </nav>
+            </div>
+            <div class="d-flex gap-1 flex-wrap">
+                @if (Model.CanEdit)
+                {
+                    <button class="btn btn-outline-primary" onclick="editLicense()">
+                        <i class="fas fa-edit me-1"></i><span class="d-none d-md-inline">Edit</span>
+                    </button>
+                }
+                @if (Model.CanRenew)
+                {
+                    <button class="btn btn-success" onclick="renewLicense()">
+                        <i class="fas fa-sync-alt me-1"></i><span class="d-none d-md-inline">Renew</span>
+                    </button>
+                }
+                @if (Model.CanSuspend)
+                {
+                    <button class="btn btn-warning" onclick="suspendLicense()">
+                        <i class="fas fa-pause me-1"></i><span class="d-none d-md-inline">Suspend</span>
+                    </button>
+                }
+                @if (Model.CanReactivate)
+                {
+                    <button class="btn btn-info" onclick="reactivateLicense()">
+                        <i class="fas fa-play me-1"></i><span class="d-none d-md-inline">Reactivate</span>
+                    </button>
+                }
+                @if (Model.CanRevoke)
+                {
+                    <button class="btn btn-danger" onclick="revokeLicense()">
+                        <i class="fas fa-ban me-1"></i><span class="d-none d-md-inline">Revoke</span>
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Overview Cards -->
+    <div class="row g-2 mb-3">
+        <div class="col-sm-6 col-lg-3">
+            <div class="stats-card">
+                <div class="stats-icon">
+                    <i class="fas fa-key"></i>
+                </div>
+                <div class="stats-content">
+                    <div class="stats-label">License ID</div>
+                    <div class="stats-number text-monospace small">@Model.License.LicenseId.Substring(0, Math.Min(12, Model.License.LicenseId.Length))...</div>
                 </div>
             </div>
-
-            <!-- License Information -->
-            <div class="row">
-                <div class="col-md-8">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-0">License Information</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <strong>License ID:</strong><br>
-                                    <span class="text-muted">@Model.License.LicenseId</span>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            @{
+                var statusCardClass = Model.License.Status switch
+                {
+                    TechWayFit.Licensing.Core.Models.LicenseStatus.Active => "stats-card-success",
+                    TechWayFit.Licensing.Core.Models.LicenseStatus.Expired => "stats-card-danger",
+                    TechWayFit.Licensing.Core.Models.LicenseStatus.Suspended => "stats-card-warning",
+                    TechWayFit.Licensing.Core.Models.LicenseStatus.GracePeriod => "stats-card-warning",
+                    _ => ""
+                };
+            }
+            <div class="stats-card @statusCardClass">
+                <div class="stats-icon">
+                    <i class="fas fa-circle-check"></i>
+                </div>
+                <div class="stats-content">
+                    <div class="stats-label">Status</div>
+                    <div class="stats-number">@Model.License.Status</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            @{
+                var daysUntilExpiry = (Model.License.ValidTo - DateTime.UtcNow).Days;
+                var expiryCardClass = daysUntilExpiry <= 0 ? "stats-card-danger" :
+                                    daysUntilExpiry <= 30 ? "stats-card-warning" : "stats-card-success";
+            }
+            <div class="stats-card @expiryCardClass">
+                <div class="stats-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div class="stats-content">
+                    <div class="stats-label">Expires In</div>
+                    <div class="stats-number">
+                        @if (daysUntilExpiry <= 0)
+                        {
+                            <span>Expired</span>
+                        }
+                        else if (daysUntilExpiry <= 30)
+                        {
+                            <span>@daysUntilExpiry days</span>
+                        }
+                        else
+                        {
+                            <span>@daysUntilExpiry days</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="stats-card">
+                <div class="stats-icon">
+                    <i class="fas fa-calendar-plus"></i>
+                </div>
+                <div class="stats-content">
+                    <div class="stats-label">Created</div>
+                    <div class="stats-number small">@Model.License.CreatedAt.ToString("MMM dd, yyyy")</div>
+                </div>
+            </div>
+        </div>
+    </div>    <!-- Main Content -->
+    <div class="row g-2">
+        <!-- License Information -->
+        <div class="col-lg-8">
+            <div class="edit-section mb-3">
+                <div class="section-header">
+                    <h5><i class="fas fa-info-circle me-2"></i>License Information</h5>
+                </div>
+                <div class="section-content">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="detail-group">
+                                <label class="detail-label">License ID</label>
+                                <div class="detail-value">
+                                    <i class="fas fa-fingerprint me-2 text-muted"></i>
+                                    <span class="text-monospace">@Model.License.LicenseId</span>
                                 </div>
-                                <div class="col-md-6">
-                                    <strong>Status:</strong><br>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-group">
+                                <label class="detail-label">Status</label>
+                                <div class="detail-value">
+                                    <i class="fas fa-circle-check me-2 text-muted"></i>
                                     <span class="badge @(GetStatusBadgeClass(Model.License.Status))">
                                         @Model.License.Status
                                     </span>
                                 </div>
                             </div>
-                            <hr>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <strong>Licensed To:</strong><br>
-                                    <span class="text-muted">@Model.License.LicenseConsumer.Consumer.CompanyName</span>
-                                </div>
-                                <div class="col-md-6">
-                                    <strong>Contact Email:</strong><br>
-                                    <span class="text-muted">@Model.License.LicenseConsumer.Consumer.PrimaryContact.Email</span>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-group">
+                                <label class="detail-label">Licensed To</label>
+                                <div class="detail-value">
+                                    <i class="fas fa-building me-2 text-muted"></i>
+                                    <span>@Model.License.LicenseConsumer.Consumer.CompanyName</span>
                                 </div>
                             </div>
-                            <hr>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <strong>Valid From:</strong><br>
-                                    <span class="text-muted">@Model.License.ValidFrom.ToString("MMM dd, yyyy HH:mm")</span>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-group">
+                                <label class="detail-label">Contact Email</label>
+                                <div class="detail-value">
+                                    <i class="fas fa-envelope me-2 text-muted"></i>
+                                    <a href="mailto:@Model.License.LicenseConsumer.Consumer.PrimaryContact.Email" class="text-decoration-none">
+                                        @Model.License.LicenseConsumer.Consumer.PrimaryContact.Email
+                                    </a>
                                 </div>
-                                <div class="col-md-6">
-                                    <strong>Valid To:</strong><br>
-                                    <span class="text-muted">@Model.License.ValidTo.ToString("MMM dd, yyyy HH:mm")</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-group">
+                                <label class="detail-label">Valid From</label>
+                                <div class="detail-value">
+                                    <i class="fas fa-calendar-plus me-2 text-muted"></i>
+                                    <span>@Model.License.ValidFrom.ToString("MMM dd, yyyy HH:mm")</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-group">
+                                <label class="detail-label">Valid To</label>
+                                <div class="detail-value">
+                                    <i class="fas fa-calendar-times me-2 text-muted"></i>
+                                    <span>@Model.License.ValidTo.ToString("MMM dd, yyyy HH:mm")</span>
                                     @if (Model.License.ValidTo < DateTime.UtcNow)
                                     {
                                         <span class="badge bg-danger ms-2">Expired</span>
@@ -101,103 +209,277 @@
                                     }
                                 </div>
                             </div>
-                            <hr>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <strong>Created:</strong><br>
-                                    <span class="text-muted">@Model.License.CreatedAt.ToString("MMM dd, yyyy HH:mm")</span>
-                                </div>
-                                <div class="col-md-6">
-                                    <strong>Status:</strong><br>
-                                    <span class="badge @(GetStatusBadgeClass(Model.License.Status))">
-                                        @Model.License.Status
-                                    </span>
-                                </div>
-                            </div>
                         </div>
-                    </div>
-
-                    @if (Model.License.Features.Any())
-                    {
-                        <div class="card mt-4">
-                            <div class="card-header">
-                                <h5 class="mb-0">Licensed Features</h5>
+                        <div class="col-md-6">
+                            <div class="detail-group">
+                                <label class="detail-label">Created</label>
+                                <div class="detail-value">
+                                    <i class="fas fa-clock me-2 text-muted"></i>
+                                    <span>@Model.License.CreatedAt.ToString("MMM dd, yyyy HH:mm")</span>
+                                </div>
                             </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    @foreach (var feature in Model.License.Features)
+                        </div>                        <div class="col-md-6">
+                            <div class="detail-group">
+                                <label class="detail-label">Product Tiers</label>
+                                <div class="detail-value">
+                                    <i class="fas fa-layer-group me-2 text-muted"></i>
+                                    @if (Model.Product != null && Model.Product.Tiers.Any())
                                     {
-                                        <div class="col-md-6 mb-2">
-                                            <span class="badge bg-success me-2">
-                                                <i class="fas fa-check"></i>
-                                            </span>
-                                            @feature.Name
-                                        </div>
+                                        @foreach (var tier in Model.Product.Tiers.Take(3))
+                                        {
+                                            var tierClass = tier.Name.ToLower() switch
+                                            {
+                                                "enterprise" => "bg-success",
+                                                "professional" or "pro" => "bg-info",
+                                                "community" or "basic" => "bg-secondary",
+                                                _ => "bg-secondary"
+                                            };
+                                            <span class="badge @tierClass me-1">@tier.Name</span>
+                                        }
+                                        @if (Model.Product.Tiers.Count() > 3)
+                                        {
+                                            <span class="text-muted">+@(Model.Product.Tiers.Count() - 3) more</span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Standard License</span>
                                     }
                                 </div>
                             </div>
                         </div>
-                    }
+                    </div>
                 </div>
+            </div>            @if (Model.License.Features.Any())
+            {
+                <div class="edit-section mb-3">
+                    <div class="section-header">
+                        <h5><i class="fas fa-puzzle-piece me-2"></i>Licensed Features</h5>
+                    </div>
+                    <div class="section-content">
+                        <div class="row g-2">
+                            @foreach (var feature in Model.License.Features)
+                            {
+                                <div class="col-sm-6 col-lg-4">
+                                    <div class="feature-item">
+                                        <i class="fas fa-check-circle text-success me-2"></i>
+                                        <span>@feature.Name</span>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
 
-                <div class="col-md-4">
-                    <!-- Product Information -->
-                    @if (Model.Product != null)
-                    {
-                        <div class="card mb-3">
-                            <div class="card-header">
-                                <h6 class="mb-0">Product Information</h6>
+            <!-- Product Information - Moved below License Information -->
+            @if (Model.Product != null)
+            {
+                <div class="edit-section mb-3">
+                    <div class="section-header">
+                        <h5><i class="fas fa-box me-2"></i>Product Information</h5>
+                    </div>
+                    <div class="section-content">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="detail-group">
+                                    <label class="detail-label">Name</label>
+                                    <div class="detail-value">
+                                        <i class="fas fa-tag me-2 text-muted"></i>
+                                        <span>@Model.Product.Name</span>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="card-body">
-                                <p><strong>Name:</strong> @Model.Product.Name</p>
-                                <p><strong>Version:</strong> @Model.Product.Version</p>
-                                <p><strong>Description:</strong> @Model.Product.Description</p>
-                                <a href="@Url.Action("Details", "Product", new { id = Model.Product.ProductId })" class="btn btn-sm btn-outline-primary">
-                                    View Product Details
+                            <div class="col-md-6">
+                                <div class="detail-group">
+                                    <label class="detail-label">Version</label>
+                                    <div class="detail-value">
+                                        <i class="fas fa-code-branch me-2 text-muted"></i>
+                                        <span>@Model.Product.Version</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="detail-group">
+                                    <label class="detail-label">Description</label>
+                                    <div class="detail-value">
+                                        <span class="text-muted">@Model.Product.Description</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <a href="@Url.Action("Details", "Product", new { id = Model.Product.ProductId })" class="btn btn-outline-primary">
+                                    <i class="fas fa-external-link-alt me-1"></i>View Product Details
                                 </a>
-                            </div>
-                        </div>
-                    }
-
-                    <!-- Consumer Information -->
-                    @if (Model.Consumer != null)
-                    {
-                        <div class="card mb-3">
-                            <div class="card-header">
-                                <h6 class="mb-0">Consumer Information</h6>
-                            </div>
-                            <div class="card-body">
-                                <p><strong>Organization:</strong> @Model.Consumer.CompanyName</p>
-                                <p><strong>Contact:</strong> @Model.Consumer.PrimaryContact.Name</p>
-                                <p><strong>Email:</strong> @Model.Consumer.PrimaryContact.Email</p>
-                                <a href="@Url.Action("Details", "Consumer", new { id = Model.Consumer.ConsumerId })" class="btn btn-sm btn-outline-primary">
-                                    View Consumer Details
-                                </a>
-                            </div>
-                        </div>
-                    }
-
-                    <!-- Quick Actions -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h6 class="mb-0">Quick Actions</h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="d-grid gap-2">
-                                <button class="btn btn-outline-secondary btn-sm" onclick="downloadLicense()">
-                                    <i class="fas fa-download"></i> Download License
-                                </button>
-                                <button class="btn btn-outline-secondary btn-sm" onclick="validateLicense()">
-                                    <i class="fas fa-check-circle"></i> Validate License
-                                </button>
-                                <button class="btn btn-outline-secondary btn-sm" onclick="viewAuditLog()">
-                                    <i class="fas fa-history"></i> View Audit Log
-                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
+            }
+
+            <!-- Consumer Information - Moved below Product Information -->
+            @if (Model.Consumer != null)
+            {
+                <div class="edit-section mb-3">
+                    <div class="section-header">
+                        <h5><i class="fas fa-users me-2"></i>Consumer Information</h5>
+                    </div>
+                    <div class="section-content">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="detail-group">
+                                    <label class="detail-label">Organization</label>
+                                    <div class="detail-value">
+                                        <i class="fas fa-building me-2 text-muted"></i>
+                                        <span>@Model.Consumer.CompanyName</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="detail-group">
+                                    <label class="detail-label">Contact</label>
+                                    <div class="detail-value">
+                                        <i class="fas fa-user me-2 text-muted"></i>
+                                        <span>@Model.Consumer.PrimaryContact.Name</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="detail-group">
+                                    <label class="detail-label">Email</label>
+                                    <div class="detail-value">
+                                        <i class="fas fa-envelope me-2 text-muted"></i>
+                                        <a href="mailto:@Model.Consumer.PrimaryContact.Email" class="text-decoration-none">
+                                            @Model.Consumer.PrimaryContact.Email
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <a href="@Url.Action("Details", "Consumer", new { id = Model.Consumer.ConsumerId })" class="btn btn-outline-primary">
+                                    <i class="fas fa-external-link-alt me-1"></i>View Consumer Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>        <!-- Sidebar - Quick Actions moved here -->
+        <div class="col-lg-4">
+            <!-- Quick Actions -->
+            <div class="sidebar-section mb-3">
+                <div class="section-header">
+                    <h6><i class="fas fa-bolt me-2"></i>Quick Actions</h6>
+                </div>
+                <div class="section-content">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-secondary" onclick="downloadLicense()">
+                            <i class="fas fa-download me-2"></i>Download License
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="validateLicense()">
+                            <i class="fas fa-check-circle me-2"></i>Validate License
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="viewAuditLog()">
+                            <i class="fas fa-history me-2"></i>View Audit Log
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="generateReport()">
+                            <i class="fas fa-chart-bar me-2"></i>Generate Report
+                        </button>
+                    </div>
+                </div>
             </div>
+
+            <!-- Recent License History -->
+            @if (Model.Consumer != null)
+            {
+                <div class="sidebar-section">
+                    <div class="section-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6><i class="fas fa-history me-2"></i>Recent License History</h6>
+                            <a href="@Url.Action("Index", "License", new { consumerId = Model.Consumer.ConsumerId })" class="btn btn-outline-primary btn-sm">
+                                View All
+                            </a>
+                        </div>
+                    </div>
+                    <div class="section-content">
+                        <p class="text-muted small mb-3">Latest licenses for @Model.Consumer.CompanyName</p>
+                        
+                        <!-- Sample Recent Licenses - Replace with actual data when available -->
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>License ID</th>
+                                        <th>Product</th>
+                                        <th>Status</th>
+                                        <th>Valid To</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Current License -->
+                                    <tr class="table-info">
+                                        <td>
+                                            <span class="text-monospace small fw-bold">@Model.License.LicenseId.Substring(0, Math.Min(8, Model.License.LicenseId.Length))...</span>
+                                            <br><small class="text-muted">Current</small>
+                                        </td>
+                                        <td>
+                                            <span class="fw-medium">@(Model.Product?.Name ?? "Unknown")</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge @(GetStatusBadgeClass(Model.License.Status)) badge-sm">
+                                                @Model.License.Status
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="small">@Model.License.ValidTo.ToString("MMM dd, yyyy")</span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="@Url.Action("Details", "License", new { id = Model.License.LicenseId })" 
+                                                   class="btn btn-outline-primary btn-sm" title="View Details">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <button class="btn btn-outline-secondary btn-sm" onclick="downloadLicense()" title="Download">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    
+                                    <!-- Sample Previous Licenses - TODO: Replace with actual data -->
+                                    <tr>
+                                        <td>
+                                            <span class="text-monospace small">LIC-FIT...</span>
+                                            <br><small class="text-muted">Previous</small>
+                                        </td>
+                                        <td>
+                                            <span>@(Model.Product?.Name ?? "TechWayFit Fitness Pro")</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary badge-sm">Expired</span>
+                                        </td>
+                                        <td>
+                                            <span class="small">Jan 20, 2025</span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="@Url.Action("Details", "License", new { id = "LIC-FITLIFE-FP-001" })" 
+                                                   class="btn btn-outline-primary btn-sm" title="View Details">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <button class="btn btn-outline-secondary btn-sm" onclick="alert('Download previous license')" title="Download">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
         </div>
     </div>
 </div>
@@ -218,50 +500,59 @@
     }
 }
 
-<script>
-    function editLicense() {
-        // TODO: Implement edit functionality
-        alert('Edit functionality will be implemented in a future update.');
-    }
-
-    function renewLicense() {
-        // TODO: Implement renew functionality
-        alert('Renew functionality will be implemented in a future update.');
-    }
-
-    function suspendLicense() {
-        if (confirm('Are you sure you want to suspend this license?')) {
-            // TODO: Implement suspend functionality
-            alert('Suspend functionality will be implemented in a future update.');
+@section Scripts {
+    <script>
+        function editLicense() {
+            // TODO: Implement edit functionality
+            alert('Edit functionality will be implemented in a future update.');
         }
-    }
 
-    function reactivateLicense() {
-        if (confirm('Are you sure you want to reactivate this license?')) {
-            // TODO: Implement reactivate functionality
-            alert('Reactivate functionality will be implemented in a future update.');
+        function renewLicense() {
+            if (confirm('Are you sure you want to renew this license?')) {
+                // TODO: Implement renew functionality
+                alert('Renew functionality will be implemented in a future update.');
+            }
         }
-    }
 
-    function revokeLicense() {
-        if (confirm('Are you sure you want to revoke this license? This action cannot be undone.')) {
-            // TODO: Implement revoke functionality
-            alert('Revoke functionality will be implemented in a future update.');
+        function suspendLicense() {
+            if (confirm('Are you sure you want to suspend this license?')) {
+                // TODO: Implement suspend functionality
+                alert('Suspend functionality will be implemented in a future update.');
+            }
         }
-    }
 
-    function downloadLicense() {
-        // TODO: Implement download functionality
-        alert('Download functionality will be implemented in a future update.');
-    }
+        function reactivateLicense() {
+            if (confirm('Are you sure you want to reactivate this license?')) {
+                // TODO: Implement reactivate functionality
+                alert('Reactivate functionality will be implemented in a future update.');
+            }
+        }
 
-    function validateLicense() {
-        // TODO: Implement validation functionality
-        alert('Validation functionality will be implemented in a future update.');
-    }
+        function revokeLicense() {
+            if (confirm('Are you sure you want to revoke this license? This action cannot be undone.')) {
+                // TODO: Implement revoke functionality
+                alert('Revoke functionality will be implemented in a future update.');
+            }
+        }
 
-    function viewAuditLog() {
-        // TODO: Implement audit log functionality
-        alert('Audit log functionality will be implemented in a future update.');
-    }
-</script>
+        function downloadLicense() {
+            // TODO: Implement download functionality
+            alert('Download functionality will be implemented in a future update.');
+        }
+
+        function validateLicense() {
+            // TODO: Implement validation functionality
+            alert('Validation functionality will be implemented in a future update.');
+        }
+
+        function viewAuditLog() {
+            // TODO: Implement audit log functionality
+            alert('Audit log functionality will be implemented in a future update.');
+        }
+
+        function generateReport() {
+            // TODO: Implement report generation functionality
+            alert('Report generation functionality will be implemented in a future update.');
+        }
+    </script>
+}

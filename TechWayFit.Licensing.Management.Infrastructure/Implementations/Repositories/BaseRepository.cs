@@ -132,6 +132,7 @@ public partial class BaseRepository<TEntity> : IBaseRepository<TEntity>
         }
 
         var totalCount = await query.CountAsync(cancellationToken);
+        query= SearchIncludesQuery(query);
         var items = await query.Skip((request.Page - 1) * request.PageSize)
                                 .Take(request.PageSize)
                                 .ToListAsync(cancellationToken);
@@ -230,7 +231,12 @@ public partial class BaseRepository<TEntity> : IBaseRepository<TEntity>
         }
         return query;
     }
+    
     protected virtual IQueryable<TEntity> SearchQuery(IQueryable<TEntity> query, string searchQuery)
+    {
+        return query;
+    }
+    protected virtual IQueryable<TEntity> SearchIncludesQuery(IQueryable<TEntity> query)
     {
         return query;
     }

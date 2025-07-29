@@ -204,7 +204,8 @@ public class ConsumerController : Controller
     {
         var licenseSummary = licenses.Select(l => new LicenseSummaryViewModel
         {
-            LicenseId = l.LicenseCode,
+            LicenseId = l.LicenseId,
+            LicenseCode = l.LicenseCode,
             ProductName = l.LicenseConsumer.Product?.Name ?? "Unknown Product",
             Tier = Core.Models.LicenseTier.Custom, // Assuming tier is not available in the license model
             Status = l.Status,

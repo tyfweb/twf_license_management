@@ -311,7 +311,7 @@
                                             <tr class="@rowClass">
                                                 <td>
                                                     <a href="@Url.Action("Details", "License", new { id = license.LicenseId })" class="text-decoration-none">
-                                                        <span class="text-monospace small">@license.LicenseId.Substring(0, Math.Min(8, license.LicenseId.Length))...</span>
+                                                        <span class="text-monospace small">@license.LicenseCode.Substring(0, Math.Min(8, license.LicenseCode.Length))...</span>
                                                     </a>
                                                 </td>
                                                 <td>

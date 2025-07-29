@@ -100,6 +100,7 @@ namespace TechWayFit.Licensing.WebUI.Controllers
                     .Select(l => new LicenseItemViewModel
                     {
                         LicenseId = l.LicenseId,
+                        LicenseCode = l.LicenseCode,
                         ConsumerName = l.LicenseConsumer.Consumer.CompanyName,
                         ContactEmail = l.LicenseConsumer.Consumer.PrimaryContact.Email,
                         Tier = LicenseTier.Community, // Default value since ProductLicense doesn't have LicenseTier

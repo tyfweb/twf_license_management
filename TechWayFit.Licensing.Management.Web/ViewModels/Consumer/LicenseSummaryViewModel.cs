@@ -8,6 +8,7 @@ namespace TechWayFit.Licensing.WebUI.ViewModels.Consumer
     public class LicenseSummaryViewModel
     {
         public string LicenseId { get; set; } = string.Empty;
+        public string LicenseCode { get; set; } = string.Empty;
         public string ProductName { get; set; } = string.Empty;
         public LicenseTier Tier { get; set; }
         public LicenseStatus Status { get; set; }

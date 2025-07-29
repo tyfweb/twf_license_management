@@ -98,6 +98,7 @@ namespace TechWayFit.Licensing.WebUI.ViewModels.License
     public class LicenseItemViewModel
     {
         public string LicenseId { get; set; } = string.Empty;
+        public string LicenseCode { get; set; } = string.Empty;
         public string ConsumerName { get; set; } = string.Empty;
         public string ContactEmail { get; set; } = string.Empty;
         public LicenseTier Tier { get; set; }

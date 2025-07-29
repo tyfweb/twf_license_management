@@ -145,4 +145,11 @@ public class ProductLicenseRepository : BaseRepository<ProductLicenseEntity>, IP
         return _dbSet.Include(l => l.Product).Include(l => l.Consumer)
                       .FirstOrDefaultAsync(l => l.LicenseId == id, cancellationToken);
     }
+
+    protected override IQueryable<ProductLicenseEntity> SearchIncludesQuery(IQueryable<ProductLicenseEntity> query)
+    {
+        query = query.Include(l => l.Product)
+                     .Include(l => l.Consumer);
+        return base.SearchIncludesQuery(query);
+    }
 }
