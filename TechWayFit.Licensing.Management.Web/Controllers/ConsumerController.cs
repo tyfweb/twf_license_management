@@ -177,6 +177,121 @@ public class ConsumerController : Controller
     }
 
     /// <summary>
+    /// Display edit consumer account form
+    /// </summary>
+    public async Task<IActionResult> Edit(string id)
+    {
+        if (string.IsNullOrWhiteSpace(id))
+        {
+            return BadRequest("Consumer ID is required");
+        }
+
+        try
+        {
+            var consumer = await _consumerAccountService.GetConsumerAccountByIdAsync(id);
+            if (consumer == null)
+            {
+                return NotFound($"Consumer account with ID '{id}' not found");
+            }
+
+            // Map to edit view model
+            var viewModel = new ConsumerEditViewModel
+            {
+                ConsumerId = consumer.ConsumerId,
+                OrganizationName = consumer.CompanyName,
+                ContactPerson = consumer.PrimaryContact?.Name ?? string.Empty,
+                ContactEmail = consumer.PrimaryContact?.Email ?? string.Empty,
+                ContactPhone = consumer.PrimaryContact?.Phone ?? string.Empty,
+                Address = consumer.Address?.Street ?? string.Empty,
+                City = consumer.Address?.City ?? string.Empty,
+                State = consumer.Address?.State ?? string.Empty,
+                Country = consumer.Address?.Country ?? string.Empty,
+                PostalCode = consumer.Address?.PostalCode ?? string.Empty,
+                IsActive = consumer.IsActive,
+                Notes = consumer.Notes,
+                CreatedAt = consumer.CreatedAt,
+                CreatedBy = string.Empty, // Not available in domain model
+                LastModifiedAt = null, // Not available in domain model
+                LastModifiedBy = string.Empty // Not available in domain model
+            };
+
+            return View(viewModel);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error loading consumer account for edit: {ConsumerId}", id);
+            TempData["ErrorMessage"] = "Failed to load consumer account for editing. Please try again.";
+            return RedirectToAction(nameof(Index));
+        }
+    }
+
+    /// <summary>
+    /// Handle edit consumer account form submission
+    /// </summary>
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(string id, ConsumerEditViewModel model)
+    {
+        if (id != model.ConsumerId)
+        {
+            return BadRequest("Consumer ID mismatch");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        try
+        {
+            // Get existing consumer
+            var existingConsumer = await _consumerAccountService.GetConsumerAccountByIdAsync(id);
+            if (existingConsumer == null)
+            {
+                return NotFound($"Consumer account with ID '{id}' not found");
+            }
+
+            // Update the existing consumer with new values
+            existingConsumer.CompanyName = model.OrganizationName;
+            existingConsumer.IsActive = model.IsActive;
+            existingConsumer.Notes = model.Notes;
+
+            // Update primary contact
+            if (existingConsumer.PrimaryContact == null)
+                existingConsumer.PrimaryContact = new ContactPerson();
+            
+            existingConsumer.PrimaryContact.Name = model.ContactPerson;
+            existingConsumer.PrimaryContact.Email = model.ContactEmail;
+            existingConsumer.PrimaryContact.Phone = model.ContactPhone;
+
+            // Update address
+            if (existingConsumer.Address == null)
+                existingConsumer.Address = new Address();
+            
+            existingConsumer.Address.Street = model.Address;
+            existingConsumer.Address.City = model.City;
+            existingConsumer.Address.State = model.State;
+            existingConsumer.Address.Country = model.Country;
+            existingConsumer.Address.PostalCode = model.PostalCode;
+
+            // Get current user
+            var currentUser = User.Identity?.Name ?? "system";
+
+            // Update consumer account
+            var updatedConsumer = await _consumerAccountService.UpdateConsumerAccountAsync(existingConsumer, currentUser);
+
+            TempData["SuccessMessage"] = $"Consumer account '{updatedConsumer.CompanyName}' updated successfully.";
+            return RedirectToAction(nameof(Details), new { id = updatedConsumer.ConsumerId });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating consumer account: {ConsumerId}", id);
+            ModelState.AddModelError("", "Failed to update consumer account. Please check the information and try again.");
+            return View(model);
+        }
+    }
+
+    /// <summary>
     /// Map domain model to view model
     /// </summary>
     private static ConsumerViewModel MapToViewModel(ConsumerAccount consumer)
