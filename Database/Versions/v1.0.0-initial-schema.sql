@@ -404,6 +404,121 @@ WHERE p.status = 'Active' AND p.is_active = true
 GROUP BY p.product_id, p.name, pt.tier_id, pt.name;
 
 -- =============================================
+-- USER MANAGEMENT ENTITIES
+-- =============================================
+
+-- User roles table
+CREATE TABLE user_roles (
+    role_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    role_name VARCHAR(50) NOT NULL,
+    role_description VARCHAR(500),
+    is_admin BOOLEAN NOT NULL DEFAULT false,
+    is_active BOOLEAN NOT NULL DEFAULT true,
+    created_by VARCHAR(100) NOT NULL,
+    updated_by VARCHAR(100),
+    created_on TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_on TIMESTAMP WITH TIME ZONE
+);
+
+-- User profiles table
+CREATE TABLE user_profiles (
+    user_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_name VARCHAR(50) NOT NULL UNIQUE,
+    password_hash VARCHAR(256) NOT NULL,
+    password_salt VARCHAR(128) NOT NULL,
+    full_name VARCHAR(100) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    department VARCHAR(100),
+    is_locked BOOLEAN NOT NULL DEFAULT false,
+    is_deleted BOOLEAN NOT NULL DEFAULT false,
+    is_admin BOOLEAN NOT NULL DEFAULT false,
+    last_login_date TIMESTAMP WITH TIME ZONE,
+    failed_login_attempts INTEGER NOT NULL DEFAULT 0,
+    locked_date TIMESTAMP WITH TIME ZONE,
+    is_active BOOLEAN NOT NULL DEFAULT true,
+    created_by VARCHAR(100) NOT NULL,
+    updated_by VARCHAR(100),
+    created_on TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_on TIMESTAMP WITH TIME ZONE
+);
+
+-- User role mappings table
+CREATE TABLE user_role_mappings (
+    mapping_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL,
+    role_id UUID NOT NULL,
+    assigned_date TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    expiry_date TIMESTAMP WITH TIME ZONE,
+    is_active BOOLEAN NOT NULL DEFAULT true,
+    created_by VARCHAR(100) NOT NULL,
+    updated_by VARCHAR(100),
+    created_on TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_on TIMESTAMP WITH TIME ZONE,
+    
+    -- Foreign key constraints
+    CONSTRAINT fk_user_role_mappings_user_id 
+        FOREIGN KEY (user_id) REFERENCES user_profiles(user_id) ON DELETE CASCADE,
+    CONSTRAINT fk_user_role_mappings_role_id 
+        FOREIGN KEY (role_id) REFERENCES user_roles(role_id) ON DELETE CASCADE,
+    
+    -- Unique constraint to prevent duplicate role assignments
+    CONSTRAINT uk_user_role_mappings_user_role 
+        UNIQUE (user_id, role_id)
+);
+
+-- =============================================
+-- USER MANAGEMENT INDEXES
+-- =============================================
+
+-- Indexes for user_profiles
+CREATE INDEX idx_user_profiles_user_name ON user_profiles(user_name);
+CREATE INDEX idx_user_profiles_email ON user_profiles(email);
+CREATE INDEX idx_user_profiles_is_active ON user_profiles(is_active);
+CREATE INDEX idx_user_profiles_is_locked ON user_profiles(is_locked);
+CREATE INDEX idx_user_profiles_is_deleted ON user_profiles(is_deleted);
+CREATE INDEX idx_user_profiles_created_on ON user_profiles(created_on);
+
+-- Indexes for user_roles
+CREATE INDEX idx_user_roles_role_name ON user_roles(role_name);
+CREATE INDEX idx_user_roles_is_active ON user_roles(is_active);
+
+-- Indexes for user_role_mappings
+CREATE INDEX idx_user_role_mappings_user_id ON user_role_mappings(user_id);
+CREATE INDEX idx_user_role_mappings_role_id ON user_role_mappings(role_id);
+CREATE INDEX idx_user_role_mappings_assigned_date ON user_role_mappings(assigned_date);
+CREATE INDEX idx_user_role_mappings_is_active ON user_role_mappings(is_active);
+
+-- =============================================
+-- USER MANAGEMENT VIEWS
+-- =============================================
+
+-- View for user details with roles
+CREATE VIEW v_user_details AS
+SELECT 
+    up.user_id,
+    up.user_name,
+    up.full_name,
+    up.email,
+    up.department,
+    up.is_locked,
+    up.is_deleted,
+    up.is_admin,
+    up.last_login_date,
+    up.failed_login_attempts,
+    up.locked_date,
+    up.is_active,
+    up.created_on,
+    ur.role_id,
+    ur.role_name,
+    ur.role_description,
+    urm.assigned_date,
+    urm.expiry_date
+FROM user_profiles up
+LEFT JOIN user_role_mappings urm ON up.user_id = urm.user_id AND urm.is_active = true
+LEFT JOIN user_roles ur ON urm.role_id = ur.role_id AND ur.is_active = true
+WHERE up.is_active = true AND up.is_deleted = false;
+
+-- =============================================
 -- COMMENTS
 -- =============================================
 
@@ -418,6 +533,9 @@ COMMENT ON TABLE product_license_features IS 'Many-to-many relationship between 
 COMMENT ON TABLE audit_entries IS 'Audit trail for all entity changes';
 COMMENT ON TABLE notification_templates IS 'Templates for system notifications';
 COMMENT ON TABLE notification_history IS 'History of sent notifications and delivery status';
+COMMENT ON TABLE user_profiles IS 'User account information and authentication data';
+COMMENT ON TABLE user_roles IS 'Role definitions for user authorization';
+COMMENT ON TABLE user_role_mappings IS 'Assignment of roles to users';
 
 -- =============================================
 -- END OF SCRIPT
@@ -425,12 +543,13 @@ COMMENT ON TABLE notification_history IS 'History of sent notifications and deli
 
 -- Script execution completed successfully
 -- Database schema created with:
--- - 10 main tables with proper relationships
--- - 1 many-to-many junction table  
+-- - 13 main tables with proper relationships (including user management)
+-- - 2 many-to-many junction tables  
 -- - Comprehensive indexes for performance
 -- - Unique constraints for data integrity
 -- - Audit trail support with is_active soft delete
 -- - Views for common queries
+-- - User management system with role-based access control
 -- - All entities aligned with actual C# entity definitions
 
 COMMIT;

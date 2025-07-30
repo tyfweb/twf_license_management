@@ -7,6 +7,7 @@ using TechWayFit.Licensing.Infrastructure.Models.Entities.Products;
 using TechWayFit.Licensing.Infrastructure.Models.Entities.License;
 using TechWayFit.Licensing.Infrastructure.Models.Entities.Consumer;
 using TechWayFit.Licensing.Infrastructure.Models.Entities.Settings;
+using TechWayFit.Licensing.Infrastructure.Models.Entities.User;
 
 namespace TechWayFit.Licensing.Infrastructure.Data.Context;
 
@@ -44,6 +45,11 @@ public class LicensingDbContext : DbContext
     // Settings related entities
     public DbSet<SettingEntity> Settings { get; set; }
 
+    // User related entities
+    public DbSet<UserProfileEntity> UserProfiles { get; set; }
+    public DbSet<UserRoleEntity> UserRoles { get; set; }
+    public DbSet<UserRoleMappingEntity> UserRoleMappings { get; set; }
+
     #endregion
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -60,6 +66,7 @@ public class LicensingDbContext : DbContext
         
         ConfigureNotificationEntities(modelBuilder);
         ConfigureSettingsEntities(modelBuilder);
+        ConfigureUserEntities(modelBuilder);
 
         // Configure indexes
         ConfigureIndexes(modelBuilder);
@@ -530,5 +537,85 @@ public class LicensingDbContext : DbContext
                     break;
             }
         }
+    }
+
+    /// <summary>
+    /// Configure User related entities
+    /// </summary>
+    private static void ConfigureUserEntities(ModelBuilder modelBuilder)
+    {
+        // UserProfileEntity configuration
+        modelBuilder.Entity<UserProfileEntity>(entity =>
+        {
+            entity.HasKey(e => e.UserId);
+            entity.Property(e => e.UserId).IsRequired();
+            entity.Property(e => e.UserName).HasMaxLength(50).IsRequired();
+            entity.Property(e => e.PasswordHash).HasMaxLength(256).IsRequired();
+            entity.Property(e => e.PasswordSalt).HasMaxLength(128).IsRequired();
+            entity.Property(e => e.FullName).HasMaxLength(100).IsRequired();
+            entity.Property(e => e.Email).HasMaxLength(255).IsRequired();
+            entity.Property(e => e.Department).HasMaxLength(100);
+            entity.Property(e => e.CreatedBy).HasMaxLength(100).IsRequired();
+            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
+
+            // Unique constraints
+            entity.HasIndex(e => e.UserName).IsUnique();
+            entity.HasIndex(e => e.Email).IsUnique();
+
+            // Indexes
+            entity.HasIndex(e => e.FullName);
+            entity.HasIndex(e => e.Department);
+            entity.HasIndex(e => e.IsLocked);
+            entity.HasIndex(e => e.IsDeleted);
+            entity.HasIndex(e => e.IsAdmin);
+        });
+
+        // UserRoleEntity configuration
+        modelBuilder.Entity<UserRoleEntity>(entity =>
+        {
+            entity.HasKey(e => e.RoleId);
+            entity.Property(e => e.RoleId).IsRequired();
+            entity.Property(e => e.RoleName).HasMaxLength(50).IsRequired();
+            entity.Property(e => e.RoleDescription).HasMaxLength(500);
+            entity.Property(e => e.CreatedBy).HasMaxLength(100).IsRequired();
+            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
+
+            // Unique constraint
+            entity.HasIndex(e => e.RoleName).IsUnique();
+
+            // Indexes
+            entity.HasIndex(e => e.IsAdmin);
+        });
+
+        // UserRoleMappingEntity configuration
+        modelBuilder.Entity<UserRoleMappingEntity>(entity =>
+        {
+            entity.HasKey(e => e.MappingId);
+            entity.Property(e => e.MappingId).IsRequired();
+            entity.Property(e => e.UserId).IsRequired();
+            entity.Property(e => e.RoleId).IsRequired();
+            entity.Property(e => e.CreatedBy).HasMaxLength(100).IsRequired();
+            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
+
+            // Foreign key relationships
+            entity.HasOne(e => e.User)
+                  .WithMany(u => u.UserRoles)
+                  .HasForeignKey(e => e.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.Role)
+                  .WithMany(r => r.UserRoles)
+                  .HasForeignKey(e => e.RoleId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            // Unique constraint - user can only have one active mapping to a specific role
+            entity.HasIndex(e => new { e.UserId, e.RoleId }).IsUnique();
+
+            // Indexes
+            entity.HasIndex(e => e.UserId);
+            entity.HasIndex(e => e.RoleId);
+            entity.HasIndex(e => e.AssignedDate);
+            entity.HasIndex(e => e.ExpiryDate);
+        });
     }
 }

@@ -1,0 +1,455 @@
+@model TechWayFit.Licensing.WebUI.ViewModels.User.EditUserViewModel
+@{
+    ViewData["Title"] = "Edit User";
+    ViewData["Description"] = "Modify user information and permissions";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/product-management.css" />
+}
+
+<div class="container-fluid py-3">
+    <!-- Header Section -->
+    <div class="header mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="mb-1">Edit User</h2>
+                <p class="text-muted mb-0">Modify user account information, roles, and permissions for enhanced system access.</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="@Url.Action("Details", new { id = Model.UserId })" class="btn btn-outline-info">
+                    <i class="fas fa-eye me-2"></i>View Details
+                </a>
+                <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Users
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit User Form -->
+    <div class="row">
+        <div class="col-lg-8">
+            <form asp-action="Edit" method="post" id="editUserForm">
+                <input asp-for="UserId" type="hidden" />
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                
+                <!-- Personal Information Section -->
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <i class="fas fa-user me-2"></i>Personal Information
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="FirstName" class="form-label">First Name <span class="text-danger">*</span></label>
+                                <input asp-for="FirstName" class="form-control" placeholder="Enter first name" />
+                                <span asp-validation-for="FirstName" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="LastName" class="form-label">Last Name <span class="text-danger">*</span></label>
+                                <input asp-for="LastName" class="form-control" placeholder="Enter last name" />
+                                <span asp-validation-for="LastName" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Email" class="form-label">Email Address <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                    <input asp-for="Email" class="form-control" placeholder="Enter email address" />
+                                </div>
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Username" class="form-label">Username</label>
+                                <input asp-for="Username" type="hidden" />
+                                <div class="username-display">
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-user-tag"></i></span>
+                                        <div class="form-control-plaintext-custom">@Model.Username</div>
+                                    </div>
+                                    <div class="form-text">
+                                        <i class="fas fa-lock me-1"></i>Username cannot be changed after creation
+                                    </div>
+                                </div>
+                                <span asp-validation-for="Username" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Professional Information Section -->
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <i class="fas fa-briefcase me-2"></i>Professional Information
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Department" class="form-label">Department</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-building"></i></span>
+                                    <input asp-for="Department" class="form-control" placeholder="Enter department" />
+                                </div>
+                                <span asp-validation-for="Department" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="JobTitle" class="form-label">Job Title</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-id-badge"></i></span>
+                                    <input asp-for="JobTitle" class="form-control" placeholder="Enter job title" />
+                                </div>
+                                <span asp-validation-for="JobTitle" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Roles Section -->
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <i class="fas fa-user-shield me-2"></i>User Roles & Permissions
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Assign Roles <span class="text-danger">*</span></label>
+                        <div class="form-text mb-3">Select one or more roles to define user access levels and permissions.</div>
+                        
+                        <div class="row">
+                            @if (Model.AvailableRoles != null && Model.AvailableRoles.Any())
+                            {
+                                @foreach (var role in Model.AvailableRoles)
+                                {
+                                    <div class="col-md-6 mb-3">
+                                        <div class="role-card card h-100 @(Model.SelectedRoleIds.Contains(role.RoleId) ? "border-primary" : "")">
+                                            <div class="card-body p-3">
+                                                <div class="form-check">
+                                                    <input type="checkbox" name="SelectedRoleIds" value="@role.RoleId" 
+                                                           class="form-check-input" id="role-@role.RoleId" 
+                                                           @(Model.SelectedRoleIds.Contains(role.RoleId) ? "checked" : "") />
+                                                    <label class="form-check-label w-100" for="role-@role.RoleId">
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="avatar avatar-sm bg-@(role.RoleName.ToLower() == "administrator" ? "danger" : role.RoleName.ToLower() == "manager" ? "warning" : "primary")-soft rounded me-3">
+                                                                <i class="fas fa-@(role.RoleName.ToLower() == "administrator" ? "crown" : role.RoleName.ToLower() == "manager" ? "user-tie" : "user") text-@(role.RoleName.ToLower() == "administrator" ? "danger" : role.RoleName.ToLower() == "manager" ? "warning" : "primary")"></i>
+                                                            </div>
+                                                            <div class="flex-grow-1">
+                                                                <div class="fw-semibold">@role.RoleName</div>
+                                                                @if (!string.IsNullOrEmpty(role.RoleDescription))
+                                                                {
+                                                                    <div class="text-muted small">@role.RoleDescription</div>
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        </div>
+                        <span asp-validation-for="SelectedRoleIds" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- Account Settings Section -->
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <i class="fas fa-cog me-2"></i>Account Settings
+                    </div>
+                    
+                    <div class="form-check form-switch">
+                        <input asp-for="IsActive" class="form-check-input" role="switch" />
+                        <label asp-for="IsActive" class="form-check-label">
+                            <strong>Active User Account</strong>
+                        </label>
+                        <div class="form-text">
+                            <i class="fas fa-info-circle me-1"></i>When enabled, user can log in and access the system
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="d-flex gap-2 mb-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Save Changes
+                    </button>
+                    <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Quick Actions Section -->
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">
+                    <i class="fas fa-bolt me-2"></i>Quick Actions
+                </div>
+                <div class="sidebar-section-content">
+                    <div class="d-grid gap-2">
+                        @if (Model.IsLocked)
+                        {
+                            <button type="button" class="btn btn-outline-success btn-sm" onclick="unlockUser('@Model.UserId')">
+                                <i class="fas fa-unlock me-2"></i>Unlock Account
+                            </button>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-outline-warning btn-sm" onclick="lockUser('@Model.UserId')">
+                                <i class="fas fa-lock me-2"></i>Lock Account
+                            </button>
+                        }
+                        <a href="@Url.Action("ChangePassword", new { id = Model.UserId })" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-key me-2"></i>Reset Password
+                        </a>
+                        <button type="button" class="btn btn-outline-info btn-sm" onclick="clearFailedAttempts('@Model.UserId')">
+                            <i class="fas fa-undo me-2"></i>Clear Failed Attempts
+                        </button>
+                        <a href="@Url.Action("Details", new { id = Model.UserId })" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-eye me-2"></i>View Details
+                        </a>
+                        <div class="border-top pt-2 mt-2">
+                            <button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="deleteUser('@Model.UserId', '@Model.FirstName @Model.LastName')">
+                                <i class="fas fa-trash me-2"></i>Delete User
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Account Status Section -->
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">
+                    <i class="fas fa-info-circle me-2"></i>Account Status
+                </div>
+                <div class="sidebar-section-content">
+                    <div class="status-info">
+                        @if (Model.IsLocked)
+                        {
+                            <div class="d-flex align-items-center text-danger mb-3">
+                                <div class="avatar avatar-sm bg-danger-soft rounded me-3">
+                                    <i class="fas fa-lock text-danger"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-semibold">Account Locked</div>
+                                    <div class="text-muted small">Login attempts disabled</div>
+                                </div>
+                            </div>
+                        }
+                        else if (Model.IsActive)
+                        {
+                            <div class="d-flex align-items-center text-success mb-3">
+                                <div class="avatar avatar-sm bg-success-soft rounded me-3">
+                                    <i class="fas fa-check text-success"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-semibold">Active Account</div>
+                                    <div class="text-muted small">User can access the system</div>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="d-flex align-items-center text-warning mb-3">
+                                <div class="avatar avatar-sm bg-warning-soft rounded me-3">
+                                    <i class="fas fa-pause text-warning"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-semibold">Inactive Account</div>
+                                    <div class="text-muted small">User cannot access the system</div>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-value">@Model.SelectedRoleIds.Count</div>
+                                <div class="stat-label">Assigned Roles</div>
+                            </div>
+                            @if (Model.FailedLoginAttempts > 0)
+                            {
+                                <div class="stat-item">
+                                    <div class="stat-value text-warning">@Model.FailedLoginAttempts</div>
+                                    <div class="stat-label">Failed Attempts</div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="stat-item">
+                                    <div class="stat-value text-success">0</div>
+                                    <div class="stat-label">Failed Attempts</div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Information Section -->
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">
+                    <i class="fas fa-user me-2"></i>User Information
+                </div>
+                <div class="sidebar-section-content">
+                    <div class="info-list">
+                        <div class="info-item">
+                            <div class="info-label">User ID</div>
+                            <div class="info-value">@Model.UserId</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Username</div>
+                            <div class="info-value">@Model.Username</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Created Date</div>
+                            <div class="info-value">@Model.CreatedDate.ToString("MMM dd, yyyy")</div>
+                        </div>
+                        @if (Model.LastLoginDate.HasValue)
+                        {
+                            <div class="info-item">
+                                <div class="info-label">Last Login</div>
+                                <div class="info-value">@Model.LastLoginDate.Value.ToString("MMM dd, yyyy HH:mm")</div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="info-item">
+                                <div class="info-label">Last Login</div>
+                                <div class="info-value text-muted">Never</div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function lockUser(userId) {
+            if (confirm('Are you sure you want to lock this user account?')) {
+                fetch('@Url.Action("Lock")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify({ userId: userId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while locking the user.');
+                });
+            }
+        }
+
+        function unlockUser(userId) {
+            if (confirm('Are you sure you want to unlock this user account?')) {
+                fetch('@Url.Action("Unlock")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify({ userId: userId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while unlocking the user.');
+                });
+            }
+        }
+
+        function clearFailedAttempts(userId) {
+            if (confirm('Are you sure you want to clear failed login attempts for this user?')) {
+                fetch('@Url.Action("ClearFailedAttempts")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify({ userId: userId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while clearing failed attempts.');
+                });
+            }
+        }
+
+        function deleteUser(userId, userName) {
+            if (confirm('Are you sure you want to delete user "' + userName + '"? This action cannot be undone.')) {
+                fetch('@Url.Action("Delete")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify({ userId: userId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = '@Url.Action("Index")';
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while deleting the user.');
+                });
+            }
+        }
+
+        // Form submission validation
+        document.getElementById('editUserForm').addEventListener('submit', function(e) {
+            const selectedRoles = document.querySelectorAll('input[name="SelectedRoleIds"]:checked');
+            if (selectedRoles.length === 0) {
+                e.preventDefault();
+                alert('Please select at least one role for the user.');
+                return false;
+            }
+        });
+    </script>
+}

@@ -23,6 +23,7 @@ using TechWayFit.Licensing.Infrastructure.Data.Repositories.License;
 using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Notification;
 using TechWayFit.Licensing.Infrastructure.Data.Repositories.Notification;
 using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Settings;
+using TechWayFit.Licensing.Management.Services.Implementations.User;
 using TechWayFit.Licensing.Infrastructure.Data.Repositories.Settings;
 using TechWayFit.Licensing.Infrastructure.Contracts.Repositories;
 
@@ -119,6 +120,11 @@ builder.Services.AddScoped<IProductTierRepository, ProductTierRepository>();
 builder.Services.AddScoped<IProductVersionRepository, ProductVersionRepository>(); 
 builder.Services.AddScoped<TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Settings.ISettingRepository, TechWayFit.Licensing.Infrastructure.Data.Repositories.Settings.SettingRepository>();
 
+// Register user management repositories
+builder.Services.AddScoped<TechWayFit.Licensing.Infrastructure.Contracts.Repositories.User.IUserProfileRepository, TechWayFit.Licensing.Management.Infrastructure.Implementations.Repositories.User.UserProfileRepository>();
+builder.Services.AddScoped<TechWayFit.Licensing.Infrastructure.Contracts.Repositories.User.IUserRoleRepository, TechWayFit.Licensing.Management.Infrastructure.Implementations.Repositories.User.UserRoleRepository>();
+builder.Services.AddScoped<TechWayFit.Licensing.Infrastructure.Contracts.Repositories.User.IUserRoleMappingRepository, TechWayFit.Licensing.Management.Infrastructure.Implementations.Repositories.User.UserRoleMappingRepository>();
+
 // Register real services (replacing mock)
 builder.Services.AddScoped<IEnterpriseProductService, EnterpriseProductService>();
 
@@ -142,6 +148,9 @@ builder.Services.AddScoped<IAuditService, TechWayFit.Licensing.Management.Servic
 
 // Step 8: Notification management services
 builder.Services.AddScoped<INotificationService, NotificationService>();
+
+// Step 9: User management services
+builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
 

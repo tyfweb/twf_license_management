@@ -1,0 +1,447 @@
+@model TechWayFit.Licensing.WebUI.ViewModels.User.UserDetailsViewModel
+@{
+    ViewData["Title"] = "User Details";
+    ViewData["Description"] = "View user information and activity";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/product-management.css" />
+}
+
+<div class="container-fluid py-3">
+    <!-- Header Section -->
+    <div class="header mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="mb-1">User Details</h2>
+                <p class="text-muted mb-0">Comprehensive view of user information, roles, and account activity.</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="@Url.Action("Edit", new { id = Model.User.UserId })" class="btn btn-primary">
+                    <i class="fas fa-edit me-2"></i>Edit User
+                </a>
+                <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Users
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Profile Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body py-4">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar avatar-lg bg-primary-soft rounded-circle me-4">
+                            <i class="fas fa-user fa-2x text-primary"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h3 class="mb-1">@Model.User.FullName</h3>
+                            <p class="text-muted mb-2">@Model.User.Email</p>
+                            <div class="d-flex align-items-center gap-3">
+                                @if (Model.User.IsLocked)
+                                {
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-lock me-1"></i>Account Locked
+                                    </span>
+                                }
+                                else if (Model.User.IsActive)
+                                {
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check-circle me-1"></i>Active
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">
+                                        <i class="fas fa-pause-circle me-1"></i>Inactive
+                                    </span>
+                                }
+                                
+                                @if (Model.UserRoles != null && Model.UserRoles.Any())
+                                {
+                                    <div class="d-flex gap-1">
+                                        @foreach (var role in Model.UserRoles.Take(3))
+                                        {
+                                            <span class="badge badge-role-@role.RoleName.ToLower()">@role.RoleName</span>
+                                        }
+                                        @if (Model.UserRoles.Count() > 3)
+                                        {
+                                            <span class="badge bg-light text-dark">+@(Model.UserRoles.Count() - 3) more</span>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <div class="text-muted small">Member since</div>
+                            <div class="fw-semibold">@Model.User.CreatedOn.ToString("MMM dd, yyyy")</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Personal Information -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-bottom-0 py-3">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar avatar-sm bg-info-soft rounded me-3">
+                            <i class="fas fa-user text-info"></i>
+                        </div>
+                        <div>
+                            <h5 class="card-title mb-0">Personal Information</h5>
+                            <p class="text-muted small mb-0">Basic user details and contact information</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-section">
+                                <label class="form-label fw-semibold text-muted small">FULL NAME</label>
+                                <div class="form-control-plaintext">@Model.User.FullName</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-section">
+                                <label class="form-label fw-semibold text-muted small">USERNAME</label>
+                                <div class="form-control-plaintext">@Model.User.UserName</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-section">
+                                <label class="form-label fw-semibold text-muted small">EMAIL ADDRESS</label>
+                                <div class="form-control-plaintext">
+                                    <i class="fas fa-envelope text-muted me-2"></i>@Model.User.Email
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-section">
+                                <label class="form-label fw-semibold text-muted small">DEPARTMENT</label>
+                                <div class="form-control-plaintext">
+                                    <i class="fas fa-building text-muted me-2"></i>@(Model.User.Department ?? "Not specified")
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-section mb-0">
+                                <label class="form-label fw-semibold text-muted small">JOB TITLE</label>
+                                <div class="form-control-plaintext">
+                                    <i class="fas fa-briefcase text-muted me-2"></i>Not specified
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-section mb-0">
+                                <label class="form-label fw-semibold text-muted small">ACCOUNT STATUS</label>
+                                <div class="form-control-plaintext">
+                                    @if (Model.User.IsLocked)
+                                    {
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-lock me-1"></i>Locked
+                                        </span>
+                                    }
+                                    else if (Model.User.IsActive)
+                                    {
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check me-1"></i>Active
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">
+                                            <i class="fas fa-pause me-1"></i>Inactive
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Roles & Permissions -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom-0 py-3">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar avatar-sm bg-warning-soft rounded me-3">
+                            <i class="fas fa-user-shield text-warning"></i>
+                        </div>
+                        <div>
+                            <h5 class="card-title mb-0">Roles & Permissions</h5>
+                            <p class="text-muted small mb-0">User access levels and assigned roles</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (Model.UserRoles != null && Model.UserRoles.Any())
+                    {
+                        <div class="row">
+                            @foreach (var role in Model.UserRoles)
+                            {
+                                <div class="col-md-6 mb-3">
+                                    <div class="card border h-100">
+                                        <div class="card-body p-3">
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar avatar-sm bg-@(role.RoleName.ToLower() == "administrator" ? "danger" : role.RoleName.ToLower() == "manager" ? "warning" : "primary")-soft rounded me-3">
+                                                    <i class="fas fa-@(role.RoleName.ToLower() == "administrator" ? "crown" : role.RoleName.ToLower() == "manager" ? "user-tie" : "user") text-@(role.RoleName.ToLower() == "administrator" ? "danger" : role.RoleName.ToLower() == "manager" ? "warning" : "primary")"></i>
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <div class="fw-semibold">@role.RoleName</div>
+                                                    @if (!string.IsNullOrEmpty(role.RoleDescription))
+                                                    {
+                                                        <div class="text-muted small">@role.RoleDescription</div>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <div class="avatar avatar-lg bg-light rounded-circle mx-auto mb-3">
+                                <i class="fas fa-user-slash fa-2x text-muted"></i>
+                            </div>
+                            <h6 class="text-muted">No Roles Assigned</h6>
+                            <p class="text-muted small mb-0">This user doesn't have any roles assigned yet.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Quick Actions -->
+            <div class="sidebar-section mb-3">
+                <div class="section-header">
+                    <h6><i class="fas fa-bolt me-2"></i>Quick Actions</h6>
+                </div>
+                <div class="section-content">
+                    <div class="d-grid gap-2">
+                        @if (Model.User.IsLocked)
+                        {
+                            <button type="button" class="btn btn-success" onclick="unlockUser('@Model.User.UserId')">
+                                <i class="fas fa-unlock me-2"></i>Unlock Account
+                            </button>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-warning" onclick="lockUser('@Model.User.UserId')">
+                                <i class="fas fa-lock me-2"></i>Lock Account
+                            </button>
+                        }
+
+                        <a href="@Url.Action("ChangePassword", new { id = Model.User.UserId })" class="btn btn-outline-primary">
+                            <i class="fas fa-key me-2"></i>Reset Password
+                        </a>
+
+                        @if (Model.FailedLoginAttempts > 0)
+                        {
+                            <button type="button" class="btn btn-outline-info" onclick="clearFailedAttempts('@Model.User.UserId')">
+                                <i class="fas fa-undo me-2"></i>Clear Failed Attempts
+                            </button>
+                        }
+                        
+                        <a href="@Url.Action("Edit", new { id = Model.User.UserId })" class="btn btn-outline-secondary">
+                            <i class="fas fa-edit me-2"></i>Edit User
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Account Information -->
+            <div class="sidebar-section mb-3">
+                <div class="section-header">
+                    <h6><i class="fas fa-info-circle me-2"></i>Account Information</h6>
+                </div>
+                <div class="section-content">
+                    <div class="detail-group">
+                        <label class="detail-label">CREATED DATE</label>
+                        <div class="detail-value">
+                            <i class="fas fa-calendar-plus text-muted me-2"></i>
+                            @Model.User.CreatedOn.ToString("MMM dd, yyyy HH:mm")
+                        </div>
+                    </div>
+
+                    @if (Model.User.UpdatedOn.HasValue)
+                    {
+                        <div class="detail-group">
+                            <label class="detail-label">LAST UPDATED</label>
+                            <div class="detail-value">
+                                <i class="fas fa-calendar-edit text-muted me-2"></i>
+                                @Model.User.UpdatedOn.Value.ToString("MMM dd, yyyy HH:mm")
+                            </div>
+                        </div>
+                    }
+
+                    <div class="detail-group">
+                        <label class="detail-label">CREATED BY</label>
+                        <div class="detail-value">
+                            <i class="fas fa-user-plus text-muted me-2"></i>
+                            @Model.User.CreatedBy
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.User.UpdatedBy))
+                    {
+                        <div class="detail-group">
+                            <label class="detail-label">UPDATED BY</label>
+                            <div class="detail-value">
+                                <i class="fas fa-user-edit text-muted me-2"></i>
+                                @Model.User.UpdatedBy
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Login Activity -->
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <h6><i class="fas fa-sign-in-alt me-2"></i>Login Activity</h6>
+                </div>
+                <div class="section-content">
+                    <div class="detail-group">
+                        <label class="detail-label">LAST LOGIN</label>
+                        <div class="detail-value">
+                            @if (Model.LastLoginDate.HasValue)
+                            {
+                                <i class="fas fa-clock text-muted me-2"></i>
+                                @Model.LastLoginDate.Value.ToString("MMM dd, yyyy HH:mm")
+                            }
+                            else
+                            {
+                                <i class="fas fa-times-circle text-muted me-2"></i>
+                                <span class="text-muted">Never logged in</span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="detail-group">
+                        <label class="detail-label">FAILED LOGIN ATTEMPTS</label>
+                        <div class="detail-value">
+                            <i class="fas fa-exclamation-triangle text-muted me-2"></i>
+                            @if (Model.FailedLoginAttempts > 0)
+                            {
+                                <span class="badge bg-warning">@Model.FailedLoginAttempts</span>
+                            }
+                            else
+                            {
+                                <span class="text-success">0</span>
+                            }
+                        </div>
+                    </div>
+
+                    @if (Model.LockedDate.HasValue)
+                    {
+                        <div class="detail-group">
+                            <label class="detail-label">LOCKED DATE</label>
+                            <div class="detail-value">
+                                <i class="fas fa-lock text-muted me-2"></i>
+                                @Model.LockedDate.Value.ToString("MMM dd, yyyy HH:mm")
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function lockUser(userId) {
+            if (confirm('Are you sure you want to lock this user account?')) {
+                fetch('@Url.Action("Lock")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify({ userId: userId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while locking the user.');
+                });
+            }
+        }
+
+        function unlockUser(userId) {
+            if (confirm('Are you sure you want to unlock this user account?')) {
+                fetch('@Url.Action("Unlock")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify({ userId: userId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while unlocking the user.');
+                });
+            }
+        }
+
+        function clearFailedAttempts(userId) {
+            if (confirm('Are you sure you want to clear failed login attempts for this user?')) {
+                fetch('@Url.Action("ClearFailedAttempts")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify({ userId: userId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while clearing failed attempts.');
+                });
+            }
+        }
+    </script>
+}
+

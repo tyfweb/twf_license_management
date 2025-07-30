@@ -1,0 +1,408 @@
+@model TechWayFit.Licensing.WebUI.ViewModels.User.CreateUserViewModel
+@{
+    ViewData["Title"] = "Create User";
+    ViewData["Description"] = "Add a new user to the system";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/product-management.css" />
+}
+
+<div class="container-fluid py-3">
+    <!-- Header Section -->
+    <div class="header mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="mb-1">Create New User</h2>
+                <p class="text-muted mb-0">Add a new user account to the system with appropriate roles and permissions.</p>
+            </div>
+            <div>
+                <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Users
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create User Form -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom-0 py-3">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar avatar-sm bg-primary-soft rounded me-3">
+                            <i class="fas fa-user-plus text-primary"></i>
+                        </div>
+                        <div>
+                            <h5 class="card-title mb-0">User Information</h5>
+                            <p class="text-muted small mb-0">Enter the basic details for the new user</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" method="post" id="createUserForm">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger d-flex align-items-center" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <div>Please correct the errors below.</div>
+                        </div>
+                        
+                        <!-- Basic Information Section -->
+                        <div class="form-section mb-4">
+                            <h6 class="text-primary mb-3">
+                                <i class="fas fa-user me-2"></i>Basic Information
+                            </h6>
+                            
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label asp-for="FullName" class="form-label fw-semibold">Full Name <span class="text-danger">*</span></label>
+                                        <input asp-for="FullName" class="form-control form-control-lg" placeholder="Enter full name" />
+                                        <span asp-validation-for="FullName" class="text-danger small"></span>
+                                    </div>
+                                </div>    
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label asp-for="Email" class="form-label fw-semibold">Email Address <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light border-end-0">
+                                                <i class="fas fa-envelope text-muted"></i>
+                                            </span>
+                                            <input asp-for="Email" class="form-control border-start-0" placeholder="Enter email address" />
+                                        </div>
+                                        <span asp-validation-for="Email" class="text-danger small"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label asp-for="Username" class="form-label fw-semibold">Username <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light border-end-0">
+                                                <i class="fas fa-at text-muted"></i>
+                                            </span>
+                                            <input asp-for="Username" class="form-control border-start-0" placeholder="Enter username" />
+                                        </div>
+                                        <span asp-validation-for="Username" class="text-danger small"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label asp-for="Department" class="form-label fw-semibold">Department</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light border-end-0">
+                                                <i class="fas fa-building text-muted"></i>
+                                            </span>
+                                            <input asp-for="Department" class="form-control border-start-0" placeholder="Enter department" />
+                                        </div>
+                                        <span asp-validation-for="Department" class="text-danger small"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label asp-for="JobTitle" class="form-label fw-semibold">Job Title</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light border-end-0">
+                                                <i class="fas fa-briefcase text-muted"></i>
+                                            </span>
+                                            <input asp-for="JobTitle" class="form-control border-start-0" placeholder="Enter job title" />
+                                        </div>
+                                        <span asp-validation-for="JobTitle" class="text-danger small"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Password Section -->
+                        <div class="form-section mb-4">
+                            <h6 class="text-primary mb-3">
+                                <i class="fas fa-lock me-2"></i>Password Setup
+                            </h6>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label asp-for="Password" class="form-label fw-semibold">Password <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light border-end-0">
+                                                <i class="fas fa-key text-muted"></i>
+                                            </span>
+                                            <input asp-for="Password" class="form-control border-start-0 border-end-0" type="password" placeholder="Enter password" />
+                                            <button type="button" class="btn btn-outline-secondary border-start-0" onclick="togglePassword('Password')">
+                                                <i class="fas fa-eye" id="Password-icon"></i>
+                                            </button>
+                                        </div>
+                                        <span asp-validation-for="Password" class="text-danger small"></span>
+                                        <div class="form-text small">
+                                            Must contain: uppercase, lowercase, number, and special character (8+ chars)
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6"></div>
+                                    <div class="mb-3">
+                                        <label asp-for="ConfirmPassword" class="form-label fw-semibold">Confirm Password <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light border-end-0">
+                                                <i class="fas fa-check-double text-muted"></i>
+                                            </span>
+                                            <input asp-for="ConfirmPassword" class="form-control border-start-0 border-end-0" type="password" placeholder="Confirm password" />
+                                            <button type="button" class="btn btn-outline-secondary border-start-0" onclick="togglePassword('ConfirmPassword')">
+                                                <i class="fas fa-eye" id="ConfirmPassword-icon"></i>
+                                            </button>
+                                        </div>
+                                        <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                                    </div>
+                                </div>
+                            </div>
+                         
+
+                        <!-- Roles Section -->
+                        <div class="form-section mb-4">
+                            <h6 class="text-primary mb-3">
+                                <i class="fas fa-user-shield me-2"></i>User Roles <span class="text-danger">*</span>
+                            </h6>
+                            
+                            <div class="row">
+                                @if (Model.AvailableRoles != null && Model.AvailableRoles.Any())
+                                {
+                                    @foreach (var role in Model.AvailableRoles)
+                                    {
+                                        <div class="col-md-6 mb-3">
+                                            <div class="card border h-100 role-card" onclick="toggleRole('@role.RoleId')">
+                                                <div class="card-body p-3">
+                                                    <div class="form-check">
+                                                        <input type="checkbox" name="SelectedRoleIds" value="@role.RoleId" 
+                                                               class="form-check-input" id="role-@role.RoleId" 
+                                                               @(Model.SelectedRoleIds.Contains(role.RoleId) ? "checked" : "") />
+                                                        <label class="form-check-label w-100" for="role-@role.RoleId">
+                                                            <div class="d-flex align-items-center">
+                                                                <div class="avatar avatar-sm bg-@(role.RoleName.ToLower() == "administrator" ? "danger" : role.RoleName.ToLower() == "manager" ? "warning" : "primary")-soft rounded me-3">
+                                                                    <i class="fas fa-@(role.RoleName.ToLower() == "administrator" ? "crown" : role.RoleName.ToLower() == "manager" ? "user-tie" : "user") text-@(role.RoleName.ToLower() == "administrator" ? "danger" : role.RoleName.ToLower() == "manager" ? "warning" : "primary")"></i>
+                                                                </div>
+                                                                <div class="flex-grow-1">
+                                                                    <div class="fw-semibold">@role.RoleName</div>
+                                                                    @if (!string.IsNullOrEmpty(role.RoleDescription))
+                                                                    {
+                                                                        <div class="text-muted small">@role.RoleDescription</div>
+                                                                    }
+                                                                </div>
+                                                            </div>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <div class="col-12">
+                                        <div class="alert alert-warning d-flex align-items-center">
+                                            <i class="fas fa-exclamation-triangle me-2"></i>
+                                            <div>No roles available. Please create roles first.</div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            <span asp-validation-for="SelectedRoleIds" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Account Settings Section -->
+                        <div class="form-section mb-4">
+                            <h6 class="text-primary mb-3">
+                                <i class="fas fa-cogs me-2"></i>Account Settings
+                            </h6>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="card border h-100">
+                                        <div class="card-body p-3">
+                                            <div class="form-check">
+                                                <input asp-for="IsActive" class="form-check-input" />
+                                                <label asp-for="IsActive" class="form-check-label fw-semibold">
+                                                    <i class="fas fa-toggle-on text-success me-2"></i>Active User
+                                                </label>
+                                                <div class="form-text small mt-1">User can log in and access the system</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card border h-100">
+                                        <div class="card-body p-3">
+                                            <div class="form-check">
+                                                <input asp-for="RequirePasswordChange" class="form-check-input" />
+                                                <label asp-for="RequirePasswordChange" class="form-check-label fw-semibold">
+                                                    <i class="fas fa-key text-warning me-2"></i>Force Password Change
+                                                </label>
+                                                <div class="form-text small mt-1">User must change password on first login</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="border-top pt-3">
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary px-4">
+                                    <i class="fas fa-plus me-2"></i>Create User
+                                </button>
+                                <a href="@Url.Action("Index")" class="btn btn-outline-secondary px-4">
+                                    <i class="fas fa-times me-2"></i>Cancel
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <!-- Password Requirements Card -->
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header bg-white border-bottom-0 py-3">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar avatar-sm bg-warning-soft rounded me-3">
+                            <i class="fas fa-shield-alt text-warning"></i>
+                        </div>
+                        <h6 class="card-title mb-0">Password Requirements</h6>
+                    </div>
+                </div>
+                <div class="card-body pt-0">
+                    <ul class="list-unstyled mb-0">
+                        <li class="d-flex align-items-center mb-2">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <small>At least 8 characters long</small>
+                        </li>
+                        <li class="d-flex align-items-center mb-2">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <small>Contains uppercase letter (A-Z)</small>
+                        </li>
+                        <li class="d-flex align-items-center mb-2">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <small>Contains lowercase letter (a-z)</small>
+                        </li>
+                        <li class="d-flex align-items-center mb-2">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <small>Contains at least one number (0-9)</small>
+                        </li>
+                        <li class="d-flex align-items-center">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <small>Contains special character (!@@#$%^&*)</small>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Role Information Card -->
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header bg-white border-bottom-0 py-3">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar avatar-sm bg-info-soft rounded me-3">
+                            <i class="fas fa-info-circle text-info"></i>
+                        </div>
+                        <h6 class="card-title mb-0">Role Information</h6>
+                    </div>
+                </div>
+                <div class="card-body pt-0">
+                    <div class="role-info mb-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="avatar avatar-xs bg-danger-soft rounded me-2">
+                                <i class="fas fa-crown text-danger small"></i>
+                            </div>
+                            <strong class="small">Administrator</strong>
+                        </div>
+                        <p class="text-muted small mb-0">Full system access with all permissions</p>
+                    </div>
+                    
+                    <div class="role-info mb-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="avatar avatar-xs bg-warning-soft rounded me-2">
+                                <i class="fas fa-user-tie text-warning small"></i>
+                            </div>
+                            <strong class="small">Manager</strong>
+                        </div>
+                        <p class="text-muted small mb-0">Can manage users and view reports</p>
+                    </div>
+                    
+                    <div class="role-info">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="avatar avatar-xs bg-primary-soft rounded me-2">
+                                <i class="fas fa-user text-primary small"></i>
+                            </div>
+                            <strong class="small">User</strong>
+                        </div>
+                        <p class="text-muted small mb-0">Standard user access with basic permissions</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Tips Card -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom-0 py-3">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar avatar-sm bg-success-soft rounded me-3">
+                            <i class="fas fa-lightbulb text-success"></i>
+                        </div>
+                        <h6 class="card-title mb-0">Quick Tips</h6>
+                    </div>
+                </div>
+                <div class="card-body pt-0">
+                    <ul class="list-unstyled mb-0">
+                        <li class="d-flex align-items-start mb-2">
+                            <i class="fas fa-dot-circle text-primary me-2 mt-1 small"></i>
+                            <small>Username must be unique across the system</small>
+                        </li>
+                        <li class="d-flex align-items-start mb-2">
+                            <i class="fas fa-dot-circle text-primary me-2 mt-1 small"></i>
+                            <small>Email will be used for password resets</small>
+                        </li>
+                        <li class="d-flex align-items-start">
+                            <i class="fas fa-dot-circle text-primary me-2 mt-1 small"></i>
+                            <small>Users can be assigned multiple roles</small>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(inputId + '-icon');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        function toggleRole(roleId) {
+            const checkbox = document.getElementById('role-' + roleId);
+            checkbox.checked = !checkbox.checked;
+        }
+
+        // Form validation
+        document.getElementById('createUserForm').addEventListener('submit', function(e) {
+            const selectedRoles = document.querySelectorAll('input[name="SelectedRoleIds"]:checked');
+            if (selectedRoles.length === 0) {
+                e.preventDefault();
+                alert('Please select at least one role for the user.');
+                return false;
+            }
+        });
+    </script>
+}

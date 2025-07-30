@@ -1,0 +1,482 @@
+@model TechWayFit.Licensing.WebUI.ViewModels.User.UserListViewModel
+@using TechWayFit.Licensing.WebUI.ViewModels.User
+@{
+    ViewData["Title"] = "User Management";
+    ViewData["Description"] = "Manage system users, roles, and permissions";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/product-management.css" />
+}
+
+@Html.AntiForgeryToken()
+
+<div class="container-fluid py-3">
+    <!-- Header Section -->
+    <div class="header mb-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="mb-1">User Management</h2>
+                <p class="text-muted mb-0">Manage system users, roles, and access permissions.</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="@Url.Action("Create")" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Add New User
+                </a>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-outline-secondary" onclick="refreshUserList()">
+                        <i class="fas fa-sync-alt me-1"></i>Refresh
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="exportUsers()">
+                        <i class="fas fa-download me-1"></i>Export
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="avatar avatar-md bg-primary-soft rounded">
+                                <i class="fas fa-users text-primary"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <div class="h4 mb-0">@Model.TotalUsers</div>
+                            <div class="text-muted small">Total Users</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="avatar avatar-md bg-success-soft rounded">
+                                <i class="fas fa-user-shield text-success"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <div class="h4 mb-0">@Model.ActiveUsers</div>
+                            <div class="text-muted small">Active Users</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="avatar avatar-md bg-danger-soft rounded">
+                                <i class="fas fa-user-lock text-danger"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <div class="h4 mb-0">@Model.LockedUsers</div>
+                            <div class="text-muted small">Locked Users</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="avatar avatar-md bg-warning-soft rounded">
+                                <i class="fas fa-user-cog text-warning"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <div class="h4 mb-0">@Model.AdminUsers</div>
+                            <div class="text-muted small">Administrators</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="position-relative">
+                        <input type="text" class="form-control ps-5" id="searchUsers" 
+                               placeholder="Search users by name, email, or department..." value="@Model.SearchTerm">
+                        <div class="position-absolute top-50 start-0 translate-middle-y ps-3">
+                            <i class="fas fa-search text-muted"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="roleFilter" onchange="filterUsers()">
+                        <option value="">All Roles</option>
+                        @{
+                            var roles = new[] { "Administrator", "Manager", "User" };
+                            foreach (var role in roles)
+                            {
+                                if (!string.IsNullOrEmpty(role) && !string.IsNullOrEmpty(Model.RoleFilter) && 
+                                        Model.RoleFilter.Equals(role, StringComparison.OrdinalIgnoreCase))
+                                {            <option value="@role" selected>@role</option>
+                                }
+                                else
+                                {            <option value="@role">@role</option>
+                                }   
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="statusFilter" onchange="filterUsers()">
+                        <option value="">All Status</option>
+                        @{ 
+                            var statuses = new[] { "active", "locked" };
+                            foreach (var status in statuses)
+                            {
+                                if (!string.IsNullOrEmpty(status) && !string.IsNullOrEmpty(Model.StatusFilter) && 
+                                        Model.StatusFilter.Equals(status, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    <option value="@status" selected>@status</option>
+                                }
+                                else
+                                {
+                                    <option value="@status">@status</option>
+                                }
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="border-0 px-4 py-3">User</th>
+                            <th class="border-0 px-4 py-3">Role</th>
+                            <th class="border-0 px-4 py-3">Department</th>
+                            <th class="border-0 px-4 py-3">Status</th>
+                            <th class="border-0 px-4 py-3">Last Login</th>
+                            <th class="border-0 px-4 py-3">Created</th>
+                            <th class="border-0 px-4 py-3 text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Users != null && Model.Users.Any())
+                        {
+                            @foreach (var user in Model.Users)
+                            {
+                                <tr>
+                                    <td class="px-4 py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar avatar-sm bg-light rounded-circle me-3">
+                                                <i class="fas fa-user text-muted"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-semibold text-dark">@user.FullName</div>
+                                                <div class="text-muted small">@user.Email</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <span class="badge rounded-pill bg-@(user.Roles.FirstOrDefault()?.RoleName?.ToLower() == "administrator" ? "danger" : user.Roles.FirstOrDefault()?.RoleName?.ToLower() == "manager" ? "warning" : "primary")-subtle text-@(user.Roles.FirstOrDefault()?.RoleName?.ToLower() == "administrator" ? "danger" : user.Roles.FirstOrDefault()?.RoleName?.ToLower() == "manager" ? "warning" : "primary")">
+                                            @(user.Roles.FirstOrDefault()?.RoleName ?? "No Role")
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <span class="text-muted">@(user.Department ?? "—")</span>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        @if (user.IsLocked)
+                                        {
+                                            <span class="badge bg-danger-subtle text-danger">
+                                                <i class="fas fa-lock me-1"></i>Locked
+                                            </span>
+                                        }
+                                        else if (user.IsActive)
+                                        {
+                                            <span class="badge bg-success-subtle text-success">
+                                                <i class="fas fa-check-circle me-1"></i>Active
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary-subtle text-secondary">
+                                                <i class="fas fa-pause-circle me-1"></i>Inactive
+                                            </span>
+                                        }
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        @if (user.LastLoginDate.HasValue)
+                                        {
+                                            <span class="text-muted small">@user.LastLoginDate.Value.ToString("MMM dd, yyyy")</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small">Never</span>
+                                        }
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <span class="text-muted small">@user.CreatedDate.ToString("MMM dd, yyyy")</span>
+                                    </td>
+                                    <td class="px-4 py-3 text-center">
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a href="@Url.Action("Details", new { id = user.UserProfileId })" 
+                                               class="btn btn-outline-primary btn-sm" title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="@Url.Action("Edit", new { id = user.UserProfileId })" 
+                                               class="btn btn-outline-secondary btn-sm" title="Edit User">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            @if (user.IsLocked)
+                                            {
+                                                <button type="button" class="btn btn-outline-success btn-sm" 
+                                                        onclick="unlockUser('@user.UserProfileId')" title="Unlock User">
+                                                    <i class="fas fa-unlock"></i>
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button type="button" class="btn btn-outline-warning btn-sm" 
+                                                        onclick="lockUser('@user.UserProfileId')" title="Lock User">
+                                                    <i class="fas fa-lock"></i>
+                                                </button>
+                                            }
+                                            <button type="button" class="btn btn-outline-danger btn-sm" 
+                                                    onclick="deleteUser('@user.UserProfileId', '@user.FullName')" title="Delete User">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center py-4">
+                                    <div class="text-muted">
+                                        <i class="fas fa-users fa-2x mb-2"></i>
+                                        <p>No users found matching your criteria.</p>
+                                        <a href="@Url.Action("Create")" class="btn btn-primary">
+                                            <i class="fas fa-plus me-2"></i>Add First User
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    @if (Model.TotalPages > 1)
+    {
+        <nav aria-label="User pagination" class="mt-3">
+            <ul class="pagination justify-content-center">
+                @if (Model.CurrentPage > 1)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Index", new { page = Model.CurrentPage - 1, search = Model.SearchTerm, role = Model.RoleFilter, status = Model.StatusFilter })">
+                            Previous
+                        </a>
+                    </li>
+                }
+
+                @for (int i = Math.Max(1, Model.CurrentPage - 2); i <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); i++)
+                {
+                    <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                        <a class="page-link" href="@Url.Action("Index", new { page = i, search = Model.SearchTerm, role = Model.RoleFilter, status = Model.StatusFilter })">
+                            @i
+                        </a>
+                    </li>
+                }
+
+                @if (Model.CurrentPage < Model.TotalPages)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Index", new { page = Model.CurrentPage + 1, search = Model.SearchTerm, role = Model.RoleFilter, status = Model.StatusFilter })">
+                            Next
+                        </a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function searchUsers() {
+            const searchTerm = document.getElementById('searchUsers').value;
+            const roleFilter = document.getElementById('roleFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            
+            window.location.href = '@Url.Action("Index")?search=' + encodeURIComponent(searchTerm) + 
+                                 '&role=' + encodeURIComponent(roleFilter) + 
+                                 '&status=' + encodeURIComponent(statusFilter);
+        }
+
+        function filterUsers() {
+            searchUsers();
+        }
+
+        function refreshUserList() {
+            window.location.reload();
+        }
+
+        function exportUsers() {
+            window.location.href = '@Url.Action("Export")';
+        }
+
+        function lockUser(userId) {
+            if (confirm('Are you sure you want to lock this user account?')) {
+                fetch('@Url.Action("Lock")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify({ userId: userId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while locking the user.');
+                });
+            }
+        }
+
+        function unlockUser(userId) {
+            if (confirm('Are you sure you want to unlock this user account?')) {
+                fetch('@Url.Action("Unlock")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify({ userId: userId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while unlocking the user.');
+                });
+            }
+        }
+
+        function deleteUser(userId, userName) {
+            if (confirm('Are you sure you want to delete user "' + userName + '"? This action cannot be undone.')) {
+                fetch('@Url.Action("Delete")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify({ userId: userId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while deleting the user.');
+                });
+            }
+        }
+
+        // Handle Enter key in search box
+        document.getElementById('searchUsers').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchUsers();
+            }
+        });
+    </script>
+}
+
+<style>
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        background: #f8f9fa;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6c757d;
+        font-size: 18px;
+    }
+
+    .badge-role-administrator {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .badge-role-manager {
+        background-color: #fd7e14;
+        color: white;
+    }
+
+    .badge-role-user {
+        background-color: #6f42c1;
+        color: white;
+    }
+
+    .search-box {
+        position: relative;
+    }
+
+    .btn-search {
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        border: none;
+        background: transparent;
+        color: #6c757d;
+        padding: 0 15px;
+    }
+
+    .btn-search:hover {
+        color: #495057;
+    }
+</style>

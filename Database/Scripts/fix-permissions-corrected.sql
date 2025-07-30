@@ -67,6 +67,9 @@ GRANT ALL PRIVILEGES ON TABLE notification_templates TO twf_license_user;
 GRANT ALL PRIVILEGES ON TABLE notification_history TO twf_license_user;
 
 GRANT ALL PRIVILEGES ON TABLE settings TO twf_license_user;
+GRANT ALL PRIVILEGES ON TABLE user_roles TO twf_license_user;
+GRANT ALL PRIVILEGES ON TABLE user_profiles TO twf_license_user;
+GRANT ALL PRIVILEGES ON TABLE user_role_mappings TO twf_license_user;
 -- =============================================
 -- VIEW PERMISSIONS
 -- =============================================
