@@ -138,7 +138,8 @@ builder.Services.AddScoped<ISettingService, SettingService>();
 builder.Services.AddScoped<TechWayFit.Licensing.Management.Web.Helpers.SettingsHelper>();
 
 // Step 7: Audit management services will be added here
-// Step 8: Notification management services will be added here
+// Step 8: Notification management services
+builder.Services.AddScoped<INotificationService, NotificationService>();
 
 var app = builder.Build();
 

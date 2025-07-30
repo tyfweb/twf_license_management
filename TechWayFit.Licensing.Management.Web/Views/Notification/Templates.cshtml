@@ -1,0 +1,352 @@
+@model TechWayFit.Licensing.WebUI.ViewModels.Notification.NotificationTemplateListViewModel
+@{
+    ViewData["Title"] = "Notification Templates";
+    ViewData["Description"] = "Manage notification templates and configurations";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/product-management.css" />
+    <style>
+        .template-card {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        .template-card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        .template-card-header {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-bottom: 1px solid #dee2e6;
+            padding: 1rem;
+        }
+        .template-card-body {
+            padding: 1rem;
+        }
+        .template-type-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+        }
+        .usage-stats {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+        .filter-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .template-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .template-preview {
+            max-height: 60px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    </style>
+}
+
+<div class="container-fluid py-3">
+    <!-- Header Section -->
+    <div class="header mb-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="mb-1">Notification Templates</h2>
+                <p class="text-muted mb-0">Manage notification templates and configurations</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="@Url.Action("CreateTemplate")" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Create Template
+                </a>
+                <a href="@Url.Action("Test")" class="btn btn-outline-info">
+                    <i class="fas fa-vial me-1"></i>Test Template
+                </a>
+                <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                    <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <form method="get" asp-action="Templates" class="row g-3">
+            <div class="col-md-4">
+                <label for="searchTerm" class="form-label">Search Templates</label>
+                <input type="text" class="form-control" id="searchTerm" name="searchTerm" 
+                       value="@Model.SearchTerm" placeholder="Search by name or subject...">
+            </div>
+            <div class="col-md-3">
+                <label for="filterType" class="form-label">Template Type</label>
+                <select class="form-select" id="filterType" name="filterType">
+                    <option value="">All Types</option>
+                    @foreach (var type in Enum.GetValues<TechWayFit.Licensing.Management.Core.Models.Notification.NotificationType>())
+                    {
+                        <option value="@type" selected="@(Model.FilterType == type)">@type</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Status</label>
+                <div class="form-check mt-2">
+                    <input class="form-check-input" type="checkbox" id="showInactive" name="showInactive" 
+                           value="true" checked="@Model.ShowInactiveTemplates">
+                    <label class="form-check-label" for="showInactive">
+                        Show Inactive
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">&nbsp;</label>
+                <div class="d-flex gap-2 mt-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search me-1"></i>Filter
+                    </button>
+                    <a href="@Url.Action("Templates")" class="btn btn-outline-secondary">
+                        <i class="fas fa-undo me-1"></i>Clear
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Templates Grid -->
+    @if (Model.Templates.Any())
+    {
+        <div class="row g-3">
+            @foreach (var template in Model.Templates)
+            {
+                <div class="col-lg-6 col-xl-4">
+                    <div class="template-card h-100">
+                        <div class="template-card-header">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1 fw-bold">@template.TemplateName</h6>
+                                    <div class="d-flex gap-2 mb-2">
+                                        <span class="badge template-type-badge bg-info">@template.TypeDisplayName</span>
+                                        <span class="badge template-type-badge bg-secondary">@template.ModeDisplayName</span>
+                                        <span class="badge template-type-badge @(template.IsActive ? "bg-success" : "bg-warning")">
+                                            @(template.IsActive ? "Active" : "Inactive")
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="@Url.Action("TemplateDetails", new { id = template.TemplateId })">
+                                            <i class="fas fa-eye me-2"></i>View Details
+                                        </a></li>
+                                        <li><a class="dropdown-item" href="@Url.Action("EditTemplate", new { id = template.TemplateId })">
+                                            <i class="fas fa-edit me-2"></i>Edit
+                                        </a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" href="@Url.Action("Test", new { templateId = template.TemplateId })">
+                                            <i class="fas fa-vial me-2"></i>Test Template
+                                        </a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="duplicateTemplate('@template.TemplateId')">
+                                            <i class="fas fa-copy me-2"></i>Duplicate
+                                        </a></li>
+                                        @if (!template.IsActive)
+                                        {
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><a class="dropdown-item text-danger" href="#" onclick="deleteTemplate('@template.TemplateId', '@template.TemplateName')">
+                                                <i class="fas fa-trash me-2"></i>Delete
+                                            </a></li>
+                                        }
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="template-card-body">
+                            <div class="mb-3">
+                                <strong class="text-muted small">Subject:</strong>
+                                <p class="mb-2 text-truncate">@template.Subject</p>
+                                
+                                <strong class="text-muted small">Preview:</strong>
+                                <div class="template-preview small text-muted">                                    @if (template.MessageTemplate.Length > 120)
+                                    {
+                                        @(template.MessageTemplate.Substring(0, 120) + "...")
+                                    }
+                                    else
+                                    {
+                                        @template.MessageTemplate
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="usage-stats d-flex justify-content-between align-items-center mb-3">
+                                <span>
+                                    <i class="fas fa-chart-bar me-1"></i>
+                                    Used @template.UsageCount times
+                                </span>
+                                @if (template.LastUsed.HasValue)
+                                {
+                                    <small class="text-muted">
+                                        Last: @template.LastUsed.Value.ToString("MMM dd")
+                                    </small>
+                                }
+                            </div>
+
+                            <div class="template-actions">
+                                <a href="@Url.Action("TemplateDetails", new { id = template.TemplateId })" 
+                                   class="btn btn-outline-primary btn-sm flex-grow-1">
+                                    <i class="fas fa-eye me-1"></i>View
+                                </a>
+                                <a href="@Url.Action("EditTemplate", new { id = template.TemplateId })" 
+                                   class="btn btn-outline-secondary btn-sm">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button type="button" class="btn btn-outline-info btn-sm" 
+                                        onclick="testTemplate('@template.TemplateId')" title="Test Template">
+                                    <i class="fas fa-vial"></i>
+                                </button>
+                            </div>
+
+                            <div class="mt-2 small text-muted">
+                                <i class="fas fa-user me-1"></i>@template.CreatedBy
+                                <span class="float-end">@template.CreatedDate.ToString("MMM dd, yyyy")</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Quick Actions for Multiple Templates -->
+        <div class="mt-4 d-flex justify-content-between align-items-center">
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-outline-secondary" onclick="selectAllTemplates()">
+                    <i class="fas fa-check-square me-1"></i>Select All
+                </button>
+                <button type="button" class="btn btn-outline-warning" onclick="bulkDeactivate()" disabled id="bulkDeactivateBtn">
+                    <i class="fas fa-pause me-1"></i>Deactivate Selected
+                </button>
+                <button type="button" class="btn btn-outline-success" onclick="bulkActivate()" disabled id="bulkActivateBtn">
+                    <i class="fas fa-play me-1"></i>Activate Selected
+                </button>
+            </div>
+            <div>
+                <button type="button" class="btn btn-outline-secondary" onclick="exportTemplates()">
+                    <i class="fas fa-download me-1"></i>Export Templates
+                </button>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            @if (string.IsNullOrEmpty(Model.SearchTerm) && !Model.FilterType.HasValue)
+            {
+                <i class="fas fa-file-alt fa-4x text-muted mb-3"></i>
+                <h4>No Templates Found</h4>
+                <p class="text-muted mb-4">Get started by creating your first notification template.</p>
+                <a href="@Url.Action("CreateTemplate")" class="btn btn-primary btn-lg">
+                    <i class="fas fa-plus me-2"></i>Create First Template
+                </a>
+            }
+            else
+            {
+                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                <h5>No Templates Match Your Criteria</h5>
+                <p class="text-muted">Try adjusting your search or filter criteria.</p>
+                <a href="@Url.Action("Templates")" class="btn btn-outline-primary">
+                    <i class="fas fa-undo me-2"></i>Clear Filters
+                </a>
+            }
+        </div>
+    }
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteTemplateModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the template <strong id="deleteTemplateName"></strong>?</p>
+                <p class="text-muted small">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete Template</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let selectedTemplates = [];
+        let templateToDelete = null;
+
+        // Test template
+        function testTemplate(templateId) {
+            window.location.href = '@Url.Action("Test")' + '?templateId=' + templateId;
+        }
+
+        // Duplicate template
+        function duplicateTemplate(templateId) {
+            // TODO: Implement template duplication
+            alert('Template duplication will be implemented in a future update.');
+        }
+
+        // Delete template
+        function deleteTemplate(templateId, templateName) {
+            templateToDelete = templateId;
+            document.getElementById('deleteTemplateName').textContent = templateName;
+            new bootstrap.Modal(document.getElementById('deleteTemplateModal')).show();
+        }
+
+        // Confirm delete
+        document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+            if (templateToDelete) {
+                // TODO: Implement template deletion via AJAX
+                alert('Template deletion will be implemented in a future update.');
+                bootstrap.Modal.getInstance(document.getElementById('deleteTemplateModal')).hide();
+                templateToDelete = null;
+            }
+        });
+
+        // Select all templates
+        function selectAllTemplates() {
+            // TODO: Implement multi-select functionality
+            alert('Multi-select functionality will be implemented in a future update.');
+        }
+
+        // Bulk operations
+        function bulkDeactivate() {
+            // TODO: Implement bulk deactivation
+            alert('Bulk operations will be implemented in a future update.');
+        }
+
+        function bulkActivate() {
+            // TODO: Implement bulk activation
+            alert('Bulk operations will be implemented in a future update.');
+        }
+
+        // Export templates
+        function exportTemplates() {
+            // TODO: Implement template export
+            alert('Template export will be implemented in a future update.');
+        }
+
+        // Search functionality with debouncing
+        let searchTimeout;
+        document.getElementById('searchTerm').addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(function() {
+                // Auto-submit form after 500ms of no typing
+                document.querySelector('form').submit();
+            }, 500);
+        });
+    </script>
+}

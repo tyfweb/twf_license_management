@@ -1,0 +1,491 @@
+@model TechWayFit.Licensing.WebUI.ViewModels.Notification.NotificationTemplateEditViewModel
+@{
+    ViewData["Title"] = string.IsNullOrEmpty(Model.TemplateId) ? "Create Notification Template" : "Edit Notification Template";
+    ViewData["Description"] = string.IsNullOrEmpty(Model.TemplateId) ? "Create a new notification template" : $"Edit notification template: {Model.TemplateName}";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/product-management.css" />
+    <style>
+        .form-section {
+            background: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .form-section-header {
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        .variable-input-group {
+            display: flex;
+            gap: 0.5rem;
+            align-items: end;
+            margin-bottom: 0.5rem;
+        }
+        .variable-tag {
+            background: #e7f3ff;
+            color: #0066cc;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.875rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        .preview-section {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        .message-editor {
+            min-height: 200px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .variable-helper {
+            background: #e9ecef;
+            border-radius: 4px;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        .toolbar {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-bottom: none;
+            border-radius: 4px 4px 0 0;
+            padding: 0.5rem;
+            display: flex;
+            gap: 0.25rem;
+            flex-wrap: wrap;
+        }
+        .toolbar-btn {
+            border: none;
+            background: none;
+            padding: 0.25rem 0.5rem;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+        .toolbar-btn:hover {
+            background: #e9ecef;
+        }
+    </style>
+}
+
+<div class="container-fluid py-3">
+    <!-- Header Section -->
+    <div class="header mb-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <nav aria-label="breadcrumb" class="mb-2">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="@Url.Action("Index")">Notifications</a></li>
+                        <li class="breadcrumb-item"><a href="@Url.Action("Templates")">Templates</a></li>
+                        <li class="breadcrumb-item active">@(string.IsNullOrEmpty(Model.TemplateId) ? "Create" : "Edit")</li>
+                    </ol>
+                </nav>
+                <h2 class="mb-1">@(string.IsNullOrEmpty(Model.TemplateId) ? "Create New Template" : "Edit Template")</h2>
+                <p class="text-muted mb-0">@(string.IsNullOrEmpty(Model.TemplateId) ? "Create a new notification template for your application" : $"Edit the notification template: {Model.TemplateName}")</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="@Url.Action("Templates")" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Back to Templates
+                </a>
+                @if (!string.IsNullOrEmpty(Model.TemplateId))
+                {
+                    <a href="@Url.Action("TemplateDetails", new { id = Model.TemplateId })" class="btn btn-outline-info">
+                        <i class="fas fa-eye me-1"></i>View Details
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+
+    <form asp-action="SaveTemplate" method="post" id="templateForm">
+        <input type="hidden" asp-for="TemplateId" />
+        
+        <div class="row">
+            <!-- Main Form -->
+            <div class="col-lg-8">
+                <!-- Basic Information -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <h5><i class="fas fa-info-circle me-2"></i>Basic Information</h5>
+                    </div>
+                    
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="TemplateName" class="form-label required">Template Name</label>
+                            <input asp-for="TemplateName" class="form-control" placeholder="Enter template name">
+                            <span asp-validation-for="TemplateName" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="NotificationType" class="form-label required">Notification Type</label>
+                            <select asp-for="NotificationType" class="form-select">
+                                @foreach (var type in Enum.GetValues<TechWayFit.Licensing.Management.Core.Models.Notification.NotificationType>())
+                                {
+                                    <option value="@type">@type</option>
+                                }
+                            </select>
+                            <span asp-validation-for="NotificationType" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-6">
+                            <label asp-for="NotificationMode" class="form-label required">Delivery Mode</label>
+                            <select asp-for="NotificationMode" class="form-select">
+                                @foreach (var mode in Enum.GetValues<TechWayFit.Licensing.Management.Core.Models.Notification.NotificationMode>())
+                                {
+                                    <option value="@mode">@mode</option>
+                                }
+                            </select>
+                            <span asp-validation-for="NotificationMode" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check mt-4">
+                                <input asp-for="IsActive" class="form-check-input" type="checkbox">
+                                <label asp-for="IsActive" class="form-check-label">
+                                    Template is active
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Template Content -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <h5><i class="fas fa-file-alt me-2"></i>Template Content</h5>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Subject" class="form-label required">Subject Line</label>
+                        <input asp-for="Subject" class="form-control" placeholder="Enter notification subject">
+                        <span asp-validation-for="Subject" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="MessageTemplate" class="form-label required">Message Template</label>
+                        
+                        <!-- Toolbar -->
+                        <div class="toolbar">
+                            <button type="button" class="toolbar-btn" onclick="insertVariable('{{consumerName}}')" title="Insert Consumer Name">
+                                <i class="fas fa-user"></i> Consumer
+                            </button>
+                            <button type="button" class="toolbar-btn" onclick="insertVariable('{{productName}}')" title="Insert Product Name">
+                                <i class="fas fa-box"></i> Product
+                            </button>
+                            <button type="button" class="toolbar-btn" onclick="insertVariable('{{licenseKey}}')" title="Insert License Key">
+                                <i class="fas fa-key"></i> License
+                            </button>
+                            <button type="button" class="toolbar-btn" onclick="insertVariable('{{expirationDate}}')" title="Insert Expiration Date">
+                                <i class="fas fa-calendar"></i> Expiry
+                            </button>
+                            <button type="button" class="toolbar-btn" onclick="insertVariable('{{companyName}}')" title="Insert Company Name">
+                                <i class="fas fa-building"></i> Company
+                            </button>
+                            <div class="vr mx-1"></div>
+                            <button type="button" class="toolbar-btn" onclick="previewTemplate()" title="Preview Template">
+                                <i class="fas fa-eye"></i> Preview
+                            </button>
+                        </div>
+                        
+                        <textarea asp-for="MessageTemplate" class="form-control message-editor" 
+                                  placeholder="Enter your notification message. Use {{variableName}} for dynamic content."></textarea>
+                        <span asp-validation-for="MessageTemplate" class="text-danger"></span>
+                        
+                        <div class="variable-helper mt-2">
+                            <small class="text-muted">
+                                <strong>Tip:</strong> Use variables like {{consumerName}}, {{productName}}, {{licenseKey}}, etc. 
+                                Click the toolbar buttons above to insert common variables.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Template Variables -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5><i class="fas fa-tags me-2"></i>Custom Variables</h5>
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="addVariable()">
+                                <i class="fas fa-plus me-1"></i>Add Variable
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="variablesContainer">
+                        @if (Model.TemplateVariables.Any())
+                        {
+                            @for (int i = 0; i < Model.TemplateVariables.Count; i++)
+                            {
+                                var variable = Model.TemplateVariables.ElementAt(i);
+                                <div class="variable-input-group">
+                                    <div class="flex-grow-1">
+                                        <input type="hidden" name="TemplateVariables[@i].Key" value="@variable.Key" />
+                                        <input name="TemplateVariables[@i].Value" value="@variable.Value" 
+                                               class="form-control" placeholder="Variable description">
+                                    </div>
+                                    <div>
+                                        <span class="variable-tag">{{@variable.Key}}</span>
+                                    </div>
+                                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeVariable(this)">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            }
+                        }
+                    </div>
+
+                    <div id="noVariables" class="text-center py-3 text-muted @(Model.TemplateVariables.Any() ? "d-none" : "")">
+                        <i class="fas fa-tags fa-2x mb-2"></i>
+                        <p>No custom variables defined. Click "Add Variable" to create custom template variables.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Available Variables -->
+                <div class="sidebar-section mb-4">
+                    <div class="section-header">
+                        <h6><i class="fas fa-list me-2"></i>Available Variables</h6>
+                    </div>
+                    <div class="section-content">
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            @foreach (var variable in Model.AvailableVariables)
+                            {
+                                <button type="button" class="btn btn-outline-secondary btn-sm variable-tag" 
+                                        onclick="insertVariable('{{@variable}}')">
+                                    {{@variable}}
+                                </button>
+                            }
+                        </div>
+                        <small class="text-muted">Click any variable to insert it into your template.</small>
+                    </div>
+                </div>
+
+                <!-- Template Preview -->
+                <div class="sidebar-section mb-4">
+                    <div class="section-header">
+                        <h6><i class="fas fa-eye me-2"></i>Live Preview</h6>
+                    </div>
+                    <div class="section-content">
+                        <div id="livePreview" class="preview-section">
+                            <div class="mb-2">
+                                <strong>Subject:</strong>
+                                <div id="previewSubject" class="text-muted">Enter a subject line...</div>
+                            </div>
+                            <div>
+                                <strong>Message:</strong>
+                                <div id="previewMessage" class="text-muted">Enter your message template...</div>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <input type="text" id="previewRecipient" class="form-control form-control-sm" 
+                                   placeholder="Preview recipient" value="john.doe@example.com">
+                            <small class="text-muted">Sample data for preview</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Template Actions -->
+                <div class="sidebar-section">
+                    <div class="section-header">
+                        <h6><i class="fas fa-tools me-2"></i>Actions</h6>
+                    </div>
+                    <div class="section-content">
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Save Template
+                            </button>
+                            <button type="button" class="btn btn-outline-info" onclick="previewTemplate()">
+                                <i class="fas fa-eye me-2"></i>Preview Full Template
+                            </button>
+                            @if (!string.IsNullOrEmpty(Model.TemplateId))
+                            {
+                                <button type="button" class="btn btn-outline-success" onclick="testTemplate()">
+                                    <i class="fas fa-vial me-2"></i>Test Template
+                                </button>
+                            }
+                            <button type="button" class="btn btn-outline-secondary" onclick="resetForm()">
+                                <i class="fas fa-undo me-2"></i>Reset Form
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Template Preview Modal -->
+<div class="modal fade" id="templatePreviewModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Template Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Subject Preview:</label>
+                    <div id="modalPreviewSubject" class="border p-2 bg-light"></div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Message Preview:</label>
+                    <div id="modalPreviewMessage" class="border p-3 bg-light" style="white-space: pre-wrap;"></div>
+                </div>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    This preview shows how your template will look with sample data. 
+                    Actual notifications will use real data from your system.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" form="templateForm" class="btn btn-primary">
+                    <i class="fas fa-save me-2"></i>Save Template
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        let variableCounter = @Model.TemplateVariables.Count;
+
+        // Insert variable into message template
+        function insertVariable(variable) {
+            const messageTextarea = document.getElementById('MessageTemplate');
+            const cursorPos = messageTextarea.selectionStart;
+            const textBefore = messageTextarea.value.substring(0, cursorPos);
+            const textAfter = messageTextarea.value.substring(messageTextarea.selectionEnd);
+            
+            messageTextarea.value = textBefore + variable + textAfter;
+            messageTextarea.selectionStart = messageTextarea.selectionEnd = cursorPos + variable.length;
+            messageTextarea.focus();
+            
+            updateLivePreview();
+        }
+
+        // Add custom variable
+        function addVariable() {
+            const variableName = prompt('Enter variable name (without brackets):');
+            if (variableName && variableName.trim()) {
+                const container = document.getElementById('variablesContainer');
+                const variableDiv = document.createElement('div');
+                variableDiv.className = 'variable-input-group';
+                variableDiv.innerHTML = `
+                    <div class="flex-grow-1">
+                        <input type="hidden" name="TemplateVariables[${variableCounter}].Key" value="${variableName.trim()}" />
+                        <input name="TemplateVariables[${variableCounter}].Value" 
+                               class="form-control" placeholder="Variable description">
+                    </div>
+                    <div>
+                        <span class="variable-tag">{{${variableName.trim()}}}</span>
+                    </div>
+                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeVariable(this)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                
+                container.appendChild(variableDiv);
+                variableCounter++;
+                
+                document.getElementById('noVariables').classList.add('d-none');
+            }
+        }
+
+        // Remove variable
+        function removeVariable(button) {
+            button.closest('.variable-input-group').remove();
+            
+            const container = document.getElementById('variablesContainer');
+            if (!container.children.length) {
+                document.getElementById('noVariables').classList.remove('d-none');
+            }
+        }
+
+        // Update live preview
+        function updateLivePreview() {
+            const subject = document.getElementById('Subject').value || 'Enter a subject line...';
+            const message = document.getElementById('MessageTemplate').value || 'Enter your message template...';
+            
+            // Simple variable replacement for preview
+            const sampleData = {
+                consumerName: 'John Doe',
+                productName: 'TechWayFit Pro',
+                licenseKey: 'TWF-12345-ABCDE',
+                expirationDate: '2024-12-31',
+                companyName: 'TechWayFit Solutions'
+            };
+            
+            let previewSubject = subject;
+            let previewMessage = message;
+            
+            Object.keys(sampleData).forEach(key => {
+                const regex = new RegExp(`{{${key}}}`, 'g');
+                previewSubject = previewSubject.replace(regex, sampleData[key]);
+                previewMessage = previewMessage.replace(regex, sampleData[key]);
+            });
+            
+            document.getElementById('previewSubject').textContent = previewSubject;
+            document.getElementById('previewMessage').textContent = previewMessage;
+        }
+
+        // Preview template in modal
+        function previewTemplate() {
+            updateLivePreview();
+            
+            document.getElementById('modalPreviewSubject').textContent = document.getElementById('previewSubject').textContent;
+            document.getElementById('modalPreviewMessage').textContent = document.getElementById('previewMessage').textContent;
+            
+            new bootstrap.Modal(document.getElementById('templatePreviewModal')).show();
+        }
+
+        // Test template
+        function testTemplate() {
+            const templateId = document.getElementById('TemplateId').value;
+            if (templateId) {
+                window.location.href = '@Url.Action("Test")' + '?templateId=' + templateId;
+            } else {
+                alert('Please save the template first before testing.');
+            }
+        }
+
+        // Reset form
+        function resetForm() {
+            if (confirm('Are you sure you want to reset the form? All unsaved changes will be lost.')) {
+                document.getElementById('templateForm').reset();
+                updateLivePreview();
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update preview when inputs change
+            document.getElementById('Subject').addEventListener('input', updateLivePreview);
+            document.getElementById('MessageTemplate').addEventListener('input', updateLivePreview);
+            
+            // Initial preview update
+            updateLivePreview();
+            
+            // Auto-resize textarea
+            const messageTextarea = document.getElementById('MessageTemplate');
+            messageTextarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.max(this.scrollHeight, 200) + 'px';
+            });
+        });
+    </script>
+}

@@ -1,0 +1,202 @@
+@model TechWayFit.Licensing.WebUI.ViewModels.Notification.NotificationItemViewModel
+
+<div class="notification-details">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-start mb-3">
+        <div>
+            <h6 class="mb-1">Notification Details</h6>
+            <small class="text-muted">ID: @Model.NotificationId</small>
+        </div>
+        <span class="badge @Model.StatusCssClass">@Model.DeliveryStatus</span>
+    </div>
+
+    <!-- Basic Information -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="detail-group">
+                <label class="detail-label">Type</label>
+                <div class="detail-value">
+                    <span class="badge bg-info">@Model.TypeDisplayName</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="detail-group">
+                <label class="detail-label">Delivery Mode</label>
+                <div class="detail-value">
+                    <i class="fas fa-@(Model.NotificationMode == TechWayFit.Licensing.Management.Core.Models.Notification.NotificationMode.Email ? "envelope" : Model.NotificationMode == TechWayFit.Licensing.Management.Core.Models.Notification.NotificationMode.Sms ? "sms" : "bell") me-1"></i>
+                    @Model.ModeDisplayName
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Entity Information -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="detail-group">
+                <label class="detail-label">Entity Type</label>
+                <div class="detail-value">@Model.EntityType</div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="detail-group">
+                <label class="detail-label">Entity ID</label>
+                <div class="detail-value">
+                    <code>@Model.EntityId</code>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recipients -->
+    <div class="detail-group mb-4">
+        <label class="detail-label">Recipients</label>
+        <div class="detail-value">
+            @Model.RecipientDisplay
+        </div>
+    </div>
+
+    <!-- Template Information -->
+    @if (!string.IsNullOrEmpty(Model.NotificationTemplateId))
+    {
+        <div class="detail-group mb-4">
+            <label class="detail-label">Template</label>
+            <div class="detail-value">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>@(Model.TemplateName ?? "Unknown Template")</span>
+                    <a href="@Url.Action("TemplateDetails", new { id = Model.NotificationTemplateId })" 
+                       class="btn btn-outline-primary btn-sm" target="_blank">
+                        <i class="fas fa-external-link-alt me-1"></i>View Template
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Subject and Message -->
+    @if (!string.IsNullOrEmpty(Model.Subject))
+    {
+        <div class="detail-group mb-4">
+            <label class="detail-label">Subject</label>
+            <div class="detail-value">
+                <div class="bg-light p-2 rounded">@Model.Subject</div>
+            </div>
+        </div>
+    }
+
+    <!-- Delivery Information -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="detail-group">
+                <label class="detail-label">Sent Date</label>
+                <div class="detail-value">
+                    <div>@Model.SentDate.ToString("MMMM dd, yyyy")</div>
+                    <small class="text-muted">@Model.SentDate.ToString("HH:mm:ss") UTC</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="detail-group">
+                <label class="detail-label">Status</label>
+                <div class="detail-value">
+                    <span class="badge @Model.StatusCssClass">@Model.DeliveryStatus</span>
+                    @if (Model.DeliveryStatus == TechWayFit.Licensing.Management.Core.Models.Notification.DeliveryStatus.Sent)
+                    {
+                        <small class="text-success d-block">
+                            <i class="fas fa-check-circle me-1"></i>Successfully delivered
+                        </small>
+                    }
+                    else if (Model.DeliveryStatus == TechWayFit.Licensing.Management.Core.Models.Notification.DeliveryStatus.Failed)
+                    {
+                        <small class="text-danger d-block">
+                            <i class="fas fa-times-circle me-1"></i>Delivery failed
+                        </small>
+                    }
+                    else if (Model.DeliveryStatus == TechWayFit.Licensing.Management.Core.Models.Notification.DeliveryStatus.Pending)
+                    {
+                        <small class="text-warning d-block">
+                            <i class="fas fa-clock me-1"></i>Pending delivery
+                        </small>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Information -->
+    @if (!string.IsNullOrEmpty(Model.DeliveryError))
+    {
+        <div class="detail-group mb-4">
+            <label class="detail-label">Error Details</label>
+            <div class="detail-value">
+                <div class="alert alert-danger mb-0">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Delivery Error:</strong>
+                    <div class="mt-1">@Model.DeliveryError</div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Additional Actions -->
+    <div class="d-flex gap-2 justify-content-end">
+        @if (!string.IsNullOrEmpty(Model.NotificationTemplateId))
+        {
+            <a href="@Url.Action("Test", new { templateId = Model.NotificationTemplateId })" 
+               class="btn btn-outline-info btn-sm" target="_blank">
+                <i class="fas fa-vial me-1"></i>Test Template
+            </a>
+        }
+        
+        @if (Model.DeliveryStatus == TechWayFit.Licensing.Management.Core.Models.Notification.DeliveryStatus.Failed)
+        {
+            <button type="button" class="btn btn-outline-warning btn-sm" onclick="retryNotification('@Model.NotificationId')">
+                <i class="fas fa-redo me-1"></i>Retry Delivery
+            </button>
+        }
+        
+        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="exportNotificationDetails('@Model.NotificationId')">
+            <i class="fas fa-download me-1"></i>Export
+        </button>
+    </div>
+</div>
+
+<style>
+    .notification-details .detail-group {
+        margin-bottom: 1rem;
+    }
+    
+    .notification-details .detail-label {
+        font-weight: 600;
+        color: #6c757d;
+        font-size: 0.875rem;
+        margin-bottom: 0.25rem;
+        display: block;
+    }
+    
+    .notification-details .detail-value {
+        color: #212529;
+    }
+    
+    .notification-details .bg-light {
+        max-height: 200px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+</style>
+
+<script>
+    function retryNotification(notificationId) {
+        if (confirm('Retry sending this notification?')) {
+            // TODO: Implement notification retry functionality
+            alert('Notification retry will be implemented in a future update.');
+        }
+    }
+    
+    function exportNotificationDetails(notificationId) {
+        // TODO: Implement notification export functionality
+        alert('Notification export will be implemented in a future update.');
+    }
+</script>

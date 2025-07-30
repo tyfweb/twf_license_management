@@ -1,0 +1,414 @@
+@model TechWayFit.Licensing.WebUI.ViewModels.Notification.NotificationDashboardViewModel
+@{
+    ViewData["Title"] = "Notification Dashboard";
+    ViewData["Description"] = "Monitor and manage notifications and alerts";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/product-management.css" />
+    <style>
+        .notification-chart {
+            height: 300px;
+        }
+        .trend-indicator {
+            font-size: 0.875rem;
+        }
+        .trend-up { color: #28a745; }
+        .trend-down { color: #dc3545; }
+        .trend-stable { color: #6c757d; }
+        .alert-card {
+            border-left: 4px solid;
+        }
+        .alert-card.critical { border-left-color: #dc3545; }
+        .alert-card.high { border-left-color: #fd7e14; }
+        .alert-card.medium { border-left-color: #ffc107; }
+        .alert-card.low { border-left-color: #17a2b8; }
+    </style>
+}
+
+<div class="container-fluid py-3">
+    <!-- Header Section -->
+    <div class="header mb-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="mb-1">Notification Dashboard</h2>
+                <p class="text-muted mb-0">Monitor notification delivery and manage templates</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="@Url.Action("Send")" class="btn btn-primary">
+                    <i class="fas fa-paper-plane me-2"></i>Send Notification
+                </a>
+                <div class="btn-group">
+                    <a href="@Url.Action("Templates")" class="btn btn-outline-secondary">
+                        <i class="fas fa-file-alt me-1"></i>Templates
+                    </a>
+                    <a href="@Url.Action("History")" class="btn btn-outline-secondary">
+                        <i class="fas fa-history me-1"></i>History
+                    </a>
+                    <a href="@Url.Action("Test")" class="btn btn-outline-info">
+                        <i class="fas fa-vial me-1"></i>Test
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Overview -->
+    <div class="row g-2 mb-3">
+        <div class="col-sm-6 col-lg-3">
+            <div class="stats-card">
+                <div class="stats-icon">
+                    <i class="fas fa-bell"></i>
+                </div>
+                <div class="stats-content">
+                    <div class="stats-number">@Model.Statistics.TotalNotifications.ToString("N0")</div>
+                    <div class="stats-label">Total Notifications</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="stats-card stats-card-success">
+                <div class="stats-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stats-content">
+                    <div class="stats-number">@Model.Statistics.SuccessfulDeliveries.ToString("N0")</div>
+                    <div class="stats-label">Delivered Successfully</div>
+                    <div class="stats-meta">@Model.Statistics.DeliverySuccessRate.ToString("F1")% success rate</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="stats-card stats-card-danger">
+                <div class="stats-icon">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <div class="stats-content">
+                    <div class="stats-number">@Model.Statistics.FailedDeliveries.ToString("N0")</div>
+                    <div class="stats-label">Failed Deliveries</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="stats-card stats-card-warning">
+                <div class="stats-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stats-content">
+                    <div class="stats-number">@Model.Statistics.PendingDeliveries.ToString("N0")</div>
+                    <div class="stats-label">Pending</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <h5><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+                </div>
+                <div class="section-content">
+                    <div class="row g-2">
+                        <div class="col-sm-6 col-lg-3">
+                            <a href="@Url.Action("Send")" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-paper-plane me-2"></i>Send Custom Notification
+                            </a>
+                        </div>
+                        <div class="col-sm-6 col-lg-3">
+                            <a href="@Url.Action("CreateTemplate")" class="btn btn-outline-success w-100">
+                                <i class="fas fa-plus me-2"></i>Create Template
+                            </a>
+                        </div>
+                        <div class="col-sm-6 col-lg-3">
+                            <a href="@Url.Action("Test")" class="btn btn-outline-info w-100">
+                                <i class="fas fa-vial me-2"></i>Test Template
+                            </a>
+                        </div>
+                        <div class="col-sm-6 col-lg-3">
+                            <button type="button" class="btn btn-outline-secondary w-100" onclick="exportNotificationData()">
+                                <i class="fas fa-download me-2"></i>Export Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Recent Notifications -->
+            <div class="edit-section mb-4">
+                <div class="section-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-history me-2"></i>Recent Notifications</h5>
+                        <a href="@Url.Action("History")" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-external-link-alt me-1"></i>View All
+                        </a>
+                    </div>
+                </div>
+                <div class="section-content">
+                    @if (Model.RecentNotifications.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Entity</th>
+                                        <th>Mode</th>
+                                        <th>Status</th>
+                                        <th>Sent Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var notification in Model.RecentNotifications)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <span class="badge bg-info">@notification.TypeDisplayName</span>
+                                            </td>
+                                            <td>
+                                                <div class="fw-medium">@notification.EntityType</div>
+                                                <small class="text-muted">@notification.EntityId.Substring(0, Math.Min(8, notification.EntityId.Length))...</small>
+                                            </td>
+                                            <td>
+                                                <i class="fas fa-@(notification.NotificationMode == TechWayFit.Licensing.Management.Core.Models.Notification.NotificationMode.Email ? "envelope" : notification.NotificationMode == TechWayFit.Licensing.Management.Core.Models.Notification.NotificationMode.Sms ? "sms" : "bell") me-1"></i>
+                                                @notification.ModeDisplayName
+                                            </td>
+                                            <td>
+                                                <span class="badge @notification.StatusCssClass">@notification.DeliveryStatus</span>
+                                                @if (!string.IsNullOrEmpty(notification.DeliveryError))
+                                                {
+                                                    <i class="fas fa-exclamation-triangle text-warning ms-1" title="@notification.DeliveryError"></i>
+                                                }
+                                            </td>
+                                            <td>
+                                                <span class="text-nowrap">@notification.SentDate.ToString("MMM dd, yyyy")</span>
+                                                <small class="text-muted d-block">@notification.SentDate.ToString("HH:mm")</small>
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="viewNotificationDetails('@notification.NotificationId')" title="View Details">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
+                            <h5>No Recent Notifications</h5>
+                            <p class="text-muted">Notifications will appear here once they're sent.</p>
+                            <a href="@Url.Action("Send")" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-2"></i>Send First Notification
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Notification Trends Chart -->
+            <div class="edit-section mb-4">
+                <div class="section-header">
+                    <h5><i class="fas fa-chart-line me-2"></i>Delivery Trends</h5>
+                </div>
+                <div class="section-content">
+                    <div class="notification-chart">
+                        <canvas id="deliveryTrendsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Popular Templates -->
+            <div class="sidebar-section mb-4">
+                <div class="section-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6><i class="fas fa-file-alt me-2"></i>Popular Templates</h6>
+                        <a href="@Url.Action("Templates")" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-external-link-alt me-1"></i>All
+                        </a>
+                    </div>
+                </div>
+                <div class="section-content">
+                    @if (Model.PopularTemplates.Any())
+                    {
+                        @foreach (var template in Model.PopularTemplates.Take(5))
+                        {
+                            <div class="detail-group mb-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <div class="fw-medium">@template.TemplateName</div>
+                                        <small class="text-muted">@template.TypeDisplayName</small>
+                                        <div class="mt-1">
+                                            <span class="badge @template.StatusCssClass">@(template.IsActive ? "Active" : "Inactive")</span>
+                                            <span class="badge bg-secondary ms-1">@template.ModeDisplayName</span>
+                                        </div>
+                                    </div>
+                                    <div class="text-end">
+                                        <a href="@Url.Action("TemplateDetails", new { id = template.TemplateId })" class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center py-3">
+                            <i class="fas fa-file-alt fa-2x text-muted mb-2"></i>
+                            <p class="text-muted mb-0">No templates available</p>
+                            <a href="@Url.Action("CreateTemplate")" class="btn btn-primary btn-sm mt-2">
+                                <i class="fas fa-plus me-1"></i>Create First Template
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Statistics by Type -->
+            <div class="sidebar-section mb-4">
+                <div class="section-header">
+                    <h6><i class="fas fa-chart-pie me-2"></i>Notifications by Type</h6>
+                </div>
+                <div class="section-content">
+                    @if (Model.Statistics.NotificationsByType.Any())
+                    {
+                        @foreach (var typeStats in Model.Statistics.NotificationsByType.OrderByDescending(x => x.Value).Take(5))
+                        {
+                            var percentage = Model.Statistics.TotalNotifications > 0 
+                                ? (double)typeStats.Value / Model.Statistics.TotalNotifications * 100 
+                                : 0;
+                            
+                            <div class="progress-item mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span class="small fw-medium">@typeStats.Key.ToString().Replace("License", "")</span>
+                                    <span class="small text-muted">@typeStats.Value (@percentage.ToString("F1")%)</span>
+                                </div>
+                                <div class="progress" style="height: 6px;">
+                                    <div class="progress-bar" role="progressbar" style="width: @percentage.ToString("F1")%" aria-valuenow="@percentage" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center">No data available</p>
+                    }
+                </div>
+            </div>
+
+            <!-- System Alerts -->
+            @if (Model.SystemAlerts.Any())
+            {
+                <div class="sidebar-section">
+                    <div class="section-header">
+                        <h6><i class="fas fa-exclamation-triangle me-2"></i>System Alerts</h6>
+                    </div>
+                    <div class="section-content">
+                        @foreach (var alert in Model.SystemAlerts.Take(3))
+                        {
+                            <div class="alert-card @alert.Severity.ToLower() p-3 mb-2 bg-light border rounded">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <div class="fw-medium">@alert.AlertType</div>
+                                        <p class="mb-1 small">@alert.Message</p>
+                                        <small class="text-muted">@alert.CreatedDate.ToString("MMM dd, yyyy HH:mm")</small>
+                                    </div>
+                                    <span class="badge @alert.SeverityBadgeClass">@alert.Severity</span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Notification Details Modal -->
+<div class="modal fade" id="notificationDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Notification Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="notificationDetailsContent">
+                <!-- Content loaded via AJAX -->
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Delivery Trends Chart
+        const ctx = document.getElementById('deliveryTrendsChart').getContext('2d');
+        const deliveryTrendsChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: @Html.Raw(Json.Serialize(Model.Trends.DeliveryTrends.Keys.Select(d => d.ToString("MMM dd")))),
+                datasets: [{
+                    label: 'Notifications Sent',
+                    data: @Html.Raw(Json.Serialize(Model.Trends.DeliveryTrends.Values)),
+                    borderColor: '#007bff',
+                    backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        });
+
+        // View notification details
+        function viewNotificationDetails(notificationId) {
+            $.get('@Url.Action("GetNotificationDetails")/' + notificationId, function(data) {
+                $('#notificationDetailsContent').html(data);
+                $('#notificationDetailsModal').modal('show');
+            }).fail(function() {
+                alert('Error loading notification details');
+            });
+        }
+
+        // Export notification data
+        function exportNotificationData() {
+            // TODO: Implement export functionality
+            alert('Export functionality will be implemented in a future update.');
+        }
+
+        // Auto-refresh data every 5 minutes
+        setInterval(function() {
+            location.reload();
+        }, 300000);
+    </script>
+}

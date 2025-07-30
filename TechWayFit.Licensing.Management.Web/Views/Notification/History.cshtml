@@ -1,0 +1,399 @@
+@model TechWayFit.Licensing.WebUI.ViewModels.Notification.NotificationListViewModel
+@{
+    ViewData["Title"] = "Notification History";
+    ViewData["Description"] = "View and filter notification delivery history";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/product-management.css" />
+    <style>
+        .filter-card {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+        }
+        .notification-row:hover {
+            background-color: #f8f9fa;
+        }
+        .date-filter-group {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        .quick-filter-btn {
+            font-size: 0.875rem;
+            padding: 0.375rem 0.75rem;
+        }
+        .pagination-info {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+    </style>
+}
+
+<div class="container-fluid py-3">
+    <!-- Header Section -->
+    <div class="header mb-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="mb-1">Notification History</h2>
+                <p class="text-muted mb-0">View and filter notification delivery history</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="@Url.Action("Send")" class="btn btn-primary">
+                    <i class="fas fa-paper-plane me-2"></i>Send Notification
+                </a>
+                <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                    <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Summary -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-lg-3">
+            <div class="stats-card">
+                <div class="stats-icon">
+                    <i class="fas fa-bell"></i>
+                </div>
+                <div class="stats-content">
+                    <div class="stats-number">@Model.Statistics.TotalNotifications.ToString("N0")</div>
+                    <div class="stats-label">Total Notifications</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="stats-card stats-card-success">
+                <div class="stats-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stats-content">
+                    <div class="stats-number">@Model.Statistics.SuccessfulDeliveries.ToString("N0")</div>
+                    <div class="stats-label">Successful</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="stats-card stats-card-danger">
+                <div class="stats-icon">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <div class="stats-content">
+                    <div class="stats-number">@Model.Statistics.FailedDeliveries.ToString("N0")</div>
+                    <div class="stats-label">Failed</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="stats-card stats-card-warning">
+                <div class="stats-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stats-content">
+                    <div class="stats-number">@Model.Statistics.PendingDeliveries.ToString("N0")</div>
+                    <div class="stats-label">Pending</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-card p-3 mb-4">
+        <form method="get" asp-action="History" id="filterForm">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label for="searchTerm" class="form-label">Search</label>
+                    <input type="text" class="form-control" id="searchTerm" name="searchTerm" 
+                           value="@Model.Filter.SearchTerm" placeholder="Search notifications...">
+                </div>
+                <div class="col-md-2">
+                    <label for="notificationType" class="form-label">Type</label>
+                    <select class="form-select" id="notificationType" name="notificationType">
+                        <option value="">All Types</option>
+                        @foreach (var type in Enum.GetValues<TechWayFit.Licensing.Management.Core.Models.Notification.NotificationType>())
+                        {
+                            <option value="@type" selected="@(Model.Filter.NotificationType == type)">@type</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="notificationMode" class="form-label">Mode</label>
+                    <select class="form-select" id="notificationMode" name="notificationMode">
+                        <option value="">All Modes</option>
+                        @foreach (var mode in Enum.GetValues<TechWayFit.Licensing.Management.Core.Models.Notification.NotificationMode>())
+                        {
+                            <option value="@mode" selected="@(Model.Filter.NotificationMode == mode)">@mode</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="deliveryStatus" class="form-label">Status</label>
+                    <select class="form-select" id="deliveryStatus" name="deliveryStatus">
+                        <option value="">All Statuses</option>
+                        @foreach (var status in Enum.GetValues<TechWayFit.Licensing.Management.Core.Models.Notification.DeliveryStatus>())
+                        {
+                            <option value="@status" selected="@(Model.Filter.DeliveryStatus == status)">@status</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Date Range</label>
+                    <div class="date-filter-group">
+                        <input type="date" class="form-control" name="sentFromDate" 
+                               value="@Model.Filter.SentFromDate?.ToString("yyyy-MM-dd")" title="From Date">
+                        <span>to</span>
+                        <input type="date" class="form-control" name="sentToDate" 
+                               value="@Model.Filter.SentToDate?.ToString("yyyy-MM-dd")" title="To Date">
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-md-6">
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search me-1"></i>Filter
+                        </button>
+                        <a href="@Url.Action("History")" class="btn btn-outline-secondary">
+                            <i class="fas fa-undo me-1"></i>Clear
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex gap-1 justify-content-end">
+                        <button type="button" class="btn btn-outline-info quick-filter-btn" onclick="setDateFilter('today')">Today</button>
+                        <button type="button" class="btn btn-outline-info quick-filter-btn" onclick="setDateFilter('week')">This Week</button>
+                        <button type="button" class="btn btn-outline-info quick-filter-btn" onclick="setDateFilter('month')">This Month</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Notifications Table -->
+    <div class="edit-section">
+        <div class="section-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5><i class="fas fa-list me-2"></i>Notification History</h5>
+                <div class="d-flex align-items-center gap-3">
+                    <div class="pagination-info">
+                        Showing @((Model.Pagination.CurrentPage - 1) * Model.Pagination.PageSize + 1) - 
+                        @Math.Min(Model.Pagination.CurrentPage * Model.Pagination.PageSize, Model.Pagination.TotalItems) 
+                        of @Model.Pagination.TotalItems notifications
+                    </div>
+                    <div class="btn-group btn-group-sm">
+                        <button type="button" class="btn btn-outline-secondary" onclick="exportNotifications()">
+                            <i class="fas fa-download me-1"></i>Export
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="section-content">
+            @if (Model.Notifications.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Type</th>
+                                <th>Mode</th>
+                                <th>Entity</th>
+                                <th>Recipients</th>
+                                <th>Subject</th>
+                                <th>Status</th>
+                                <th>Sent Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var notification in Model.Notifications)
+                            {
+                                <tr class="notification-row">
+                                    <td>
+                                        <code class="text-muted">@notification.NotificationId.Substring(0, 8)...</code>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">@notification.TypeDisplayName</span>
+                                    </td>
+                                    <td>
+                                        <i class="fas fa-@(notification.NotificationMode == TechWayFit.Licensing.Management.Core.Models.Notification.NotificationMode.Email ? "envelope" : notification.NotificationMode == TechWayFit.Licensing.Management.Core.Models.Notification.NotificationMode.Sms ? "sms" : "bell") me-1"></i>
+                                        @notification.ModeDisplayName
+                                    </td>
+                                    <td>
+                                        <div class="fw-medium">@notification.EntityType</div>
+                                        <small class="text-muted">@notification.EntityId.Substring(0, Math.Min(12, notification.EntityId.Length))...</small>
+                                    </td>
+                                    <td>
+                                        <div class="text-truncate" style="max-width: 150px;" title="@notification.RecipientDisplay">
+                                            @notification.RecipientDisplay
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="text-truncate" style="max-width: 200px;" title="@notification.Subject">
+                                            @notification.Subject
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge status-badge @notification.StatusCssClass">@notification.DeliveryStatus</span>
+                                        @if (!string.IsNullOrEmpty(notification.DeliveryError))
+                                        {
+                                            <i class="fas fa-exclamation-triangle text-warning ms-1" 
+                                               title="@notification.DeliveryError" data-bs-toggle="tooltip"></i>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="text-nowrap">@notification.SentDate.ToString("MMM dd, yyyy")</span>
+                                        <small class="text-muted d-block">@notification.SentDate.ToString("HH:mm")</small>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button type="button" class="btn btn-outline-primary" 
+                                                    onclick="viewNotificationDetails('@notification.NotificationId')" 
+                                                    title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            @if (!string.IsNullOrEmpty(notification.NotificationTemplateId))
+                                            {
+                                                <a href="@Url.Action("TemplateDetails", new { id = notification.NotificationTemplateId })" 
+                                                   class="btn btn-outline-secondary" title="View Template">
+                                                    <i class="fas fa-file-alt"></i>
+                                                </a>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                @if (Model.Pagination.TotalPages > 1)
+                {
+                    <nav aria-label="Notification history pagination" class="mt-3">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item @(Model.Pagination.CurrentPage == 1 ? "disabled" : "")">
+                                <a class="page-link" href="@GetPageUrl(Model.Pagination.CurrentPage - 1)">Previous</a>
+                            </li>
+                            
+                            @for (int i = Math.Max(1, Model.Pagination.CurrentPage - 2); i <= Math.Min(Model.Pagination.TotalPages, Model.Pagination.CurrentPage + 2); i++)
+                            {
+                                <li class="page-item @(i == Model.Pagination.CurrentPage ? "active" : "")">
+                                    <a class="page-link" href="@GetPageUrl(i)">@i</a>
+                                </li>
+                            }
+                            
+                            <li class="page-item @(Model.Pagination.CurrentPage == Model.Pagination.TotalPages ? "disabled" : "")">
+                                <a class="page-link" href="@GetPageUrl(Model.Pagination.CurrentPage + 1)">Next</a>
+                            </li>
+                        </ul>
+                    </nav>
+                }
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                    <h5>No Notifications Found</h5>
+                    <p class="text-muted">No notifications match your current filter criteria.</p>
+                    <a href="@Url.Action("History")" class="btn btn-outline-primary">
+                        <i class="fas fa-undo me-2"></i>Clear Filters
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Notification Details Modal -->
+<div class="modal fade" id="notificationDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Notification Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="notificationDetailsContent">
+                <!-- Content loaded via AJAX -->
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // View notification details
+        function viewNotificationDetails(notificationId) {
+            $.get('@Url.Action("GetNotificationDetails")/' + notificationId, function(data) {
+                $('#notificationDetailsContent').html(data);
+                $('#notificationDetailsModal').modal('show');
+            }).fail(function() {
+                alert('Error loading notification details');
+            });
+        }
+
+        // Set date filter
+        function setDateFilter(period) {
+            const today = new Date();
+            let fromDate, toDate = today.toISOString().split('T')[0];
+            
+            switch(period) {
+                case 'today':
+                    fromDate = toDate;
+                    break;
+                case 'week':
+                    const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+                    fromDate = weekAgo.toISOString().split('T')[0];
+                    break;
+                case 'month':
+                    const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+                    fromDate = monthAgo.toISOString().split('T')[0];
+                    break;
+            }
+            
+            $('input[name="sentFromDate"]').val(fromDate);
+            $('input[name="sentToDate"]').val(toDate);
+            $('#filterForm').submit();
+        }
+
+        // Export notifications
+        function exportNotifications() {
+            // TODO: Implement export functionality
+            alert('Export functionality will be implemented in a future update.');
+        }
+
+        // Initialize tooltips
+        document.addEventListener('DOMContentLoaded', function() {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+    </script>
+}
+
+@functions {
+    private string GetPageUrl(int page)
+    {
+        var routeValues = new Dictionary<string, object?>
+        {
+            ["page"] = page,
+            ["searchTerm"] = Model.Filter.SearchTerm ?? "",
+            ["notificationType"] = Model.Filter.NotificationType?.ToString() ?? "",
+            ["notificationMode"] = Model.Filter.NotificationMode?.ToString() ?? "",
+            ["deliveryStatus"] = Model.Filter.DeliveryStatus?.ToString() ?? "",
+            ["sentFromDate"] = Model.Filter.SentFromDate?.ToString("yyyy-MM-dd") ?? "",
+            ["sentToDate"] = Model.Filter.SentToDate?.ToString("yyyy-MM-dd") ?? "",
+            ["entityType"] = Model.Filter.EntityType ?? "",
+            ["entityId"] = Model.Filter.EntityId ?? ""
+        };
+        
+        return Url.Action("History", routeValues) ?? "#";
+    }
+}

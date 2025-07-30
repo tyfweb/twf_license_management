@@ -1,0 +1,611 @@
+@model TechWayFit.Licensing.WebUI.ViewModels.Notification.SendNotificationViewModel
+@{
+    ViewData["Title"] = "Send Notification";
+    ViewData["Description"] = "Send a custom notification to recipients";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/product-management.css" />
+    <style>
+        .form-section {
+            background: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .form-section-header {
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        .recipient-tag {
+            background: #e7f3ff;
+            color: #0066cc;
+            border: 1px solid #b3d9ff;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            margin: 0.125rem;
+        }
+        .recipient-tag .remove-btn {
+            background: none;
+            border: none;
+            color: #0066cc;
+            cursor: pointer;
+            padding: 0;
+            margin-left: 0.25rem;
+        }
+        .recipients-container {
+            min-height: 80px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            padding: 0.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            background: #fff;
+        }
+        .recipient-input {
+            border: none;
+            outline: none;
+            flex-grow: 1;
+            min-width: 200px;
+            padding: 0.25rem;
+        }
+        .template-selector {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        .template-card {
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .template-card:hover {
+            background: #f8f9fa;
+            border-color: #007bff;
+        }
+        .template-card.selected {
+            background: #e7f3ff;
+            border-color: #007bff;
+        }
+        .message-editor {
+            min-height: 200px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .preview-section {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+        .suggested-recipient {
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+        }
+        .suggested-recipient:hover {
+            background: #e9ecef;
+        }
+    </style>
+}
+
+<div class="container-fluid py-3">
+    <!-- Header Section -->
+    <div class="header mb-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <nav aria-label="breadcrumb" class="mb-2">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="@Url.Action("Index")">Notifications</a></li>
+                        <li class="breadcrumb-item active">Send Notification</li>
+                    </ol>
+                </nav>
+                <h2 class="mb-1">Send Notification</h2>
+                <p class="text-muted mb-0">Send a custom notification to one or more recipients</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="@Url.Action("Templates")" class="btn btn-outline-secondary">
+                    <i class="fas fa-file-alt me-1"></i>Templates
+                </a>
+                <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                    <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <form asp-action="Send" method="post" id="sendNotificationForm">
+        <div class="row">
+            <!-- Main Form -->
+            <div class="col-lg-8">
+                <!-- Template Selection -->
+                @if (Model.AvailableTemplates.Any())
+                {
+                    <div class="form-section">
+                        <div class="form-section-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5><i class="fas fa-file-alt me-2"></i>Template Selection</h5>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="useTemplate">
+                                    <label class="form-check-label" for="useTemplate">
+                                        Use existing template
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="templateSelection" class="d-none">
+                            <input type="hidden" asp-for="TemplateId" id="selectedTemplateId" />
+                            <div class="row g-2">
+                                @foreach (var template in Model.AvailableTemplates.Take(6))
+                                {
+                                    <div class="col-md-6">
+                                        <div class="template-card" onclick="selectTemplate('@template.TemplateId', '@template.TemplateName', '@template.Subject', '@Html.Raw(Html.Encode(template.MessageTemplate ?? ""))')">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div class="flex-grow-1">
+                                                    <div class="fw-medium">@template.TemplateName</div>
+                                                    <small class="text-muted">@template.Subject</small>
+                                                    <div class="mt-1">
+                                                        <span class="badge bg-info small">@template.TypeDisplayName</span>
+                                                        <span class="badge bg-secondary small">@template.ModeDisplayName</span>
+                                                    </div>
+                                                </div>
+                                                <i class="fas fa-check text-success d-none template-check"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            @if (Model.AvailableTemplates.Count > 6)
+                            {
+                                <div class="text-center mt-2">
+                                    <a href="@Url.Action("Templates")" class="btn btn-outline-primary btn-sm">
+                                        View All @Model.AvailableTemplates.Count Templates
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <!-- Recipients -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <h5><i class="fas fa-users me-2"></i>Recipients</h5>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label required">Recipients</label>
+                        <div class="recipients-container" id="recipientsContainer">
+                            @foreach (var recipient in Model.Recipients)
+                            {
+                                <span class="recipient-tag">
+                                    @recipient
+                                    <button type="button" class="remove-btn" onclick="removeRecipient('@recipient')">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </span>
+                                <input type="hidden" name="Recipients" value="@recipient" />
+                            }
+                            <input type="email" class="recipient-input" id="recipientInput" 
+                                   placeholder="Enter email address and press Enter">
+                        </div>
+                        <span asp-validation-for="Recipients" class="text-danger"></span>
+                        <div class="form-text">
+                            Enter email addresses and press Enter to add them. You can add multiple recipients.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notification Settings -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <h5><i class="fas fa-cog me-2"></i>Notification Settings</h5>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="NotificationType" class="form-label required">Notification Type</label>
+                            <select asp-for="NotificationType" class="form-select">
+                                @foreach (var type in Enum.GetValues<TechWayFit.Licensing.Management.Core.Models.Notification.NotificationType>())
+                                {
+                                    <option value="@type">@type</option>
+                                }
+                            </select>
+                            <span asp-validation-for="NotificationType" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="NotificationMode" class="form-label required">Delivery Mode</label>
+                            <select asp-for="NotificationMode" class="form-select">
+                                @foreach (var mode in Enum.GetValues<TechWayFit.Licensing.Management.Core.Models.Notification.NotificationMode>())
+                                {
+                                    <option value="@mode">@mode</option>
+                                }
+                            </select>
+                            <span asp-validation-for="NotificationMode" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-6">
+                            <label asp-for="ScheduledSendTime" class="form-label">Schedule Send Time</label>
+                            <input asp-for="ScheduledSendTime" type="datetime-local" class="form-control">
+                            <span asp-validation-for="ScheduledSendTime" class="text-danger"></span>
+                            <div class="form-text">Leave empty to send immediately</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Message Content -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <h5><i class="fas fa-envelope me-2"></i>Message Content</h5>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Subject" class="form-label required">Subject</label>
+                        <input asp-for="Subject" class="form-control" placeholder="Enter notification subject">
+                        <span asp-validation-for="Subject" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Message" class="form-label required">Message</label>
+                        <textarea asp-for="Message" class="form-control message-editor" 
+                                  placeholder="Enter your notification message..."></textarea>
+                        <span asp-validation-for="Message" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- Additional Metadata -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5><i class="fas fa-tags me-2"></i>Additional Metadata</h5>
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="addMetadata()">
+                                <i class="fas fa-plus me-1"></i>Add Metadata
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="metadataContainer">
+                        @if (Model.Metadata.Any())
+                        {
+                            @for (int i = 0; i < Model.Metadata.Count; i++)
+                            {
+                                var metadata = Model.Metadata.ElementAt(i);
+                                <div class="row g-2 mb-2 metadata-row">
+                                    <div class="col-md-4">
+                                        <input name="Metadata[@i].Key" value="@metadata.Key" 
+                                               class="form-control" placeholder="Key">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <input name="Metadata[@i].Value" value="@metadata.Value" 
+                                               class="form-control" placeholder="Value">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button type="button" class="btn btn-outline-danger" onclick="removeMetadata(this)">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+
+                    <div id="noMetadata" class="text-center py-3 text-muted @(Model.Metadata.Any() ? "d-none" : "")">
+                        <i class="fas fa-tags fa-2x mb-2"></i>
+                        <p>No additional metadata. Click "Add Metadata" to include custom data with your notification.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Suggested Recipients -->
+                @if (Model.SuggestedRecipients.Any())
+                {
+                    <div class="sidebar-section mb-4">
+                        <div class="section-header">
+                            <h6><i class="fas fa-user-friends me-2"></i>Suggested Recipients</h6>
+                        </div>
+                        <div class="section-content">
+                            @foreach (var recipient in Model.SuggestedRecipients.Take(10))
+                            {
+                                <div class="suggested-recipient small" onclick="addSuggestedRecipient('@recipient')">
+                                    <i class="fas fa-plus me-1 text-muted"></i>@recipient
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <!-- Preview -->
+                <div class="sidebar-section mb-4">
+                    <div class="section-header">
+                        <h6><i class="fas fa-eye me-2"></i>Preview</h6>
+                    </div>
+                    <div class="section-content">
+                        <div class="preview-section">
+                            <div class="mb-2">
+                                <strong>To:</strong>
+                                <div id="previewRecipients" class="text-muted small">No recipients selected</div>
+                            </div>
+                            <div class="mb-2">
+                                <strong>Subject:</strong>
+                                <div id="previewSubject" class="text-muted">Enter a subject...</div>
+                            </div>
+                            <div>
+                                <strong>Message:</strong>
+                                <div id="previewMessage" class="text-muted">Enter your message...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Send Options -->
+                <div class="sidebar-section">
+                    <div class="section-header">
+                        <h6><i class="fas fa-paper-plane me-2"></i>Send Options</h6>
+                    </div>
+                    <div class="section-content">
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary" name="action" value="send">
+                                <i class="fas fa-paper-plane me-2"></i>Send Now
+                            </button>
+                            <button type="submit" class="btn btn-outline-secondary" name="action" value="draft">
+                                <i class="fas fa-save me-2"></i>Save as Draft
+                            </button>
+                            <button type="button" class="btn btn-outline-info" onclick="previewNotification()">
+                                <i class="fas fa-eye me-2"></i>Full Preview
+                            </button>
+                            <button type="button" class="btn btn-outline-warning" onclick="testNotification()">
+                                <i class="fas fa-vial me-2"></i>Send Test
+                            </button>
+                        </div>
+                        
+                        <div class="mt-3 text-center">
+                            <small class="text-muted">
+                                Recipients: <span id="recipientCount">@Model.Recipients.Count</span>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Preview Modal -->
+<div class="modal fade" id="previewModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Notification Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <strong>Recipients:</strong>
+                    <div id="modalPreviewRecipients" class="text-muted"></div>
+                </div>
+                <div class="mb-3">
+                    <strong>Subject:</strong>
+                    <div id="modalPreviewSubject" class="border p-2 bg-light"></div>
+                </div>
+                <div class="mb-3">
+                    <strong>Message:</strong>
+                    <div id="modalPreviewMessage" class="border p-3 bg-light" style="white-space: pre-wrap;"></div>
+                </div>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    This is how your notification will appear to recipients.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" form="sendNotificationForm" name="action" value="send" class="btn btn-primary">
+                    <i class="fas fa-paper-plane me-2"></i>Send Notification
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        let recipients = @Html.Raw(Json.Serialize(Model.Recipients));
+        let metadataCounter = @Model.Metadata.Count;
+        let selectedTemplate = null;
+
+        // Template selection
+        document.getElementById('useTemplate').addEventListener('change', function() {
+            const templateSelection = document.getElementById('templateSelection');
+            if (this.checked) {
+                templateSelection.classList.remove('d-none');
+            } else {
+                templateSelection.classList.add('d-none');
+                clearSelectedTemplate();
+            }
+        });
+
+        function selectTemplate(templateId, templateName, subject, message) {
+            // Remove previous selection
+            document.querySelectorAll('.template-card').forEach(card => {
+                card.classList.remove('selected');
+                card.querySelector('.template-check').classList.add('d-none');
+            });
+
+            // Select current template
+            event.currentTarget.classList.add('selected');
+            event.currentTarget.querySelector('.template-check').classList.remove('d-none');
+
+            // Update form fields
+            document.getElementById('selectedTemplateId').value = templateId;
+            document.getElementById('Subject').value = subject;
+            document.getElementById('Message').value = message;
+
+            selectedTemplate = { id: templateId, name: templateName };
+            updatePreview();
+        }
+
+        function clearSelectedTemplate() {
+            document.querySelectorAll('.template-card').forEach(card => {
+                card.classList.remove('selected');
+                card.querySelector('.template-check').classList.add('d-none');
+            });
+            document.getElementById('selectedTemplateId').value = '';
+            selectedTemplate = null;
+        }
+
+        // Recipient management
+        document.getElementById('recipientInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addRecipient(this.value.trim());
+                this.value = '';
+            }
+        });
+
+        function addRecipient(email) {
+            if (email && isValidEmail(email) && !recipients.includes(email)) {
+                recipients.push(email);
+                updateRecipientsDisplay();
+                updatePreview();
+            }
+        }
+
+        function addSuggestedRecipient(email) {
+            addRecipient(email);
+        }
+
+        function removeRecipient(email) {
+            recipients = recipients.filter(r => r !== email);
+            updateRecipientsDisplay();
+            updatePreview();
+        }
+
+        function updateRecipientsDisplay() {
+            const container = document.getElementById('recipientsContainer');
+            const input = container.querySelector('.recipient-input');
+            
+            // Clear existing recipient tags
+            container.querySelectorAll('.recipient-tag').forEach(tag => tag.remove());
+            container.querySelectorAll('input[name="Recipients"]').forEach(input => input.remove());
+
+            // Add recipient tags
+            recipients.forEach(recipient => {
+                const tag = document.createElement('span');
+                tag.className = 'recipient-tag';                tag.innerHTML = `
+                    ` + recipient + `
+                    <button type="button" class="remove-btn" onclick="removeRecipient('` + recipient + `')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'Recipients';
+                hiddenInput.value = recipient;
+                
+                container.insertBefore(tag, input);
+                container.insertBefore(hiddenInput, input);
+            });
+
+            document.getElementById('recipientCount').textContent = recipients.length;
+        }        function isValidEmail(email) {
+            return /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/.test(email);
+        }        // Metadata management
+        function addMetadata() {
+            const container = document.getElementById('metadataContainer');
+            const metadataDiv = document.createElement('div');
+            metadataDiv.className = 'row g-2 mb-2 metadata-row';
+            metadataDiv.innerHTML = 
+                '<div class="col-md-4">' +
+                    '<input name="Metadata[' + metadataCounter + '].Key" class="form-control" placeholder="Key">' +
+                '</div>' +
+                '<div class="col-md-6">' +
+                    '<input name="Metadata[' + metadataCounter + '].Value" class="form-control" placeholder="Value">' +
+                '</div>' +
+                '<div class="col-md-2">' +
+                    '<button type="button" class="btn btn-outline-danger" onclick="removeMetadata(this)">' +
+                        '<i class="fas fa-times"></i>' +
+                    '</button>' +
+                '</div>';
+            
+            container.appendChild(metadataDiv);
+            metadataCounter++;
+            
+            document.getElementById('noMetadata').classList.add('d-none');
+        }
+
+        function removeMetadata(button) {
+            button.closest('.metadata-row').remove();
+            
+            const container = document.getElementById('metadataContainer');
+            if (!container.children.length) {
+                document.getElementById('noMetadata').classList.remove('d-none');
+            }
+        }
+
+        // Preview management
+        function updatePreview() {
+            const subject = document.getElementById('Subject').value || 'Enter a subject...';
+            const message = document.getElementById('Message').value || 'Enter your message...';
+            const recipientText = recipients.length > 0 ? recipients.join(', ') : 'No recipients selected';
+
+            document.getElementById('previewRecipients').textContent = recipientText;
+            document.getElementById('previewSubject').textContent = subject;
+            document.getElementById('previewMessage').textContent = message;
+        }
+
+        function previewNotification() {
+            updatePreview();
+            
+            document.getElementById('modalPreviewRecipients').textContent = document.getElementById('previewRecipients').textContent;
+            document.getElementById('modalPreviewSubject').textContent = document.getElementById('previewSubject').textContent;
+            document.getElementById('modalPreviewMessage').textContent = document.getElementById('previewMessage').textContent;
+            
+            new bootstrap.Modal(document.getElementById('previewModal')).show();
+        }        function testNotification() {
+            const currentUser = '@(User.Identity?.Name ?? "")';
+            if (currentUser && confirm('Send a test notification to your email address?')) {
+                // Add current user as test recipient temporarily
+                const originalRecipients = [...recipients];
+                recipients = [currentUser];
+                updateRecipientsDisplay();
+                
+                // Submit form
+                document.getElementById('sendNotificationForm').submit();
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update preview when inputs change
+            document.getElementById('Subject').addEventListener('input', updatePreview);
+            document.getElementById('Message').addEventListener('input', updatePreview);
+            
+            // Initial preview update
+            updatePreview();
+            
+            // Auto-resize textarea
+            const messageTextarea = document.getElementById('Message');
+            messageTextarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.max(this.scrollHeight, 200) + 'px';
+            });
+        });
+    </script>
+}
