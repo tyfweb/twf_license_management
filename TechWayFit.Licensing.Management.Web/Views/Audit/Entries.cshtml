@@ -6,30 +6,16 @@
 }
 
 @section Styles {
+    <link rel="stylesheet" href="~/css/product-management.css" />
     <style>
-        .audit-entry-card {
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            transition: all 0.2s ease-in-out;
-            margin-bottom: 1rem;
-        }
-        .audit-entry-card:hover {
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            transform: translateY(-1px);
-        }
-        .filter-card {
-            background: #f8f9fa;
-            border-radius: 8px;
-            border: 1px solid #dee2e6;
-        }
         .entry-meta {
             font-size: 0.875rem;
-            color: #6c757d;
+            color: var(--text-secondary);
         }
         .changes-preview {
             background: #fff3cd;
             border: 1px solid #ffeaa7;
-            border-radius: 4px;
+            border-radius: var(--radius-sm);
             padding: 0.5rem;
             font-size: 0.875rem;
         }
@@ -38,27 +24,27 @@
             padding: 0.25rem 0.5rem;
         }
         .entity-link {
-            color: #495057;
+            color: var(--text-primary);
             text-decoration: none;
         }
         .entity-link:hover {
-            color: #007bff;
+            color: var(--primary-color);
             text-decoration: underline;
         }
         .filter-summary {
-            background: #e3f2fd;
-            border-left: 4px solid #2196f3;
+            background: var(--primary-light);
+            border-left: 4px solid var(--primary-color);
             padding: 0.75rem;
             margin-bottom: 1rem;
-            border-radius: 0 4px 4px 0;
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
         }
         .no-results {
             text-align: center;
             padding: 3rem 1rem;
-            color: #6c757d;
+            color: var(--text-secondary);
         }
         .pagination-info {
-            color: #6c757d;
+            color: var(--text-secondary);
             font-size: 0.875rem;
         }
     </style>
@@ -66,32 +52,37 @@
 
 <div class="container-fluid">
     <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="mb-1">Audit Entries</h1>
-            <p class="text-muted mb-0">
-                @if (Model.TotalEntries > 0)
-                {
-                    @("Showing " + ((Model.Pagination.CurrentPage - 1) * Model.Pagination.PageSize + 1).ToString("N0") + 
-                      " to " + Math.Min(Model.Pagination.CurrentPage * Model.Pagination.PageSize, Model.TotalEntries).ToString("N0") + 
-                      " of " + Model.TotalEntries.ToString("N0") + " entries")
-                }
-                else
-                {
-                    @("No entries found")
-                }
-            </p>
-        </div>
-        <div class="d-flex gap-2">
-            <a href="@Url.Action("Index", "Audit")" class="btn btn-outline-secondary">
-                <i class="fas fa-chart-line"></i> Dashboard
-            </a>
-            <a href="@Url.Action("Security", "Audit")" class="btn btn-outline-warning">
-                <i class="fas fa-shield-alt"></i> Security View
-            </a>
-            <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#exportModal">
-                <i class="fas fa-download"></i> Export
-            </button>
+    <div class="header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="mb-1">
+                    <i class="fas fa-list text-primary me-2"></i>
+                    Audit Entries
+                </h2>
+                <p class="text-muted mb-0">
+                    @if (Model.TotalEntries > 0)
+                    {
+                        @("Showing " + ((Model.Pagination.CurrentPage - 1) * Model.Pagination.PageSize + 1).ToString("N0") + 
+                          " to " + Math.Min(Model.Pagination.CurrentPage * Model.Pagination.PageSize, Model.TotalEntries).ToString("N0") + 
+                          " of " + Model.TotalEntries.ToString("N0") + " entries")
+                    }
+                    else
+                    {
+                        @("No entries found")
+                    }
+                </p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="@Url.Action("Index", "Audit")" class="btn btn-outline-secondary">
+                    <i class="fas fa-chart-line"></i> Dashboard
+                </a>
+                <a href="@Url.Action("Security", "Audit")" class="btn btn-outline-warning">
+                    <i class="fas fa-shield-alt"></i> Security View
+                </a>
+                <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#exportModal">
+                    <i class="fas fa-download"></i> Export
+                </button>
+            </div>
         </div>
     </div>
 

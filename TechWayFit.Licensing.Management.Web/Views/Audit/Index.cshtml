@@ -6,53 +6,14 @@
 }
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/audit-dashboard.css" />
+    <link rel="stylesheet" href="~/css/product-management.css" />
     <style>
-        .audit-card {
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transition: transform 0.2s ease-in-out;
-        }
-        .audit-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-        }
-        .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 10px;
-            padding: 1.5rem;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 100px;
-            height: 100px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 50%;
-            transform: translate(30px, -30px);
-        }
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-        }
-        .stat-label {
-            font-size: 0.9rem;
-            opacity: 0.9;
-        }
         .audit-timeline {
             max-height: 400px;
             overflow-y: auto;
         }
         .timeline-item {
-            border-left: 3px solid #dee2e6;
+            border-left: 3px solid var(--border-color);
             padding-left: 1rem;
             margin-bottom: 1rem;
             position: relative;
@@ -65,21 +26,22 @@
             width: 12px;
             height: 12px;
             border-radius: 50%;
-            background-color: #6c757d;
+            background-color: var(--gray-500);
         }
-        .timeline-item.high-risk::before { background-color: #dc3545; }
-        .timeline-item.medium-risk::before { background-color: #ffc107; }
-        .timeline-item.low-risk::before { background-color: #28a745; }
+        .timeline-item.high-risk::before { background-color: var(--danger-color); }
+        .timeline-item.medium-risk::before { background-color: var(--warning-color); }
+        .timeline-item.low-risk::before { background-color: var(--success-color); }
         .chart-container {
             position: relative;
             height: 300px;
             width: 100%;
         }
         .filter-section {
-            background: #f8f9fa;
-            border-radius: 8px;
+            background: var(--light-bg);
+            border-radius: var(--radius);
             padding: 1rem;
             margin-bottom: 1.5rem;
+            border: 1px solid var(--border-color);
         }
         .quick-stats {
             display: grid;
@@ -87,26 +49,37 @@
             gap: 1rem;
             margin-bottom: 2rem;
         }
+        .text-purple {
+            color: #8b5cf6 !important;
+        }
+        .bg-purple {
+            background-color: #8b5cf6 !important;
+        }
     </style>
 }
 
 <div class="container-fluid">
     <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="mb-1">Audit Dashboard</h1>
-            <p class="text-muted mb-0">System activity monitoring and audit trail overview</p>
-        </div>
-        <div class="d-flex gap-2">
-            <a href="@Url.Action("Entries", "Audit")" class="btn btn-outline-primary">
-                <i class="fas fa-list"></i> View All Entries
-            </a>
-            <a href="@Url.Action("Security", "Audit")" class="btn btn-outline-warning">
-                <i class="fas fa-shield-alt"></i> Security Audit
-            </a>
-            <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#exportModal">
-                <i class="fas fa-download"></i> Export Data
-            </button>
+    <div class="header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="mb-1">
+                    <i class="fas fa-shield-alt text-primary me-2"></i>
+                    Audit Dashboard
+                </h2>
+                <p class="text-muted mb-0">System activity monitoring and audit trail overview</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="@Url.Action("Entries", "Audit")" class="btn btn-outline-primary">
+                    <i class="fas fa-list"></i> View All Entries
+                </a>
+                <a href="@Url.Action("Security", "Audit")" class="btn btn-outline-warning">
+                    <i class="fas fa-shield-alt"></i> Security Audit
+                </a>
+                <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#exportModal">
+                    <i class="fas fa-download"></i> Export Data
+                </button>
+            </div>
         </div>
     </div>
 
@@ -129,37 +102,34 @@
                 </button>
             </div>
         </form>
-    </div>
-
-    <!-- Quick Statistics -->
+    </div>    <!-- Quick Statistics -->
     <div class="quick-stats">
-        <div class="stat-card">
-            <div class="stat-number">@Model.TotalEntriesToday.ToString("N0")</div>
+        <div class="stat-card primary">
+            <div class="stat-value">@Model.TotalEntriesToday.ToString("N0")</div>
             <div class="stat-label">Today's Entries</div>
         </div>
-        <div class="stat-card">
-            <div class="stat-number">@Model.TotalEntriesWeek.ToString("N0")</div>
+        <div class="stat-card success">
+            <div class="stat-value">@Model.TotalEntriesWeek.ToString("N0")</div>
             <div class="stat-label">This Week</div>
         </div>
-        <div class="stat-card">
-            <div class="stat-number">@Model.TotalEntriesMonth.ToString("N0")</div>
+        <div class="stat-card warning">
+            <div class="stat-value">@Model.TotalEntriesMonth.ToString("N0")</div>
             <div class="stat-label">This Month</div>
         </div>
-        <div class="stat-card">
-            <div class="stat-number">@Model.Statistics.UniqueUsers.ToString("N0")</div>
+        <div class="stat-card secondary">
+            <div class="stat-value">@Model.Statistics.UniqueUsers.ToString("N0")</div>
             <div class="stat-label">Active Users</div>
         </div>
-    </div>
-
-    <div class="row g-4">
+    </div>    <div class="row g-4">
         <!-- Activity Chart -->
         <div class="col-xl-8">
-            <div class="card audit-card h-100">
+            <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">
                         <i class="fas fa-chart-line text-primary me-2"></i>
                         Activity Timeline
-                    </h5>                    <small class="text-muted">
+                    </h5>
+                    <small class="text-muted">
                         @if (Model.DateRangeStart.HasValue && Model.DateRangeEnd.HasValue)
                         {
                             <text>@Model.DateRangeStart.Value.ToString("MMM dd") - @Model.DateRangeEnd.Value.ToString("MMM dd, yyyy")</text>
@@ -176,7 +146,7 @@
 
         <!-- Recent Activity -->
         <div class="col-xl-4">
-            <div class="card audit-card h-100">
+            <div class="card h-100">
                 <div class="card-header">
                     <h5 class="card-title mb-0">
                         <i class="fas fa-clock text-warning me-2"></i>
@@ -225,13 +195,11 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Statistics Row -->
+    </div>    <!-- Statistics Row -->
     <div class="row g-4 mt-2">
         <!-- Top Actions -->
         <div class="col-md-4">
-            <div class="card audit-card h-100">
+            <div class="card h-100">
                 <div class="card-header">
                     <h5 class="card-title mb-0">
                         <i class="fas fa-tasks text-success me-2"></i>
@@ -259,11 +227,9 @@
                     }
                 </div>
             </div>
-        </div>
-
-        <!-- Top Entity Types -->
+        </div>        <!-- Top Entity Types -->
         <div class="col-md-4">
-            <div class="card audit-card h-100">
+            <div class="card h-100">
                 <div class="card-header">
                     <h5 class="card-title mb-0">
                         <i class="fas fa-cubes text-info me-2"></i>
@@ -291,11 +257,9 @@
                     }
                 </div>
             </div>
-        </div>
-
-        <!-- Top Users -->
+        </div>        <!-- Top Users -->
         <div class="col-md-4">
-            <div class="card audit-card h-100">
+            <div class="card h-100">
                 <div class="card-header">
                     <h5 class="card-title mb-0">
                         <i class="fas fa-users text-purple me-2"></i>

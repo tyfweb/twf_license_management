@@ -5,107 +5,85 @@
 }
 
 @section Styles {
+    <link rel="stylesheet" href="~/css/product-management.css" />
     <style>
-        .security-card {
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transition: transform 0.2s ease-in-out;
-        }
-        .security-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-        }
         .alert-header {
-            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            background: var(--danger-color);
             color: white;
-            border-radius: 8px 8px 0 0;
+            border-radius: var(--radius) var(--radius) 0 0;
             padding: 1.5rem;
         }
         .warning-header {
-            background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
-            color: #212529;
-            border-radius: 8px 8px 0 0;
+            background: var(--warning-color);
+            color: white;
+            border-radius: var(--radius) var(--radius) 0 0;
             padding: 1.5rem;
         }
         .info-header {
-            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            background: var(--info-color);
             color: white;
-            border-radius: 8px 8px 0 0;
+            border-radius: var(--radius) var(--radius) 0 0;
             padding: 1.5rem;
         }
         .risk-high {
-            border-left: 4px solid #dc3545;
+            border-left: 4px solid var(--danger-color);
             background: rgba(220, 53, 69, 0.05);
         }
         .risk-medium {
-            border-left: 4px solid #ffc107;
+            border-left: 4px solid var(--warning-color);
             background: rgba(255, 193, 7, 0.05);
         }
         .risk-low {
-            border-left: 4px solid #28a745;
+            border-left: 4px solid var(--success-color);
             background: rgba(40, 167, 69, 0.05);
         }
-        .security-metric {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 10px;
-            padding: 1.5rem;
-            text-align: center;
+        .security-timeline {
+            max-height: 400px;
+            overflow-y: auto;
         }
         .timeline-item {
-            border-left: 3px solid #dee2e6;
+            border-left: 3px solid var(--border-color);
             padding-left: 1rem;
-            margin-left: 0.75rem;
+            margin-bottom: 1rem;
             position: relative;
         }
         .timeline-item::before {
             content: '';
             position: absolute;
-            left: -0.5rem;
-            top: 0.5rem;
-            width: 0.75rem;
-            height: 0.75rem;
+            left: -6px;
+            top: 8px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
-            background: #dee2e6;
-        }
-        .timeline-item.risk-high::before {
-            background: #dc3545;
-        }
-        .timeline-item.risk-medium::before {
-            background: #ffc107;
-        }
-        .timeline-item.risk-low::before {
-            background: #28a745;
-        }
-        .filter-card {
-            background: #f8f9fa;
-            border-radius: 8px;
-            border: 1px solid #dee2e6;
-        }
+            background-color: var(--gray-500);
+        }        .timeline-item.critical::before { background-color: var(--danger-color); }
+        .timeline-item.warning::before { background-color: var(--warning-color); }
+        .timeline-item.info::before { background-color: var(--info-color); }
     </style>
 }
 
 <div class="container-fluid">
     <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="mb-1">
-                <i class="fas fa-shield-alt text-warning me-2"></i>
-                Security Audit
-            </h1>
-            <p class="text-muted mb-0">Security-focused audit analysis and threat monitoring</p>
-        </div>
-        <div class="d-flex gap-2">
-            <a href="@Url.Action("Index", "Audit")" class="btn btn-outline-primary">
-                <i class="fas fa-chart-line"></i> Dashboard
-            </a>
-            <a href="@Url.Action("Entries", "Audit")" class="btn btn-outline-secondary">
-                <i class="fas fa-list"></i> All Entries
-            </a>
-            <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#exportModal">
-                <i class="fas fa-download"></i> Export
-            </button>
+    <div class="header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="mb-1">
+                    <i class="fas fa-shield-alt text-warning me-2"></i>
+                    Security Audit
+                </h2>
+                <p class="text-muted mb-0">Security-focused audit analysis and threat monitoring</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="@Url.Action("Index", "Audit")" class="btn btn-outline-primary">
+                    <i class="fas fa-chart-line"></i> Dashboard
+                </a>
+                <a href="@Url.Action("Entries", "Audit")" class="btn btn-outline-secondary">
+                    <i class="fas fa-list"></i> All Entries
+                </a>
+                <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#exportModal">
+                    <i class="fas fa-download"></i> Export
+                </button>
+            </div>
         </div>
     </div>
 
@@ -133,52 +111,30 @@
                 </div>
             </form>
         </div>
-    </div>
-
-    <!-- Security Metrics -->
+    </div>    <!-- Security Metrics -->
     <div class="row mb-4">
         <div class="col-md-3">
-            <div class="security-metric">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h3 class="mb-0">@Model.TotalSecurityEvents</h3>
-                        <p class="mb-0">Total Events</p>
-                    </div>
-                    <i class="fas fa-exclamation-triangle fa-2x"></i>
-                </div>
+            <div class="stat-card warning">
+                <div class="stat-value">@Model.TotalSecurityEvents</div>
+                <div class="stat-label">Total Events</div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="security-metric bg-danger">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h3 class="mb-0">@Model.HighRiskEvents</h3>
-                        <p class="mb-0">High Risk</p>
-                    </div>
-                    <i class="fas fa-ban fa-2x"></i>
-                </div>
+            <div class="stat-card" style="border-color: #fecaca;">
+                <div class="stat-value" style="color: var(--danger-color);">@Model.HighRiskEvents</div>
+                <div class="stat-label">High Risk</div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="security-metric bg-warning text-dark">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h3 class="mb-0">@Model.MediumRiskEvents</h3>
-                        <p class="mb-0">Medium Risk</p>
-                    </div>
-                    <i class="fas fa-exclamation-circle fa-2x"></i>
-                </div>
+            <div class="stat-card warning">
+                <div class="stat-value">@Model.MediumRiskEvents</div>
+                <div class="stat-label">Medium Risk</div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="security-metric bg-success">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h3 class="mb-0">@Model.LowRiskEvents</h3>
-                        <p class="mb-0">Low Risk</p>
-                    </div>
-                    <i class="fas fa-check-circle fa-2x"></i>
-                </div>
+            <div class="stat-card success">
+                <div class="stat-value">@Model.LowRiskEvents</div>
+                <div class="stat-label">Low Risk</div>
             </div>
         </div>
     </div>
