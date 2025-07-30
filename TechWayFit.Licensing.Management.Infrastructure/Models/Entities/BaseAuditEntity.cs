@@ -53,21 +53,31 @@ public abstract class BaseAuditEntity
             PropertyNameCaseInsensitive = true
         };
         return System.Text.Json.JsonSerializer.Deserialize<T>(json, options) ?? throw new InvalidOperationException("Deserialization failed");
-    }
-    protected static Dictionary<string, string> FromDictJson(string? json)
+    }    protected static Dictionary<string, string> FromDictJson(string? json)
     {
         json ??= "{}"; // Default to empty JSON if null
         if (string.IsNullOrWhiteSpace(json))
-            return default!; // Return default value for T if json is empty or whitespace
+            return new Dictionary<string, string>(); // Return empty dictionary for empty/null json
+        
         var options = new System.Text.Json.JsonSerializerOptions
         {
             PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
             PropertyNameCaseInsensitive = true
         };
-        var dictOfObj = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(json, options);
-        if (dictOfObj == null)
-            return new Dictionary<string, string>(); // Return empty dictionary if deserialization fails
-        return dictOfObj.ToDictionary(kvp => kvp.Key, kvp => kvp.Value?.ToString() ?? string.Empty);        
+        
+        try
+        {
+            var dictOfObj = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(json, options);
+            if (dictOfObj == null)
+                return new Dictionary<string, string>(); // Return empty dictionary if deserialization fails
+            
+            return dictOfObj.ToDictionary(kvp => kvp.Key, kvp => kvp.Value?.ToString() ?? string.Empty);
+        }
+        catch (System.Text.Json.JsonException)
+        {
+            // If JSON deserialization fails, return empty dictionary
+            return new Dictionary<string, string>();
+        }
     }
 
     public static T ToEnum<T>(string? value) where T : struct, Enum

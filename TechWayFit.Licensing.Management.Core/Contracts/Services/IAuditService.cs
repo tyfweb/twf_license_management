@@ -204,4 +204,26 @@ public interface IAuditService
         string? entityId = null,
         DateTime? fromDate = null,
         DateTime? toDate = null);
+    /// <summary>
+    /// Gets distinct entity types from audit entries
+    /// </summary>
+    /// <returns></returns>
+    Task<IEnumerable<string>> GetDistinctEntityTypesAsync();
+    /// <summary>
+    /// Gets distinct entity IDs from audit entries
+    /// </summary>
+    /// <returns></returns>
+    Task<IEnumerable<string>> GetDistinctActionsAsync();    /// <summary>
+    /// Gets security-related audit entries
+    /// </summary>
+    /// <param name="fromDate">Start date filter</param>
+    /// <param name="toDate">End date filter</param>
+    /// <param name="pageNumber">Page number (1-based)</param>
+    /// <param name="pageSize">Page size</param>
+    /// <returns>List of security audit entries</returns>
+    Task<IEnumerable<AuditEntry>> GetSecurityAuditEntriesAsync(
+        DateTime? fromDate = null,
+        DateTime? toDate = null,
+        int pageNumber = 1,
+        int pageSize = 50);
 }

@@ -1,0 +1,548 @@
+@model TechWayFit.Licensing.WebUI.ViewModels.Audit.EntityAuditViewModel
+@{
+    ViewData["Title"] = $"Audit History - {Model.EntityDisplayName}";
+    ViewData["Description"] = $"Complete audit trail for {Model.EntityType} {Model.EntityId}";
+}
+
+@section Styles {
+    <style>
+        .entity-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 8px 8px 0 0;
+            padding: 2rem;
+        }
+        .timeline-container {
+            position: relative;
+        }
+        .timeline-line {
+            position: absolute;
+            left: 2rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #dee2e6;
+        }
+        .timeline-item {
+            position: relative;
+            padding-left: 4rem;
+            margin-bottom: 2rem;
+        }
+        .timeline-marker {
+            position: absolute;
+            left: 1.25rem;
+            top: 1rem;
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            background: #fff;
+            border: 3px solid #007bff;
+            z-index: 2;
+        }
+        .timeline-marker.create {
+            border-color: #28a745;
+            background: #28a745;
+        }
+        .timeline-marker.update {
+            border-color: #ffc107;
+            background: #ffc107;
+        }
+        .timeline-marker.delete {
+            border-color: #dc3545;
+            background: #dc3545;
+        }
+        .timeline-marker.security {
+            border-color: #fd7e14;
+            background: #fd7e14;
+        }
+        .timeline-content {
+            background: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.2s ease-in-out;
+        }
+        .timeline-content:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            transform: translateY(-1px);
+        }
+        .entity-card {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .filter-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        .stats-card {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            color: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        .entry-changes {
+            background: #f8f9fa;
+            border-radius: 4px;
+            padding: 0.75rem;
+            margin-top: 1rem;
+        }
+        .change-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.25rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .change-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+}
+
+<div class="container-fluid">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Audit")">Audit Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="@Url.Action("Entries", "Audit")">Audit Entries</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Entity History</li>
+        </ol>
+    </nav>
+
+    <!-- Entity Header -->
+    <div class="card entity-card mb-4">
+        <div class="entity-header">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h1 class="mb-2">
+                        <i class="fas fa-history me-2"></i>
+                        Audit History
+                    </h1>
+                    <h3 class="mb-1">@Model.EntityDisplayName</h3>
+                    <p class="mb-0 opacity-75">
+                        Complete audit trail for this @Model.EntityType.ToLowerInvariant()
+                    </p>
+                </div>
+                <div class="col-auto">
+                    <div class="text-end">
+                        <span class="badge bg-light text-dark fs-6">@Model.EntityType</span>
+                        <div class="mt-2">
+                            <code class="text-light">@Model.EntityId</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions and Filters -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex gap-2">
+            <a href="@Url.Action("Entries", "Audit")" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to All Entries
+            </a>
+            <a href="@Url.Action("Index", "Audit")" class="btn btn-outline-primary">
+                <i class="fas fa-chart-line"></i> Dashboard
+            </a>
+        </div>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#exportModal">
+                <i class="fas fa-download"></i> Export History
+            </button>
+            <div class="dropdown">
+                <button class="btn btn-outline-info dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <i class="fas fa-filter"></i> Filter
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="?">All Events</a></li>
+                    <li><a class="dropdown-item" href="?actionFilter=create">Create Events</a></li>
+                    <li><a class="dropdown-item" href="?actionFilter=update">Update Events</a></li>
+                    <li><a class="dropdown-item" href="?actionFilter=delete">Delete Events</a></li>
+                    <li><a class="dropdown-item" href="?actionFilter=security">Security Events</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Date Range Filter -->
+    <div class="filter-card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <input type="hidden" name="entityType" value="@Model.EntityType" />
+                <input type="hidden" name="entityId" value="@Model.EntityId" />
+                <div class="col-md-4">
+                    <label for="startDate" class="form-label">Start Date</label>
+                    <input type="date" id="startDate" name="startDate" class="form-control" 
+                           value="@Model.DateRangeStart?.ToString("yyyy-MM-dd")">
+                </div>
+                <div class="col-md-4">
+                    <label for="endDate" class="form-label">End Date</label>
+                    <input type="date" id="endDate" name="endDate" class="form-control" 
+                           value="@Model.DateRangeEnd?.ToString("yyyy-MM-dd")">
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Apply Filter
+                    </button>
+                    <a href="@Url.Action("EntityAudit", "Audit", new { entityType = Model.EntityType, entityId = Model.EntityId })" 
+                       class="btn btn-outline-secondary ms-2">
+                        <i class="fas fa-times"></i> Clear
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Timeline -->
+        <div class="col-lg-9">
+            @if (Model.Entries.Any())
+            {
+                <div class="timeline-container">
+                    <div class="timeline-line"></div>
+                    
+                    @foreach (var entry in Model.Entries)
+                    {
+                        var markerClass = GetTimelineMarkerClass(entry.ActionType);
+                        <div class="timeline-item">
+                            <div class="timeline-marker @markerClass" title="@entry.DisplayActionType"></div>
+                            <div class="timeline-content" data-entry-id="@entry.EntryId">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div class="flex-grow-1">
+                                        <h5 class="mb-1">
+                                            <a href="@Url.Action("EntryDetails", "Audit", new { entryId = entry.EntryId })" 
+                                               class="text-decoration-none">
+                                                @entry.DisplayActionType
+                                            </a>
+                                        </h5>
+                                        <p class="mb-1 text-muted">
+                                            By <strong>@entry.UserName</strong>
+                                            @if (!string.IsNullOrEmpty(entry.IpAddress))
+                                            {
+                                                <span class="ms-2">from <code>@entry.IpAddress</code></span>
+                                            }
+                                        </p>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="badge @entry.ActionBadgeClass">@entry.DisplayActionType</span>
+                                        <div class="text-muted small mt-1">
+                                            @entry.Timestamp.ToString("MMM dd, yyyy HH:mm:ss UTC")
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                @if (!string.IsNullOrEmpty(entry.Reason))
+                                {
+                                    <div class="mb-2">
+                                        <small class="text-muted"><strong>Reason:</strong> @entry.Reason</small>
+                                    </div>
+                                }
+
+                                @if (HasChanges(entry))
+                                {
+                                    <div class="entry-changes">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <small class="text-muted fw-bold">Changes Made:</small>
+                                            <button class="btn btn-sm btn-outline-secondary" type="button" 
+                                                    data-bs-toggle="collapse" data-bs-target="#changes-@entry.EntryId">
+                                                <i class="fas fa-eye"></i> View Details
+                                            </button>
+                                        </div>
+                                        
+                                        <div class="collapse" id="changes-@entry.EntryId">
+                                            @if (!string.IsNullOrEmpty(entry.OldValue) || !string.IsNullOrEmpty(entry.NewValue))
+                                            {
+                                                <div class="change-item">
+                                                    <span class="fw-bold">Value Changed</span>
+                                                    <span class="badge bg-info">Modified</span>
+                                                </div>
+                                                @if (!string.IsNullOrEmpty(entry.OldValue))
+                                                {
+                                                    <div class="mt-2">
+                                                        <small class="text-muted">Previous:</small>
+                                                        <div class="small text-monospace text-muted">@entry.OldValue</div>
+                                                    </div>
+                                                }
+                                                @if (!string.IsNullOrEmpty(entry.NewValue))
+                                                {
+                                                    <div class="mt-2">
+                                                        <small class="text-muted">New:</small>
+                                                        <div class="small text-monospace">@entry.NewValue</div>
+                                                    </div>
+                                                }
+                                            }
+                                        </div>
+                                    </div>
+                                }
+
+                                <div class="mt-3">
+                                    <a href="@Url.Action("EntryDetails", "Audit", new { entryId = entry.EntryId })" 
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-info-circle"></i> View Full Details
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Pagination -->
+                @if (Model.Pagination?.TotalItems > Model.Pagination?.PageSize)
+                {
+                    <nav aria-label="Entity audit pagination" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            @if (Model.Pagination.CurrentPage > 1)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=@(Model.Pagination.CurrentPage - 1)&pageSize=@Model.Pagination.PageSize">
+                                        Previous
+                                    </a>
+                                </li>
+                            }
+                            
+                            @for (int i = Math.Max(1, Model.Pagination.CurrentPage - 2); 
+                                  i <= Math.Min(Model.Pagination.TotalPages, Model.Pagination.CurrentPage + 2); 
+                                  i++)
+                            {
+                                <li class="page-item @(i == Model.Pagination.CurrentPage ? "active" : "")">
+                                    <a class="page-link" href="?page=@i&pageSize=@Model.Pagination.PageSize">@i</a>
+                                </li>
+                            }
+                            
+                            @if (Model.Pagination.CurrentPage < Model.Pagination.TotalPages)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=@(Model.Pagination.CurrentPage + 1)&pageSize=@Model.Pagination.PageSize">
+                                        Next
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                }
+            }
+            else
+            {
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                        <h4 class="text-muted">No Audit History Found</h4>
+                        <p class="text-muted mb-4">
+                            No audit entries found for this @Model.EntityType.ToLowerInvariant() in the selected time range.
+                        </p>
+                        <a href="@Url.Action("Entries", "Audit")" class="btn btn-primary">
+                            View All Audit Entries
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-3">
+            <!-- Statistics -->
+            <div class="card entity-card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        Statistics
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Statistics != null)
+                    {
+                        <div class="stats-card mb-3">
+                            <h3 class="mb-0">@Model.Statistics.TotalEntries</h3>
+                            <small>Total Entries</small>
+                        </div>
+                        
+                        @if (Model.Statistics.TopActions.Any())
+                        {
+                            <h6 class="fw-bold">Top Actions:</h6>
+                            @foreach (var action in Model.Statistics.TopActions.Take(5))
+                            {
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="text-truncate">@action.Key</span>
+                                    <span class="badge bg-secondary">@action.Value</span>
+                                </div>
+                            }
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center">No statistics available</p>
+                    }
+                </div>
+            </div>
+
+            <!-- Entity Info -->
+            <div class="card entity-card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Entity Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm table-borderless">
+                        <tbody>
+                            <tr>
+                                <th width="40%">Type:</th>
+                                <td>@Model.EntityType</td>
+                            </tr>
+                            <tr>
+                                <th>ID:</th>
+                                <td><code>@Model.EntityId</code></td>
+                            </tr>
+                            <tr>
+                                <th>Entries:</th>
+                                <td>@Model.Entries.Count()</td>
+                            </tr>
+                            @if (Model.DateRangeStart.HasValue)
+                            {
+                                <tr>
+                                    <th>From:</th>
+                                    <td>@Model.DateRangeStart.Value.ToString("MMM dd, yyyy")</td>
+                                </tr>
+                            }
+                            @if (Model.DateRangeEnd.HasValue)
+                            {
+                                <tr>
+                                    <th>To:</th>
+                                    <td>@Model.DateRangeEnd.Value.ToString("MMM dd, yyyy")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card entity-card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-tools me-2"></i>
+                        Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="@Url.Action("Entries", "Audit", new { entityType = Model.EntityType, entityId = Model.EntityId })" 
+                           class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-filter"></i> Filter by Entity
+                        </a>
+                        <a href="@Url.Action("Entries", "Audit", new { entityType = Model.EntityType })" 
+                           class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-layer-group"></i> All @Model.EntityType Entries
+                        </a>
+                        <a href="@Url.Action("Security", "Audit")" 
+                           class="btn btn-outline-warning btn-sm">
+                            <i class="fas fa-shield-alt"></i> Security View
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Export Modal -->
+<div class="modal fade" id="exportModal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exportModalLabel">Export Entity Audit History</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="@Url.Action("Export", "Audit")" method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="exportFormat" class="form-label">Export Format</label>
+                        <select id="exportFormat" name="Format" class="form-select" required>
+                            <option value="csv">CSV</option>
+                            <option value="json">JSON</option>
+                            <option value="xml">XML</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="exportStartDate" class="form-label">Start Date</label>
+                        <input type="date" id="exportStartDate" name="StartDate" class="form-control" 
+                               value="@Model.DateRangeStart?.ToString("yyyy-MM-dd")">
+                    </div>
+                    <div class="mb-3">
+                        <label for="exportEndDate" class="form-label">End Date</label>
+                        <input type="date" id="exportEndDate" name="EndDate" class="form-control" 
+                               value="@Model.DateRangeEnd?.ToString("yyyy-MM-dd")">
+                    </div>
+                    <input type="hidden" name="EntityType" value="@Model.EntityType" />
+                    <input type="hidden" name="EntityId" value="@Model.EntityId" />
+                    <input type="hidden" name="FileName" value="@Model.EntityType.ToLower()-@Model.EntityId-audit-@DateTime.UtcNow.ToString("yyyy-MM-dd")" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Click to view entry details
+            $('[data-entry-id]').click(function(e) {
+                if (!$(e.target).closest('a, button').length) {
+                    var entryId = $(this).data('entry-id');
+                    window.location.href = '@Url.Action("EntryDetails", "Audit")'.replace('EntryDetails', 'EntryDetails/' + entryId);
+                }
+            });
+
+            // Update export filename based on format
+            $('#exportFormat').change(function() {
+                var format = $(this).val();
+                var fileName = '@Model.EntityType.ToLower()-@Model.EntityId-audit-@DateTime.UtcNow.ToString("yyyy-MM-dd")' + '.' + format;
+                $('input[name="FileName"]').val(fileName);
+            });
+
+            // Smooth scroll to top when clicking pagination
+            $('.pagination a').click(function() {
+                $('html, body').animate({
+                    scrollTop: 0
+                }, 'fast');
+            });
+        });
+    </script>
+}
+
+@functions {
+    private string GetTimelineMarkerClass(string actionType)
+    {
+        var action = actionType.ToUpperInvariant();
+        
+        if (action.Contains("CREATE") || action.Contains("ADD") || action.Contains("INSERT"))
+            return "create";
+        
+        if (action.Contains("UPDATE") || action.Contains("MODIFY") || action.Contains("CHANGE"))
+            return "update";
+        
+        if (action.Contains("DELETE") || action.Contains("REMOVE") || action.Contains("PURGE"))
+            return "delete";
+        
+        if (action.Contains("SECURITY") || action.Contains("LOGIN") || action.Contains("ACCESS") || action.Contains("ADMIN"))
+            return "security";
+        
+        return "";
+    }
+
+    private bool HasChanges(TechWayFit.Licensing.WebUI.ViewModels.Audit.AuditEntryItemViewModel entry)
+    {
+        return !string.IsNullOrEmpty(entry.OldValue) || !string.IsNullOrEmpty(entry.NewValue);
+    }
+}

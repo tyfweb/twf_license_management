@@ -154,9 +154,7 @@ public class AuditService : IAuditService
         _logger.LogWarning("GetProductAuditEntriesAsync not implemented");
         await Task.CompletedTask;
         return Enumerable.Empty<AuditEntry>();
-    }
-
-    public async Task<IEnumerable<AuditEntry>> GetUserAuditEntriesAsync(
+    }    public async Task<IEnumerable<AuditEntry>> GetUserAuditEntriesAsync(
         string userId,
         DateTime? fromDate = null,
         DateTime? toDate = null,
@@ -176,10 +174,31 @@ public class AuditService : IAuditService
         int pageNumber = 1,
         int pageSize = 50)
     {
-        // TODO: Implement
-        _logger.LogWarning("GetAuditEntriesByActionAsync not implemented");
-        await Task.CompletedTask;
-        return Enumerable.Empty<AuditEntry>();
+        try
+        {
+            var entities = await _auditEntryRepository.GetRecentEntriesAsync(1000);
+
+            // Filter by action type
+            entities = entities.Where(e => e.ActionType.Equals(action, StringComparison.OrdinalIgnoreCase));
+
+            // Apply date filters
+            if (fromDate.HasValue)
+                entities = entities.Where(a => a.CreatedOn >= fromDate.Value);
+
+            if (toDate.HasValue)
+                entities = entities.Where(a => a.CreatedOn <= toDate.Value);
+
+            return entities
+                .OrderByDescending(a => a.CreatedOn)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(e => e.ToModel());
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting audit entries by action: {Action}", action);
+            return Enumerable.Empty<AuditEntry>();
+        }
     }
 
     public async Task<IEnumerable<AuditEntry>> GetAuditEntriesByEntityTypeAsync(
@@ -206,9 +225,7 @@ public class AuditService : IAuditService
         _logger.LogWarning("GetAllAuditEntriesAsync not implemented");
         await Task.CompletedTask;
         return Enumerable.Empty<AuditEntry>();
-    }
-
-    public async Task<int> GetAuditEntryCountAsync(
+    }    public async Task<int> GetAuditEntryCountAsync(
         string? entityType = null,
         string? action = null,
         DateTime? fromDate = null,
@@ -222,18 +239,29 @@ public class AuditService : IAuditService
 
     public async Task<IEnumerable<string>> GetDistinctActionsAsync()
     {
-        // TODO: Implement
-        _logger.LogWarning("GetDistinctActionsAsync not implemented");
-        await Task.CompletedTask;
-        return Enumerable.Empty<string>();
+        try
+        {
+            var entities = await _auditEntryRepository.GetRecentEntriesAsync(1000);
+            return entities.Select(e => e.ActionType).Distinct().ToList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting distinct actions");
+            return Enumerable.Empty<string>();
+        }
     }
 
     public async Task<IEnumerable<string>> GetDistinctEntityTypesAsync()
     {
-        // TODO: Implement
-        _logger.LogWarning("GetDistinctEntityTypesAsync not implemented");
-        await Task.CompletedTask;
-        return Enumerable.Empty<string>();
+        try
+        {
+            var entities = await _auditEntryRepository.GetRecentEntriesAsync(1000);
+            return entities.Select(e => e.EntityType).Distinct().ToList();
+        }        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting distinct entity types");
+            return Enumerable.Empty<string>();
+        }
     }
 
     public async Task<IEnumerable<AuditEntry>> GetSecurityAuditEntriesAsync(
@@ -242,10 +270,32 @@ public class AuditService : IAuditService
         int pageNumber = 1,
         int pageSize = 50)
     {
-        // TODO: Implement
-        _logger.LogWarning("GetSecurityAuditEntriesAsync not implemented");
-        await Task.CompletedTask;
-        return Enumerable.Empty<AuditEntry>();
+        try
+        {
+            var entities = await _auditEntryRepository.GetRecentEntriesAsync(1000);
+
+            // Filter by security-related actions
+            var securityActions = new[] { "LOGIN", "LOGOUT", "ACCESS_DENIED", "PERMISSION_CHANGE", "DELETE", "ADMIN_ACCESS" };
+            var filtered = entities.Where(e => securityActions.Any(action => e.ActionType.ToUpperInvariant().Contains(action)));
+
+            // Apply date filters
+            if (fromDate.HasValue)
+                filtered = filtered.Where(a => a.CreatedOn >= fromDate.Value);
+
+            if (toDate.HasValue)
+                filtered = filtered.Where(a => a.CreatedOn <= toDate.Value);
+
+            return filtered
+                .OrderByDescending(a => a.CreatedOn)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(e => e.ToModel());
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting security audit entries");
+            return Enumerable.Empty<AuditEntry>();
+        }
     }
 
     public async Task<bool> DeleteAuditEntriesAsync(DateTime beforeDate)
@@ -270,8 +320,7 @@ public class AuditService : IAuditService
         string format = "csv",
         string? entityType = null,
         string? action = null)
-    {
-        // TODO: Implement
+    {        // TODO: Implement
         _logger.LogWarning("ExportAuditEntriesAsync not implemented");
         await Task.CompletedTask;
         return Array.Empty<byte>();
@@ -288,10 +337,40 @@ public class AuditService : IAuditService
         int pageNumber = 1,
         int pageSize = 50)
     {
-        // TODO: Implement
-        _logger.LogWarning("GetAuditEntriesAsync not implemented");
-        await Task.CompletedTask;
-        return Enumerable.Empty<AuditEntry>();
+        try
+        {
+            var entities = await _auditEntryRepository.GetRecentEntriesAsync(1000);
+
+            // Apply filters
+            if (!string.IsNullOrEmpty(entityType))
+                entities = entities.Where(e => e.EntityType.Equals(entityType, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrEmpty(entityId))
+                entities = entities.Where(e => e.EntityId.Equals(entityId, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrEmpty(actionType))
+                entities = entities.Where(e => e.ActionType.Equals(actionType, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrEmpty(userName))
+                entities = entities.Where(e => e.CreatedBy.Equals(userName, StringComparison.OrdinalIgnoreCase));
+
+            // Apply date filters
+            if (fromDate.HasValue)
+                entities = entities.Where(a => a.CreatedOn >= fromDate.Value);
+
+            if (toDate.HasValue)
+                entities = entities.Where(a => a.CreatedOn <= toDate.Value);
+
+            return entities
+                .OrderByDescending(a => a.CreatedOn)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(e => e.ToModel());
+        }        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting audit entries");
+            return Enumerable.Empty<AuditEntry>();
+        }
     }
 
     public async Task<int> GetAuditEntryCountAsync(
@@ -302,10 +381,37 @@ public class AuditService : IAuditService
         DateTime? fromDate = null,
         DateTime? toDate = null)
     {
-        // TODO: Implement
-        _logger.LogWarning("GetAuditEntryCountAsync (overload) not implemented");
-        await Task.CompletedTask;
-        return 0;
+        try
+        {
+            var entities = await _auditEntryRepository.GetRecentEntriesAsync(1000);
+
+            // Apply filters
+            if (!string.IsNullOrEmpty(entityType))
+                entities = entities.Where(e => e.EntityType.Equals(entityType, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrEmpty(entityId))
+                entities = entities.Where(e => e.EntityId.Equals(entityId, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrEmpty(actionType))
+                entities = entities.Where(e => e.ActionType.Equals(actionType, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrEmpty(userName))
+                entities = entities.Where(e => e.CreatedBy.Equals(userName, StringComparison.OrdinalIgnoreCase));
+
+            // Apply date filters
+            if (fromDate.HasValue)
+                entities = entities.Where(a => a.CreatedOn >= fromDate.Value);
+
+            if (toDate.HasValue)
+                entities = entities.Where(a => a.CreatedOn <= toDate.Value);
+
+            return entities.Count();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting audit entry count");
+            return 0;
+        }
     }
 
     public async Task<string> LogLicenseCreatedAsync(ProductLicense license, string createdBy)
@@ -341,8 +447,7 @@ public class AuditService : IAuditService
     }
 
     public async Task<string> LogLicenseValidatedAsync(string licenseId, bool isValid, string validatedBy)
-    {
-        // TODO: Implement
+    {        // TODO: Implement
         _logger.LogWarning("LogLicenseValidatedAsync not implemented");
         await Task.CompletedTask;
         return string.Empty;
@@ -350,10 +455,35 @@ public class AuditService : IAuditService
 
     public async Task<AuditStatistics> GetAuditStatisticsAsync(DateTime? fromDate = null, DateTime? toDate = null)
     {
-        // TODO: Implement
-        _logger.LogWarning("GetAuditStatisticsAsync not implemented");
-        await Task.CompletedTask;
-        return new AuditStatistics();
+        try
+        {
+            var entities = await _auditEntryRepository.GetRecentEntriesAsync(1000);
+
+            // Apply date filters
+            if (fromDate.HasValue)
+                entities = entities.Where(a => a.CreatedOn >= fromDate.Value);
+
+            if (toDate.HasValue)
+                entities = entities.Where(a => a.CreatedOn <= toDate.Value);
+
+            var entitiesList = entities.ToList();
+
+            return new AuditStatistics
+            {
+                TotalEntries = entitiesList.Count,
+                EntriesByAction = entitiesList.GroupBy(e => e.ActionType).ToDictionary(g => g.Key, g => g.Count()),
+                EntriesByEntity = entitiesList.GroupBy(e => e.EntityType).ToDictionary(g => g.Key, g => g.Count()),
+                EntriesByUser = entitiesList.GroupBy(e => e.CreatedBy).ToDictionary(g => g.Key, g => g.Count()),
+                EntriesByDate = entitiesList.GroupBy(e => e.CreatedOn.Date).ToDictionary(g => g.Key, g => g.Count()),
+                UniqueUsers = entitiesList.Select(e => e.CreatedBy).Distinct().Count(),
+                UniqueEntities = entitiesList.Select(e => $"{e.EntityType}:{e.EntityId}").Distinct().Count()
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting audit statistics");
+            return new AuditStatistics();
+        }
     }
 
     public async Task<byte[]> ExportAuditEntriesAsync(
@@ -362,8 +492,7 @@ public class AuditService : IAuditService
         string? actionType = null,
         DateTime? fromDate = null,
         DateTime? toDate = null)
-    {
-        // TODO: Implement
+    {        // TODO: Implement
         _logger.LogWarning("ExportAuditEntriesAsync (overload) not implemented");
         await Task.CompletedTask;
         return Array.Empty<byte>();

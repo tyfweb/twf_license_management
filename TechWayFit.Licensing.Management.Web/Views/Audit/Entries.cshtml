@@ -1,0 +1,593 @@
+@using TechWayFit.Licensing.WebUI.ViewModels.Audit
+@model TechWayFit.Licensing.WebUI.ViewModels.Audit.AuditListViewModel
+@{
+    ViewData["Title"] = "Audit Entries";
+    ViewData["Description"] = "Complete audit trail with filtering and search capabilities";
+}
+
+@section Styles {
+    <style>
+        .audit-entry-card {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            transition: all 0.2s ease-in-out;
+            margin-bottom: 1rem;
+        }
+        .audit-entry-card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transform: translateY(-1px);
+        }
+        .filter-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        .entry-meta {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+        .changes-preview {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+            padding: 0.5rem;
+            font-size: 0.875rem;
+        }
+        .action-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+        }
+        .entity-link {
+            color: #495057;
+            text-decoration: none;
+        }
+        .entity-link:hover {
+            color: #007bff;
+            text-decoration: underline;
+        }
+        .filter-summary {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border-radius: 0 4px 4px 0;
+        }
+        .no-results {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #6c757d;
+        }
+        .pagination-info {
+            color: #6c757d;
+            font-size: 0.875rem;
+        }
+    </style>
+}
+
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="mb-1">Audit Entries</h1>
+            <p class="text-muted mb-0">
+                @if (Model.TotalEntries > 0)
+                {
+                    @("Showing " + ((Model.Pagination.CurrentPage - 1) * Model.Pagination.PageSize + 1).ToString("N0") + 
+                      " to " + Math.Min(Model.Pagination.CurrentPage * Model.Pagination.PageSize, Model.TotalEntries).ToString("N0") + 
+                      " of " + Model.TotalEntries.ToString("N0") + " entries")
+                }
+                else
+                {
+                    @("No entries found")
+                }
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="@Url.Action("Index", "Audit")" class="btn btn-outline-secondary">
+                <i class="fas fa-chart-line"></i> Dashboard
+            </a>
+            <a href="@Url.Action("Security", "Audit")" class="btn btn-outline-warning">
+                <i class="fas fa-shield-alt"></i> Security View
+            </a>
+            <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#exportModal">
+                <i class="fas fa-download"></i> Export
+            </button>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card filter-card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-filter me-2"></i>
+                Search & Filter
+            </h5>
+        </div>
+        <div class="card-body">
+            <form method="get" id="filterForm">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label for="searchTerm" class="form-label">Search</label>
+                        <input type="text" class="form-control" id="searchTerm" name="searchTerm" 
+                               value="@Model.Filter.SearchTerm" placeholder="Search entries...">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="entityType" class="form-label">Entity Type</label>
+                        <select class="form-select" id="entityType" name="entityType">
+                            <option value="">All Types</option>
+                            @foreach (var entityType in Model.AvailableEntityTypes)
+                            {
+                                if(Model.Filter.EntityType == entityType)
+                                {
+                                    <option value="@entityType" selected>
+                                        @entityType.ToTitleCase()
+                                    </option>
+                                }  else{
+                                    
+                                } <option value="@entityType">
+                                    @entityType.ToTitleCase()
+                                </option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="actionType" class="form-label">Action</label>
+                        <select class="form-select" id="actionType" name="actionType">
+                            <option value="">All Actions</option>
+                            @foreach (var action in Model.AvailableActions)
+                            {
+                                if(Model.Filter.ActionType == action)
+                                {
+                                    <option value="@action" selected>
+                                        @action.ToTitleCase()
+                                    </option>
+                                }
+                                else
+                                {
+                                    <option value="@action")>   
+                                        @action.ToTitleCase()
+                                    </option>
+                                }
+                                
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="userName" class="form-label">User</label>
+                        <input type="text" class="form-control" id="userName" name="userName" 
+                               value="@Model.Filter.UserName" placeholder="Username">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="startDate" class="form-label">Date Range</label>
+                        <div class="input-group">
+                            <input type="date" class="form-control" id="startDate" name="startDate" 
+                                   value="@Model.Filter.StartDate?.ToString("yyyy-MM-dd")">
+                            <span class="input-group-text">to</span>
+                            <input type="date" class="form-control" id="endDate" name="endDate" 
+                                   value="@Model.Filter.EndDate?.ToString("yyyy-MM-dd")">
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-3 mt-2">
+                    <div class="col-md-2">
+                        <label for="pageSize" class="form-label">Results per page</label>
+                        <select class="form-select" id="pageSize" name="pageSize">
+                            @{
+                                
+                                if (Model.Filter.PageSize == 25)
+                                {
+                                    <option value="25" selected>25</option>
+                                }
+                                else
+                                {
+                                    <option value="25">25</option>
+                                }
+                                if (Model.Filter.PageSize == 50)
+                                {
+                                    <option value="50" selected>50</option>
+                                }
+                                else
+                                {
+                                    <option value="50">50</option>
+                                }
+                                if (Model.Filter.PageSize == 1000)
+                                {
+                                    <option value="100" selected>100</option>
+                                }
+                                else
+                                {
+                                    <option value="100">100</option>
+                                }
+                            } 
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="sortBy" class="form-label">Sort by</label>
+                        <select class="form-select" id="sortBy" name="sortBy">
+                            @{
+                                if (Model.Filter.SortBy == "Timestamp")
+                                {
+                                    <option value="Timestamp" selected>Date</option>
+                                }
+                                else
+                                {
+                                    <option value="Timestamp">Date</option>
+                                }
+                                if (Model.Filter.SortBy == "ActionType")
+                                {
+                                    <option value="ActionType" selected>Action</option>
+                                }
+                                else
+                                {
+                                    <option value="ActionType">Action</option>
+                                }
+                                if (Model.Filter.SortBy == "EntityType")
+                                {
+                                    <option value="EntityType" selected>Entity Type</option>
+                                }
+                                else
+                                {
+                                    <option value="EntityType">Entity Type</option>
+                                }
+                                if (Model.Filter.SortBy == "UserName")
+                                {
+                                    <option value="UserName" selected>User</option>
+                                }
+                                else
+                                {
+                                    <option value="UserName">User</option>
+                                }
+                            } 
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="sortOrder" class="form-label">Order</label>
+                        <select class="form-select" id="sortOrder" name="sortOrder">
+                            @{
+                                if (Model.Filter.SortOrder == "desc")
+                                {
+                                    <option value="desc" selected>Newest First</option>
+                                }
+                                else
+                                {
+                                    <option value="desc">Newest First</option>
+                                }
+                                if (Model.Filter.SortOrder == "asc")
+                                {
+                                    <option value="asc" selected>Oldest First</option>
+                                }
+                                else
+                                {
+                                    <option value="asc">Oldest First</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-6 d-flex align-items-end gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                        <a href="@Url.Action("Entries", "Audit")" class="btn btn-outline-secondary">
+                            <i class="fas fa-times"></i> Clear
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Filter Summary -->
+    @if (HasActiveFilters())
+    {
+        <div class="filter-summary">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>Active Filters:</strong>
+                    @if (!string.IsNullOrEmpty(Model.Filter.SearchTerm))
+                    {
+                        <span class="badge bg-primary me-1">Search: @Model.Filter.SearchTerm</span>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.Filter.EntityType))
+                    {
+                        <span class="badge bg-info me-1">Entity: @Model.Filter.EntityType.ToTitleCase()</span>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.Filter.ActionType))
+                    {
+                        <span class="badge bg-success me-1">Action: @Model.Filter.ActionType.ToTitleCase()</span>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.Filter.UserName))
+                    {
+                        <span class="badge bg-warning me-1">User: @Model.Filter.UserName</span>
+                    }
+                    @if (Model.Filter.StartDate.HasValue || Model.Filter.EndDate.HasValue)
+                    {
+                        <span class="badge bg-secondary me-1">
+                            Date: @(Model.Filter.StartDate?.ToString("yyyy-MM-dd") ?? "...") to @(Model.Filter.EndDate?.ToString("yyyy-MM-dd") ?? "...")
+                        </span>
+                    }
+                </div>
+                <small class="text-muted">@Model.TotalEntries.ToString("N0") results found</small>
+            </div>
+        </div>
+    }
+
+    <!-- Audit Entries -->
+    @if (Model.HasResults)
+    {
+        <div class="audit-entries">
+            @foreach (var entry in Model.Entries)
+            {
+                <div class="card audit-entry-card">
+                    <div class="card-body">
+                        <div class="row align-items-start">
+                            <div class="col-md-8">
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="badge @entry.ActionBadgeClass action-badge me-2">@entry.DisplayActionType</span>
+                                    <h6 class="mb-0">
+                                        <a href="@Url.Action("EntityAudit", "Audit", new { entityType = entry.EntityType, entityId = entry.EntityId })" 
+                                           class="entity-link">
+                                            @entry.DisplayEntityType: @entry.EntityId
+                                        </a>
+                                    </h6>
+                                </div>
+                                
+                                <div class="entry-meta mb-2">
+                                    <i class="fas fa-user me-1"></i> @entry.UserName
+                                    <i class="fas fa-clock me-1 ms-3"></i> @entry.TimestampDisplay
+                                    @if (!string.IsNullOrEmpty(entry.IpAddress))
+                                    {
+                                        <i class="fas fa-map-marker-alt me-1 ms-3"></i> @entry.IpAddress
+                                    }
+                                </div>
+
+                                @if (!string.IsNullOrEmpty(entry.Reason))
+                                {
+                                    <div class="mb-2">
+                                        <strong>Reason:</strong> <span class="text-muted">@entry.Reason</span>
+                                    </div>
+                                }
+
+                                @if (entry.HasChanges)
+                                {
+                                    <div class="changes-preview">
+                                        <strong>Changes:</strong>
+                                        @if (!string.IsNullOrEmpty(entry.OldValue) && !string.IsNullOrEmpty(entry.NewValue))
+                                        {
+                                            <span class="text-danger">@TruncateValue(entry.OldValue)</span>
+                                            <i class="fas fa-arrow-right mx-1"></i>
+                                            <span class="text-success">@TruncateValue(entry.NewValue)</span>
+                                        }
+                                        else if (!string.IsNullOrEmpty(entry.NewValue))
+                                        {
+                                            <span class="text-success">Added: @TruncateValue(entry.NewValue)</span>
+                                        }
+                                        else if (!string.IsNullOrEmpty(entry.OldValue))
+                                        {
+                                            <span class="text-danger">Removed: @TruncateValue(entry.OldValue)</span>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <div class="mb-2">
+                                    <small class="text-muted d-block">@entry.RelativeTime</small>
+                                </div>
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-sm btn-outline-primary view-details-btn"
+                                            data-entry-id="@entry.EntryId" data-bs-toggle="modal" data-bs-target="#entryDetailsModal">
+                                        <i class="fas fa-eye"></i> Details
+                                    </button>
+                                    <a href="@Url.Action("EntityAudit", "Audit", new { entityType = entry.EntityType, entityId = entry.EntityId })" 
+                                       class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-history"></i> History
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Pagination -->
+        @if (Model.Pagination.TotalPages > 1)
+        {
+            <nav aria-label="Audit entries pagination" class="mt-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="pagination-info">
+                        Showing @((Model.Pagination.CurrentPage - 1) * Model.Pagination.PageSize + 1) to 
+                        @(Math.Min(Model.Pagination.CurrentPage * Model.Pagination.PageSize, Model.TotalEntries)) of 
+                        @Model.TotalEntries.ToString("N0") entries
+                    </div>
+                    <div>
+                        <ul class="pagination pagination-sm mb-0">
+                            @if (Model.Pagination.HasPrevious)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="@GetPageUrl(Model.Pagination.CurrentPage - 1)">
+                                        <i class="fas fa-chevron-left"></i> Previous
+                                    </a>
+                                </li>
+                            }
+
+                            @foreach (var pageNum in Model.Pagination.PageNumbers)
+                            {
+                                <li class="page-item @(pageNum == Model.Pagination.CurrentPage ? "active" : "")">
+                                    <a class="page-link" href="@GetPageUrl(pageNum)">@pageNum</a>
+                                </li>
+                            }
+
+                            @if (Model.Pagination.HasNext)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="@GetPageUrl(Model.Pagination.CurrentPage + 1)">
+                                        Next <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        }
+    }
+    else
+    {
+        <div class="no-results">
+            <i class="fas fa-search fa-3x mb-3"></i>
+            <h4>No audit entries found</h4>
+            <p class="text-muted">
+                @if (HasActiveFilters())
+                {
+                    @("Try adjusting your search criteria or ")
+                    <a href="@Url.Action("Entries", "Audit")">clear all filters</a>
+                    @(" to see all entries.")
+                }
+                else
+                {
+                    @("No audit entries are available in the system.")
+                }
+            </p>
+        </div>
+    }
+</div>
+
+<!-- Entry Details Modal -->
+<div class="modal fade" id="entryDetailsModal" tabindex="-1" aria-labelledby="entryDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="entryDetailsModalLabel">Audit Entry Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="entryDetailsContent">
+                <!-- Content loaded via AJAX -->
+                <div class="text-center py-4">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Export Modal -->
+<div class="modal fade" id="exportModal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="@Url.Action("Export", "Audit")">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exportModalLabel">Export Filtered Results</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="exportFormat" class="form-label">Export Format</label>
+                        <select class="form-select" id="exportFormat" name="Format" required>
+                            <option value="csv">CSV</option>
+                            <option value="json">JSON</option>
+                            <option value="xml">XML</option>
+                        </select>
+                    </div>
+                    <input type="hidden" name="EntityType" value="@Model.Filter.EntityType" />
+                    <input type="hidden" name="ActionType" value="@Model.Filter.ActionType" />
+                    <input type="hidden" name="StartDate" value="@Model.Filter.StartDate?.ToString("yyyy-MM-dd")" />
+                    <input type="hidden" name="EndDate" value="@Model.Filter.EndDate?.ToString("yyyy-MM-dd")" />
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="includeMetadata" name="IncludeMetadata" checked>
+                        <label class="form-check-label" for="includeMetadata">
+                            Include metadata
+                        </label>
+                    </div>
+                    <div class="mt-3 p-3 bg-light rounded">
+                        <small class="text-muted">
+                            <strong>Export will include:</strong> @Model.TotalEntries.ToString("N0") entries with current filters applied.
+                        </small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Handle view details buttons
+            $('.view-details-btn').on('click', function() {
+                const entryId = $(this).data('entry-id');
+                loadEntryDetails(entryId);
+            });
+
+            // Auto-submit form when filter controls change (with debounce)
+            let searchTimeout;
+            $('#searchTerm').on('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(function() {
+                    $('#filterForm').submit();
+                }, 500);
+            });
+
+            $('#entityType, #actionType, #pageSize, #sortBy, #sortOrder').on('change', function() {
+                $('#filterForm').submit();
+            });
+        });
+
+        function loadEntryDetails(entryId) {
+            $('#entryDetailsContent').html('<div class="text-center py-4"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+            
+            $.get('@Url.Action("GetEntryDetails", "Audit")/' + entryId)
+                .done(function(data) {
+                    $('#entryDetailsContent').html(data);
+                })
+                .fail(function() {
+                    $('#entryDetailsContent').html('<div class="alert alert-danger">Error loading entry details.</div>');
+                });
+        }
+    </script>
+}
+
+@functions {
+    private bool HasActiveFilters()
+    {
+        return !string.IsNullOrEmpty(Model.Filter.SearchTerm) ||
+               !string.IsNullOrEmpty(Model.Filter.EntityType) ||
+               !string.IsNullOrEmpty(Model.Filter.ActionType) ||
+               !string.IsNullOrEmpty(Model.Filter.UserName) ||
+               Model.Filter.StartDate.HasValue ||
+               Model.Filter.EndDate.HasValue;
+    }
+
+    private string GetPageUrl(int page)
+    {
+        var routeValues = new Dictionary<string, object?>
+        {
+            ["page"] = page,
+            ["searchTerm"] = Model.Filter.SearchTerm ?? "",
+            ["entityType"] = Model.Filter.EntityType ?? "",
+            ["actionType"] = Model.Filter.ActionType ?? "",
+            ["userName"] = Model.Filter.UserName ?? "",
+            ["startDate"] = Model.Filter.StartDate?.ToString("yyyy-MM-dd") ?? "",
+            ["endDate"] = Model.Filter.EndDate?.ToString("yyyy-MM-dd") ?? "",
+            ["pageSize"] = Model.Filter.PageSize,
+            ["sortBy"] = Model.Filter.SortBy,
+            ["sortOrder"] = Model.Filter.SortOrder
+        };
+
+        return Url.Action("Entries", routeValues) ?? "#";
+    }
+
+    private string TruncateValue(string value, int maxLength = 100)
+    {
+        if (string.IsNullOrEmpty(value) || value.Length <= maxLength)
+            return value;
+        return value.Substring(0, maxLength) + "...";
+    }
+}

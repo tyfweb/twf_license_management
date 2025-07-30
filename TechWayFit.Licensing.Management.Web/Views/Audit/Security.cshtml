@@ -1,0 +1,553 @@
+@model TechWayFit.Licensing.WebUI.ViewModels.Audit.SecurityAuditViewModel
+@{
+    ViewData["Title"] = "Security Audit";
+    ViewData["Description"] = "Security-focused audit analysis and monitoring";
+}
+
+@section Styles {
+    <style>
+        .security-card {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease-in-out;
+        }
+        .security-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .alert-header {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            border-radius: 8px 8px 0 0;
+            padding: 1.5rem;
+        }
+        .warning-header {
+            background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+            color: #212529;
+            border-radius: 8px 8px 0 0;
+            padding: 1.5rem;
+        }
+        .info-header {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            color: white;
+            border-radius: 8px 8px 0 0;
+            padding: 1.5rem;
+        }
+        .risk-high {
+            border-left: 4px solid #dc3545;
+            background: rgba(220, 53, 69, 0.05);
+        }
+        .risk-medium {
+            border-left: 4px solid #ffc107;
+            background: rgba(255, 193, 7, 0.05);
+        }
+        .risk-low {
+            border-left: 4px solid #28a745;
+            background: rgba(40, 167, 69, 0.05);
+        }
+        .security-metric {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        .timeline-item {
+            border-left: 3px solid #dee2e6;
+            padding-left: 1rem;
+            margin-left: 0.75rem;
+            position: relative;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -0.5rem;
+            top: 0.5rem;
+            width: 0.75rem;
+            height: 0.75rem;
+            border-radius: 50%;
+            background: #dee2e6;
+        }
+        .timeline-item.risk-high::before {
+            background: #dc3545;
+        }
+        .timeline-item.risk-medium::before {
+            background: #ffc107;
+        }
+        .timeline-item.risk-low::before {
+            background: #28a745;
+        }
+        .filter-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+    </style>
+}
+
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="mb-1">
+                <i class="fas fa-shield-alt text-warning me-2"></i>
+                Security Audit
+            </h1>
+            <p class="text-muted mb-0">Security-focused audit analysis and threat monitoring</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="@Url.Action("Index", "Audit")" class="btn btn-outline-primary">
+                <i class="fas fa-chart-line"></i> Dashboard
+            </a>
+            <a href="@Url.Action("Entries", "Audit")" class="btn btn-outline-secondary">
+                <i class="fas fa-list"></i> All Entries
+            </a>
+            <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#exportModal">
+                <i class="fas fa-download"></i> Export
+            </button>
+        </div>
+    </div>
+
+    <!-- Date Range Filter -->
+    <div class="filter-card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label for="startDate" class="form-label">Start Date</label>
+                    <input type="date" id="startDate" name="startDate" class="form-control" 
+                           value="@Model.DateRangeStart?.ToString("yyyy-MM-dd")">
+                </div>
+                <div class="col-md-4">
+                    <label for="endDate" class="form-label">End Date</label>
+                    <input type="date" id="endDate" name="endDate" class="form-control" 
+                           value="@Model.DateRangeEnd?.ToString("yyyy-MM-dd")">
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Apply Filter
+                    </button>
+                    <a href="@Url.Action("Security", "Audit")" class="btn btn-outline-secondary ms-2">
+                        <i class="fas fa-times"></i> Clear
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Security Metrics -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="security-metric">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="mb-0">@Model.TotalSecurityEvents</h3>
+                        <p class="mb-0">Total Events</p>
+                    </div>
+                    <i class="fas fa-exclamation-triangle fa-2x"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="security-metric bg-danger">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="mb-0">@Model.HighRiskEvents</h3>
+                        <p class="mb-0">High Risk</p>
+                    </div>
+                    <i class="fas fa-ban fa-2x"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="security-metric bg-warning text-dark">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="mb-0">@Model.MediumRiskEvents</h3>
+                        <p class="mb-0">Medium Risk</p>
+                    </div>
+                    <i class="fas fa-exclamation-circle fa-2x"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="security-metric bg-success">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="mb-0">@Model.LowRiskEvents</h3>
+                        <p class="mb-0">Low Risk</p>
+                    </div>
+                    <i class="fas fa-check-circle fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Security Events -->
+        <div class="col-lg-8">
+            <!-- High Risk Events -->
+            @if (Model.SecurityEntries.Any())
+            {
+                <div class="card security-card mb-4">
+                    <div class="alert-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Recent Security Events
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        @foreach (var entry in Model.SecurityEntries.Take(10))
+                        {
+                            var riskClass = GetRiskClass(entry.ActionType);
+                            <div class="p-3 border-bottom @riskClass" data-entry-id="@entry.EntryId">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">
+                                            <a href="@Url.Action("EntryDetails", "Audit", new { entryId = entry.EntryId })" 
+                                               class="text-decoration-none">
+                                                @entry.DisplayActionType
+                                            </a>
+                                        </h6>
+                                        <p class="mb-1 text-muted small">
+                                            <strong>@entry.DisplayEntityType:</strong> @entry.EntityId
+                                        </p>
+                                        <p class="mb-1 text-muted small">
+                                            By @entry.UserName
+                                            @if (!string.IsNullOrEmpty(entry.IpAddress))
+                                            {
+                                                <span class="ms-2">from <code>@entry.IpAddress</code></span>
+                                            }
+                                        </p>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="badge @entry.ActionBadgeClass">@entry.DisplayActionType</span>
+                                        <span class="badge @GetRiskBadgeClass(entry.ActionType) ms-1">@GetRiskLevel(entry.ActionType)</span>
+                                        <small class="d-block text-muted mt-1">@entry.RelativeTime</small>
+                                    </div>
+                                </div>
+                                @if (!string.IsNullOrEmpty(entry.Reason))
+                                {
+                                    <div class="mt-2">
+                                        <small class="text-muted"><strong>Reason:</strong> @entry.Reason</small>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                    @if (Model.SecurityEntries.Count() > 10)
+                    {
+                        <div class="card-footer text-center">
+                            <a href="@Url.Action("Entries", "Audit", new { searchTerm = "security" })" 
+                               class="btn btn-sm btn-outline-primary">
+                                View All Security Events
+                            </a>
+                        </div>
+                    }
+                </div>
+            }
+
+            <!-- Failed Logins -->
+            @if (Model.FailedLogins.Any())
+            {
+                <div class="card security-card mb-4">
+                    <div class="warning-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-user-times me-2"></i>
+                            Recent Failed Login Attempts
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        @foreach (var entry in Model.FailedLogins.Take(5))
+                        {
+                            <div class="p-3 border-bottom">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">Failed Login Attempt</h6>
+                                        <p class="mb-0 text-muted small">
+                                            User: @entry.UserName
+                                            @if (!string.IsNullOrEmpty(entry.IpAddress))
+                                            {
+                                                <span class="ms-2">from <code>@entry.IpAddress</code></span>
+                                            }
+                                        </p>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="badge bg-warning text-dark">Failed</span>
+                                        <small class="d-block text-muted mt-1">@entry.RelativeTime</small>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Access Violations -->
+            @if (Model.AccessViolations.Any())
+            {
+                <div class="card security-card mb-4">
+                    <div class="alert-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-ban me-2"></i>
+                            Access Violations
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        @foreach (var entry in Model.AccessViolations.Take(5))
+                        {
+                            <div class="p-3 border-bottom risk-high">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">
+                                            <a href="@Url.Action("EntryDetails", "Audit", new { entryId = entry.EntryId })" 
+                                               class="text-decoration-none">
+                                                @entry.DisplayActionType
+                                            </a>
+                                        </h6>
+                                        <p class="mb-1 text-muted small">
+                                            <strong>@entry.DisplayEntityType:</strong> @entry.EntityId
+                                        </p>
+                                        <p class="mb-0 text-muted small">
+                                            By @entry.UserName
+                                        </p>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="badge bg-danger">High Risk</span>
+                                        <small class="d-block text-muted mt-1">@entry.RelativeTime</small>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Security Summary -->
+            <div class="card security-card mb-4">
+                <div class="info-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>
+                        Security Summary
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6 border-end">
+                            <h4 class="text-danger">@Model.HighRiskEvents</h4>
+                            <small class="text-muted">High Risk</small>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-warning">@Model.MediumRiskEvents</h4>
+                            <small class="text-muted">Medium Risk</small>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="text-center">
+                        <h4 class="text-success">@Model.LowRiskEvents</h4>
+                        <small class="text-muted">Low Risk Events</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card security-card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-tools me-2"></i>
+                        Security Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="@Url.Action("Entries", "Audit", new { searchTerm = "failed" })" 
+                           class="btn btn-outline-warning btn-sm">
+                            <i class="fas fa-user-times"></i> View Failed Logins
+                        </a>
+                        <a href="@Url.Action("Entries", "Audit", new { searchTerm = "access" })" 
+                           class="btn btn-outline-danger btn-sm">
+                            <i class="fas fa-ban"></i> Access Violations
+                        </a>
+                        <a href="@Url.Action("Entries", "Audit", new { searchTerm = "privilege" })" 
+                           class="btn btn-outline-info btn-sm">
+                            <i class="fas fa-user-shield"></i> Privilege Changes
+                        </a>
+                        <a href="@Url.Action("Entries", "Audit", new { searchTerm = "delete" })" 
+                           class="btn btn-outline-dark btn-sm">
+                            <i class="fas fa-trash"></i> Deletions
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Tips -->
+            <div class="card security-card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        Security Tips
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Regularly review failed login attempts
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Monitor privilege escalations
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Set up alerts for high-risk activities
+                        </li>
+                        <li class="mb-0">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Export security logs regularly
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Export Modal -->
+<div class="modal fade" id="exportModal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exportModalLabel">Export Security Audit Data</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="@Url.Action("Export", "Audit")" method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="exportFormat" class="form-label">Export Format</label>
+                        <select id="exportFormat" name="Format" class="form-select" required>
+                            <option value="csv">CSV</option>
+                            <option value="json">JSON</option>
+                            <option value="xml">XML</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="exportStartDate" class="form-label">Start Date</label>
+                        <input type="date" id="exportStartDate" name="StartDate" class="form-control" 
+                               value="@Model.DateRangeStart?.ToString("yyyy-MM-dd")">
+                    </div>
+                    <div class="mb-3">
+                        <label for="exportEndDate" class="form-label">End Date</label>
+                        <input type="date" id="exportEndDate" name="EndDate" class="form-control" 
+                               value="@Model.DateRangeEnd?.ToString("yyyy-MM-dd")">
+                    </div>
+                    <input type="hidden" name="EntityType" value="" />
+                    <input type="hidden" name="EntityId" value="" />
+                    <input type="hidden" name="FileName" value="security-audit-@DateTime.UtcNow.ToString("yyyy-MM-dd")" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Auto-refresh every 5 minutes for security monitoring
+            setInterval(function() {
+                location.reload();
+            }, 300000);
+
+            // Click to view entry details
+            $('[data-entry-id]').click(function() {
+                var entryId = $(this).data('entry-id');
+                window.location.href = '@Url.Action("EntryDetails", "Audit")'.replace('EntryDetails', 'EntryDetails/' + entryId);
+            });
+
+            // Update export filename based on format
+            $('#exportFormat').change(function() {
+                var format = $(this).val();
+                var fileName = 'security-audit-@DateTime.UtcNow.ToString("yyyy-MM-dd")' + '.' + format;
+                $('input[name="FileName"]').val(fileName);
+            });
+        });
+
+        function getRiskClass(actionType) {
+            return '@Html.Raw(GetRiskClass("PLACEHOLDER"))'.replace('PLACEHOLDER', actionType);
+        }
+
+        function getRiskLevel(actionType) {
+            if (actionType.toUpperCase().includes('DELETE') || 
+                actionType.toUpperCase().includes('REMOVE') || 
+                actionType.toUpperCase().includes('ADMIN')) {
+                return 'High';
+            } else if (actionType.toUpperCase().includes('UPDATE') || 
+                       actionType.toUpperCase().includes('MODIFY')) {
+                return 'Medium';
+            }
+            return 'Low';
+        }
+    </script>
+}
+
+@functions {
+    private string GetRiskClass(string actionType)
+    {
+        if (IsHighRiskAction(actionType))
+            return "risk-high";
+        if (IsMediumRiskAction(actionType))
+            return "risk-medium";
+        return "risk-low";
+    }
+
+    private string GetRiskLevel(string actionType)
+    {
+        if (IsHighRiskAction(actionType))
+            return "High";
+        if (IsMediumRiskAction(actionType))
+            return "Medium";
+        return "Low";
+    }
+
+    private string GetRiskBadgeClass(string actionType)
+    {
+        if (IsHighRiskAction(actionType))
+            return "bg-danger";
+        if (IsMediumRiskAction(actionType))
+            return "bg-warning text-dark";
+        return "bg-success";
+    }
+
+    private bool IsHighRiskAction(string actionType)
+    {
+        var highRiskActions = new[]
+        {
+            "DELETE", "REMOVE", "PURGE", "ADMIN_ACCESS", "PRIVILEGE_ESCALATION",
+            "PASSWORD_RESET", "SECURITY_OVERRIDE", "SYSTEM_SHUTDOWN"
+        };
+
+        return highRiskActions.Any(action => 
+            actionType.ToUpperInvariant().Contains(action));
+    }
+
+    private bool IsMediumRiskAction(string actionType)
+    {
+        var mediumRiskActions = new[]
+        {
+            "UPDATE", "MODIFY", "ACTIVATE", "DEACTIVATE", "SUSPEND",
+            "PERMISSION_CHANGE", "CONFIG_CHANGE", "LICENSE_ISSUE"
+        };
+
+        return mediumRiskActions.Any(action => 
+            actionType.ToUpperInvariant().Contains(action));
+    }
+}

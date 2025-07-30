@@ -1,0 +1,488 @@
+@using TechWayFit.Licensing.WebUI.ViewModels.Audit
+@model TechWayFit.Licensing.WebUI.ViewModels.Audit.AuditDashboardViewModel
+@{
+    ViewData["Title"] = "Audit Dashboard";
+    ViewData["Description"] = "System audit trail and activity monitoring";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/audit-dashboard.css" />
+    <style>
+        .audit-card {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease-in-out;
+        }
+        .audit-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            transform: translate(30px, -30px);
+        }
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        .audit-timeline {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .timeline-item {
+            border-left: 3px solid #dee2e6;
+            padding-left: 1rem;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 8px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #6c757d;
+        }
+        .timeline-item.high-risk::before { background-color: #dc3545; }
+        .timeline-item.medium-risk::before { background-color: #ffc107; }
+        .timeline-item.low-risk::before { background-color: #28a745; }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        .filter-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+    </style>
+}
+
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="mb-1">Audit Dashboard</h1>
+            <p class="text-muted mb-0">System activity monitoring and audit trail overview</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="@Url.Action("Entries", "Audit")" class="btn btn-outline-primary">
+                <i class="fas fa-list"></i> View All Entries
+            </a>
+            <a href="@Url.Action("Security", "Audit")" class="btn btn-outline-warning">
+                <i class="fas fa-shield-alt"></i> Security Audit
+            </a>
+            <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#exportModal">
+                <i class="fas fa-download"></i> Export Data
+            </button>
+        </div>
+    </div>
+
+    <!-- Date Range Filter -->
+    <div class="filter-section">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label for="startDate" class="form-label">Start Date</label>
+                <input type="date" class="form-control" id="startDate" name="startDate" 
+                       value="@Model.DateRangeStart?.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="col-md-4">
+                <label for="endDate" class="form-label">End Date</label>
+                <input type="date" class="form-control" id="endDate" name="endDate" 
+                       value="@Model.DateRangeEnd?.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-filter"></i> Apply Filter
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Quick Statistics -->
+    <div class="quick-stats">
+        <div class="stat-card">
+            <div class="stat-number">@Model.TotalEntriesToday.ToString("N0")</div>
+            <div class="stat-label">Today's Entries</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">@Model.TotalEntriesWeek.ToString("N0")</div>
+            <div class="stat-label">This Week</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">@Model.TotalEntriesMonth.ToString("N0")</div>
+            <div class="stat-label">This Month</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">@Model.Statistics.UniqueUsers.ToString("N0")</div>
+            <div class="stat-label">Active Users</div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Activity Chart -->
+        <div class="col-xl-8">
+            <div class="card audit-card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-line text-primary me-2"></i>
+                        Activity Timeline
+                    </h5>                    <small class="text-muted">
+                        @if (Model.DateRangeStart.HasValue && Model.DateRangeEnd.HasValue)
+                        {
+                            <text>@Model.DateRangeStart.Value.ToString("MMM dd") - @Model.DateRangeEnd.Value.ToString("MMM dd, yyyy")</text>
+                        }
+                    </small>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="activityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="col-xl-4">
+            <div class="card audit-card h-100">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-clock text-warning me-2"></i>
+                        Recent Activity
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="audit-timeline p-3">
+                        @if (Model.RecentEntries.Any())
+                        {
+                            @foreach (var entry in Model.RecentEntries)
+                            {
+                                <div class="timeline-item @GetRiskClass(entry.ActionType)" data-entry-id="@entry.EntryId">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1">@entry.DisplayActionType</h6>
+                                            <p class="mb-1 text-muted small">
+                                                <strong>@entry.DisplayEntityType:</strong> @entry.EntityId
+                                            </p>
+                                            <p class="mb-1 text-muted small">
+                                                By @entry.UserName
+                                            </p>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="badge @entry.ActionBadgeClass">@entry.DisplayActionType</span>
+                                            <small class="d-block text-muted mt-1">@entry.RelativeTime</small>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <button type="button" class="btn btn-sm btn-outline-primary view-details-btn"
+                                                data-entry-id="@entry.EntryId" data-bs-toggle="modal" data-bs-target="#entryDetailsModal">
+                                            <i class="fas fa-eye"></i> View Details
+                                        </button>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-center text-muted py-4">
+                                <i class="fas fa-inbox fa-2x mb-2"></i>
+                                <p>No recent audit entries found.</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Row -->
+    <div class="row g-4 mt-2">
+        <!-- Top Actions -->
+        <div class="col-md-4">
+            <div class="card audit-card h-100">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-tasks text-success me-2"></i>
+                        Top Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Statistics.EntriesByAction.Any())
+                    {
+                        @foreach (var action in Model.Statistics.EntriesByAction.Take(5))
+                        {
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-truncate">@action.Key.ToTitleCase()</span>
+                                <span class="badge bg-secondary">@action.Value</span>
+                            </div>
+                            <div class="progress mb-3" style="height: 4px;">
+                                <div class="progress-bar bg-success" role="progressbar" 
+                                     style="width: @(Math.Max(1, (action.Value * 100.0 / Model.Statistics.EntriesByAction.Max(x => x.Value))))%"></div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center">No action data available.</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Entity Types -->
+        <div class="col-md-4">
+            <div class="card audit-card h-100">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-cubes text-info me-2"></i>
+                        Top Entity Types
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Statistics.EntriesByEntity.Any())
+                    {
+                        @foreach (var entity in Model.Statistics.EntriesByEntity.Take(5))
+                        {
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-truncate">@entity.Key.ToTitleCase()</span>
+                                <span class="badge bg-secondary">@entity.Value</span>
+                            </div>
+                            <div class="progress mb-3" style="height: 4px;">
+                                <div class="progress-bar bg-info" role="progressbar" 
+                                     style="width: @(Math.Max(1, (entity.Value * 100.0 / Model.Statistics.EntriesByEntity.Max(x => x.Value))))%"></div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center">No entity data available.</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Users -->
+        <div class="col-md-4">
+            <div class="card audit-card h-100">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-users text-purple me-2"></i>
+                        Most Active Users
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Statistics.EntriesByUser.Any())
+                    {
+                        @foreach (var user in Model.Statistics.EntriesByUser.Take(5))
+                        {
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-truncate">@user.Key</span>
+                                <span class="badge bg-secondary">@user.Value</span>
+                            </div>
+                            <div class="progress mb-3" style="height: 4px;">
+                                <div class="progress-bar bg-purple" role="progressbar" 
+                                     style="width: @(Math.Max(1, (user.Value * 100.0 / Model.Statistics.EntriesByUser.Max(x => x.Value))))%"></div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center">No user data available.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Entry Details Modal -->
+<div class="modal fade" id="entryDetailsModal" tabindex="-1" aria-labelledby="entryDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="entryDetailsModalLabel">Audit Entry Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="entryDetailsContent">
+                <!-- Content loaded via AJAX -->
+                <div class="text-center py-4">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Export Modal -->
+<div class="modal fade" id="exportModal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="@Url.Action("Export", "Audit")">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exportModalLabel">Export Audit Data</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="exportFormat" class="form-label">Export Format</label>
+                        <select class="form-select" id="exportFormat" name="Format" required>
+                            <option value="csv">CSV</option>
+                            <option value="json">JSON</option>
+                            <option value="xml">XML</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="exportStartDate" class="form-label">Start Date</label>
+                        <input type="date" class="form-control" id="exportStartDate" name="StartDate" 
+                               value="@Model.DateRangeStart?.ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="exportEndDate" class="form-label">End Date</label>
+                        <input type="date" class="form-control" id="exportEndDate" name="EndDate" 
+                               value="@Model.DateRangeEnd?.ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="includeMetadata" name="IncludeMetadata" checked>
+                        <label class="form-check-label" for="includeMetadata">
+                            Include metadata
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Initialize activity chart
+            initializeActivityChart();
+
+            // Handle view details buttons
+            $('.view-details-btn').on('click', function() {
+                const entryId = $(this).data('entry-id');
+                loadEntryDetails(entryId);
+            });
+
+            // Auto-refresh every 5 minutes
+            setInterval(function() {
+                location.reload();
+            }, 300000);
+        });
+
+        function initializeActivityChart() {
+            const ctx = document.getElementById('activityChart').getContext('2d');
+            
+            // Get chart data via AJAX
+            $.get('@Url.Action("GetActivityData", "Audit")', {
+                startDate: '@Model.DateRangeStart?.ToString("yyyy-MM-dd")',
+                endDate: '@Model.DateRangeEnd?.ToString("yyyy-MM-dd")'
+            })
+            .done(function(data) {
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.map(d => new Date(d.date).toLocaleDateString()),
+                        datasets: [{
+                            label: 'Audit Entries',
+                            data: data.map(d => d.count),
+                            borderColor: '#667eea',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    precision: 0
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+            })
+            .fail(function() {
+                $('#activityChart').parent().html('<div class="text-center text-muted py-4">Error loading chart data</div>');
+            });
+        }
+
+        function loadEntryDetails(entryId) {
+            $('#entryDetailsContent').html('<div class="text-center py-4"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+            
+            $.get('@Url.Action("GetEntryDetails", "Audit")/' + entryId)
+                .done(function(data) {
+                    $('#entryDetailsContent').html(data);
+                })
+                .fail(function() {
+                    $('#entryDetailsContent').html('<div class="alert alert-danger">Error loading entry details.</div>');
+                });
+        }
+    </script>
+}
+
+@functions {
+    private string GetRiskClass(string actionType)
+    {
+        var highRisk = new[] { "DELETE", "REMOVE", "PURGE", "ADMIN", "SECURITY" };
+        var mediumRisk = new[] { "UPDATE", "MODIFY", "ACTIVATE", "DEACTIVATE" };
+
+        if (highRisk.Any(r => actionType.ToUpperInvariant().Contains(r)))
+            return "high-risk";
+        if (mediumRisk.Any(r => actionType.ToUpperInvariant().Contains(r)))
+            return "medium-risk";
+        return "low-risk";
+    }
+}

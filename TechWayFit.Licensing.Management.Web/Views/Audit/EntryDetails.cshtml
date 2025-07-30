@@ -1,0 +1,363 @@
+@model TechWayFit.Licensing.WebUI.ViewModels.Audit.AuditEntryDetailViewModel
+@{
+    ViewData["Title"] = "Audit Entry Details";
+    ViewData["Description"] = "Detailed view of audit entry and related information";
+}
+
+@section Styles {
+    <style>
+        .entry-card {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .entry-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 8px 8px 0 0;
+            padding: 1.5rem;
+        }
+        .metadata-table th {
+            width: 200px;
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+        .change-card {
+            border-left: 4px solid #007bff;
+            margin-bottom: 1rem;
+        }
+        .change-added {
+            border-left-color: #28a745;
+            background: #f8fff9;
+        }
+        .change-modified {
+            border-left-color: #ffc107;
+            background: #fffcf5;
+        }
+        .change-removed {
+            border-left-color: #dc3545;
+            background: #fff5f5;
+        }
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 1rem;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .related-entry {
+            transition: all 0.2s ease-in-out;
+        }
+        .related-entry:hover {
+            background: #f8f9fa;
+        }
+        .breadcrumb-item a {
+            text-decoration: none;
+        }
+    </style>
+}
+
+<div class="container-fluid">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Audit")">Audit Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="@Url.Action("Entries", "Audit")">Audit Entries</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Entry Details</li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="mb-1">Audit Entry Details</h1>
+            <p class="text-muted mb-0">Comprehensive view of audit entry @Model.Entry?.EntryId</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="@Url.Action("Entries", "Audit")" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Entries
+            </a>
+            <a href="@Url.Action("EntityAudit", "Audit", new { entityType = Model.Entry?.EntityType, entityId = Model.Entry?.EntityId })" 
+               class="btn btn-outline-primary">
+                <i class="fas fa-history"></i> Entity History
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Entry Details -->
+        <div class="col-lg-8">
+            <!-- Entry Overview -->
+            <div class="card entry-card mb-4">
+                <div class="entry-header">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h3 class="mb-2">@Model.Entry?.DisplayActionType</h3>
+                            <p class="mb-1">
+                                <strong>@Model.Entry?.DisplayEntityType:</strong> @Model.Entry?.EntityId
+                            </p>
+                            <p class="mb-0">
+                                <i class="fas fa-user me-2"></i>@Model.Entry?.UserName
+                                <i class="fas fa-clock ms-3 me-2"></i>@Model.Entry?.Timestamp.ToString("MMM dd, yyyy 'at' HH:mm:ss UTC")
+                            </p>
+                        </div>
+                        <div class="col-auto">
+                            <span class="badge @Model.Entry?.ActionBadgeClass fs-6">@Model.Entry?.DisplayActionType</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless metadata-table">
+                        <tbody>
+                            <tr>
+                                <th>Entry ID</th>
+                                <td><code>@Model.Entry?.EntryId</code></td>
+                            </tr>
+                            <tr>
+                                <th>Entity Type</th>
+                                <td>@Model.Entry?.DisplayEntityType</td>
+                            </tr>
+                            <tr>
+                                <th>Entity ID</th>
+                                <td><code>@Model.Entry?.EntityId</code></td>
+                            </tr>
+                            <tr>
+                                <th>Action Type</th>
+                                <td><span class="badge @Model.Entry?.ActionBadgeClass">@Model.Entry?.DisplayActionType</span></td>
+                            </tr>
+                            <tr>
+                                <th>User</th>
+                                <td>@Model.Entry?.UserName</td>
+                            </tr>
+                            <tr>
+                                <th>Timestamp</th>
+                                <td>@Model.Entry?.Timestamp.ToString("yyyy-MM-dd HH:mm:ss UTC")</td>
+                            </tr>
+                            @if (!string.IsNullOrEmpty(Model.Entry?.IpAddress))
+                            {
+                                <tr>
+                                    <th>IP Address</th>
+                                    <td><code>@Model.Entry?.IpAddress</code></td>
+                                </tr>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.Entry?.UserAgent))
+                            {
+                                <tr>
+                                    <th>User Agent</th>
+                                    <td class="text-muted small">@Model.Entry?.UserAgent</td>
+                                </tr>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.Entry?.Reason))
+                            {
+                                <tr>
+                                    <th>Reason</th>
+                                    <td>@Model.Entry?.Reason</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Changes Section -->
+            @if (Model.Changes.Any())
+            {
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-edit me-2"></i>
+                            Changes Made
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        @foreach (var change in Model.Changes)
+                        {
+                            <div class="card change-card change-@change.ChangeType.ToLower()">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="mb-0">@change.PropertyName</h6>
+                                        <span class="badge badge-outline-@(change.ChangeType == "Added" ? "success" : change.ChangeType == "Removed" ? "danger" : "warning")">
+                                            @change.ChangeType
+                                        </span>
+                                    </div>
+                                    
+                                    @if (!string.IsNullOrEmpty(change.OldValue))
+                                    {
+                                        <div class="mb-2">
+                                            <small class="text-muted fw-bold">Previous Value:</small>
+                                            <div class="code-block">@change.OldValue</div>
+                                        </div>
+                                    }
+                                    
+                                    @if (!string.IsNullOrEmpty(change.NewValue))
+                                    {
+                                        <div>
+                                            <small class="text-muted fw-bold">New Value:</small>
+                                            <div class="code-block">@change.NewValue</div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Raw Data Section -->
+            @if (!string.IsNullOrEmpty(Model.FormattedOldValue) || !string.IsNullOrEmpty(Model.FormattedNewValue))
+            {
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-code me-2"></i>
+                            Raw Data
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        @if (!string.IsNullOrEmpty(Model.FormattedOldValue))
+                        {
+                            <div class="mb-3">
+                                <h6 class="text-muted">Previous Value:</h6>
+                                <div class="code-block">@Model.FormattedOldValue</div>
+                            </div>
+                        }
+                        
+                        @if (!string.IsNullOrEmpty(Model.FormattedNewValue))
+                        {
+                            <div>
+                                <h6 class="text-muted">New Value:</h6>
+                                <div class="code-block">@Model.FormattedNewValue</div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Metadata Section -->
+            @if (Model.Entry?.Metadata != null && Model.Entry.Metadata.Any())
+            {
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Additional Metadata
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-sm table-borderless">
+                            <tbody>
+                                @foreach (var kvp in Model.Entry.Metadata)
+                                {
+                                    <tr>
+                                        <th class="text-muted" style="width: 200px;">@kvp.Key</th>
+                                        <td><div class="code-block">@kvp.Value</div></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Related Entries -->
+            @if (Model.RelatedEntries?.Any() == true)
+            {
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-link me-2"></i>
+                            Related Entries
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        @foreach (var relatedEntry in Model.RelatedEntries.Take(10))
+                        {
+                            <div class="related-entry p-3 border-bottom">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">
+                                            <a href="@Url.Action("EntryDetails", "Audit", new { entryId = relatedEntry.EntryId })" 
+                                               class="text-decoration-none">
+                                                @relatedEntry.DisplayActionType
+                                            </a>
+                                        </h6>
+                                        <p class="mb-1 text-muted small">
+                                            By @relatedEntry.UserName
+                                        </p>
+                                        <small class="text-muted">@relatedEntry.RelativeTime</small>
+                                    </div>
+                                    <span class="badge @relatedEntry.ActionBadgeClass">@relatedEntry.DisplayActionType</span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <div class="card-footer text-center">
+                        <a href="@Url.Action("EntityAudit", "Audit", new { entityType = Model.Entry?.EntityType, entityId = Model.Entry?.EntityId })" 
+                           class="btn btn-sm btn-outline-primary">
+                            View All Related Entries
+                        </a>
+                    </div>
+                </div>
+            }
+
+            <!-- Quick Actions -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-tools me-2"></i>
+                        Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="@Url.Action("EntityAudit", "Audit", new { entityType = Model.Entry?.EntityType, entityId = Model.Entry?.EntityId })" 
+                           class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-history"></i> View Entity History
+                        </a>
+                        <a href="@Url.Action("Entries", "Audit", new { actionType = Model.Entry?.ActionType })" 
+                           class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-search"></i> Find Similar Actions
+                        </a>
+                        <a href="@Url.Action("Entries", "Audit", new { userName = Model.Entry?.UserName })" 
+                           class="btn btn-outline-info btn-sm">
+                            <i class="fas fa-user"></i> User's Activities
+                        </a>
+                        <a href="@Url.Action("Security", "Audit")" 
+                           class="btn btn-outline-warning btn-sm">
+                            <i class="fas fa-shield-alt"></i> Security Audit
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Add copy to clipboard functionality for code blocks
+            $('.code-block').each(function() {
+                var $this = $(this);
+                var $copyBtn = $('<button class="btn btn-sm btn-outline-secondary position-absolute" style="top: 5px; right: 5px;" title="Copy to clipboard"><i class="fas fa-copy"></i></button>');
+                
+                $this.addClass('position-relative');
+                $this.append($copyBtn);
+                
+                $copyBtn.click(function() {
+                    navigator.clipboard.writeText($this.text().trim()).then(function() {
+                        $copyBtn.html('<i class="fas fa-check"></i>');
+                        setTimeout(function() {
+                            $copyBtn.html('<i class="fas fa-copy"></i>');
+                        }, 2000);
+                    });
+                });
+            });
+        });
+    </script>
+}

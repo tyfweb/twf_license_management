@@ -40,8 +40,7 @@ public class AuditEntryEntity : BaseAuditEntity
             CreatedBy = model.UserName,
             CreatedOn = model.Timestamp
         };
-    }
-    public AuditEntry ToModel()
+    }    public AuditEntry ToModel()
     {
         return new AuditEntry
         {
@@ -54,7 +53,7 @@ public class AuditEntryEntity : BaseAuditEntity
             IpAddress = IpAddress,
             UserAgent = UserAgent,
             Reason = Reason,
-            Metadata = FromJson<Dictionary<string, string>>(Metadata),
+            Metadata = FromDictJson(Metadata),
             UserName = CreatedBy,
             Timestamp = CreatedOn
         };

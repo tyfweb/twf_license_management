@@ -137,7 +137,9 @@ builder.Services.AddScoped<ISettingService, SettingService>();
 // Step 6a: Settings helper services
 builder.Services.AddScoped<TechWayFit.Licensing.Management.Web.Helpers.SettingsHelper>();
 
-// Step 7: Audit management services will be added here
+// Step 7: Audit management services
+builder.Services.AddScoped<IAuditService, TechWayFit.Licensing.Management.Services.Implementations.Audit.AuditService>();
+
 // Step 8: Notification management services
 builder.Services.AddScoped<INotificationService, NotificationService>();
 
