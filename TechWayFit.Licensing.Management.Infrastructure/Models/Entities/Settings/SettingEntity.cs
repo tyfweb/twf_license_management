@@ -1,4 +1,4 @@
-using TechWayFit.Licensing.Infrastructure.Models.Entities;
+using System.ComponentModel.DataAnnotations;
 
 namespace TechWayFit.Licensing.Infrastructure.Models.Entities.Settings;
 
@@ -10,46 +10,59 @@ public class SettingEntity : BaseAuditEntity
     /// <summary>
     /// Unique identifier for the setting
     /// </summary>
+    [Key]
     public string SettingId { get; set; } = Guid.NewGuid().ToString();
 
     /// <summary>
     /// Category of the setting (e.g., "System", "Branding", "Email", "Security")
     /// </summary>
+    [Required]
+    [MaxLength(100)]
     public string Category { get; set; } = string.Empty;
 
     /// <summary>
     /// Unique key within the category
     /// </summary>
+    [Required]
+    [MaxLength(100)]
     public string Key { get; set; } = string.Empty;
 
     /// <summary>
     /// Current value of the setting (stored as JSON string for complex objects)
     /// </summary>
+    [MaxLength(4000)]
     public string? Value { get; set; }
 
     /// <summary>
     /// Default value for the setting
     /// </summary>
+    [MaxLength(4000)]
     public string? DefaultValue { get; set; }
 
     /// <summary>
     /// Data type of the setting value (string, int, bool, json, etc.)
     /// </summary>
+    [Required]
+    [MaxLength(50)]
     public string DataType { get; set; } = "string";
 
     /// <summary>
     /// Display name for the UI
     /// </summary>
+    [Required]
+    [MaxLength(200)]
     public string DisplayName { get; set; } = string.Empty;
 
     /// <summary>
     /// Description/help text for the setting
     /// </summary>
+    [MaxLength(1000)]
     public string? Description { get; set; }
 
     /// <summary>
     /// Category for grouping in UI
     /// </summary>
+    [MaxLength(100)]
     public string? GroupName { get; set; }
 
     /// <summary>
@@ -75,26 +88,31 @@ public class SettingEntity : BaseAuditEntity
     /// <summary>
     /// JSON string containing validation rules (min/max length, regex pattern, etc.)
     /// </summary>
+    [MaxLength(2000)]
     public string? ValidationRules { get; set; }
 
     /// <summary>
     /// JSON string containing possible values for dropdown/select inputs
     /// </summary>
+    [MaxLength(2000)]
     public string? PossibleValues { get; set; }
 
     /// <summary>
     /// Full key combining category and key (for quick lookups)
     /// </summary>
+    [MaxLength(201)] // Category(100) + "." + Key(100) + 1
     public string FullKey => $"{Category}.{Key}";
 
     /// <summary>
     /// Source of the current value (Default, Configuration, Database, User)
     /// </summary>
+    [MaxLength(50)]
     public string ValueSource { get; set; } = "Database";
 
     /// <summary>
     /// Tags for categorization and searching
     /// </summary>
+    [MaxLength(500)]
     public string? Tags { get; set; }
 
     /// <summary>
@@ -105,11 +123,13 @@ public class SettingEntity : BaseAuditEntity
     /// <summary>
     /// Environment where this setting applies (Development, Staging, Production, All)
     /// </summary>
+    [MaxLength(50)]
     public string Environment { get; set; } = "All";
 
     /// <summary>
     /// Version when this setting was introduced
     /// </summary>
+    [MaxLength(20)]
     public string? IntroducedInVersion { get; set; }
 
     /// <summary>
@@ -120,6 +140,7 @@ public class SettingEntity : BaseAuditEntity
     /// <summary>
     /// Deprecation message
     /// </summary>
+    [MaxLength(500)]
     public string? DeprecationMessage { get; set; }
 
     /// <summary>

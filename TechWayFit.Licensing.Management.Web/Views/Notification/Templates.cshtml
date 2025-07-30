@@ -6,48 +6,6 @@
 
 @section Styles {
     <link rel="stylesheet" href="~/css/product-management.css" />
-    <style>
-        .template-card {
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            transition: all 0.2s ease;
-        }
-        .template-card:hover {
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            transform: translateY(-2px);
-        }
-        .template-card-header {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border-bottom: 1px solid #dee2e6;
-            padding: 1rem;
-        }
-        .template-card-body {
-            padding: 1rem;
-        }
-        .template-type-badge {
-            font-size: 0.75rem;
-            padding: 0.25rem 0.5rem;
-        }
-        .usage-stats {
-            font-size: 0.875rem;
-            color: #6c757d;
-        }
-        .filter-section {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-        }
-        .template-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-        .template-preview {
-            max-height: 60px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-    </style>
 }
 
 <div class="container-fluid py-3">
@@ -73,45 +31,50 @@
     </div>
 
     <!-- Filter Section -->
-    <div class="filter-section">
-        <form method="get" asp-action="Templates" class="row g-3">
-            <div class="col-md-4">
-                <label for="searchTerm" class="form-label">Search Templates</label>
-                <input type="text" class="form-control" id="searchTerm" name="searchTerm" 
-                       value="@Model.SearchTerm" placeholder="Search by name or subject...">
-            </div>
-            <div class="col-md-3">
-                <label for="filterType" class="form-label">Template Type</label>
-                <select class="form-select" id="filterType" name="filterType">
-                    <option value="">All Types</option>
-                    @foreach (var type in Enum.GetValues<TechWayFit.Licensing.Management.Core.Models.Notification.NotificationType>())
-                    {
-                        <option value="@type" selected="@(Model.FilterType == type)">@type</option>
-                    }
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Status</label>
-                <div class="form-check mt-2">
-                    <input class="form-check-input" type="checkbox" id="showInactive" name="showInactive" 
-                           value="true" checked="@Model.ShowInactiveTemplates">
-                    <label class="form-check-label" for="showInactive">
-                        Show Inactive
-                    </label>
+    <div class="sidebar-section mb-4">
+        <div class="section-header">
+            <h5><i class="fas fa-filter me-2"></i>Filter Templates</h5>
+        </div>
+        <div class="section-content">
+            <form method="get" asp-action="Templates" class="row g-3">
+                <div class="col-md-4">
+                    <label for="searchTerm" class="form-label">Search Templates</label>
+                    <input type="text" class="form-control" id="searchTerm" name="searchTerm" 
+                           value="@Model.SearchTerm" placeholder="Search by name or subject...">
                 </div>
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">&nbsp;</label>
-                <div class="d-flex gap-2 mt-2">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-search me-1"></i>Filter
-                    </button>
-                    <a href="@Url.Action("Templates")" class="btn btn-outline-secondary">
-                        <i class="fas fa-undo me-1"></i>Clear
-                    </a>
+                <div class="col-md-3">
+                    <label for="filterType" class="form-label">Template Type</label>
+                    <select class="form-select" id="filterType" name="filterType">
+                        <option value="">All Types</option>
+                        @foreach (var type in Enum.GetValues<TechWayFit.Licensing.Management.Core.Models.Notification.NotificationType>())
+                        {
+                            <option value="@type" selected="@(Model.FilterType == type)">@type</option>
+                        }
+                    </select>
                 </div>
-            </div>
-        </form>
+                <div class="col-md-2">
+                    <label class="form-label">Status</label>
+                    <div class="form-check mt-2">
+                        <input class="form-check-input" type="checkbox" id="showInactive" name="showInactive" 
+                               value="true" checked="@Model.ShowInactiveTemplates">
+                        <label class="form-check-label" for="showInactive">
+                            Show Inactive
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">&nbsp;</label>
+                    <div class="d-flex gap-2 mt-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search me-1"></i>Filter
+                        </button>
+                        <a href="@Url.Action("Templates")" class="btn btn-outline-secondary">
+                            <i class="fas fa-undo me-1"></i>Clear
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
 
     <!-- Templates Grid -->
@@ -121,15 +84,15 @@
             @foreach (var template in Model.Templates)
             {
                 <div class="col-lg-6 col-xl-4">
-                    <div class="template-card h-100">
-                        <div class="template-card-header">
+                    <div class="edit-section h-100">
+                        <div class="section-header">
                             <div class="d-flex justify-content-between align-items-start">
                                 <div class="flex-grow-1">
                                     <h6 class="mb-1 fw-bold">@template.TemplateName</h6>
                                     <div class="d-flex gap-2 mb-2">
-                                        <span class="badge template-type-badge bg-info">@template.TypeDisplayName</span>
-                                        <span class="badge template-type-badge bg-secondary">@template.ModeDisplayName</span>
-                                        <span class="badge template-type-badge @(template.IsActive ? "bg-success" : "bg-warning")">
+                                        <span class="badge bg-info">@template.TypeDisplayName</span>
+                                        <span class="badge bg-secondary">@template.ModeDisplayName</span>
+                                        <span class="badge @(template.IsActive ? "bg-success" : "bg-warning")">
                                             @(template.IsActive ? "Active" : "Inactive")
                                         </span>
                                     </div>
@@ -163,13 +126,14 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="template-card-body">
+                        <div class="section-content">
                             <div class="mb-3">
                                 <strong class="text-muted small">Subject:</strong>
                                 <p class="mb-2 text-truncate">@template.Subject</p>
                                 
                                 <strong class="text-muted small">Preview:</strong>
-                                <div class="template-preview small text-muted">                                    @if (template.MessageTemplate.Length > 120)
+                                <div class="small text-muted" style="max-height: 60px; overflow: hidden;">
+                                    @if (template.MessageTemplate.Length > 120)
                                     {
                                         @(template.MessageTemplate.Substring(0, 120) + "...")
                                     }
@@ -180,7 +144,7 @@
                                 </div>
                             </div>
 
-                            <div class="usage-stats d-flex justify-content-between align-items-center mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-3" style="font-size: 0.875rem; color: #6c757d;">
                                 <span>
                                     <i class="fas fa-chart-bar me-1"></i>
                                     Used @template.UsageCount times
@@ -193,7 +157,7 @@
                                 }
                             </div>
 
-                            <div class="template-actions">
+                            <div class="d-flex gap-2">
                                 <a href="@Url.Action("TemplateDetails", new { id = template.TemplateId })" 
                                    class="btn btn-outline-primary btn-sm flex-grow-1">
                                     <i class="fas fa-eye me-1"></i>View

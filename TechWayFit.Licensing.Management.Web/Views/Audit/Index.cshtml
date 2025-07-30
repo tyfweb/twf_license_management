@@ -13,7 +13,7 @@
             overflow-y: auto;
         }
         .timeline-item {
-            border-left: 3px solid var(--border-color);
+            border-left: 3px solid #dee2e6;
             padding-left: 1rem;
             margin-bottom: 1rem;
             position: relative;
@@ -26,117 +26,169 @@
             width: 12px;
             height: 12px;
             border-radius: 50%;
-            background-color: var(--gray-500);
+            background-color: #6c757d;
         }
-        .timeline-item.high-risk::before { background-color: var(--danger-color); }
-        .timeline-item.medium-risk::before { background-color: var(--warning-color); }
-        .timeline-item.low-risk::before { background-color: var(--success-color); }
+        .timeline-item.high-risk::before { background-color: #dc3545; }
+        .timeline-item.medium-risk::before { background-color: #ffc107; }
+        .timeline-item.low-risk::before { background-color: #198754; }
         .chart-container {
             position: relative;
             height: 300px;
             width: 100%;
         }
-        .filter-section {
-            background: var(--light-bg);
-            border-radius: var(--radius);
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-            border: 1px solid var(--border-color);
-        }
-        .quick-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-        .text-purple {
-            color: #8b5cf6 !important;
-        }
-        .bg-purple {
-            background-color: #8b5cf6 !important;
-        }
     </style>
 }
 
-<div class="container-fluid">
-    <!-- Header -->
-    <div class="header">
+<div class="container-fluid py-3">
+    <!-- Header Section -->
+    <div class="header mb-3">
         <div class="d-flex justify-content-between align-items-center">
             <div>
-                <h2 class="mb-1">
-                    <i class="fas fa-shield-alt text-primary me-2"></i>
-                    Audit Dashboard
-                </h2>
+                <h2 class="mb-1">Audit Dashboard</h2>
                 <p class="text-muted mb-0">System activity monitoring and audit trail overview</p>
             </div>
             <div class="d-flex gap-2">
-                <a href="@Url.Action("Entries", "Audit")" class="btn btn-outline-primary">
-                    <i class="fas fa-list"></i> View All Entries
+                <a href="@Url.Action("Entries", "Audit")" class="btn btn-primary">
+                    <i class="fas fa-list me-2"></i>View All Entries
                 </a>
-                <a href="@Url.Action("Security", "Audit")" class="btn btn-outline-warning">
-                    <i class="fas fa-shield-alt"></i> Security Audit
-                </a>
-                <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#exportModal">
-                    <i class="fas fa-download"></i> Export Data
-                </button>
+                <div class="btn-group">
+                    <a href="@Url.Action("Security", "Audit")" class="btn btn-outline-secondary">
+                        <i class="fas fa-shield-alt me-1"></i>Security Audit
+                    </a>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#exportModal">
+                        <i class="fas fa-download me-1"></i>Export Data
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Date Range Filter -->
-    <div class="filter-section">
-        <form method="get" class="row g-3 align-items-end">
-            <div class="col-md-4">
-                <label for="startDate" class="form-label">Start Date</label>
-                <input type="date" class="form-control" id="startDate" name="startDate" 
-                       value="@Model.DateRangeStart?.ToString("yyyy-MM-dd")" />
+    <!-- Statistics Cards -->
+    <div class="row g-2 mb-3">
+        <div class="col-sm-6 col-lg-3">
+            <div class="stats-card">
+                <div class="stats-icon">
+                    <i class="fas fa-calendar-day"></i>
+                </div>
+                <div class="stats-content">
+                    <div class="stats-number">@Model.TotalEntriesToday.ToString("N0")</div>
+                    <div class="stats-label">Today's Entries</div>
+                </div>
             </div>
-            <div class="col-md-4">
-                <label for="endDate" class="form-label">End Date</label>
-                <input type="date" class="form-control" id="endDate" name="endDate" 
-                       value="@Model.DateRangeEnd?.ToString("yyyy-MM-dd")" />
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="stats-card stats-card-success">
+                <div class="stats-icon">
+                    <i class="fas fa-calendar-week"></i>
+                </div>
+                <div class="stats-content">
+                    <div class="stats-number">@Model.TotalEntriesWeek.ToString("N0")</div>
+                    <div class="stats-label">This Week</div>
+                </div>
             </div>
-            <div class="col-md-4">
-                <button type="submit" class="btn btn-primary w-100">
-                    <i class="fas fa-filter"></i> Apply Filter
-                </button>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="stats-card stats-card-warning">
+                <div class="stats-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div class="stats-content">
+                    <div class="stats-number">@Model.TotalEntriesMonth.ToString("N0")</div>
+                    <div class="stats-label">This Month</div>
+                </div>
             </div>
-        </form>
-    </div>    <!-- Quick Statistics -->
-    <div class="quick-stats">
-        <div class="stat-card primary">
-            <div class="stat-value">@Model.TotalEntriesToday.ToString("N0")</div>
-            <div class="stat-label">Today's Entries</div>
         </div>
-        <div class="stat-card success">
-            <div class="stat-value">@Model.TotalEntriesWeek.ToString("N0")</div>
-            <div class="stat-label">This Week</div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="stats-card">
+                <div class="stats-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stats-content">
+                    <div class="stats-number">@Model.Statistics.UniqueUsers.ToString("N0")</div>
+                    <div class="stats-label">Active Users</div>
+                </div>
+            </div>
         </div>
-        <div class="stat-card warning">
-            <div class="stat-value">@Model.TotalEntriesMonth.ToString("N0")</div>
-            <div class="stat-label">This Month</div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <h5><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+                </div>
+                <div class="section-content">
+                    <div class="row g-2">
+                        <div class="col-sm-6 col-lg-3">
+                            <a href="@Url.Action("Entries", "Audit")" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-list me-2"></i>View All Entries
+                            </a>
+                        </div>
+                        <div class="col-sm-6 col-lg-3">
+                            <a href="@Url.Action("Security", "Audit")" class="btn btn-outline-warning w-100">
+                                <i class="fas fa-shield-alt me-2"></i>Security Audit
+                            </a>
+                        </div>
+                        <div class="col-sm-6 col-lg-3">
+                            <a href="@Url.Action("EntityAudit", "Audit")" class="btn btn-outline-info w-100">
+                                <i class="fas fa-database me-2"></i>Entity Audit
+                            </a>
+                        </div>
+                        <div class="col-sm-6 col-lg-3">
+                            <button type="button" class="btn btn-outline-secondary w-100" data-bs-toggle="modal" data-bs-target="#exportModal">
+                                <i class="fas fa-download me-2"></i>Export Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="stat-card secondary">
-            <div class="stat-value">@Model.Statistics.UniqueUsers.ToString("N0")</div>
-            <div class="stat-label">Active Users</div>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="row g-2 mb-3">
+        <div class="col-12">
+            <div class="search-section">
+                <div class="d-flex gap-2 align-items-end">
+                    <div class="flex-grow-1">
+                        <form method="get" class="row g-2">
+                            <div class="col-md-4">
+                                <label for="startDate" class="form-label">Start Date</label>
+                                <input type="date" class="form-control" id="startDate" name="startDate" 
+                                       value="@Model.DateRangeStart?.ToString("yyyy-MM-dd")" />
+                            </div>
+                            <div class="col-md-4">
+                                <label for="endDate" class="form-label">End Date</label>
+                                <input type="date" class="form-control" id="endDate" name="endDate" 
+                                       value="@Model.DateRangeEnd?.ToString("yyyy-MM-dd")" />
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-filter me-1"></i>Apply Filter
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>    <div class="row g-4">
+    </div>    <div class="row">
         <!-- Activity Chart -->
         <div class="col-xl-8">
-            <div class="card h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-chart-line text-primary me-2"></i>
-                        Activity Timeline
-                    </h5>
-                    <small class="text-muted">
+            <div class="edit-section mb-4">
+                <div class="section-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-chart-line me-2"></i>Activity Timeline</h5>
                         @if (Model.DateRangeStart.HasValue && Model.DateRangeEnd.HasValue)
                         {
-                            <text>@Model.DateRangeStart.Value.ToString("MMM dd") - @Model.DateRangeEnd.Value.ToString("MMM dd, yyyy")</text>
+                            <small class="text-muted">
+                                @Model.DateRangeStart.Value.ToString("MMM dd") - @Model.DateRangeEnd.Value.ToString("MMM dd, yyyy")
+                            </small>
                         }
-                    </small>
+                    </div>
                 </div>
-                <div class="card-body">
+                <div class="section-content">
                     <div class="chart-container">
                         <canvas id="activityChart"></canvas>
                     </div>
@@ -146,15 +198,12 @@
 
         <!-- Recent Activity -->
         <div class="col-xl-4">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-clock text-warning me-2"></i>
-                        Recent Activity
-                    </h5>
+            <div class="edit-section mb-4">
+                <div class="section-header">
+                    <h5><i class="fas fa-clock me-2"></i>Recent Activity</h5>
                 </div>
-                <div class="card-body p-0">
-                    <div class="audit-timeline p-3">
+                <div class="section-content">
+                    <div class="audit-timeline">
                         @if (Model.RecentEntries.Any())
                         {
                             @foreach (var entry in Model.RecentEntries)
@@ -195,18 +244,15 @@
                 </div>
             </div>
         </div>
-    </div>    <!-- Statistics Row -->
-    <div class="row g-4 mt-2">
+    </div>    <!-- Detailed Statistics -->
+    <div class="row">
         <!-- Top Actions -->
         <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-tasks text-success me-2"></i>
-                        Top Actions
-                    </h5>
+            <div class="edit-section mb-4">
+                <div class="section-header">
+                    <h5><i class="fas fa-tasks me-2"></i>Top Actions</h5>
                 </div>
-                <div class="card-body">
+                <div class="section-content">
                     @if (Model.Statistics.EntriesByAction.Any())
                     {
                         @foreach (var action in Model.Statistics.EntriesByAction.Take(5))
@@ -227,16 +273,15 @@
                     }
                 </div>
             </div>
-        </div>        <!-- Top Entity Types -->
+        </div>
+
+        <!-- Top Entity Types -->
         <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-cubes text-info me-2"></i>
-                        Top Entity Types
-                    </h5>
+            <div class="edit-section mb-4">
+                <div class="section-header">
+                    <h5><i class="fas fa-cubes me-2"></i>Top Entity Types</h5>
                 </div>
-                <div class="card-body">
+                <div class="section-content">
                     @if (Model.Statistics.EntriesByEntity.Any())
                     {
                         @foreach (var entity in Model.Statistics.EntriesByEntity.Take(5))
@@ -257,16 +302,15 @@
                     }
                 </div>
             </div>
-        </div>        <!-- Top Users -->
+        </div>
+
+        <!-- Top Users -->
         <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-users text-purple me-2"></i>
-                        Most Active Users
-                    </h5>
+            <div class="edit-section mb-4">
+                <div class="section-header">
+                    <h5><i class="fas fa-users me-2"></i>Most Active Users</h5>
                 </div>
-                <div class="card-body">
+                <div class="section-content">
                     @if (Model.Statistics.EntriesByUser.Any())
                     {
                         @foreach (var user in Model.Statistics.EntriesByUser.Take(5))
@@ -276,7 +320,7 @@
                                 <span class="badge bg-secondary">@user.Value</span>
                             </div>
                             <div class="progress mb-3" style="height: 4px;">
-                                <div class="progress-bar bg-purple" role="progressbar" 
+                                <div class="progress-bar" style="background-color: #8b5cf6;" role="progressbar" 
                                      style="width: @(Math.Max(1, (user.Value * 100.0 / Model.Statistics.EntriesByUser.Max(x => x.Value))))%"></div>
                             </div>
                         }

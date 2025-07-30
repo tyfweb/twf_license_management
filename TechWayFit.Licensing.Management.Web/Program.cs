@@ -135,7 +135,7 @@ builder.Services.AddSingleton<ILicenseValidationService, LicenseValidationServic
 builder.Services.AddScoped<ISettingService, SettingService>();
 
 // Step 6a: Settings helper services
-builder.Services.AddScoped<TechWayFit.Licensing.Management.Web.Helpers.SettingsHelper>();
+//builder.Services.AddScoped<TechWayFit.Licensing.Management.Web.Helpers.SettingsHelper>();
 
 // Step 7: Audit management services
 builder.Services.AddScoped<IAuditService, TechWayFit.Licensing.Management.Services.Implementations.Audit.AuditService>();
