@@ -35,21 +35,21 @@
             width: 1.5rem;
             height: 1.5rem;
             border-radius: 50%;
-            background: #fff;
-            border: 3px solid #007bff;
+            background: var(--background-primary, #fff);
+            border: 3px solid var(--primary-color, #007bff);
             z-index: 2;
         }
         .timeline-marker.create {
-            border-color: #28a745;
-            background: #28a745;
+            border-color: var(--success-color, #28a745);
+            background: var(--success-color, #28a745);
         }
         .timeline-marker.update {
-            border-color: #ffc107;
-            background: #ffc107;
+            border-color: var(--warning-color, #ffc107);
+            background: var(--warning-color, #ffc107);
         }
         .timeline-marker.delete {
-            border-color: #dc3545;
-            background: #dc3545;
+            border-color: var(--danger-color, #dc3545);
+            background: var(--danger-color, #dc3545);
         }
         .timeline-marker.security {
             border-color: #fd7e14;

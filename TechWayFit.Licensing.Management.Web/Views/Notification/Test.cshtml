@@ -8,19 +8,19 @@
     <link rel="stylesheet" href="~/css/product-management.css" />
     <style>
         .form-section {
-            background: #fff;
-            border: 1px solid #dee2e6;
+            background: var(--white);
+            border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 1.5rem;
             margin-bottom: 1.5rem;
         }
         .form-section-header {
-            border-bottom: 1px solid #dee2e6;
+            border-bottom: 1px solid var(--border-color);
             padding-bottom: 0.75rem;
             margin-bottom: 1rem;
         }
         .template-card {
-            border: 1px solid #dee2e6;
+            border: 1px solid var(--border-color);
             border-radius: 4px;
             padding: 0.75rem;
             cursor: pointer;
@@ -28,22 +28,22 @@
             margin-bottom: 0.5rem;
         }
         .template-card:hover {
-            background: #f8f9fa;
-            border-color: #007bff;
+            background: var(--gray-50);
+            border-color: var(--primary-color);
         }
         .template-card.selected {
-            background: #e7f3ff;
-            border-color: #007bff;
+            background: var(--primary-light);
+            border-color: var(--primary-color);
         }
         .test-data-input {
-            background: #f8f9fa;
+            background: var(--gray-50);
             border-radius: 4px;
             padding: 0.5rem;
             margin-bottom: 0.5rem;
         }
         .preview-section {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
+            background: var(--gray-50);
+            border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 1rem;
         }
@@ -53,18 +53,18 @@
             margin-top: 1rem;
         }
         .result-success {
-            background: #d4edda;
-            border: 1px solid #c3e6cb;
-            color: #155724;
+            background: var(--success-light);
+            border: 1px solid var(--success-color);
+            color: var(--success-text);
         }
         .result-error {
-            background: #f8d7da;
-            border: 1px solid #f5c6cb;
-            color: #721c24;
+            background: var(--danger-light);
+            border: 1px solid var(--danger-color);
+            color: var(--danger-text);
         }
         .variable-tag {
-            background: #e7f3ff;
-            color: #0066cc;
+            background: var(--info-light);
+            color: var(--info-text);
             padding: 0.25rem 0.5rem;
             border-radius: 4px;
             font-family: monospace;

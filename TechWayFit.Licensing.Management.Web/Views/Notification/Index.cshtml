@@ -13,16 +13,16 @@
         .trend-indicator {
             font-size: 0.875rem;
         }
-        .trend-up { color: #28a745; }
-        .trend-down { color: #dc3545; }
-        .trend-stable { color: #6c757d; }
+        .trend-up { color: var(--success-color); }
+        .trend-down { color: var(--danger-color); }
+        .trend-stable { color: var(--text-muted); }
         .alert-card {
             border-left: 4px solid;
         }
-        .alert-card.critical { border-left-color: #dc3545; }
-        .alert-card.high { border-left-color: #fd7e14; }
-        .alert-card.medium { border-left-color: #ffc107; }
-        .alert-card.low { border-left-color: #17a2b8; }
+        .alert-card.critical { border-left-color: var(--danger-color); }
+        .alert-card.high { border-left-color: var(--warning-color); }
+        .alert-card.medium { border-left-color: var(--info-color); }
+        .alert-card.low { border-left-color: var(--primary-color); }
     </style>
 }
 
@@ -357,6 +357,11 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         // Delivery Trends Chart
+        // Get theme-aware colors
+        const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color') || '#007bff';
+        const primaryColorRgba = primaryColor.replace('#', '').match(/.{2}/g);
+        const primaryColorAlpha = primaryColorRgba ? `rgba(${parseInt(primaryColorRgba[0], 16)}, ${parseInt(primaryColorRgba[1], 16)}, ${parseInt(primaryColorRgba[2], 16)}, 0.1)` : 'rgba(0, 123, 255, 0.1)';
+        
         const ctx = document.getElementById('deliveryTrendsChart').getContext('2d');
         const deliveryTrendsChart = new Chart(ctx, {
             type: 'line',
@@ -365,8 +370,8 @@
                 datasets: [{
                     label: 'Notifications Sent',
                     data: @Html.Raw(Json.Serialize(Model.Trends.DeliveryTrends.Values)),
-                    borderColor: '#007bff',
-                    backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                    borderColor: primaryColor,
+                    backgroundColor: primaryColorAlpha,
                     tension: 0.4,
                     fill: true
                 }]

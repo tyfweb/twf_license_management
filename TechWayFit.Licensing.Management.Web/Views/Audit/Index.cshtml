@@ -26,11 +26,11 @@
             width: 12px;
             height: 12px;
             border-radius: 50%;
-            background-color: #6c757d;
+            background-color: var(--text-muted, #6c757d);
         }
-        .timeline-item.high-risk::before { background-color: #dc3545; }
-        .timeline-item.medium-risk::before { background-color: #ffc107; }
-        .timeline-item.low-risk::before { background-color: #198754; }
+        .timeline-item.high-risk::before { background-color: var(--danger-color, #dc3545); }
+        .timeline-item.medium-risk::before { background-color: var(--warning-color, #ffc107); }
+        .timeline-item.low-risk::before { background-color: var(--success-color, #198754); }
         .chart-container {
             position: relative;
             height: 300px;
@@ -320,7 +320,7 @@
                                 <span class="badge bg-secondary">@user.Value</span>
                             </div>
                             <div class="progress mb-3" style="height: 4px;">
-                                <div class="progress-bar" style="background-color: #8b5cf6;" role="progressbar" 
+                                <div class="progress-bar" style="background-color: var(--purple-color);" role="progressbar" 
                                      style="width: @(Math.Max(1, (user.Value * 100.0 / Model.Statistics.EntriesByUser.Max(x => x.Value))))%"></div>
                             </div>
                         }

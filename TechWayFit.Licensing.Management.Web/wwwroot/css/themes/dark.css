@@ -102,6 +102,27 @@
     --text-muted: #94a3b8;
     --border-color: #475569;
     --border-light: #334155;
+    
+    /* Status Colors - Dark Theme */
+    --success-color: #10b981;
+    --success-light: #064e3b;
+    --success-text: #6ee7b7;
+    --warning-color: #f59e0b;
+    --warning-light: #451a03;
+    --warning-text: #fbbf24;
+    --danger-color: #ef4444;
+    --danger-light: #450a0a;
+    --danger-text: #f87171;
+    --info-color: #06b6d4;
+    --info-light: #083344;
+    --info-text: #67e8f9;
+    --purple-color: #8b5cf6;
+    --purple-light: #3c1561;
+    --purple-text: #c4b5fd;
+    
+    /* Primary Color Variations - Dark Theme */
+    --primary-dark: #1e40af;
+    --primary-darker: #1e3a8a;
 }
 
 /* Dark theme-specific component overrides */
