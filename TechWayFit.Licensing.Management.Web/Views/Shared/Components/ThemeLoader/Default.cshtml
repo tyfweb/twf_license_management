@@ -1,0 +1,94 @@
+@model TechWayFit.Licensing.Management.Web.Components.ThemeLoaderModel
+
+@{
+    // Only load theme CSS if not default theme
+    var shouldLoadTheme = !string.IsNullOrEmpty(Model.CurrentTheme) && Model.CurrentTheme != "default";
+}
+
+@if (shouldLoadTheme)
+{
+    <link rel="stylesheet" type="text/css" href="~/css/themes/@(Model.CurrentTheme).css" data-theme="@Model.CurrentTheme" />
+}
+
+<script>
+    // Initialize theme settings for client-side use
+    window.themeSettings = {
+        currentTheme: '@Model.CurrentTheme',
+        autoDetect: @Model.AutoDetect.ToString().ToLower(),
+        transitionDuration: @Model.TransitionDuration
+    };
+
+    // Auto-detect system theme if enabled
+    if (window.themeSettings.autoDetect && window.matchMedia) {
+        // Listen for system theme changes
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        
+        function handleThemeChange(e) {
+            const prefersDark = e.matches;
+            const systemTheme = prefersDark ? 'dark' : 'default';
+            
+            // Only switch if different from current theme
+            if (systemTheme !== window.themeSettings.currentTheme) {
+                loadTheme(systemTheme);
+                // Update server-side setting
+                updateServerTheme(systemTheme);
+            }
+        }
+        
+        // Initial check
+        if (mediaQuery.matches && window.themeSettings.currentTheme !== 'dark') {
+            loadTheme('dark');
+            updateServerTheme('dark');
+        } else if (!mediaQuery.matches && window.themeSettings.currentTheme === 'dark') {
+            loadTheme('default');
+            updateServerTheme('default');
+        }
+        
+        // Listen for changes
+        mediaQuery.addListener(handleThemeChange);
+    }
+
+    // Function to load theme dynamically
+    function loadTheme(themeName) {
+        // Remove existing theme stylesheets
+        const existingThemes = document.querySelectorAll('link[data-theme]');
+        existingThemes.forEach(link => link.remove());
+        
+        // Add new theme if not default
+        if (themeName && themeName !== 'default') {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.type = 'text/css';
+            link.href = '/css/themes/' + themeName + '.css';
+            link.setAttribute('data-theme', themeName);
+            document.head.appendChild(link);
+        }
+        
+        // Update current theme
+        window.themeSettings.currentTheme = themeName;
+    }
+
+    // Function to update server-side theme setting
+    function updateServerTheme(themeName) {
+        if (typeof fetch !== 'undefined') {
+            fetch('@Url.Action("SetCurrentTheme", "Settings")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                },
+                body: JSON.stringify({ theme: themeName })
+            }).catch(error => {
+                console.warn('Failed to update server theme:', error);
+            });
+        }
+    }
+
+    // Expose theme functions globally for use by other scripts
+    window.TechWayFitTheme = {
+        loadTheme: loadTheme,
+        updateServerTheme: updateServerTheme,
+        getCurrentTheme: () => window.themeSettings.currentTheme,
+        getSettings: () => window.themeSettings
+    };
+</script>

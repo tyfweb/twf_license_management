@@ -85,6 +85,10 @@
             color: white !important;
         }
     </style>
+    
+    <!-- Theme Loading -->
+    @await RenderSectionAsync("Styles", required: false)
+    @await Component.InvokeAsync("ThemeLoader")
 </head>
 <body class="bg-light">
     <header>

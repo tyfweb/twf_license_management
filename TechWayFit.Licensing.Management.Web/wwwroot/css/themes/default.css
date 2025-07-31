@@ -1,0 +1,231 @@
+/* ===== DEFAULT THEME ===== */
+/* TechWayFit License Management - Default Light Theme */
+
+:root {
+    /* Theme Identity */
+    --theme-name: 'default';
+    --theme-display-name: 'Default Light';
+    --theme-mode: 'light';
+    
+    /* Primary Brand Colors */
+    --accent-primary: #3b82f6;
+    --accent-secondary: #8b5cf6;
+    --accent-tertiary: #06b6d4;
+    
+    /* Extended Color Palette */
+    --primary-50: #eff6ff;
+    --primary-100: #dbeafe;
+    --primary-200: #bfdbfe;
+    --primary-300: #93c5fd;
+    --primary-400: #60a5fa;
+    --primary-500: #3b82f6;
+    --primary-600: #2563eb;
+    --primary-700: #1d4ed8;
+    --primary-800: #1e40af;
+    --primary-900: #1e3a8a;
+    
+    /* Background Layers */
+    --background-primary: #ffffff;
+    --background-secondary: #f8fafc;
+    --background-tertiary: #f1f5f9;
+    --background-accent: #f0f9ff;
+    
+    /* Card and Surface Colors */
+    --card-background: var(--background-primary);
+    --card-background-hover: var(--background-secondary);
+    --sidebar-background: linear-gradient(135deg, var(--background-secondary), var(--background-tertiary));
+    --header-background: var(--gradient-primary);
+    --footer-background: var(--background-tertiary);
+    --sidebar-background: var(--background-secondary);
+    --header-background: var(--background-primary);
+    --footer-background: var(--background-tertiary);
+    
+    /* Interactive Elements */
+    --hover-lift: 2px;
+    --hover-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --animation-speed: 0.2s;
+    --animation-curve: cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Theme-specific Gradients */
+    --gradient-primary: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    --gradient-secondary: linear-gradient(135deg, var(--background-primary), var(--background-secondary));
+    --gradient-card: linear-gradient(135deg, var(--card-background), var(--background-secondary));
+    --gradient-accent: linear-gradient(135deg, var(--primary-50), var(--primary-100));
+    
+    /* Status Colors Enhanced */
+    --status-success: #10b981;
+    --status-success-bg: #d1fae5;
+    --status-warning: #f59e0b;
+    --status-warning-bg: #fef3c7;
+    --status-danger: #ef4444;
+    --status-danger-bg: #fee2e2;
+    --status-info: #3b82f6;
+    --status-info-bg: #dbeafe;
+    
+    /* Border and Shadow Variations */
+    --border-light-themed: rgba(59, 130, 246, 0.1);
+    --border-medium-themed: rgba(59, 130, 246, 0.2);
+    --shadow-themed: 0 4px 6px -1px rgba(59, 130, 246, 0.1), 0 2px 4px -1px rgba(59, 130, 246, 0.06);
+    --shadow-themed-lg: 0 20px 25px -5px rgba(59, 130, 246, 0.1), 0 10px 10px -5px rgba(59, 130, 246, 0.04);
+    
+    /* Typography Enhancements */
+    --heading-color: #1e293b;
+    --text-primary-themed: #334155;
+    --text-secondary-themed: #64748b;
+    --text-accent: var(--accent-primary);
+    
+    /* Form Elements */
+    --input-background: var(--background-primary);
+    --input-border: #e2e8f0;
+    --input-border-focus: var(--accent-primary);
+    --input-background-focus: var(--background-accent);
+    
+    /* Navigation */
+    --nav-active-background: var(--background-accent);
+    --nav-active-border: var(--accent-primary);
+    --nav-hover-background: var(--background-secondary);
+    
+    /* Special Effects */
+    --background-pattern: none;
+    --glass-effect: rgba(255, 255, 255, 0.8);
+    --backdrop-blur: blur(10px);
+}
+
+/* Theme-specific component overrides */
+.theme-default {
+    /* Enhanced card styling */
+    .card, .sidebar-section, .form-section {
+        background: var(--card-background);
+        border: 1px solid var(--border-light-themed);
+        box-shadow: var(--shadow-themed);
+        transition: all var(--animation-speed) var(--animation-curve);
+    }
+    
+    .card:hover, .sidebar-section:hover {
+        transform: translateY(calc(-1 * var(--hover-lift)));
+        box-shadow: var(--hover-shadow);
+    }
+    
+    /* Enhanced button styling */
+    .btn-primary {
+        background: var(--gradient-primary);
+        border: none;
+        box-shadow: var(--shadow-themed);
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-themed-lg);
+    }
+    
+    /* Form enhancements */
+    .form-control:focus {
+        background: var(--input-background-focus);
+        border-color: var(--input-border-focus);
+        box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.1);
+    }
+    
+    /* Navigation enhancements */
+    .nav-link.active {
+        background: var(--nav-active-background);
+        border-left: 3px solid var(--nav-active-border);
+    }
+}
+
+/* Default theme sidebar styling */
+.sidebar-section {
+    background: var(--sidebar-background) !important;
+    border-color: var(--border-color) !important;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.08) !important;
+    transition: all 0.3s ease !important;
+}
+
+.sidebar-section:hover {
+    background: var(--card-background-hover) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15) !important;
+}
+
+.sidebar-section-title {
+    background: linear-gradient(135deg, var(--background-secondary), var(--background-tertiary)) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+
+.sidebar-section-content {
+    background: transparent !important;
+}
+
+/* LicenseHub Sidebar Styles */
+.licensehub-sidebar {
+    background: linear-gradient(135deg, #1e40af, #2563eb) !important;
+    box-shadow: 2px 0 15px rgba(59, 130, 246, 0.2);
+}
+
+.licensehub-sidebar .licensehub-sidebar-brand {
+    background: rgba(0, 0, 0, 0.2) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.licensehub-sidebar .licensehub-nav-link {
+    color: rgba(255, 255, 255, 0.9) !important;
+    transition: all 0.3s ease;
+    border-radius: 8px !important;
+    margin-bottom: 4px;
+    font-weight: 500;
+}
+
+.licensehub-sidebar .licensehub-nav-link:hover {
+    color: white !important;
+    background: rgba(59, 130, 246, 0.25) !important;
+    transform: translateX(4px);
+}
+
+.licensehub-sidebar .licensehub-nav-link.active {
+    color: white !important;
+    background: rgba(59, 130, 246, 0.35) !important;
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
+.licensehub-sidebar .licensehub-sidebar-user {
+    background: rgba(0, 0, 0, 0.2) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+/* License Breakdown Default Theme */
+.breakdown-item {
+    background: var(--card-background) !important;
+    border-color: var(--border-color) !important;
+}
+
+.breakdown-item:hover {
+    background: var(--card-background-hover) !important;
+    border-color: var(--accent-primary) !important;
+}
+
+.breakdown-item::before {
+    background: var(--accent-primary) !important;
+}
+
+.edit-section .section-content {
+    background: linear-gradient(135deg, var(--card-background) 0%, var(--background-secondary) 100%) !important;
+    border-color: var(--border-color) !important;
+}
+
+.tier-breakdown {
+    border-top-color: var(--border-color) !important;
+}
+
+.tier-breakdown::before {
+    background: var(--accent-primary) !important;
+}
+
+.tier-breakdown h6::before {
+    background: var(--accent-primary) !important;
+}
+
+.stats-card {
+    background: var(--card-background) !important;
+    border-color: var(--border-color) !important;
+}

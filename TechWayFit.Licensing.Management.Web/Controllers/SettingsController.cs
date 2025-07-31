@@ -12,13 +12,16 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
     {
         private readonly ISettingService _settingService;
         private readonly ILogger<SettingsController> _logger;
+        private readonly IWebHostEnvironment _hostEnvironment;
 
         public SettingsController(
             ISettingService settingService,
-            ILogger<SettingsController> logger)
+            ILogger<SettingsController> logger,
+            IWebHostEnvironment hostEnvironment)
         {
             _settingService = settingService;
             _logger = logger;
+            _hostEnvironment = hostEnvironment;
         }
 
         /// <summary>
@@ -402,6 +405,192 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 _logger.LogError(ex, "Error validating settings");
                 return Json(new { success = false, message = "Error validating settings" });
             }
+        }
+
+        #region Theme Management
+
+        /// <summary>
+        /// Get current theme configuration
+        /// </summary>
+        /// <returns>JSON result with current theme</returns>
+        [HttpGet]
+        public async Task<IActionResult> GetCurrentTheme()
+        {
+            try
+            {
+                var currentTheme = await _settingService.GetSettingValueAsync<string>("UI", "CurrentTheme", "default");
+                return Json(new { success = true, theme = currentTheme });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting current theme");
+                return Json(new { success = false, message = "Error getting current theme" });
+            }
+        }
+
+        /// <summary>
+        /// Get available themes
+        /// </summary>
+        /// <returns>JSON result with available themes</returns>
+        [HttpGet]
+        public async Task<IActionResult> GetAvailableThemes()
+        {
+            try
+            {
+                var availableThemesString = await _settingService.GetSettingValueAsync<string>("UI", "AvailableThemes", "default,dark,blue,green,purple");
+                var availableThemes = availableThemesString.Split(',').Select(t => t.Trim()).ToList();
+                
+                var themeDetails = availableThemes.Select(theme => new
+                {
+                    Name = theme,
+                    DisplayName = GetThemeDisplayName(theme),
+                    CssFile = $"/css/themes/{theme}-theme.css",
+                    IsDarkMode = theme.Contains("dark", StringComparison.OrdinalIgnoreCase)
+                }).ToList();
+
+                return Json(new { success = true, themes = themeDetails });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting available themes");
+                return Json(new { success = false, message = "Error getting available themes" });
+            }
+        }
+
+        /// <summary>
+        /// Set current theme
+        /// </summary>
+        /// <param name="themeName">Name of the theme to set</param>
+        /// <returns>JSON result</returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SetCurrentTheme([FromBody] ThemeRequestViewModel request)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(request?.Theme))
+                {
+                    return Json(new { success = false, message = "Theme name is required" });
+                }
+
+                // Validate theme exists in available themes
+                var availableThemesString = await _settingService.GetSettingValueAsync<string>("UI", "AvailableThemes", "default,dark,blue,green,purple");
+                var availableThemes = availableThemesString.Split(',').Select(t => t.Trim()).ToList();
+                
+                if (!availableThemes.Contains(request.Theme, StringComparer.OrdinalIgnoreCase))
+                {
+                    return Json(new { success = false, message = "Invalid theme selected" });
+                }
+
+                var currentUser = GetCurrentUser();
+                var setting = await _settingService.GetSettingAsync("UI", "CurrentTheme");
+                
+                if (setting != null)
+                {
+                    await _settingService.UpdateSettingAsync(setting.SettingId, request.Theme, currentUser);
+                }
+
+                return Json(new 
+                { 
+                    success = true, 
+                    message = "Theme updated successfully", 
+                    theme = request.Theme,
+                    cssFile = $"/css/themes/{request.Theme}.css"
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error setting current theme to {ThemeName}", request.Theme);
+                return Json(new { success = false, message = "Error updating theme. Please try again." });
+            }
+        }
+
+        /// <summary>
+        /// Toggle theme auto-detection
+        /// </summary>
+        /// <param name="enabled">Whether to enable auto-detection</param>
+        /// <returns>JSON result</returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SetThemeAutoDetect([FromBody] ThemeAutoDetectRequestViewModel request)
+        {
+            try
+            {
+                var currentUser = GetCurrentUser();
+                var setting = await _settingService.GetSettingAsync("UI", "ThemeAutoDetect");
+                
+                if (setting != null)
+                {
+                    await _settingService.UpdateSettingAsync(setting.SettingId, request.AutoDetect.ToString().ToLower(), currentUser);
+                }
+
+                return Json(new 
+                { 
+                    success = true, 
+                    message = "Theme auto-detection updated successfully", 
+                    enabled = request.AutoDetect
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error setting theme auto-detection to {Enabled}", request.AutoDetect);
+                return Json(new { success = false, message = "Error updating theme auto-detection. Please try again." });
+            }
+        }
+
+        /// <summary>
+        /// Generate CSS for current theme
+        /// </summary>
+        /// <returns>CSS content</returns>
+        [HttpGet]
+        public async Task<IActionResult> GetThemeCss()
+        {
+            try
+            {
+                var currentTheme = await _settingService.GetSettingValueAsync<string>("UI", "CurrentTheme", "default");
+                var cssFilePath = Path.Combine(_hostEnvironment.WebRootPath, "css", "themes", $"{currentTheme}-theme.css");
+                
+                if (System.IO.File.Exists(cssFilePath))
+                {
+                    var cssContent = await System.IO.File.ReadAllTextAsync(cssFilePath);
+                    return Content(cssContent, "text/css");
+                }
+                
+                // Fallback to default theme
+                var defaultCssPath = Path.Combine(_hostEnvironment.WebRootPath, "css", "themes", "default-theme.css");
+                if (System.IO.File.Exists(defaultCssPath))
+                {
+                    var defaultCssContent = await System.IO.File.ReadAllTextAsync(defaultCssPath);
+                    return Content(defaultCssContent, "text/css");
+                }
+                
+                return Content("/* No theme CSS found */", "text/css");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting theme CSS");
+                return Content("/* Error loading theme CSS */", "text/css");
+            }
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Get display name for theme
+        /// </summary>
+        /// <param name="themeName">Theme internal name</param>
+        /// <returns>Display name</returns>
+        private static string GetThemeDisplayName(string themeName)
+        {
+            return themeName.ToLower() switch
+            {
+                "default" => "Default Light",
+                "dark" => "Dark Mode",
+                "blue" => "Ocean Blue",
+                "green" => "Forest Green",
+                "purple" => "Royal Purple",
+                _ => themeName.Substring(0, 1).ToUpper() + themeName.Substring(1).ToLower()
+            };
         }
 
         /// <summary>

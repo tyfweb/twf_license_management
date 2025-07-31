@@ -1,0 +1,444 @@
+/* ===== PURPLE THEME ===== */
+/* TechWayFit License Management - Royal Purple Theme */
+
+:root {
+    /* Theme Identity */
+    --theme-name: 'purple';
+    --theme-display-name: 'Royal Purple';
+    --theme-mode: 'light';
+    
+    /* Purple-centric Brand Colors */
+    --accent-primary: #7c3aed;
+    --accent-secondary: #8b5cf6;
+    --accent-tertiary: #a855f7;
+    
+    /* Extended Purple Palette */
+    --primary-50: #faf5ff;
+    --primary-100: #f3e8ff;
+    --primary-200: #e9d5ff;
+    --primary-300: #d8b4fe;
+    --primary-400: #c084fc;
+    --primary-500: #a855f7;
+    --primary-600: #9333ea;
+    --primary-700: #7c3aed;
+    --primary-800: #6b21a8;
+    --primary-900: #581c87;
+    
+    /* Purple-tinted Backgrounds */
+    --background-primary: #ffffff;
+    --background-secondary: #faf5ff;
+    --background-tertiary: #f3e8ff;
+    --background-accent: #e9d5ff;
+    
+    /* Card and Surface Colors */
+    --card-background: var(--background-primary);
+    --card-background-hover: var(--background-secondary);
+    --sidebar-background: linear-gradient(135deg, var(--background-secondary), var(--background-tertiary));
+    --header-background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+    --footer-background: var(--background-tertiary);
+    
+    /* Interactive Elements */
+    --hover-lift: 2px;
+    --hover-shadow: 0 10px 25px -5px rgba(124, 58, 237, 0.15), 0 10px 10px -5px rgba(139, 92, 246, 0.1);
+    --animation-speed: 0.25s;
+    --animation-curve: cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Purple Theme Gradients */
+    --gradient-primary: linear-gradient(135deg, #7c3aed, #8b5cf6);
+    --gradient-secondary: linear-gradient(135deg, #faf5ff, #f3e8ff);
+    --gradient-card: linear-gradient(135deg, var(--background-primary), var(--background-secondary));
+    --gradient-accent: linear-gradient(135deg, #e9d5ff, #d8b4fe);
+    
+    /* Text Colors - Purple Theme */
+    --text-primary: #0f172a;
+    --text-secondary: #374151;
+    --text-muted: #6b7280;
+    --text-inverse: #ffffff;
+    --text-accent: var(--accent-primary);
+    
+    /* Border and Shadow Colors */
+    --border-color: #e9d5ff;
+    --border-strong: #d8b4fe;
+    --shadow-color: rgba(124, 58, 237, 0.1);
+    --divider-color: #d8b4fe;
+    
+    /* Status Colors - Purple Theme Adjusted */
+    --success-color: #059669;
+    --success-light: #d1fae5;
+    --warning-color: #f59e0b;
+    --warning-light: #fef3c7;
+    --danger-color: #dc2626;
+    --danger-light: #fee2e2;
+    --info-color: var(--accent-primary);
+    --info-light: var(--background-accent);
+    
+    /* Button Colors */
+    --btn-primary-bg: var(--accent-primary);
+    --btn-primary-hover: #6b21a8;
+    --btn-primary-border: var(--accent-primary);
+    --btn-secondary-bg: var(--background-secondary);
+    --btn-secondary-hover: var(--background-tertiary);
+    --btn-secondary-border: var(--border-strong);
+    
+    /* Form Elements */
+    --input-bg: var(--background-primary);
+    --input-border: var(--border-color);
+    --input-focus: var(--accent-primary);
+    --input-placeholder: var(--text-muted);
+    
+    /* Navigation Colors */
+    --nav-bg: var(--gradient-primary);
+    --nav-text: var(--text-inverse);
+    --nav-hover: rgba(255, 255, 255, 0.1);
+    --nav-active: rgba(255, 255, 255, 0.2);
+    
+    /* Table Colors */
+    --table-bg: var(--background-primary);
+    --table-stripe: var(--background-secondary);
+    --table-hover: var(--background-accent);
+    --table-border: var(--border-color);
+    
+    /* Modal and Overlay Colors */
+    --modal-bg: var(--background-primary);
+    --modal-header: var(--background-secondary);
+    --modal-overlay: rgba(0, 0, 0, 0.5);
+    
+    /* Custom Purple Theme Variables */
+    --royal-purple: #7c3aed;
+    --amethyst: #a855f7;
+    --lavender: #c084fc;
+    --lilac-light: #d8b4fe;
+}
+
+/* ===== PURPLE THEME COMPONENT OVERRIDES ===== */
+
+/* Navigation Bar */
+.navbar-dark {
+    background: var(--nav-bg) !important;
+}
+
+.navbar-dark .navbar-brand,
+.navbar-dark .navbar-nav .nav-link {
+    color: var(--nav-text) !important;
+}
+
+.navbar-dark .navbar-nav .nav-link:hover {
+    color: var(--nav-text) !important;
+    background: var(--nav-hover);
+    border-radius: 0.375rem;
+}
+
+/* Cards */
+body {
+    background-color: var(--background-secondary) !important;
+}
+
+.card,
+.stats-card,
+.product-card,
+.consumer-card {
+    background: var(--card-background) !important;
+    border-color: var(--border-color) !important;
+}
+
+.card:hover,
+.stats-card:hover,
+.product-card:hover,
+.consumer-card:hover {
+    background: var(--card-background-hover) !important;
+    transform: translateY(calc(-1 * var(--hover-lift)));
+    box-shadow: var(--hover-shadow);
+}
+
+/* Headers and Sections */
+.section-header {
+    background: var(--background-secondary) !important;
+    border-color: var(--border-color) !important;
+}
+
+.sidebar-section {
+    background: var(--sidebar-background) !important;
+    border-color: var(--border-color) !important;
+    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.08) !important;
+    transition: all 0.3s ease !important;
+}
+
+.sidebar-section:hover {
+    background: var(--card-background-hover) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: var(--hover-shadow) !important;
+}
+
+.sidebar-section-title {
+    background: linear-gradient(135deg, var(--background-secondary), var(--background-tertiary)) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+
+.sidebar-section-content {
+    background: transparent !important;
+}
+
+/* LicenseHub Sidebar Styles */
+.licensehub-sidebar {
+    background: linear-gradient(135deg, #581c87, #7c3aed) !important;
+    box-shadow: 2px 0 15px rgba(124, 58, 237, 0.3);
+}
+
+.licensehub-sidebar .licensehub-sidebar-brand {
+    background: rgba(0, 0, 0, 0.3) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.licensehub-sidebar .licensehub-nav-link {
+    color: rgba(255, 255, 255, 0.9) !important;
+    transition: all 0.3s ease;
+    border-radius: 8px !important;
+    margin-bottom: 4px;
+    font-weight: 500;
+}
+
+.licensehub-sidebar .licensehub-nav-link:hover {
+    color: white !important;
+    background: rgba(147, 51, 234, 0.3) !important;
+    transform: translateX(4px);
+}
+
+.licensehub-sidebar .licensehub-nav-link.active {
+    color: white !important;
+    background: rgba(147, 51, 234, 0.4) !important;
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(147, 51, 234, 0.3);
+}
+
+.licensehub-sidebar .licensehub-sidebar-user {
+    background: rgba(0, 0, 0, 0.3) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+/* License Breakdown Purple Theme */
+.breakdown-item {
+    background: var(--card-background) !important;
+    border-color: var(--border-color) !important;
+}
+
+.breakdown-item:hover {
+    background: var(--card-background-hover) !important;
+    border-color: var(--accent-primary) !important;
+}
+
+.breakdown-item::before {
+    background: var(--accent-primary) !important;
+}
+
+.edit-section .section-content {
+    background: linear-gradient(135deg, var(--card-background) 0%, var(--background-secondary) 100%) !important;
+    border-color: var(--border-color) !important;
+}
+
+.tier-breakdown {
+    border-top-color: var(--border-color) !important;
+}
+
+.tier-breakdown::before {
+    background: var(--accent-primary) !important;
+}
+
+.tier-breakdown h6::before {
+    background: var(--accent-primary) !important;
+}
+
+.stats-card {
+    background: var(--card-background) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* Buttons */
+.btn-primary {
+    background: var(--btn-primary-bg) !important;
+    border-color: var(--btn-primary-border) !important;
+    color: var(--text-inverse) !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background: var(--btn-primary-hover) !important;
+    border-color: var(--btn-primary-hover) !important;
+    color: var(--text-inverse) !important;
+}
+
+.btn-outline-primary {
+    color: var(--accent-primary) !important;
+    border-color: var(--accent-primary) !important;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+    background: var(--accent-primary) !important;
+    border-color: var(--accent-primary) !important;
+    color: var(--text-inverse) !important;
+}
+
+/* Forms */
+.form-control {
+    background: var(--input-bg) !important;
+    border-color: var(--input-border) !important;
+    color: var(--text-primary) !important;
+}
+
+.form-control:focus {
+    border-color: var(--input-focus) !important;
+    box-shadow: 0 0 0 0.2rem rgba(124, 58, 237, 0.25) !important;
+}
+
+/* Tables */
+.table {
+    background: var(--table-bg) !important;
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) > td {
+    background: var(--table-stripe) !important;
+}
+
+.table-hover > tbody > tr:hover > td {
+    background: var(--table-hover) !important;
+}
+
+/* Badges */
+.badge.bg-success {
+    background: var(--success-color) !important;
+}
+
+.badge.bg-primary {
+    background: var(--accent-primary) !important;
+}
+
+/* Theme-specific accents */
+.text-primary {
+    color: var(--accent-primary) !important;
+}
+
+.bg-primary {
+    background: var(--accent-primary) !important;
+}
+
+.border-primary {
+    border-color: var(--accent-primary) !important;
+}
+
+/* Status indicators with purple theme */
+.stats-card-success {
+    border-left-color: var(--success-color) !important;
+}
+
+.stats-card-success .stats-icon {
+    background: var(--success-light) !important;
+}
+
+.stats-card-success .stats-icon i {
+    color: var(--success-color) !important;
+}
+
+/* Purple-specific status indicators */
+.stats-card-primary {
+    border-left-color: var(--accent-primary) !important;
+}
+
+.stats-card-primary .stats-icon {
+    background: var(--background-accent) !important;
+}
+
+.stats-card-primary .stats-icon i {
+    color: var(--accent-primary) !important;
+}
+
+/* Animation and transitions */
+* {
+    transition: all var(--animation-speed) var(--animation-curve) !important;
+}
+
+/* Purple theme specific animations */
+@keyframes purplePulse {
+    0%, 100% { 
+        box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.4); 
+    }
+    50% { 
+        box-shadow: 0 0 0 10px rgba(124, 58, 237, 0); 
+    }
+}
+
+.btn-primary:focus {
+    animation: purplePulse 1.5s infinite;
+}
+
+/* Purple theme gradient animations */
+@keyframes purpleShimmer {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+}
+
+.card:hover {
+    background: linear-gradient(90deg, var(--card-background) 25%, var(--background-accent) 50%, var(--card-background) 75%);
+    background-size: 200% 100%;
+    animation: purpleShimmer 2s ease-in-out;
+}
+
+/* Custom purple theme components */
+.royal-accent {
+    color: var(--royal-purple) !important;
+}
+
+.amethyst-bg {
+    background: var(--amethyst) !important;
+}
+
+.lavender-bg {
+    background: var(--lavender) !important;
+}
+
+.lilac-bg {
+    background: var(--lilac-light) !important;
+}
+
+/* Purple theme specific shadows */
+.card-shadow-purple {
+    box-shadow: 0 4px 6px -1px rgba(124, 58, 237, 0.1), 0 2px 4px -1px rgba(124, 58, 237, 0.06);
+}
+
+.card-shadow-purple:hover {
+    box-shadow: var(--hover-shadow);
+}
+
+/* Purple theme alerts */
+.alert-purple {
+    background: var(--background-accent) !important;
+    border-color: var(--border-strong) !important;
+    color: var(--accent-primary) !important;
+}
+
+/* Purple theme progress bars */
+.progress-purple .progress-bar {
+    background: linear-gradient(45deg, var(--accent-primary), var(--accent-secondary)) !important;
+}
+
+/* Sidebar enhancements for purple theme */
+.sidebar-purple {
+    background: var(--gradient-secondary) !important;
+    border-right: 2px solid var(--border-color) !important;
+}
+
+.sidebar-purple .nav-link {
+    color: var(--text-primary) !important;
+    border-radius: 0.5rem;
+    margin: 0.25rem 0.5rem;
+}
+
+.sidebar-purple .nav-link:hover {
+    background: var(--background-accent) !important;
+    color: var(--accent-primary) !important;
+}
+
+.sidebar-purple .nav-link.active {
+    background: var(--accent-primary) !important;
+    color: var(--text-inverse) !important;
+}

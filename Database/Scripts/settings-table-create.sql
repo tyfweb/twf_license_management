@@ -146,17 +146,29 @@ INSERT INTO public.settings (
  TRUE, TRUE, FALSE, 'license,activations,limit', 'System'),
 
 -- UI Settings
-('w3x4y5z6-a7b8-9012-3456-cdef01234567', 'UI', 'DefaultTheme', 'light', 'light', 'string', 
- 'Default Theme', 'Default UI theme for new users', 'Appearance', 1, 
+('w3x4y5z6-a7b8-9012-3456-cdef01234567', 'UI', 'CurrentTheme', 'default', 'default', 'string', 
+ 'Current Theme', 'Currently active UI theme for the application', 'Appearance', 1, 
  TRUE, FALSE, FALSE, 'ui,theme,appearance', 'System'),
 
 ('x4y5z6a7-b8c9-0123-4567-def012345678', 'UI', 'ItemsPerPage', '25', '25', 'int', 
  'Items per Page', 'Default number of items to display per page in lists', 'Pagination', 2, 
  TRUE, FALSE, FALSE, 'ui,pagination,items', 'System'),
 
-('y5z6a7b8-c9d0-1234-5678-ef0123456789', 'UI', 'EnableDarkMode', 'true', 'true', 'bool', 
- 'Enable Dark Mode', 'Whether dark mode option is available to users', 'Appearance', 3, 
- TRUE, FALSE, FALSE, 'ui,dark,mode', 'System'),
+('y5z6a7b8-c9d0-1234-5678-ef0123456789', 'UI', 'AvailableThemes', 'default,dark,blue,green,purple', 'default,dark,blue,green,purple', 'string', 
+ 'Available Themes', 'Comma-separated list of available themes for users to choose from', 'Appearance', 3, 
+ TRUE, FALSE, FALSE, 'ui,themes,available', 'System'),
+
+('z5a6b7c8-d9e0-3456-7890-123456789abc', 'UI', 'ThemeAutoDetect', 'false', 'false', 'bool', 
+ 'Auto-Detect System Theme', 'Whether to automatically detect and use system dark/light mode preference', 'Appearance', 4, 
+ TRUE, FALSE, FALSE, 'ui,theme,auto,detect', 'System'),
+
+('a6b7c8d9-e0f1-4567-8901-23456789abcd', 'UI', 'AllowThemeCustomization', 'true', 'true', 'bool', 
+ 'Allow Theme Customization', 'Whether administrators can customize and create new themes', 'Appearance', 5, 
+ TRUE, FALSE, FALSE, 'ui,theme,custom,admin', 'System'),
+
+('b7c8d9e0-f1g2-5678-9012-3456789abcde', 'UI', 'ThemeTransitionDuration', '300', '300', 'int', 
+ 'Theme Transition Duration (ms)', 'Duration in milliseconds for theme transition animations', 'Appearance', 6, 
+ TRUE, FALSE, FALSE, 'ui,theme,transition,animation', 'System'),
 
 -- Notification Settings
 ('z6a7b8c9-d0e1-2345-6789-f012345678ab', 'Notification', 'EmailNotificationsEnabled', 'true', 'true', 'bool', 

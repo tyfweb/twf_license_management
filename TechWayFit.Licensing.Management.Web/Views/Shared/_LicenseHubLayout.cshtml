@@ -19,30 +19,8 @@
     <!-- LicenseHub Custom CSS -->
     <link rel="stylesheet" href="~/css/licensehub.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    
-    <!-- Custom CSS for Bootstrap Enhancement -->
+   
     <style>
-        /* Enhanced navigation styling */
-        .licensehub-nav-link {
-            color: rgba(255, 255, 255, 0.8) !important;
-            border-radius: 8px !important;
-            margin-bottom: 4px;
-            transition: all 0.3s ease;
-            font-weight: 500;
-        }
-        
-        .licensehub-nav-link:hover {
-            color: white !important;
-            background: rgba(255, 255, 255, 0.1) !important;
-            transform: translateX(4px);
-        }
-        
-        .licensehub-nav-link.active {
-            color: white !important;
-            background: rgba(255, 255, 255, 0.15) !important;
-            transform: translateX(4px);
-        }
-        
         /* Sidebar responsive enhancements */
         @@media (max-width: 767.98px) {
             .licensehub-sidebar {
@@ -54,15 +32,10 @@
                 transform: translateX(0);
             }
         }
-          /* Button hover effects */
-        .btn-outline-light:hover {
-            background: rgba(220, 38, 38, 0.2) !important;
-            border-color: rgba(220, 38, 38, 0.4) !important;
-            color: #fca5a5 !important;
-        }
     </style>
     
     @await RenderSectionAsync("Styles", required: false)
+    @await Component.InvokeAsync("ThemeLoader")
 </head>
 <body>
     <!-- Mobile Menu Toggle -->

@@ -1,0 +1,376 @@
+/* ===== GREEN THEME ===== */
+/* TechWayFit License Management - Nature Green Theme */
+
+:root {
+    /* Theme Identity */
+    --theme-name: 'green';
+    --theme-display-name: 'Nature Green';
+    --theme-mode: 'light';
+    
+    /* Green-centric Brand Colors */
+    --accent-primary: #047857;
+    --accent-secondary: #059669;
+    --accent-tertiary: #10b981;
+    
+    /* Extended Green Palette */
+    --primary-50: #f0fdf4;
+    --primary-100: #dcfce7;
+    --primary-200: #bbf7d0;
+    --primary-300: #86efac;
+    --primary-400: #4ade80;
+    --primary-500: #22c55e;
+    --primary-600: #16a34a;
+    --primary-700: #15803d;
+    --primary-800: #166534;
+    --primary-900: #14532d;
+    
+    /* Green-tinted Backgrounds */
+    --background-primary: #ffffff;
+    --background-secondary: #f0fdf4;
+    --background-tertiary: #ecfdf5;
+    --background-accent: #dcfce7;
+    
+    /* Card and Surface Colors */
+    --card-background: var(--background-primary);
+    --card-background-hover: var(--background-secondary);
+    --sidebar-background: linear-gradient(135deg, var(--background-secondary), var(--background-tertiary));
+    --header-background: linear-gradient(135deg, #047857, #059669);
+    --footer-background: var(--background-tertiary);
+    
+    /* Interactive Elements */
+    --hover-lift: 2px;
+    --hover-shadow: 0 10px 25px -5px rgba(4, 120, 87, 0.15), 0 10px 10px -5px rgba(5, 150, 105, 0.1);
+    --animation-speed: 0.25s;
+    --animation-curve: cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Green Theme Gradients */
+    --gradient-primary: linear-gradient(135deg, #047857, #059669);
+    --gradient-secondary: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+    --gradient-card: linear-gradient(135deg, var(--background-primary), var(--background-secondary));
+    --gradient-accent: linear-gradient(135deg, #dcfce7, #bbf7d0);
+    
+    /* Text Colors - Green Theme */
+    --text-primary: #0f172a;
+    --text-secondary: #374151;
+    --text-muted: #6b7280;
+    --text-inverse: #ffffff;
+    --text-accent: var(--accent-primary);
+    
+    /* Border and Shadow Colors */
+    --border-color: #d1fae5;
+    --border-strong: #a7f3d0;
+    --shadow-color: rgba(4, 120, 87, 0.1);
+    --divider-color: #bbf7d0;
+    
+    /* Status Colors - Green Theme Adjusted */
+    --success-color: #059669;
+    --success-light: #d1fae5;
+    --warning-color: #f59e0b;
+    --warning-light: #fef3c7;
+    --danger-color: #dc2626;
+    --danger-light: #fee2e2;
+    --info-color: #0ea5e9;
+    --info-light: #e0f2fe;
+    
+    /* Button Colors */
+    --btn-primary-bg: var(--accent-primary);
+    --btn-primary-hover: #065f46;
+    --btn-primary-border: var(--accent-primary);
+    --btn-secondary-bg: var(--background-secondary);
+    --btn-secondary-hover: var(--background-tertiary);
+    --btn-secondary-border: var(--border-strong);
+    
+    /* Form Elements */
+    --input-bg: var(--background-primary);
+    --input-border: var(--border-color);
+    --input-focus: var(--accent-primary);
+    --input-placeholder: var(--text-muted);
+    
+    /* Navigation Colors */
+    --nav-bg: var(--gradient-primary);
+    --nav-text: var(--text-inverse);
+    --nav-hover: rgba(255, 255, 255, 0.1);
+    --nav-active: rgba(255, 255, 255, 0.2);
+    
+    /* Table Colors */
+    --table-bg: var(--background-primary);
+    --table-stripe: var(--background-secondary);
+    --table-hover: var(--background-accent);
+    --table-border: var(--border-color);
+    
+    /* Modal and Overlay Colors */
+    --modal-bg: var(--background-primary);
+    --modal-header: var(--background-secondary);
+    --modal-overlay: rgba(0, 0, 0, 0.5);
+    
+    /* Custom Green Theme Variables */
+    --nature-accent: #22c55e;
+    --forest-green: #047857;
+    --mint-fresh: #86efac;
+    --sage-light: #bbf7d0;
+}
+
+/* ===== GREEN THEME COMPONENT OVERRIDES ===== */
+
+/* Navigation Bar */
+.navbar-dark {
+    background: var(--nav-bg) !important;
+}
+
+.navbar-dark .navbar-brand,
+.navbar-dark .navbar-nav .nav-link {
+    color: var(--nav-text) !important;
+}
+
+.navbar-dark .navbar-nav .nav-link:hover {
+    color: var(--nav-text) !important;
+    background: var(--nav-hover);
+    border-radius: 0.375rem;
+}
+
+/* Cards */
+body {
+    background-color: var(--background-secondary) !important;
+}
+
+.card,
+.stats-card,
+.product-card,
+.consumer-card {
+    background: var(--card-background) !important;
+    border-color: var(--border-color) !important;
+}
+
+.card:hover,
+.stats-card:hover,
+.product-card:hover,
+.consumer-card:hover {
+    background: var(--card-background-hover) !important;
+    transform: translateY(calc(-1 * var(--hover-lift)));
+    box-shadow: var(--hover-shadow);
+}
+
+/* Headers and Sections */
+.section-header {
+    background: var(--background-secondary) !important;
+    border-color: var(--border-color) !important;
+}
+
+.sidebar-section {
+    background: var(--sidebar-background) !important;
+    border-color: var(--border-color) !important;
+    box-shadow: 0 2px 8px rgba(4, 120, 87, 0.08) !important;
+    transition: all 0.3s ease !important;
+}
+
+.sidebar-section:hover {
+    background: var(--card-background-hover) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: var(--hover-shadow) !important;
+}
+
+.sidebar-section-title {
+    background: linear-gradient(135deg, var(--background-secondary), var(--background-tertiary)) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+
+.sidebar-section-content {
+    background: transparent !important;
+}
+
+/* LicenseHub Sidebar Styles */
+.licensehub-sidebar {
+    background: linear-gradient(135deg, #064e3b, #047857) !important;
+    box-shadow: 2px 0 15px rgba(4, 120, 87, 0.3);
+}
+
+.licensehub-sidebar .licensehub-sidebar-brand {
+    background: rgba(0, 0, 0, 0.3) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.licensehub-sidebar .licensehub-nav-link {
+    color: rgba(255, 255, 255, 0.9) !important;
+    transition: all 0.3s ease;
+    border-radius: 8px !important;
+    margin-bottom: 4px;
+    font-weight: 500;
+}
+
+.licensehub-sidebar .licensehub-nav-link:hover {
+    color: white !important;
+    background: rgba(34, 197, 94, 0.3) !important;
+    transform: translateX(4px);
+}
+
+.licensehub-sidebar .licensehub-nav-link.active {
+    color: white !important;
+    background: rgba(34, 197, 94, 0.4) !important;
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
+}
+
+.licensehub-sidebar .licensehub-sidebar-user {
+    background: rgba(0, 0, 0, 0.3) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+/* License Breakdown Green Theme */
+.breakdown-item {
+    background: var(--card-background) !important;
+    border-color: var(--border-color) !important;
+}
+
+.breakdown-item:hover {
+    background: var(--card-background-hover) !important;
+    border-color: var(--accent-primary) !important;
+}
+
+.breakdown-item::before {
+    background: var(--accent-primary) !important;
+}
+
+.edit-section .section-content {
+    background: linear-gradient(135deg, var(--card-background) 0%, var(--background-secondary) 100%) !important;
+    border-color: var(--border-color) !important;
+}
+
+.tier-breakdown {
+    border-top-color: var(--border-color) !important;
+}
+
+.tier-breakdown::before {
+    background: var(--accent-primary) !important;
+}
+
+.tier-breakdown h6::before {
+    background: var(--accent-primary) !important;
+}
+
+.stats-card {
+    background: var(--card-background) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* Buttons */
+.btn-primary {
+    background: var(--btn-primary-bg) !important;
+    border-color: var(--btn-primary-border) !important;
+    color: var(--text-inverse) !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background: var(--btn-primary-hover) !important;
+    border-color: var(--btn-primary-hover) !important;
+    color: var(--text-inverse) !important;
+}
+
+.btn-outline-primary {
+    color: var(--accent-primary) !important;
+    border-color: var(--accent-primary) !important;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+    background: var(--accent-primary) !important;
+    border-color: var(--accent-primary) !important;
+    color: var(--text-inverse) !important;
+}
+
+/* Forms */
+.form-control {
+    background: var(--input-bg) !important;
+    border-color: var(--input-border) !important;
+    color: var(--text-primary) !important;
+}
+
+.form-control:focus {
+    border-color: var(--input-focus) !important;
+    box-shadow: 0 0 0 0.2rem rgba(4, 120, 87, 0.25) !important;
+}
+
+/* Tables */
+.table {
+    background: var(--table-bg) !important;
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) > td {
+    background: var(--table-stripe) !important;
+}
+
+.table-hover > tbody > tr:hover > td {
+    background: var(--table-hover) !important;
+}
+
+/* Badges */
+.badge.bg-success {
+    background: var(--success-color) !important;
+}
+
+.badge.bg-primary {
+    background: var(--accent-primary) !important;
+}
+
+/* Theme-specific accents */
+.text-primary {
+    color: var(--accent-primary) !important;
+}
+
+.bg-primary {
+    background: var(--accent-primary) !important;
+}
+
+.border-primary {
+    border-color: var(--accent-primary) !important;
+}
+
+/* Status indicators with green theme */
+.stats-card-success {
+    border-left-color: var(--success-color) !important;
+}
+
+.stats-card-success .stats-icon {
+    background: var(--success-light) !important;
+}
+
+.stats-card-success .stats-icon i {
+    color: var(--success-color) !important;
+}
+
+/* Animation and transitions */
+* {
+    transition: all var(--animation-speed) var(--animation-curve) !important;
+}
+
+/* Green theme specific animations */
+@keyframes greenPulse {
+    0%, 100% { 
+        box-shadow: 0 0 0 0 rgba(4, 120, 87, 0.4); 
+    }
+    50% { 
+        box-shadow: 0 0 0 10px rgba(4, 120, 87, 0); 
+    }
+}
+
+.btn-primary:focus {
+    animation: greenPulse 1.5s infinite;
+}
+
+/* Custom green theme components */
+.nature-accent {
+    color: var(--nature-accent) !important;
+}
+
+.forest-bg {
+    background: var(--forest-green) !important;
+}
+
+.mint-bg {
+    background: var(--mint-fresh) !important;
+}
+
+.sage-bg {
+    background: var(--sage-light) !important;
+}

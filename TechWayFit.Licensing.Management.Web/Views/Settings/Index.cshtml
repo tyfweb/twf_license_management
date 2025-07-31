@@ -118,30 +118,127 @@
         </div>
     </div>
 
+    <!-- Theme Selector Section -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <h5><i class="fas fa-palette me-2"></i>Application Theme</h5>
+                </div>
+                <div class="section-content">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="theme-selector-container">
+                                <label class="form-label">Select Theme</label>
+                                <div class="theme-options d-flex gap-3 flex-wrap">
+                                    <div class="theme-option" data-theme="default">
+                                        <div class="theme-preview theme-preview-default">
+                                            <div class="theme-preview-header"></div>
+                                            <div class="theme-preview-content">
+                                                <div class="theme-preview-text"></div>
+                                                <div class="theme-preview-button"></div>
+                                            </div>
+                                        </div>
+                                        <span class="theme-label">Default</span>
+                                    </div>
+                                    <div class="theme-option" data-theme="dark">
+                                        <div class="theme-preview theme-preview-dark">
+                                            <div class="theme-preview-header"></div>
+                                            <div class="theme-preview-content">
+                                                <div class="theme-preview-text"></div>
+                                                <div class="theme-preview-button"></div>
+                                            </div>
+                                        </div>
+                                        <span class="theme-label">Dark</span>
+                                    </div>
+                                    <div class="theme-option" data-theme="blue">
+                                        <div class="theme-preview theme-preview-blue">
+                                            <div class="theme-preview-header"></div>
+                                            <div class="theme-preview-content">
+                                                <div class="theme-preview-text"></div>
+                                                <div class="theme-preview-button"></div>
+                                            </div>
+                                        </div>
+                                        <span class="theme-label">Blue</span>
+                                    </div>
+                                    <div class="theme-option" data-theme="green">
+                                        <div class="theme-preview theme-preview-green">
+                                            <div class="theme-preview-header"></div>
+                                            <div class="theme-preview-content">
+                                                <div class="theme-preview-text"></div>
+                                                <div class="theme-preview-button"></div>
+                                            </div>
+                                        </div>
+                                        <span class="theme-label">Green</span>
+                                    </div>
+                                    <div class="theme-option" data-theme="purple">
+                                        <div class="theme-preview theme-preview-purple">
+                                            <div class="theme-preview-header"></div>
+                                            <div class="theme-preview-content">
+                                                <div class="theme-preview-text"></div>
+                                                <div class="theme-preview-button"></div>
+                                            </div>
+                                        </div>
+                                        <span class="theme-label">Purple</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="theme-settings">
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="themeAutoDetect">
+                                        <label class="form-check-label" for="themeAutoDetect">
+                                            Auto-detect theme based on system preference
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="themeTransitionDuration" class="form-label">Transition Duration</label>
+                                    <div class="input-group">
+                                        <input type="range" class="form-range" id="themeTransitionDuration" min="0" max="1000" step="50" value="200">
+                                        <span class="input-group-text" id="transitionValue">200ms</span>
+                                    </div>
+                                </div>
+                                <div class="theme-actions">
+                                    <button type="button" class="btn btn-primary btn-sm" id="applyThemeBtn">
+                                        <i class="fas fa-check me-1"></i>Apply Theme
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" id="resetThemeBtn">
+                                        <i class="fas fa-undo me-1"></i>Reset to Default
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Search and Filter Section -->
     <div class="row g-2 mb-3">
         <div class="col-12">
             <div class="search-section">
-                <div class="d-flex gap-2 align-items-end">
+                <div class="d-flex flex-wrap align-items-center gap-3">
                     <div class="flex-grow-1">
                         <div class="search-box">
                             <i class="fas fa-search search-icon"></i>
                             <input type="text" class="form-control" id="searchInput" placeholder="Search settings by name, description, or key...">
                         </div>
                     </div>
-                    <div class="search-actions">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="form-check mb-0">
+                            <input class="form-check-input" type="checkbox" id="showModifiedOnly">
+                            <label class="form-check-label text-nowrap" for="showModifiedOnly">
+                                Show modified only
+                            </label>
+                        </div>
                         <button type="button" class="btn btn-primary" id="searchBtn">
                             <i class="fas fa-search me-1"></i>Search
                         </button>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="showModifiedOnly">
-                        <label class="form-check-label" for="showModifiedOnly">
-                            Show modified only
-                        </label>
-                    </div>
-                    <div class="filter-button">
-                        <button type="button" class="btn btn-outline-primary" id="clearFiltersBtn">
+                        <button type="button" class="btn btn-outline-secondary" id="clearFiltersBtn">
                             <i class="fas fa-times me-1"></i>Clear
                         </button>
                     </div>
@@ -157,14 +254,6 @@
                 <div class="section-header">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5><i class="fas fa-cogs me-2"></i>Settings Management</h5>
-                        <div class="btn-group" role="group" aria-label="View toggle">
-                            <button type="button" class="btn btn-outline-secondary btn-sm active" id="gridViewBtn" onclick="switchView('grid')">
-                                <i class="fas fa-th-large me-1"></i>Grid
-                            </button>
-                            <button type="button" class="btn btn-outline-secondary btn-sm" id="listViewBtn" onclick="switchView('list')">
-                                <i class="fas fa-list me-1"></i>List
-                            </button>
-                        </div>
                     </div>
                 </div>
                 
@@ -194,111 +283,8 @@
                     <!-- Alerts -->
                     <div id="alertContainer"></div>
 
-                    <!-- Grid View -->
-                    <div id="gridView" class="settings-grid">
-                        @foreach (var categoryGroup in Model.SettingsGrouped.OrderBy(g => g.Key))
-                        {
-                            <div class="settings-category-section" data-category="@categoryGroup.Key">
-                                <h6 class="category-header">
-                                    <i class="fas fa-folder me-2"></i>@categoryGroup.Key
-                                    @if (Model.GetCategoryModifiedCount(categoryGroup.Key) > 0)
-                                    {
-                                        <span class="badge bg-warning ms-2">@Model.GetCategoryModifiedCount(categoryGroup.Key) modified</span>
-                                    }
-                                </h6>
-                                <div class="row g-3">
-                                    @foreach (var setting in categoryGroup.Value.OrderBy(s => s.SortOrder))
-                                    {
-                                        <div class="col-md-6 col-lg-4">
-                                            <div class="product-card @(setting.IsModified ? "setting-modified" : "") @(setting.IsReadOnly ? "setting-readonly" : "")" 
-                                                 data-setting-id="@setting.SettingId" 
-                                                 data-search-text="@($"{setting.DisplayName} {setting.Description} {setting.Category} {setting.Key}".ToLower())">
-                                                <div class="product-card-header">
-                                                    <div class="product-info">
-                                                        <h6 class="product-name">
-                                                            @setting.DisplayName
-                                                            @if (setting.IsRequired)
-                                                            {
-                                                                <span class="text-danger">*</span>
-                                                            }
-                                                            @if (setting.IsModified)
-                                                            {
-                                                                <i class="fas fa-circle text-warning ms-1" title="Modified from default"></i>
-                                                            }
-                                                        </h6>
-                                                    </div>
-                                                    <span class="badge bg-info">@setting.DataType</span>
-                                                </div>
-                                                <div class="product-card-body">
-                                                    @if (!string.IsNullOrEmpty(setting.Description))
-                                                    {
-                                                        <div class="product-detail">
-                                                            <small class="text-muted">@setting.Description</small>
-                                                        </div>
-                                                    }
-                                                    <div class="product-detail">
-                                                        @if (setting.DataType.ToLower() == "boolean" || setting.DataType.ToLower() == "bool")
-                                                        {
-                                                            <div class="form-check form-switch">
-                                                                <input type="checkbox" 
-                                                                       class="form-check-input setting-input" 
-                                                                       id="setting_@setting.SettingId"
-                                                                       data-setting-id="@setting.SettingId"
-                                                                       data-original="@setting.Value"
-                                                                       @(string.Equals(setting.Value, "true", StringComparison.OrdinalIgnoreCase) ? "checked" : "")
-                                                                       @(setting.IsReadOnly ? "disabled" : "") />
-                                                                <label class="form-check-label" for="setting_@setting.SettingId">
-                                                                    @(string.Equals(setting.Value, "true", StringComparison.OrdinalIgnoreCase) ? "Enabled" : "Disabled")
-                                                                </label>
-                                                            </div>
-                                                        }
-                                                        else if (setting.InputType == "textarea")
-                                                        {
-                                                            <textarea class="form-control setting-input" 
-                                                                      rows="3"
-                                                                      data-setting-id="@setting.SettingId"
-                                                                      data-original="@setting.Value"
-                                                                      @(setting.IsReadOnly ? "readonly" : "")
-                                                                      placeholder="@setting.DefaultValue">@setting.Value</textarea>
-                                                        }
-                                                        else
-                                                        {
-                                                            <input type="@setting.InputType" 
-                                                                   class="form-control setting-input" 
-                                                                   data-setting-id="@setting.SettingId"
-                                                                   data-original="@setting.Value"
-                                                                   value="@setting.Value"
-                                                                   @(setting.IsReadOnly ? "readonly" : "")
-                                                                   placeholder="@setting.DefaultValue" />
-                                                        }
-                                                    </div>
-                                                    <div class="product-detail">
-                                                        <small class="text-muted">Key: @setting.Key</small>
-                                                    </div>
-                                                </div>
-                                                <div class="product-card-actions">
-                                                    <div class="btn-group w-100" role="group">
-                                                        <button type="button" class="btn btn-sm btn-success save-setting-btn" style="display: none;" onclick="saveSetting('@setting.SettingId', this)">
-                                                            <i class="fas fa-check"></i>
-                                                        </button>
-                                                        <button type="button" class="btn btn-sm btn-secondary cancel-setting-btn" style="display: none;" onclick="cancelSetting('@setting.SettingId', this)">
-                                                            <i class="fas fa-times"></i>
-                                                        </button>
-                                                        <button type="button" class="btn btn-sm btn-outline-warning" onclick="resetSetting('@setting.SettingId', this)" title="Reset to default">
-                                                            <i class="fas fa-undo"></i>&nbsp;Reset to Default
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    }
-                                </div>
-                            </div>
-                        }
-                    </div>
-
                     <!-- List View -->
-                    <div id="listView" class="d-none">
+                    <div id="listView">
                         <div class="table-responsive">
                             <table class="table table-hover">
                                 <thead class="table-light">
@@ -400,26 +386,109 @@
                                 <div class="configuration-display">
                                     @foreach (var configGroup in Model.ConfigurationSettings)
                                     {
-                                        <div class="config-group mb-3">
-                                            <h6>@configGroup.Key</h6>
-                                            <div class="config-content">
-                                                @if (configGroup.Value is IDictionary<string, object> dict)
-                                                {
-                                                    <details>
-                                                        <summary>@dict.Count items</summary>
-                                                        @foreach (var item in dict)
+                                        <div class="config-group mb-4">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h6 class="mb-0">
+                                                        <i class="fas fa-cog me-2"></i>@configGroup.Key
+                                                    </h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    @{
+                                                        string configJson = "";
+                                                        try
                                                         {
-                                                            <div class="config-item">
-                                                                <span class="config-key">@item.Key:</span>
-                                                                <span class="config-value">@item.Value</span>
-                                                            </div>
+                                                            configJson = System.Text.Json.JsonSerializer.Serialize(configGroup.Value, new System.Text.Json.JsonSerializerOptions 
+                                                            { 
+                                                                WriteIndented = true,
+                                                                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                                                            });
                                                         }
-                                                    </details>
-                                                }
-                                                else
-                                                {
-                                                    <span>@configGroup.Value?.ToString()</span>
-                                                }
+                                                        catch
+                                                        {
+                                                            configJson = configGroup.Value?.ToString() ?? "null";
+                                                        }
+                                                    }
+                                                    
+                                                    @if (configGroup.Value is IDictionary<string, object> dict && dict.Any())
+                                                    {
+                                                        <div class="config-items">
+                                                            @foreach (var item in dict)
+                                                            {
+                                                                <div class="config-item mb-2">
+                                                                    <div class="row">
+                                                                        <div class="col-md-3">
+                                                                            <strong class="config-key">@item.Key:</strong>
+                                                                        </div>
+                                                                        <div class="col-md-9">
+                                                                            <span class="config-value">
+                                                                                @if (item.Value is IDictionary<string, object> nestedDict)
+                                                                                {
+                                                                                    <details class="nested-config">
+                                                                                        <summary>@nestedDict.Count nested items</summary>
+                                                                                        <div class="nested-config-content ms-3 mt-2">
+                                                                                            @foreach (var nested in nestedDict)
+                                                                                            {
+                                                                                                <div class="mb-1">
+                                                                                                    <span class="text-muted">@nested.Key:</span>
+                                                                                                    <span class="ms-2">@(nested.Value?.ToString() ?? "null")</span>
+                                                                                                </div>
+                                                                                            }
+                                                                                        </div>
+                                                                                    </details>
+                                                                                }
+                                                                                else if (item.Value is System.Collections.IEnumerable enumerable && !(item.Value is string))
+                                                                                {
+                                                                                    <div class="config-array">
+                                                                                        @{
+                                                                                            var items = enumerable.Cast<object>().ToList();
+                                                                                        }
+                                                                                        @if (items.Count > 0)
+                                                                                        {
+                                                                                            <span class="badge bg-info">@items.Count items</span>
+                                                                                            <ul class="list-unstyled mt-1 ms-3">
+                                                                                                @foreach (var arrayItem in items.Take(5))
+                                                                                                {
+                                                                                                    <li><small>• @(arrayItem?.ToString() ?? "null")</small></li>
+                                                                                                }
+                                                                                                @if (items.Count > 5)
+                                                                                                {
+                                                                                                    <li><small>... and @(items.Count - 5) more</small></li>
+                                                                                                }
+                                                                                            </ul>
+                                                                                        }
+                                                                                        else
+                                                                                        {
+                                                                                            <span class="text-muted">Empty array</span>
+                                                                                        }
+                                                                                    </div>
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    <code class="config-simple-value">@(item.Value?.ToString() ?? "null")</code>
+                                                                                }
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="config-simple">
+                                                            <code class="config-simple-value">@(configGroup.Value?.ToString() ?? "null")</code>
+                                                        </div>
+                                                    }
+                                                    
+                                                    <!-- Raw JSON view -->
+                                                    <div class="mt-3">
+                                                        <details>
+                                                            <summary class="text-muted"><small>View Raw JSON</small></summary>
+                                                            <pre class="mt-2 p-2 bg-light border rounded"><code>@configJson</code></pre>
+                                                        </details>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     }
@@ -445,7 +514,7 @@
         // Global variables
         let modifiedSettings = new Set();
         let originalValues = new Map();
-        let currentView = 'grid';
+        let currentView = 'list';
         let currentCategory = 'all';
 
         // Ensure jQuery is loaded before proceeding
@@ -466,9 +535,12 @@
                 originalValues.set(settingId, value);
             });
 
-            // Initialize view based on saved preference
-            const savedView = localStorage.getItem('settingsViewType') || 'grid';
-            switchView(savedView);
+            // Initialize view based on saved preference (always list now)
+            const savedView = 'list';
+            // Remove any old preferences
+            localStorage.removeItem('settingsViewType');
+            // Initialize the list view
+            switchView('list');
 
             // Bind setting input change events
             $(document).on('input change', '.setting-input', function() {
@@ -509,30 +581,16 @@
         // Start initialization
         initializeSettings();
 
-        // View switching functionality
+        // View switching functionality (simplified for list-only)
         function switchView(view) {
-            currentView = view;
-            const gridView = document.getElementById('gridView');
+            currentView = 'list';
             const listView = document.getElementById('listView');
-            const gridBtn = document.getElementById('gridViewBtn');
-            const listBtn = document.getElementById('listViewBtn');
-
-            if (view === 'grid') {
-                gridView.classList.remove('d-none');
-                listView.classList.add('d-none');
-                gridBtn.classList.add('active');
-                listBtn.classList.remove('active');
-                localStorage.setItem('settingsViewType', 'grid');
-            } else {
-                gridView.classList.add('d-none');
+            if (listView) {
                 listView.classList.remove('d-none');
-                gridBtn.classList.remove('active');
-                listBtn.classList.add('active');
-                localStorage.setItem('settingsViewType', 'list');
             }
         }
 
-        // Category switching
+        // Category switching (updated for list view and config section)
         function showCategory(category, button) {
             currentCategory = category;
             
@@ -540,60 +598,44 @@
             document.querySelectorAll('.category-navigation .btn').forEach(btn => btn.classList.remove('active'));
             button.classList.add('active');
             
-            // Show/hide categories
-            const categoryElements = document.querySelectorAll('.settings-category-section');
-            categoryElements.forEach(element => {
-                const elementCategory = $(element).data('category');
+            // Handle table rows
+            const rows = document.querySelectorAll('.setting-row');
+            rows.forEach(row => {
+                const rowCategory = row.getAttribute('data-category');
                 if (category === 'all') {
-                    element.style.display = 'block';
+                    row.style.display = 'table-row';
                 } else if (category === 'config') {
-                    element.style.display = elementCategory === 'config' ? 'block' : 'none';
+                    // Hide table rows when showing config section
+                    row.style.display = 'none';
                 } else {
-                    element.style.display = elementCategory === category ? 'block' : 'none';
+                    row.style.display = rowCategory === category ? 'table-row' : 'none';
                 }
             });
             
-            // Apply current filters
-            filterSettings(document.getElementById('searchInput').value);
-        }
-
-        // Search functionality
-        function filterSettings(searchTerm) {
-            const showModifiedOnly = document.getElementById('showModifiedOnly').checked;
+            // Handle configuration section and table visibility
+            const listView = document.getElementById('listView');
+            const configSection = document.querySelector('.settings-category-section[data-category="config"]');
             
-            if (currentView === 'grid') {
-                filterGridView(searchTerm, showModifiedOnly);
+            if (category === 'config') {
+                // Show config section, hide table
+                if (listView) listView.style.display = 'none';
+                if (configSection) configSection.style.display = 'block';
             } else {
-                filterListView(searchTerm, showModifiedOnly);
+                // Show table, hide config section  
+                if (listView) listView.style.display = 'block';
+                if (configSection) configSection.style.display = 'none';
+            }
+            
+            // Apply current filters (only for non-config categories)
+            if (category !== 'config') {
+                filterSettings(document.getElementById('searchInput').value);
             }
         }
 
-        function filterGridView(searchTerm, showModifiedOnly) {
-            let hasResults = false;
-            const cards = document.querySelectorAll('.product-card');
-            
-            cards.forEach(card => {
-                const searchText = $(card).data('search-text') || '';
-                const isModified = card.classList.contains('setting-modified');
-                const matchesSearch = searchTerm === '' || searchText.includes(searchTerm.toLowerCase());
-                const matchesFilter = !showModifiedOnly || isModified;
-                
-                const columnElement = card.closest('.col-md-6');
-                if (matchesSearch && matchesFilter) {
-                    columnElement.style.display = 'block';
-                    hasResults = true;
-                } else {
-                    columnElement.style.display = 'none';
-                }
-            });
-            
-            // Hide empty categories
-            document.querySelectorAll('.settings-category-section').forEach(section => {
-                const visibleCards = section.querySelectorAll('.col-md-6[style*="block"]').length;
-                section.style.display = visibleCards > 0 ? 'block' : 'none';
-            });
-            
-            document.getElementById('noResults').classList.toggle('d-none', hasResults);
+        // Search functionality (simplified for list view only)
+        function filterSettings(searchTerm) {
+            const showModifiedOnly = document.getElementById('showModifiedOnly').checked;
+            filterListView(searchTerm, showModifiedOnly);
         }
 
         function filterListView(searchTerm, showModifiedOnly) {
@@ -603,10 +645,13 @@
             rows.forEach(row => {
                 const searchText = $(row).data('search-text') || '';
                 const isModified = row.classList.contains('table-warning');
+                const rowCategory = row.getAttribute('data-category');
+                
                 const matchesSearch = searchTerm === '' || searchText.includes(searchTerm.toLowerCase());
                 const matchesFilter = !showModifiedOnly || isModified;
+                const matchesCategory = currentCategory === 'all' || rowCategory === currentCategory;
                 
-                if (matchesSearch && matchesFilter) {
+                if (matchesSearch && matchesFilter && matchesCategory) {
                     row.style.display = 'table-row';
                     hasResults = true;
                 } else {
@@ -624,6 +669,18 @@
         function clearFilters() {
             document.getElementById('searchInput').value = '';
             document.getElementById('showModifiedOnly').checked = false;
+            
+            // Reset category to 'all'
+            currentCategory = 'all';
+            document.querySelectorAll('.category-navigation .btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector('.category-navigation .btn[data-category="all"]').classList.add('active');
+            
+            // Show table, hide config section
+            const listView = document.getElementById('listView');
+            const configSection = document.querySelector('.settings-category-section[data-category="config"]');
+            if (listView) listView.style.display = 'block';
+            if (configSection) configSection.style.display = 'none';
+            
             filterSettings('');
         }
 
@@ -634,7 +691,7 @@
             const originalValue = originalValues.get(settingId);
             
             const isModified = currentValue !== originalValue;
-            const container = element.closest('.product-card, .setting-row');
+            const container = element.closest('.setting-row');
             
             if (isModified) {
                 modifiedSettings.add(settingId);
@@ -691,7 +748,7 @@
                         originalValues.set(settingId, value);
                         modifiedSettings.delete(settingId);
                         
-                        const container = input.closest('.product-card, .setting-row');
+                        const container = input.closest('.setting-row');
                         container.classList.remove('setting-modified', 'table-warning');
                         const saveBtn = container.querySelector('.save-setting-btn');
                         const cancelBtn = container.querySelector('.cancel-setting-btn');
@@ -728,7 +785,7 @@
             }
             
             modifiedSettings.delete(settingId);
-            const container = input.closest('.product-card, .setting-row');
+            const container = input.closest('.setting-row');
             container.classList.remove('setting-modified', 'table-warning');
             const saveBtn = container.querySelector('.save-setting-btn');
             const cancelBtn = container.querySelector('.cancel-setting-btn');
@@ -864,7 +921,7 @@
                     input.value = originalValue;
                 }
                 
-                const container = input.closest('.product-card, .setting-row');
+                const container = input.closest('.setting-row');
                 container.classList.remove('setting-modified', 'table-warning');
                 const saveBtn = container.querySelector('.save-setting-btn');
                 const cancelBtn = container.querySelector('.cancel-setting-btn');
@@ -1066,5 +1123,213 @@
                 actionButtons.style.display = 'block';
             }
         }
+
+
+        // Theme Management Functions
+        let currentTheme = 'default';
+        let availableThemes = ['default', 'dark', 'blue', 'green', 'purple'];
+
+        // Initialize theme selector
+        function initializeThemeSelector() {
+            // Load current theme settings
+            loadCurrentThemeSettings();
+            
+            // Bind theme option clicks
+            $('.theme-option').on('click', function() {
+                const selectedTheme = $(this).data('theme');
+                selectTheme(selectedTheme);
+            });
+
+            // Bind auto-detect toggle
+            $('#themeAutoDetect').on('change', function() {
+                const autoDetect = $(this).is(':checked');
+                setThemeAutoDetect(autoDetect);
+            });
+
+            // Bind transition duration slider
+            $('#themeTransitionDuration').on('input', function() {
+                const duration = $(this).val();
+                $('#transitionValue').text(duration + 'ms');
+                updateTransitionDuration(duration);
+            });
+
+            // Bind apply theme button
+            $('#applyThemeBtn').on('click', function() {
+                applyCurrentTheme();
+            });
+
+            // Bind reset theme button
+            $('#resetThemeBtn').on('click', function() {
+                resetThemeToDefault();
+            });
+        }
+
+        // Load current theme settings
+        function loadCurrentThemeSettings() {
+            $.ajax({
+                url: '@Url.Action("GetCurrentTheme", "Settings")',
+                type: 'GET',
+                success: function(response) {
+                    if (response.success) {
+                        currentTheme = response.theme || 'default';
+                        selectTheme(currentTheme, false);
+                        
+                        // Load other settings
+                        if (response.autoDetect !== undefined) {
+                            $('#themeAutoDetect').prop('checked', response.autoDetect);
+                        }
+                        
+                        if (response.transitionDuration !== undefined) {
+                            $('#themeTransitionDuration').val(response.transitionDuration);
+                            $('#transitionValue').text(response.transitionDuration + 'ms');
+                        }
+                    }
+                },
+                error: function() {
+                    console.warn('Failed to load current theme settings');
+                }
+            });
+        }
+
+        // Select a theme
+        function selectTheme(themeName, apply = true) {
+            // Update visual selection
+            $('.theme-option').removeClass('active');
+            $(`.theme-option[data-theme="${themeName}"]`).addClass('active');
+            
+            currentTheme = themeName;
+            
+            if (apply) {
+                previewTheme(themeName);
+            }
+        }
+
+        // Preview theme without saving
+        function previewTheme(themeName) {
+            const duration = $('#themeTransitionDuration').val() || 200;
+            
+            // Apply theme with transition
+            $('body').addClass('theme-transition');
+            $('*').css('transition-duration', duration + 'ms');
+            
+            // Load theme CSS
+            loadThemeCSS(themeName);
+            
+            // Remove transition class after duration
+            setTimeout(() => {
+                $('body').removeClass('theme-transition');
+                $('*').css('transition-duration', '');
+            }, parseInt(duration) + 100);
+        }
+
+        // Load theme CSS
+        function loadThemeCSS(themeName) {
+            // Remove existing theme stylesheets
+            $('link[data-theme]').remove();
+            
+            if (themeName !== 'default') {
+                // Add new theme stylesheet
+                const link = $('<link>');
+                link.attr({
+                    'rel': 'stylesheet',
+                    'type': 'text/css',
+                    'href': `@Url.Content("~/css/themes/")${themeName}.css`,
+                    'data-theme': themeName
+                });
+                $('head').append(link);
+            }
+        }
+
+        // Apply current theme (save to server)
+        function applyCurrentTheme() {
+            const button = $('#applyThemeBtn');
+            const originalText = button.html();
+            
+            button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i>Applying...');
+            
+            $.ajax({
+                url: '@Url.Action("SetCurrentTheme", "Settings")',
+                type: 'POST',
+                data: JSON.stringify({ theme: currentTheme }),
+                contentType: 'application/json',
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        showToast('Theme applied successfully', 'success');
+                        loadThemeCSS(currentTheme);
+                    } else {
+                        showToast(response.message || 'Failed to apply theme', 'error');
+                    }
+                },
+                error: function() {
+                    showToast('Failed to apply theme', 'error');
+                },
+                complete: function() {
+                    button.prop('disabled', false).html(originalText);
+                }
+            });
+        }
+
+        // Set theme auto-detect
+        function setThemeAutoDetect(autoDetect) {
+            $.ajax({
+                url: '@Url.Action("SetThemeAutoDetect", "Settings")',
+                type: 'POST',
+                data: JSON.stringify({ autoDetect: autoDetect }),
+                contentType: 'application/json',
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        if (autoDetect) {
+                            detectAndApplySystemTheme();
+                        }
+                    } else {
+                        showToast(response.message || 'Failed to update auto-detect setting', 'error');
+                        $('#themeAutoDetect').prop('checked', !autoDetect);
+                    }
+                },
+                error: function() {
+                    showToast('Failed to update auto-detect setting', 'error');
+                    $('#themeAutoDetect').prop('checked', !autoDetect);
+                }
+            });
+        }
+
+        // Detect system theme preference
+        function detectAndApplySystemTheme() {
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                selectTheme('dark');
+                applyCurrentTheme();
+            } else {
+                selectTheme('default');
+                applyCurrentTheme();
+            }
+        }
+
+        // Update transition duration
+        function updateTransitionDuration(duration) {
+            // This could be saved immediately or on apply
+            document.documentElement.style.setProperty('--theme-transition-duration', duration + 'ms');
+        }
+
+        // Reset theme to default
+        function resetThemeToDefault() {
+            selectTheme('default');
+            $('#themeAutoDetect').prop('checked', false);
+            $('#themeTransitionDuration').val(200);
+            $('#transitionValue').text('200ms');
+            
+            applyCurrentTheme();
+            showToast('Theme reset to default', 'info');
+        }
+
+        // Add theme selector initialization to the main initialization
+        $(document).ready(function() {
+            initializeThemeSelector();
+        });
     </script>
 }

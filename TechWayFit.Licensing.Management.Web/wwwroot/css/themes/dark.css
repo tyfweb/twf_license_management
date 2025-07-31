@@ -1,0 +1,301 @@
+/* ===== DARK THEME ===== */
+/* TechWayFit License Management - Dark Theme */
+
+:root {
+    /* Theme Identity */
+    --theme-name: 'dark';
+    --theme-display-name: 'Dark Mode';
+    --theme-mode: 'dark';
+    
+    /* Primary Brand Colors - Adjusted for dark mode */
+    --accent-primary: #60a5fa;
+    --accent-secondary: #a78bfa;
+    --accent-tertiary: #22d3ee;
+    
+    /* Extended Color Palette - Dark Mode */
+    --primary-50: #1e3a8a;
+    --primary-100: #1e40af;
+    --primary-200: #1d4ed8;
+    --primary-300: #2563eb;
+    --primary-400: #3b82f6;
+    --primary-500: #60a5fa;
+    --primary-600: #93c5fd;
+    --primary-700: #bfdbfe;
+    --primary-800: #dbeafe;
+    --primary-900: #eff6ff;
+    
+    /* Dark Background Layers */
+    --background-primary: #0f172a;
+    --background-secondary: #1e293b;
+    --background-tertiary: #334155;
+    --background-accent: #1e3a8a;
+    
+    /* Card and Surface Colors */
+    --card-background: #1e293b;
+    --card-background-hover: #334155;
+    --sidebar-background: linear-gradient(135deg, #0f172a, #1e293b);
+    --header-background: #1e293b;
+    --footer-background: #0f172a;
+    
+    /* Interactive Elements */
+    --hover-lift: 3px;
+    --hover-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+    --animation-speed: 0.3s;
+    --animation-curve: cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Dark Theme Gradients */
+    --gradient-primary: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    --gradient-secondary: linear-gradient(135deg, var(--background-secondary), var(--background-tertiary));
+    --gradient-card: linear-gradient(135deg, var(--card-background), var(--background-secondary));
+    --gradient-accent: linear-gradient(135deg, #1e3a8a, #1e40af);
+    
+    /* Status Colors - Dark Mode Adjusted */
+    --status-success: #34d399;
+    --status-success-bg: #064e3b;
+    --status-warning: #fbbf24;
+    --status-warning-bg: #78350f;
+    --status-danger: #f87171;
+    --status-danger-bg: #7f1d1d;
+    --status-info: #60a5fa;
+    --status-info-bg: #1e3a8a;
+    
+    /* Border and Shadow Variations */
+    --border-light-themed: rgba(96, 165, 250, 0.2);
+    --border-medium-themed: rgba(96, 165, 250, 0.3);
+    --shadow-themed: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+    --shadow-themed-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+    
+    /* Typography - Dark Mode */
+    --heading-color: #f1f5f9;
+    --text-primary-themed: #e2e8f0;
+    --text-secondary-themed: #94a3b8;
+    --text-accent: var(--accent-primary);
+    
+    /* Form Elements - Dark Mode */
+    --input-background: var(--background-secondary);
+    --input-border: #475569;
+    --input-border-focus: var(--accent-primary);
+    --input-background-focus: var(--background-accent);
+    
+    /* Navigation - Dark Mode */
+    --nav-active-background: var(--background-accent);
+    --nav-active-border: var(--accent-primary);
+    --nav-hover-background: var(--background-secondary);
+    
+    /* Special Effects - Dark Mode */
+    --background-pattern: radial-gradient(circle at 25% 25%, rgba(96, 165, 250, 0.05) 0%, transparent 50%);
+    --glass-effect: rgba(30, 41, 59, 0.8);
+    --backdrop-blur: blur(15px);
+    
+    /* Override light mode colors */
+    --white: #1e293b;
+    --black: #f1f5f9;
+    --gray-50: #334155;
+    --gray-100: #475569;
+    --gray-200: #64748b;
+    --gray-300: #94a3b8;
+    --gray-400: #cbd5e1;
+    --gray-500: #e2e8f0;
+    --gray-600: #f1f5f9;
+    --text-primary: #f1f5f9;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+    --border-color: #475569;
+    --border-light: #334155;
+}
+
+/* Dark theme-specific component overrides */
+.theme-dark {
+    /* Enhanced dark card styling */
+    .card, .sidebar-section, .form-section {
+        background: var(--card-background);
+        border: 1px solid var(--border-light-themed);
+        box-shadow: var(--shadow-themed);
+        backdrop-filter: var(--backdrop-blur);
+    }
+    
+    .card:hover, .sidebar-section:hover {
+        transform: translateY(calc(-1 * var(--hover-lift)));
+        box-shadow: var(--hover-shadow);
+        background: var(--card-background-hover);
+    }
+    
+    /* Enhanced dark button styling */
+    .btn-primary {
+        background: var(--gradient-primary);
+        border: none;
+        box-shadow: var(--shadow-themed);
+        color: var(--background-primary);
+    }
+    
+    .btn-outline-primary {
+        border-color: var(--accent-primary);
+        color: var(--accent-primary);
+        background: transparent;
+    }
+    
+    .btn-outline-primary:hover {
+        background: var(--accent-primary);
+        color: var(--background-primary);
+    }
+    
+    /* Dark form enhancements */
+    .form-control {
+        background: var(--input-background);
+        border-color: var(--input-border);
+        color: var(--text-primary-themed);
+    }
+    
+    .form-control:focus {
+        background: var(--input-background-focus);
+        border-color: var(--input-border-focus);
+        box-shadow: 0 0 0 0.2rem rgba(96, 165, 250, 0.2);
+        color: var(--text-primary-themed);
+    }
+    
+    .form-control::placeholder {
+        color: var(--text-secondary-themed);
+    }
+    
+    /* Dark navigation enhancements */
+    .nav-link.active {
+        background: var(--nav-active-background);
+        border-left: 3px solid var(--nav-active-border);
+        color: var(--text-primary-themed);
+    }
+    
+    /* Table styling for dark mode */
+    .table {
+        color: var(--text-primary-themed);
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: var(--background-secondary);
+        color: var(--text-primary-themed);
+    }
+    
+    /* Alert styling for dark mode */
+    .alert {
+        border-color: var(--border-light-themed);
+    }
+    
+    .alert-info {
+        background-color: var(--status-info-bg);
+        border-color: var(--status-info);
+        color: var(--status-info);
+    }
+    
+    .alert-warning {
+        background-color: var(--status-warning-bg);
+        border-color: var(--status-warning);
+        color: var(--status-warning);
+    }
+    
+    .alert-success {
+        background-color: var(--status-success-bg);
+        border-color: var(--status-success);
+        color: var(--status-success);
+    }
+    
+    .alert-danger {
+        background-color: var(--status-danger-bg);
+        border-color: var(--status-danger);
+        color: var(--status-danger);
+    }
+}
+
+/* Dark theme sidebar styling */
+.sidebar-section {
+    background: var(--sidebar-background) !important;
+    border-color: var(--border-color) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+    transition: all 0.3s ease !important;
+}
+
+.sidebar-section:hover {
+    background: var(--card-background-hover) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4) !important;
+}
+
+.sidebar-section-title {
+    background: linear-gradient(135deg, var(--background-secondary), var(--background-tertiary)) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+
+.sidebar-section-content {
+    background: transparent !important;
+}
+
+/* LicenseHub Sidebar Styles */
+.licensehub-sidebar {
+    background: linear-gradient(135deg, #0f172a, #1e293b) !important;
+    box-shadow: 2px 0 15px rgba(0, 0, 0, 0.5);
+}
+
+.licensehub-sidebar .licensehub-sidebar-brand {
+    background: rgba(0, 0, 0, 0.4) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.licensehub-sidebar .licensehub-nav-link {
+    color: rgba(255, 255, 255, 0.8) !important;
+    transition: all 0.3s ease;
+    border-radius: 8px !important;
+    margin-bottom: 4px;
+    font-weight: 500;
+}
+
+.licensehub-sidebar .licensehub-nav-link:hover {
+    color: white !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    transform: translateX(4px);
+}
+
+.licensehub-sidebar .licensehub-nav-link.active {
+    color: white !important;
+    background: rgba(255, 255, 255, 0.2) !important;
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1);
+}
+
+.licensehub-sidebar .licensehub-sidebar-user {
+    background: rgba(0, 0, 0, 0.4) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* License Breakdown Dark Theme */
+.breakdown-item {
+    background: var(--card-background) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+
+.breakdown-item:hover {
+    background: var(--card-background-hover) !important;
+    border-color: var(--accent-primary) !important;
+}
+
+.breakdown-label {
+    color: var(--text-primary) !important;
+}
+
+.edit-section .section-content {
+    background: var(--card-background) !important;
+    border-color: var(--border-color) !important;
+}
+
+.tier-breakdown {
+    border-top-color: var(--border-color) !important;
+}
+
+.tier-breakdown h6 {
+    color: var(--text-primary) !important;
+}
+
+.stats-card {
+    background: var(--card-background) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
