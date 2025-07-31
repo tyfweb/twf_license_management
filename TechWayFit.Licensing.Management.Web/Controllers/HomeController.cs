@@ -6,6 +6,7 @@ namespace TechWayFit.Licensing.WebUI.Controllers
     /// <summary>
     /// Home controller for basic navigation and system information
     /// </summary>
+[Authorize]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;

@@ -75,4 +75,11 @@ public interface IUserProfileRepository : IBaseRepository<UserProfileEntity>
     /// Unlocks a user account
     /// </summary>
     Task UnlockUserAsync(Guid userId, CancellationToken cancellationToken = default);
+    /// <summary>
+    /// Validates the user's password
+    /// </summary>
+    /// <param name="username"></param>
+    /// <param name="password"></param>
+    /// <returns></returns>
+    Task<bool> ValidatePasswordAsync(string username, string password);
 }

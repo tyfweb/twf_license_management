@@ -1,12 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.WebUI.ViewModels.User;
+using Microsoft.AspNetCore.Authorization;
 
 namespace TechWayFit.Licensing.WebUI.Controllers;
 
 /// <summary>
 /// Controller for user management operations
 /// </summary>
+[Authorize(Roles = "Administrator")]
 public class UserController : Controller
 {
     private readonly IUserService _userService;

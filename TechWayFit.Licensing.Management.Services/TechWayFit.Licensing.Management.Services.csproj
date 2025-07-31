@@ -13,8 +13,4 @@
     <ProjectReference Include="../TechWayFit.Licensing.Generator/TechWayFit.Licensing.Generator.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Implementations/" />
-  </ItemGroup>
-
 </Project>

@@ -26,6 +26,7 @@ using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Settings;
 using TechWayFit.Licensing.Management.Services.Implementations.User;
 using TechWayFit.Licensing.Infrastructure.Data.Repositories.Settings;
 using TechWayFit.Licensing.Infrastructure.Contracts.Repositories;
+using TechWayFit.Licensing.Management.Services.Implementations.Account;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,8 +51,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 builder.Services.AddAuthorization();
 
 // Register authentication service
-builder.Services.AddScoped<IAuthenticationService, SimpleAuthenticationService>();
-
+builder.Services.AddScoped<IAuthenticationService, AccountService>();
+builder.Services.AddScoped<AuthenticationManager>();
 // Add services to the container.
 builder.Services.AddControllersWithViews()
     .AddRazorOptions(options =>

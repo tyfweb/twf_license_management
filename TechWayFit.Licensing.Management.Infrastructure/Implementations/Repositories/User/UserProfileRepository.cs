@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using System.Text;
 using Microsoft.EntityFrameworkCore;
 using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.User;
 using TechWayFit.Licensing.Infrastructure.Data.Context;
@@ -46,7 +48,7 @@ public class UserProfileRepository : BaseRepository<UserProfileEntity>, IUserPro
         return await _dbSet
             .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role)
-            .Where(u => u.IsActive && !u.IsDeleted && 
+            .Where(u => u.IsActive && !u.IsDeleted &&
                        u.UserRoles.Any(ur => ur.Role.RoleName == roleName && ur.IsActive))
             .OrderBy(u => u.FullName)
             .ToListAsync(cancellationToken);
@@ -71,7 +73,7 @@ public class UserProfileRepository : BaseRepository<UserProfileEntity>, IUserPro
         // Apply filters
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
-            query = query.Where(u => 
+            query = query.Where(u =>
                 u.FullName.Contains(searchTerm) ||
                 u.Email.Contains(searchTerm) ||
                 u.UserName.Contains(searchTerm));
@@ -123,7 +125,7 @@ public class UserProfileRepository : BaseRepository<UserProfileEntity>, IUserPro
     public async Task<bool> UsernameExistsAsync(string username, Guid? excludeUserId = null, CancellationToken cancellationToken = default)
     {
         var query = _dbSet.Where(u => u.UserName == username && u.IsActive && !u.IsDeleted);
-        
+
         if (excludeUserId.HasValue)
         {
             query = query.Where(u => u.UserId != excludeUserId.Value);
@@ -135,7 +137,7 @@ public class UserProfileRepository : BaseRepository<UserProfileEntity>, IUserPro
     public async Task<bool> EmailExistsAsync(string email, Guid? excludeUserId = null, CancellationToken cancellationToken = default)
     {
         var query = _dbSet.Where(u => u.Email == email && u.IsActive && !u.IsDeleted);
-        
+
         if (excludeUserId.HasValue)
         {
             query = query.Where(u => u.UserId != excludeUserId.Value);
@@ -208,4 +210,27 @@ public class UserProfileRepository : BaseRepository<UserProfileEntity>, IUserPro
                               u.UserName.Contains(searchQuery) ||
                               (u.Department != null && u.Department.Contains(searchQuery)));
     }
+
+    public async Task<bool> ValidatePasswordAsync(string username, string password)
+    {
+        var user = await _dbSet.FirstOrDefaultAsync(u => u.UserName == username && u.IsActive && !u.IsDeleted);
+        if (user == null)
+        {
+            return false;
+        }
+
+        var salt = user.PasswordSalt;
+        var hashedPassword = HashPasswordWithSalt(password, salt);  
+        
+        return user.PasswordHash == hashedPassword;
+    }
+    
+     private static string HashPasswordWithSalt(string password, string salt)
+    {
+        var passwordBytes = Encoding.UTF8.GetBytes(password + salt);
+        using var sha256 = SHA256.Create();
+        var hashBytes = sha256.ComputeHash(passwordBytes);
+        return Convert.ToBase64String(hashBytes);
+    }
+ 
 }

@@ -32,7 +32,7 @@ INSERT INTO user_profiles (
 ) VALUES (
     'd4e5f6a7-b8c9-0123-def4-56789012345a',
     'admin',
-    'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3',  -- SHA-256 hash of "Admin@123" + salt
+    'v5yPL6Qc1jnMONXAZfwvWkuRuyXAOD4vBF5MJWVpFJw=',  -- SHA-256 hash of "Admin@123" + salt
     'admin_salt_2024',
     'System Administrator',
     'admin@techway.com',
