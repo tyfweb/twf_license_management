@@ -2,12 +2,15 @@ using Microsoft.AspNetCore.Mvc;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Web.ViewModels.Settings;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace TechWayFit.Licensing.Management.Web.Controllers
 {
     /// <summary>
     /// Controller for managing system settings
     /// </summary>
+    [Authorize(Roles = "Administrator")]
+
     public class SettingsController : Controller
     {
         private readonly ISettingService _settingService;

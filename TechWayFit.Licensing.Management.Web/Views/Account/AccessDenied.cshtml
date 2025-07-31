@@ -1,24 +1,69 @@
 @{
-    ViewData["Title"] = "Access Denied";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Access Denied - TechWayFit License Management";
+    ViewData["Description"] = "You don't have permission to access this resource";
 }
 
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-sm mt-5">
-                <div class="card-header bg-danger text-white text-center">
-                    <h4 class="mb-0">
-                        <i class="fas fa-ban me-2"></i>
-                        Access Denied
-                    </h4>
+@section Styles {
+    <link rel="stylesheet" href="~/css/product-management.css" />
+}
+
+<div class="container-fluid">
+    <div class="access-denied-container">
+        <div class="access-denied-card">
+            <!-- Header -->
+            <div class="access-denied-header">
+                <div class="access-denied-icon">
+                    <i class="fas fa-shield-alt"></i>
                 </div>
-                <div class="card-body text-center">
-                    <p>You don't have permission to access this resource.</p>
-                    <a href="@Url.Action("Login", "Account")" class="btn btn-primary">
-                        <i class="fas fa-sign-in-alt me-1"></i>
-                        Login
-                    </a>
+                <h1 class="access-denied-title">Access Restricted</h1>
+            </div>
+            
+            <!-- Body -->
+            <div class="access-denied-body">
+                <p class="access-denied-message">
+                    You don't have permission to access this resource. This area is restricted to authorized users only.
+                </p>
+                
+                <div class="access-denied-details">
+                    <h6>
+                        <i class="fas fa-info-circle text-danger"></i>
+                        What can you do?
+                    </h6>
+                    <p>
+                        If you believe you should have access to this resource, please contact your system administrator 
+                        or sign in with an account that has the appropriate permissions.
+                    </p>
+                </div>
+                
+                <div class="btn-group-access">
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <a href="@Url.Action("Index", "Home")" class="btn-access btn-access-primary">
+                            <i class="fas fa-home"></i>
+                            Return to Dashboard
+                        </a>
+                        <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                            <button type="submit" class="btn-access btn-access-secondary">
+                                <i class="fas fa-sign-out-alt"></i>
+                                Sign Out
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <a href="@Url.Action("Login", "Account")" class="btn-access btn-access-primary">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Sign In
+                        </a>
+                        <a href="@Url.Action("Index", "Home")" class="btn-access btn-access-secondary">
+                            <i class="fas fa-home"></i>
+                            Home
+                        </a>
+                    }
+                </div>
+                
+                <div class="error-code">
+                    Error Code: HTTP 403 - Forbidden
                 </div>
             </div>
         </div>

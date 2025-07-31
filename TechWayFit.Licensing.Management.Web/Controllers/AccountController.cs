@@ -9,10 +9,10 @@ namespace TechWayFit.Licensing.WebUI.Controllers
     
     public class AccountController : Controller
     {
-        private readonly Services.IAuthenticationService _authService;
+        private readonly AuthenticationManager _authService;
         private readonly ILogger<AccountController> _logger;
 
-        public AccountController(Services.IAuthenticationService authService, ILogger<AccountController> logger)
+        public AccountController(AuthenticationManager authService, ILogger<AccountController> logger)
         {
             _authService = authService;
             _logger = logger;

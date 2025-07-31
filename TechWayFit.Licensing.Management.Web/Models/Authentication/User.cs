@@ -2,9 +2,10 @@ namespace TechWayFit.Licensing.WebUI.Models.Authentication
 {
     public class User
     {
+        public string Name { get; set; }
         public string Username { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
-        public string Role { get; set; } = string.Empty;
+        public IEnumerable<string> Roles { get; set; } = new List<string>();
     }
 
     public class AuthenticationSettings

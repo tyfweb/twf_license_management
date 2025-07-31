@@ -8,8 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Contracts/" />
-    <Folder Include="Contracts/Services/" />
     <Folder Include="Models/Report/" />
     <Folder Include="Models/Services/" />
   </ItemGroup>
