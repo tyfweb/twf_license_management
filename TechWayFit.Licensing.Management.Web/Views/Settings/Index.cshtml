@@ -39,44 +39,52 @@
     <div class="row g-2 mb-3">
         <div class="col-sm-6 col-lg-3">
             <div class="stats-card">
-                <div class="stats-icon">
-                    <i class="fas fa-cog"></i>
-                </div>
-                <div class="stats-content">
+                <div class="stats-row-1">
+                    <div class="stats-icon">
+                        <i class="fas fa-cog"></i>
+                    </div>
                     <div class="stats-number">@Model.TotalSettings</div>
+                </div>
+                <div class="stats-row-2">
                     <div class="stats-label">Total Settings</div>
                 </div>
             </div>
         </div>
         <div class="col-sm-6 col-lg-3">
             <div class="stats-card stats-card-success">
-                <div class="stats-icon">
-                    <i class="fas fa-edit"></i>
-                </div>
-                <div class="stats-content">
+                <div class="stats-row-1">
+                    <div class="stats-icon">
+                        <i class="fas fa-edit"></i>
+                    </div>
                     <div class="stats-number" id="modifiedCount">@Model.ModifiedSettings</div>
+                </div>
+                <div class="stats-row-2">
                     <div class="stats-label">Modified</div>
                 </div>
             </div>
         </div>
         <div class="col-sm-6 col-lg-3">
             <div class="stats-card">
-                <div class="stats-icon">
-                    <i class="fas fa-lock"></i>
-                </div>
-                <div class="stats-content">
+                <div class="stats-row-1">
+                    <div class="stats-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
                     <div class="stats-number">@Model.ReadOnlySettings</div>
+                </div>
+                <div class="stats-row-2">
                     <div class="stats-label">Read-Only</div>
                 </div>
             </div>
         </div>
         <div class="col-sm-6 col-lg-3">
             <div class="stats-card">
-                <div class="stats-icon">
-                    <i class="fas fa-tags"></i>
-                </div>
-                <div class="stats-content">
+                <div class="stats-row-1">
+                    <div class="stats-icon">
+                        <i class="fas fa-tags"></i>
+                    </div>
                     <div class="stats-number">@Model.Categories.Count</div>
+                </div>
+                <div class="stats-row-2">
                     <div class="stats-label">Categories</div>
                 </div>
             </div>

@@ -29,44 +29,52 @@
     <div class="row g-2 mb-3">
         <div class="col-sm-6 col-lg-3">
             <div class="stats-card">
-                <div class="stats-icon">
-                    <i class="fas fa-cube"></i>
-                </div>
-                <div class="stats-content">
+                <div class="stats-row-1">
+                    <div class="stats-icon">
+                        <i class="fas fa-cube"></i>
+                    </div>
                     <div class="stats-number">@(ViewBag.TotalProducts ?? Model.Products.Count)</div>
+                </div>
+                <div class="stats-row-2">
                     <div class="stats-label">Total Products</div>
                 </div>
             </div>
         </div>
         <div class="col-sm-6 col-lg-3">
             <div class="stats-card stats-card-success">
-                <div class="stats-icon">
-                    <i class="fas fa-check-circle"></i>
-                </div>
-                <div class="stats-content">
+                <div class="stats-row-1">
+                    <div class="stats-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
                     <div class="stats-number">@(ViewBag.ActiveProducts ?? Model.Products.Count(p => p.IsActive))</div>
+                </div>
+                <div class="stats-row-2">
                     <div class="stats-label">Active Products</div>
                 </div>
             </div>
         </div>
         <div class="col-sm-6 col-lg-3">
             <div class="stats-card">
-                <div class="stats-icon">
-                    <i class="fas fa-key"></i>
-                </div>
-                <div class="stats-content">
+                <div class="stats-row-1">
+                    <div class="stats-icon">
+                        <i class="fas fa-key"></i>
+                    </div>
                     <div class="stats-number">@Model.Products.Sum(p => p.LicenseCount)</div>
+                </div>
+                <div class="stats-row-2">
                     <div class="stats-label">Total Licenses</div>
                 </div>
             </div>
         </div>
         <div class="col-sm-6 col-lg-3">
             <div class="stats-card">
-                <div class="stats-icon">
-                    <i class="fas fa-users"></i>
-                </div>
-                <div class="stats-content">
+                <div class="stats-row-1">
+                    <div class="stats-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
                     <div class="stats-number">@Model.Products.Sum(p => p.ConsumerCount)</div>
+                </div>
+                <div class="stats-row-2">
                     <div class="stats-label">Total Consumers</div>
                 </div>
             </div>

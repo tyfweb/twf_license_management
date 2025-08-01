@@ -57,22 +57,26 @@
     <div class="row g-2 mb-3">
         <div class="col-sm-6 col-lg-3">
             <div class="stats-card">
-                <div class="stats-icon">
-                    <i class="fas fa-bell"></i>
-                </div>
-                <div class="stats-content">
+                <div class="stats-row-1">
+                    <div class="stats-icon">
+                        <i class="fas fa-bell"></i>
+                    </div>
                     <div class="stats-number">@Model.Statistics.TotalNotifications.ToString("N0")</div>
+                </div>
+                <div class="stats-row-2">
                     <div class="stats-label">Total Notifications</div>
                 </div>
             </div>
         </div>
         <div class="col-sm-6 col-lg-3">
             <div class="stats-card stats-card-success">
-                <div class="stats-icon">
-                    <i class="fas fa-check-circle"></i>
-                </div>
-                <div class="stats-content">
+                <div class="stats-row-1">
+                    <div class="stats-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
                     <div class="stats-number">@Model.Statistics.SuccessfulDeliveries.ToString("N0")</div>
+                </div>
+                <div class="stats-row-2">
                     <div class="stats-label">Delivered Successfully</div>
                     <div class="stats-meta">@Model.Statistics.DeliverySuccessRate.ToString("F1")% success rate</div>
                 </div>
@@ -80,22 +84,26 @@
         </div>
         <div class="col-sm-6 col-lg-3">
             <div class="stats-card stats-card-danger">
-                <div class="stats-icon">
-                    <i class="fas fa-times-circle"></i>
-                </div>
-                <div class="stats-content">
+                <div class="stats-row-1">
+                    <div class="stats-icon">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
                     <div class="stats-number">@Model.Statistics.FailedDeliveries.ToString("N0")</div>
+                </div>
+                <div class="stats-row-2">
                     <div class="stats-label">Failed Deliveries</div>
                 </div>
             </div>
         </div>
         <div class="col-sm-6 col-lg-3">
             <div class="stats-card stats-card-warning">
-                <div class="stats-icon">
-                    <i class="fas fa-clock"></i>
-                </div>
-                <div class="stats-content">
+                <div class="stats-row-1">
+                    <div class="stats-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
                     <div class="stats-number">@Model.Statistics.PendingDeliveries.ToString("N0")</div>
+                </div>
+                <div class="stats-row-2">
                     <div class="stats-label">Pending</div>
                 </div>
             </div>

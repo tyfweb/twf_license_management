@@ -28,44 +28,52 @@
             <div class="row g-3 mb-4">
                 <div class="col-sm-6 col-lg-3">
                     <div class="stats-card">
-                        <div class="stats-icon">
-                            <i class="fas fa-key"></i>
-                        </div>
-                        <div class="stats-content">
+                        <div class="stats-row-1">
+                            <div class="stats-icon">
+                                <i class="fas fa-key"></i>
+                            </div>
                             <div class="stats-number">@(Model?.TotalLicenses ?? 0)</div>
+                        </div>
+                        <div class="stats-row-2">
                             <div class="stats-label">Total Licenses</div>
                         </div>
                     </div>
                 </div>
                 <div class="col-sm-6 col-lg-3">
                     <div class="stats-card stats-card-success">
-                        <div class="stats-icon">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                        <div class="stats-content">
+                        <div class="stats-row-1">
+                            <div class="stats-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
                             <div class="stats-number">@(Model?.ActiveLicenses ?? 0)</div>
+                        </div>
+                        <div class="stats-row-2">
                             <div class="stats-label">Active Licenses</div>
                         </div>
                     </div>
                 </div>
                 <div class="col-sm-6 col-lg-3">
                     <div class="stats-card stats-card-warning">
-                        <div class="stats-icon">
-                            <i class="fas fa-clock"></i>
-                        </div>
-                        <div class="stats-content">
+                        <div class="stats-row-1">
+                            <div class="stats-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
                             <div class="stats-number">@(Model?.ExpiringLicenses ?? 0)</div>
+                        </div>
+                        <div class="stats-row-2">
                             <div class="stats-label">Expiring Soon</div>
                         </div>
                     </div>
                 </div>
                 <div class="col-sm-6 col-lg-3">
                     <div class="stats-card">
-                        <div class="stats-icon">
-                            <i class="fas fa-users"></i>
-                        </div>
-                        <div class="stats-content">
+                        <div class="stats-row-1">
+                            <div class="stats-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
                             <div class="stats-number">@(Model?.TotalConsumers ?? 0)</div>
+                        </div>
+                        <div class="stats-row-2">
                             <div class="stats-label">Consumers</div>
                         </div>
                     </div>

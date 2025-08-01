@@ -67,44 +67,52 @@
     <div class="row g-2 mb-3">
         <div class="col-sm-6 col-lg-3">
             <div class="stats-card">
-                <div class="stats-icon">
-                    <i class="fas fa-calendar-day"></i>
-                </div>
-                <div class="stats-content">
+                <div class="stats-row-1">
+                    <div class="stats-icon">
+                        <i class="fas fa-calendar-day"></i>
+                    </div>
                     <div class="stats-number">@Model.TotalEntriesToday.ToString("N0")</div>
+                </div>
+                <div class="stats-row-2">
                     <div class="stats-label">Today's Entries</div>
                 </div>
             </div>
         </div>
         <div class="col-sm-6 col-lg-3">
             <div class="stats-card stats-card-success">
-                <div class="stats-icon">
-                    <i class="fas fa-calendar-week"></i>
-                </div>
-                <div class="stats-content">
+                <div class="stats-row-1">
+                    <div class="stats-icon">
+                        <i class="fas fa-calendar-week"></i>
+                    </div>
                     <div class="stats-number">@Model.TotalEntriesWeek.ToString("N0")</div>
+                </div>
+                <div class="stats-row-2">
                     <div class="stats-label">This Week</div>
                 </div>
             </div>
         </div>
         <div class="col-sm-6 col-lg-3">
             <div class="stats-card stats-card-warning">
-                <div class="stats-icon">
-                    <i class="fas fa-calendar-alt"></i>
-                </div>
-                <div class="stats-content">
+                <div class="stats-row-1">
+                    <div class="stats-icon">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
                     <div class="stats-number">@Model.TotalEntriesMonth.ToString("N0")</div>
+                </div>
+                <div class="stats-row-2">
                     <div class="stats-label">This Month</div>
                 </div>
             </div>
         </div>
         <div class="col-sm-6 col-lg-3">
             <div class="stats-card">
-                <div class="stats-icon">
-                    <i class="fas fa-users"></i>
-                </div>
-                <div class="stats-content">
+                <div class="stats-row-1">
+                    <div class="stats-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
                     <div class="stats-number">@Model.Statistics.UniqueUsers.ToString("N0")</div>
+                </div>
+                <div class="stats-row-2">
                     <div class="stats-label">Active Users</div>
                 </div>
             </div>

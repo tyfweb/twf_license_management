@@ -29,44 +29,52 @@
     <div class="row g-2 mb-3">
         <div class="col-sm-6 col-lg-3">
             <div class="stats-card">
-                <div class="stats-icon">
-                    <i class="fas fa-key"></i>
-                </div>
-                <div class="stats-content">
+                <div class="stats-row-1">
+                    <div class="stats-icon">
+                        <i class="fas fa-key"></i>
+                    </div>
                     <div class="stats-number">@(Model?.Licenses?.Count() ?? 0)</div>
+                </div>
+                <div class="stats-row-2">
                     <div class="stats-label">Total Licenses</div>
                 </div>
             </div>
         </div>
         <div class="col-sm-6 col-lg-3">
             <div class="stats-card stats-card-success">
-                <div class="stats-icon">
-                    <i class="fas fa-check-circle"></i>
-                </div>
-                <div class="stats-content">
+                <div class="stats-row-1">
+                    <div class="stats-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
                     <div class="stats-number">@(Model?.Licenses?.Count(l => l.Status == LicenseStatus.Active) ?? 0)</div>
+                </div>
+                <div class="stats-row-2">
                     <div class="stats-label">Active Licenses</div>
                 </div>
             </div>
         </div>
         <div class="col-sm-6 col-lg-3">
             <div class="stats-card">
-                <div class="stats-icon">
-                    <i class="fas fa-exclamation-triangle"></i>
-                </div>
-                <div class="stats-content">
+                <div class="stats-row-1">
+                    <div class="stats-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
                     <div class="stats-number">@(Model?.Licenses?.Count(l => l.DaysUntilExpiry <= 30 && l.DaysUntilExpiry > 0) ?? 0)</div>
+                </div>
+                <div class="stats-row-2">
                     <div class="stats-label">Expiring Soon</div>
                 </div>
             </div>
         </div>
         <div class="col-sm-6 col-lg-3">
             <div class="stats-card">
-                <div class="stats-icon">
-                    <i class="fas fa-times-circle"></i>
-                </div>
-                <div class="stats-content">
+                <div class="stats-row-1">
+                    <div class="stats-icon">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
                     <div class="stats-number">@(Model?.Licenses?.Count(l => l.Status == LicenseStatus.Expired) ?? 0)</div>
+                </div>
+                <div class="stats-row-2">
                     <div class="stats-label">Expired</div>
                 </div>
             </div>
