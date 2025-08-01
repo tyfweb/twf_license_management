@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using TechWayFit.Licensing.Management.Infrastructure.Models.Entities;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.OperationsDashboard;
@@ -105,5 +106,6 @@ public class SystemHealthSnapshotEntity : BaseAuditEntity
     /// <summary>
     /// JSON array of current health issues
     /// </summary>
+    [Column(TypeName = "jsonb")]
     public string? HealthIssuesJson { get; set; }
 }

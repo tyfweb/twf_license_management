@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using TechWayFit.Licensing.Management.Infrastructure.Models.Entities;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.OperationsDashboard;
@@ -95,6 +96,7 @@ public class QueryPerformanceMetricEntity : BaseAuditEntity
     /// <summary>
     /// Sample parameters JSON (first occurrence)
     /// </summary>
+    [Column(TypeName = "jsonb")]
     public string? ParametersSampleJson { get; set; }
 
     /// <summary>

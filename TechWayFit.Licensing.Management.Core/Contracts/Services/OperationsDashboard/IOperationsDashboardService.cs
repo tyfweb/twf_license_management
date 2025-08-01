@@ -21,6 +21,7 @@ public interface IOperationsDashboardService
     Task<object> GetTopErrorsAsync(int topCount = 10, DateTime? startTime = null, DateTime? endTime = null);
     Task<object> GetUnresolvedErrorsAsync();
     Task<object> RecordErrorAsync(object errorLog);
+    Task<object> RecordErrorsBulkAsync(IEnumerable<object> errorLogs);
     Task<object> MarkErrorAsResolvedAsync(string errorHash, string resolvedBy);
     
     // Performance metrics methods
@@ -28,17 +29,20 @@ public interface IOperationsDashboardService
     Task<object> GetSlowestEndpointsAsync(int topCount = 10, DateTime? startTime = null, DateTime? endTime = null);
     Task<object> GetHighestTrafficEndpointsAsync(int topCount = 10, DateTime? startTime = null, DateTime? endTime = null);
     Task<object> RecordPagePerformanceAsync(object pageMetric);
+    Task<object> RecordPagePerformanceBulkAsync(IEnumerable<object> pageMetrics);
     
     // Query performance methods
     Task<object> GetQueryPerformanceAsync(DateTime startTime, DateTime endTime);
     Task<object> GetSlowestQueriesAsync(int topCount = 10, DateTime? startTime = null, DateTime? endTime = null);
     Task<object> GetMostFrequentQueriesAsync(int topCount = 10, DateTime? startTime = null, DateTime? endTime = null);
     Task<object> RecordQueryPerformanceAsync(object queryMetric);
+    Task<object> RecordQueryPerformanceBulkAsync(IEnumerable<object> queryMetrics);
     
     // System health methods
     Task<object> GetSystemHealthHistoryAsync(DateTime startTime, DateTime endTime);
     Task<object> GetCurrentSystemHealthAsync();
     Task<object> RecordSystemHealthSnapshotAsync(object healthSnapshot);
+    Task<object> RecordSystemHealthSnapshotsBulkAsync(IEnumerable<object> healthSnapshots);
     Task<object> GetHealthTrendsAsync(int hours = 24);
     
     // Analytics and reporting methods

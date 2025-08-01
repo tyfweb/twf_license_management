@@ -46,8 +46,4 @@
     <Content Remove="Views/ProductLicense/**" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Logs/Development/" />
-  </ItemGroup>
-
 </Project>

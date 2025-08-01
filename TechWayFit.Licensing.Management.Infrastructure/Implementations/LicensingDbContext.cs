@@ -1,4 +1,7 @@
 using Microsoft.EntityFrameworkCore; 
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System.ComponentModel.DataAnnotations.Schema;
 using TechWayFit.Licensing.Management.Infrastructure.Data.Entities.Consumer;
 using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Audit;
 using TechWayFit.Licensing.Management.Infrastructure.Models.Entities;

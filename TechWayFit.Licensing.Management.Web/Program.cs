@@ -114,6 +114,13 @@ try
             options.AddInterceptors(sqlInterceptor);
         }
 
+        // Add enhanced SQL interceptor for operations dashboard metrics
+        var enhancedSqlInterceptor = serviceProvider.GetService<EnhancedSqlInterceptor>();
+        if (enhancedSqlInterceptor != null)
+        {
+            options.AddInterceptors(enhancedSqlInterceptor);
+        }
+
         // Enable sensitive data logging in development
         if (builder.Environment.IsDevelopment())
         {
@@ -126,6 +133,12 @@ try
     RegisterServices(builder);    
     builder.Services.AddScoped<AuthenticationManager>();
     
+    // Register operations dashboard data collection services
+    builder.Services.AddScoped<EnhancedSqlInterceptor>();
+    builder.Services.AddSingleton<MetricsBufferService>();
+    builder.Services.AddHostedService<MetricsBufferService>(provider => provider.GetService<MetricsBufferService>()!);
+    builder.Services.AddHostedService<SystemHealthCollectionService>();
+    
     var app = builder.Build();
 
     // Add correlation ID middleware first to ensure all logs have correlation ID
@@ -133,6 +146,10 @@ try
 
     // Use Serilog for request logging with correlation ID support
     app.ConfigureSerilogRequestLogging();
+
+    // Add operations dashboard middlewares for data collection
+    app.UsePerformanceTracking();
+    app.UseErrorTracking();
 
     // Create logs directory
     var logsPath = Path.Combine(app.Environment.ContentRootPath, "Logs");

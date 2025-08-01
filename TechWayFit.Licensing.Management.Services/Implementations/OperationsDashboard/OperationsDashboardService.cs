@@ -359,6 +359,71 @@ public class OperationsDashboardService : IOperationsDashboardService
         }
     }
 
+    public async Task<object> RecordErrorsBulkAsync(IEnumerable<object> errorLogs)
+    {
+        try
+        {
+            var processedCount = 0;
+            var newErrorsCount = 0;
+            var incrementedCount = 0;
+
+            foreach (var errorLog in errorLogs)
+            {
+                var json = JsonSerializer.Serialize(errorLog);
+                var errorData = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
+                
+                if (errorData != null && errorData.ContainsKey("errorMessage"))
+                {
+                    var errorMessage = errorData["errorMessage"]?.ToString() ?? "Unknown error";
+                    var errorHash = GenerateErrorHash(errorMessage);
+
+                    var existingError = await _errorLogSummaryRepository.GetByMessageHashAsync(errorHash);
+                    
+                    if (existingError != null)
+                    {
+                        await _errorLogSummaryRepository.IncrementOccurrenceAsync(errorHash);
+                        incrementedCount++;
+                    }
+                    else
+                    {
+                        var newError = new ErrorLogSummaryEntity
+                        {
+                            ErrorSummaryId = Guid.NewGuid(),
+                            ErrorMessageHash = errorHash,
+                            ErrorMessageSample = errorMessage,
+                            ErrorType = errorData.ContainsKey("errorLevel") ? errorData["errorLevel"]?.ToString() ?? "Error" : "Error",
+                            OccurrenceCount = 1,
+                            FirstOccurrence = DateTime.UtcNow,
+                            LastOccurrence = DateTime.UtcNow,
+                            IsResolved = false,
+                            CreatedOn = DateTime.UtcNow,
+                            CreatedBy = "System"
+                        };
+
+                        await _errorLogSummaryRepository.CreateAsync(newError);
+                        newErrorsCount++;
+                    }
+                    processedCount++;
+                }
+            }
+
+            _logger.LogInformation("Bulk processed {ProcessedCount} errors: {NewCount} new, {IncrementedCount} incremented", 
+                processedCount, newErrorsCount, incrementedCount);
+            
+            return new { 
+                ProcessedCount = processedCount, 
+                NewErrorsCount = newErrorsCount, 
+                IncrementedCount = incrementedCount,
+                Message = "Bulk error processing successful" 
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error bulk recording error logs");
+            throw;
+        }
+    }
+
     public async Task<object> MarkErrorAsResolvedAsync(string errorHash, string resolvedBy)
     {
         try
@@ -464,6 +529,42 @@ public class OperationsDashboardService : IOperationsDashboardService
         }
     }
 
+    public async Task<object> RecordPagePerformanceBulkAsync(IEnumerable<object> pageMetrics)
+    {
+        try
+        {
+            var entities = new List<PagePerformanceMetricEntity>();
+            
+            foreach (var pageMetric in pageMetrics)
+            {
+                var json = JsonSerializer.Serialize(pageMetric);
+                var metric = JsonSerializer.Deserialize<PagePerformanceMetricEntity>(json);
+                
+                if (metric != null)
+                {
+                    metric.PerformanceId = Guid.NewGuid();
+                    metric.CreatedOn = DateTime.UtcNow;
+                    metric.CreatedBy = "System";
+                    entities.Add(metric);
+                }
+            }
+
+            if (entities.Count > 0)
+            {
+                await _pagePerformanceMetricRepository.CreateBulkAsync(entities);
+                _logger.LogInformation("Bulk recorded {Count} page performance metrics", entities.Count);
+                return new { RecordCount = entities.Count, Message = "Bulk insert successful" };
+            }
+
+            return new { RecordCount = 0, Message = "No valid metrics to insert" };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error bulk recording page performance metrics");
+            throw;
+        }
+    }
+
     // Query performance methods
     public async Task<object> GetQueryPerformanceAsync(DateTime startTime, DateTime endTime)
     {
@@ -554,6 +655,42 @@ public class OperationsDashboardService : IOperationsDashboardService
         }
     }
 
+    public async Task<object> RecordQueryPerformanceBulkAsync(IEnumerable<object> queryMetrics)
+    {
+        try
+        {
+            var entities = new List<QueryPerformanceMetricEntity>();
+            
+            foreach (var queryMetric in queryMetrics)
+            {
+                var json = JsonSerializer.Serialize(queryMetric);
+                var metric = JsonSerializer.Deserialize<QueryPerformanceMetricEntity>(json);
+                
+                if (metric != null)
+                {
+                    metric.QueryMetricId = Guid.NewGuid();
+                    metric.CreatedOn = DateTime.UtcNow;
+                    metric.CreatedBy = "System";
+                    entities.Add(metric);
+                }
+            }
+
+            if (entities.Count > 0)
+            {
+                await _queryPerformanceMetricRepository.CreateBulkAsync(entities);
+                _logger.LogInformation("Bulk recorded {Count} query performance metrics", entities.Count);
+                return new { RecordCount = entities.Count, Message = "Bulk insert successful" };
+            }
+
+            return new { RecordCount = 0, Message = "No valid metrics to insert" };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error bulk recording query performance metrics");
+            throw;
+        }
+    }
+
     // System health methods
     public async Task<object> GetSystemHealthHistoryAsync(DateTime startTime, DateTime endTime)
     {
@@ -627,6 +764,43 @@ public class OperationsDashboardService : IOperationsDashboardService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error recording system health snapshot");
+            throw;
+        }
+    }
+
+    public async Task<object> RecordSystemHealthSnapshotsBulkAsync(IEnumerable<object> healthSnapshots)
+    {
+        try
+        {
+            var entities = new List<SystemHealthSnapshotEntity>();
+            
+            foreach (var healthSnapshot in healthSnapshots)
+            {
+                var json = JsonSerializer.Serialize(healthSnapshot);
+                var snapshot = JsonSerializer.Deserialize<SystemHealthSnapshotEntity>(json);
+                
+                if (snapshot != null)
+                {
+                    snapshot.SnapshotId = Guid.NewGuid();
+                    snapshot.SnapshotTimestamp = DateTime.UtcNow;
+                    snapshot.CreatedOn = DateTime.UtcNow;
+                    snapshot.CreatedBy = "System";
+                    entities.Add(snapshot);
+                }
+            }
+
+            if (entities.Count > 0)
+            {
+                await _systemHealthSnapshotRepository.CreateBulkAsync(entities);
+                _logger.LogInformation("Bulk recorded {Count} system health snapshots", entities.Count);
+                return new { RecordCount = entities.Count, Message = "Bulk insert successful" };
+            }
+
+            return new { RecordCount = 0, Message = "No valid snapshots to insert" };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error bulk recording system health snapshots");
             throw;
         }
     }
