@@ -74,11 +74,13 @@
                     <div class="stats-icon">
                         <i class="fas fa-check-circle"></i>
                     </div>
-                    <div class="stats-number">@Model.Statistics.SuccessfulDeliveries.ToString("N0")</div>
+                    <div class="stats-number">
+                        @Model.Statistics.SuccessfulDeliveries.ToString("N0")
+                        <small class="text-muted ms-1">(@Model.Statistics.DeliverySuccessRate.ToString("F1")%)</small>
+                    </div>
                 </div>
                 <div class="stats-row-2">
                     <div class="stats-label">Delivered Successfully</div>
-                    <div class="stats-meta">@Model.Statistics.DeliverySuccessRate.ToString("F1")% success rate</div>
                 </div>
             </div>
         </div>

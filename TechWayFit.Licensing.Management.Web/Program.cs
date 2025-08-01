@@ -34,16 +34,11 @@ using Serilog.Events;
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.User;
 using TechWayFit.Licensing.Management.Infrastructure.Implementations.Repositories.User;
 using TechWayFit.Licensing.Management.Web.Extensions;
+using TechWayFit.Licensing.Management.Web.Middleware;
 
 // Configure Serilog early to capture startup issues
 Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Debug()
-    .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
-    .Enrich.FromLogContext()
-    .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
-    .WriteTo.File("Logs/startup-.log", 
-        rollingInterval: RollingInterval.Day,
-        outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} {Level:u3}] {Message:lj}{NewLine}{Exception}")
+    .ConfigureBootstrapLogging()
     .CreateBootstrapLogger();
 
 try
@@ -55,7 +50,7 @@ try
     // Clear default logging providers and use Serilog
     builder.Logging.ClearProviders();
     builder.Host.UseSerilog((context, services, configuration) => configuration
-        .ReadFrom.Configuration(context.Configuration)
+        .ConfigureStructuredLogging(context.HostingEnvironment.IsDevelopment())
         .ReadFrom.Services(services)
         .Enrich.FromLogContext());
 
@@ -120,29 +115,6 @@ try
         {
             options.EnableSensitiveDataLogging();
             options.EnableDetailedErrors();
-            
-            // Enable SQL query logging with detailed information
-            options.LogTo(query => Log.Information("EF Core SQL: {Query}", query), 
-                new[] { 
-                    DbLoggerCategory.Database.Command.Name,
-                    DbLoggerCategory.Database.Connection.Name,
-                    DbLoggerCategory.Database.Transaction.Name
-                },
-                LogLevel.Information);
-                
-            // Alternative: Log to console for immediate visibility during development
-            // options.LogTo(Console.WriteLine, LogLevel.Information);
-        }
-        else
-        {
-            // In production, log only warnings and errors for performance
-            options.LogTo(query => Log.Warning("EF Core SQL Warning/Error: {Query}", query), 
-                new[] { 
-                    DbLoggerCategory.Database.Command.Name,
-                    DbLoggerCategory.Database.Connection.Name,
-                    DbLoggerCategory.Database.Transaction.Name
-                },
-                LogLevel.Warning);
         }
     });
 
@@ -152,23 +124,11 @@ try
     
     var app = builder.Build();
 
-    // Use Serilog for request logging
-    app.UseSerilogRequestLogging(options =>
-    {
-        options.MessageTemplate = "HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.0000} ms";
-        options.GetLevel = (httpContext, elapsed, ex) => ex != null
-            ? LogEventLevel.Error
-            : httpContext.Response.StatusCode > 499
-                ? LogEventLevel.Error
-                : LogEventLevel.Information;
-        options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
-        {
-            diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value);
-            diagnosticContext.Set("RequestScheme", httpContext.Request.Scheme);
-            var userAgent = httpContext.Request.Headers["User-Agent"].FirstOrDefault();
-            diagnosticContext.Set("UserAgent", userAgent ?? "Unknown");
-        };
-    });
+    // Add correlation ID middleware first to ensure all logs have correlation ID
+    app.UseCorrelationId();
+
+    // Use Serilog for request logging with correlation ID support
+    app.ConfigureSerilogRequestLogging();
 
     // Create logs directory
     var logsPath = Path.Combine(app.Environment.ContentRootPath, "Logs");
