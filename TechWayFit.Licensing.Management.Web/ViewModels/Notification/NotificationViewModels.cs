@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using TechWayFit.Licensing.Management.Core.Models.Notification;
 
-namespace TechWayFit.Licensing.WebUI.ViewModels.Notification
+namespace TechWayFit.Licensing.Management.Web.ViewModels.Notification
 {
     /// <summary>
     /// Notification listing view model

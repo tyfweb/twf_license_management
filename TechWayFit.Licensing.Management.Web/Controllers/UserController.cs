@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
-using TechWayFit.Licensing.WebUI.ViewModels.User;
+using TechWayFit.Licensing.Management.Web.ViewModels.User;
 using Microsoft.AspNetCore.Authorization;
 
-namespace TechWayFit.Licensing.WebUI.Controllers;
+namespace TechWayFit.Licensing.Management.Web.Controllers;
 
 /// <summary>
 /// Controller for user management operations

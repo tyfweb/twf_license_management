@@ -1,9 +1,9 @@
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Consumer;
-using TechWayFit.Licensing.Infrastructure.Data.Entities.Consumer;
-using TechWayFit.Licensing.Infrastructure.Models.Search;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Consumer;
+using TechWayFit.Licensing.Management.Infrastructure.Data.Entities.Consumer;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Search;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Core.Models.Common;
 using TechWayFit.Licensing.Management.Core.Models.Consumer;

@@ -1,10 +1,10 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using TechWayFit.Licensing.Core.Helpers;
-using TechWayFit.Licensing.Infrastructure.Models.Entities.Consumer;
-using TechWayFit.Licensing.Infrastructure.Models.Entities.License;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Consumer;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.License;
 using TechWayFit.Licensing.Management.Core.Models.Product;
 
-namespace TechWayFit.Licensing.Infrastructure.Models.Entities.Products;
+namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Products;
 
 /// <summary>
 /// Database entity for EnterpriseProduct

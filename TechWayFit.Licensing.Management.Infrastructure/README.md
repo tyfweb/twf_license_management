@@ -75,7 +75,7 @@ Add to your `appsettings.json`:
 Register the infrastructure services in your `Program.cs`:
 
 ```csharp
-using TechWayFit.Licensing.Infrastructure.Extensions;
+using TechWayFit.Licensing.Management.Infrastructure.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 

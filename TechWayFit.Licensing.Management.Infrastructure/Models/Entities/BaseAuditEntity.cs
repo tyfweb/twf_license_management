@@ -1,4 +1,4 @@
-namespace TechWayFit.Licensing.Infrastructure.Models.Entities;
+namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities;
 
 /// <summary>
 /// Base entity class that provides audit fields for all database entities

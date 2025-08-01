@@ -1,8 +1,8 @@
-using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Consumer;
-using TechWayFit.Licensing.Infrastructure.Data.Context;
-using TechWayFit.Licensing.Infrastructure.Data.Entities.Consumer;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Consumer;
+using TechWayFit.Licensing.Management.Infrastructure.Data.Context;
+using TechWayFit.Licensing.Management.Infrastructure.Data.Entities.Consumer;
 
-namespace TechWayFit.Licensing.Infrastructure.Data.Repositories.Consumer;
+namespace TechWayFit.Licensing.Management.Infrastructure.Data.Repositories.Consumer;
 
 /// <summary>
 /// Consumer account repository implementation

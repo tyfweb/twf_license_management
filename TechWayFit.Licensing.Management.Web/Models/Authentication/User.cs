@@ -1,4 +1,4 @@
-namespace TechWayFit.Licensing.WebUI.Models.Authentication
+namespace TechWayFit.Licensing.Management.Web.Models.Authentication
 {
     public class User
     {

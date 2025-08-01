@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
-using TechWayFit.Licensing.WebUI.ViewModels.Audit;
+using TechWayFit.Licensing.Management.Web.ViewModels.Audit;
 using TechWayFit.Licensing.Management.Core.Models.Audit;
 
-namespace TechWayFit.Licensing.WebUI.Controllers;
+namespace TechWayFit.Licensing.Management.Web.Controllers;
 
 /// <summary>
 /// Controller for audit log management and viewing

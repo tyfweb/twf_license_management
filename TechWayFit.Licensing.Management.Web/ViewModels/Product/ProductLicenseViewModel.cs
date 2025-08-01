@@ -1,6 +1,6 @@
 using TechWayFit.Licensing.Core.Models;
 
-namespace TechWayFit.Licensing.WebUI.ViewModels.Product
+namespace TechWayFit.Licensing.Management.Web.ViewModels.Product
 {
     public class ProductLicenseViewModel
     {

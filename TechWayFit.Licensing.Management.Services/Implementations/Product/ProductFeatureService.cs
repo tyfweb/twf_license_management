@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
-using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Product;
-using TechWayFit.Licensing.Infrastructure.Models.Entities.Products;
-using TechWayFit.Licensing.Infrastructure.Models.Search;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Product;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Products;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Search;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Core.Models.Common;
 using TechWayFit.Licensing.Management.Core.Models.Product;

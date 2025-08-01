@@ -1,6 +1,6 @@
 using TechWayFit.Licensing.Management.Core.Models.Audit;
 
-namespace TechWayFit.Licensing.WebUI.ViewModels.Audit;
+namespace TechWayFit.Licensing.Management.Web.ViewModels.Audit;
 
 /// <summary>
 /// Main dashboard view model for audit overview

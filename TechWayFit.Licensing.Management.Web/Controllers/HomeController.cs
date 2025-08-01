@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 
-namespace TechWayFit.Licensing.WebUI.Controllers
+namespace TechWayFit.Licensing.Management.Web.Controllers
 {
     /// <summary>
     /// Home controller for basic navigation and system information

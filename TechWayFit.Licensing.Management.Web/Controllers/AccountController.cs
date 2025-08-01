@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TechWayFit.Licensing.WebUI.Models.Authentication;
-using TechWayFit.Licensing.WebUI.Services;
+using TechWayFit.Licensing.Management.Web.Models.Authentication;
+using TechWayFit.Licensing.Management.Web.Services;
+using TechWayFit.Licensing.Management.Web.Extensions;
 
-namespace TechWayFit.Licensing.WebUI.Controllers
+namespace TechWayFit.Licensing.Management.Web.Controllers
 {
     
     public class AccountController : Controller
@@ -53,7 +54,7 @@ namespace TechWayFit.Licensing.WebUI.Controllers
                 if (user != null)
                 {
                     await _authService.SignInAsync(HttpContext, user, model.RememberMe);
-                    _logger.LogInformation("User {Username} logged in successfully", model.Username);
+                    _logger.LogUserAuthentication(model.Username, true, HttpContext.Connection.RemoteIpAddress?.ToString());
 
                     // Redirect to return URL or home
                     if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
@@ -65,7 +66,7 @@ namespace TechWayFit.Licensing.WebUI.Controllers
             }
 
             ModelState.AddModelError(string.Empty, "Invalid username or password.");
-            _logger.LogWarning("Failed login attempt for user: {Username}", model.Username);
+            _logger.LogUserAuthentication(model.Username, false, HttpContext.Connection.RemoteIpAddress?.ToString());
             return View(model);
         }
 
@@ -74,8 +75,9 @@ namespace TechWayFit.Licensing.WebUI.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
+            var username = User.Identity?.Name ?? "Unknown";
             await _authService.SignOutAsync(HttpContext);
-            _logger.LogInformation("User logged out");
+            _logger.LogInformation("User {Username} logged out successfully", username);
             return RedirectToAction("Index", "Home");
         }
 

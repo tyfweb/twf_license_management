@@ -1,12 +1,12 @@
-using TechWayFit.Licensing.Infrastructure.Data.Entities.Consumer;
+using TechWayFit.Licensing.Management.Infrastructure.Data.Entities.Consumer;
 using TechWayFit.Licensing.Management.Core.Models.License;
 using TechWayFit.Licensing.Management.Core.Models.Product;
 using TechWayFit.Licensing.Management.Core.Models.Consumer;
 using System.ComponentModel.DataAnnotations.Schema;
-using TechWayFit.Licensing.Infrastructure.Models.Entities.Products;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Products;
 using TechWayFit.Licensing.Core.Models;
 
-namespace TechWayFit.Licensing.Infrastructure.Models.Entities.License;
+namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.License;
 
 /// <summary>
 /// Database entity for ProductLicense

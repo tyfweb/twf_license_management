@@ -1,11 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
-using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Settings;
-using TechWayFit.Licensing.Infrastructure.Data.Context;
-using TechWayFit.Licensing.Infrastructure.Data.Repositories;
-using TechWayFit.Licensing.Infrastructure.Models.Entities.Settings;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Settings;
+using TechWayFit.Licensing.Management.Infrastructure.Data.Context;
+using TechWayFit.Licensing.Management.Infrastructure.Data.Repositories;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Settings;
 
-namespace TechWayFit.Licensing.Infrastructure.Data.Repositories.Settings;
+namespace TechWayFit.Licensing.Management.Infrastructure.Data.Repositories.Settings;
 
 /// <summary>
 /// Repository implementation for managing system settings

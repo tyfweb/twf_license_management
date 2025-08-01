@@ -1,7 +1,7 @@
-using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Common;
-using TechWayFit.Licensing.Infrastructure.Models.Entities.User;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Common;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.User;
 
-namespace TechWayFit.Licensing.Infrastructure.Contracts.Repositories.User;
+namespace TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.User;
 
 /// <summary>
 /// Repository interface for UserProfile entities

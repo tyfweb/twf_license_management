@@ -1,11 +1,11 @@
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
-using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Common;
-using TechWayFit.Licensing.Infrastructure.Data.Context;
-using TechWayFit.Licensing.Infrastructure.Models.Entities;
-using TechWayFit.Licensing.Infrastructure.Models.Search;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Common;
+using TechWayFit.Licensing.Management.Infrastructure.Data.Context;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Search;
 
-namespace TechWayFit.Licensing.Infrastructure.Data.Repositories;
+namespace TechWayFit.Licensing.Management.Infrastructure.Data.Repositories;
 
 public partial class BaseRepository<TEntity> : IBaseRepository<TEntity>
     where TEntity : BaseAuditEntity

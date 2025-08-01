@@ -1,6 +1,6 @@
 using TechWayFit.Licensing.Core.Models;
 
-namespace TechWayFit.Licensing.WebUI.ViewModels.Consumer
+namespace TechWayFit.Licensing.Management.Web.ViewModels.Consumer
 {
     /// <summary>
     /// License summary view model

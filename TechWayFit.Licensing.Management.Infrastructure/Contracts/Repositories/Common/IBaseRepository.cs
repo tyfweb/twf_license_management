@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
-using TechWayFit.Licensing.Infrastructure.Models.Search;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Search;
 
-namespace TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Common;
+namespace TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Common;
 
 public interface IBaseRepository<TEntity> where TEntity : class
 {

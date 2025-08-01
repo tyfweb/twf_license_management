@@ -1,7 +1,7 @@
-using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Common;
-using TechWayFit.Licensing.Infrastructure.Models.Entities.Settings;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Common;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Settings;
 
-namespace TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Settings;
+namespace TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Settings;
 
 /// <summary>
 /// Repository interface for managing system settings

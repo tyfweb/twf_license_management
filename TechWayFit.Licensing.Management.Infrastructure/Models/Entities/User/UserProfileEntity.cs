@@ -1,6 +1,6 @@
 using TechWayFit.Licensing.Management.Core.Models.User;
 
-namespace TechWayFit.Licensing.Infrastructure.Models.Entities.User;
+namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.User;
 
 /// <summary>
 /// Entity representing a user profile in the system
@@ -108,7 +108,19 @@ public class UserProfileEntity : BaseAuditEntity
             IsAdmin = IsAdmin,
             LastLoginDate = LastLoginDate,
             FailedLoginAttempts = FailedLoginAttempts,
-            LockedDate = LockedDate
+            LockedDate = LockedDate,
+            Roles = UserRoles.Select(urm => urm.Role).Select(role => new UserRole
+            {
+                RoleId = role.RoleId,
+                RoleName = role.RoleName,
+                RoleDescription = role.RoleDescription,
+                IsAdmin = role.IsAdmin,
+                CreatedOn = role.CreatedOn,
+                CreatedBy = role.CreatedBy,
+                UpdatedOn = role.UpdatedOn,
+                UpdatedBy = role.UpdatedBy,
+                IsActive = role.IsActive
+            }).ToList()
         };
     }
 }

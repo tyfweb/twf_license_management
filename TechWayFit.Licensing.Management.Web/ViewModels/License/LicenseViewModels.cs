@@ -5,7 +5,7 @@ using TechWayFit.Licensing.Management.Core.Models.Consumer;
 using LicenseModels = TechWayFit.Licensing.Core.Models;
 using TechWayFit.Licensing.Management.Core.Models.Product;
 
-namespace TechWayFit.Licensing.WebUI.ViewModels.License
+namespace TechWayFit.Licensing.Management.Web.ViewModels.License
 {
     /// <summary>
     /// License generation view model

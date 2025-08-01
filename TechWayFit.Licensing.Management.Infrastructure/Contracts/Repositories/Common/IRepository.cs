@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 
-namespace TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Common;
+namespace TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Common;
 
 /// <summary>
 /// Generic repository interface that provides basic CRUD operations

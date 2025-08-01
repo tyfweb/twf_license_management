@@ -6,173 +6,261 @@ using TechWayFit.Licensing.Management.Services.Implementations.License;
 using TechWayFit.Licensing.Management.Services.Implementations.Product;
 using TechWayFit.Licensing.Management.Services.Implementations.Consumer;
 using TechWayFit.Licensing.Management.Services.Implementations;
-using TechWayFit.Licensing.WebUI.Models.Authentication;
-using TechWayFit.Licensing.WebUI.Services;
-// using TechWayFit.Licensing.WebUI.Extensions;
+using TechWayFit.Licensing.Management.Web.Models.Authentication;
+using TechWayFit.Licensing.Management.Web.Services;
+// using TechWayFit.Licensing.Management.Web.Extensions;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
-using TechWayFit.Licensing.Infrastructure.Data.Context;
-using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Product;
-using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Consumer;
-using TechWayFit.Licensing.Infrastructure.Data.Repositories.Product;
-using TechWayFit.Licensing.Infrastructure.Data.Repositories.Consumer;
-using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Audit;
-using TechWayFit.Licensing.Infrastructure.Implementations.Repositories.Audit;
-using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.License;
-using TechWayFit.Licensing.Infrastructure.Data.Repositories.License;
-using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Notification;
-using TechWayFit.Licensing.Infrastructure.Data.Repositories.Notification;
-using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Settings;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Logging;
+using TechWayFit.Licensing.Management.Infrastructure.Data.Context;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Product;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Consumer;
+using TechWayFit.Licensing.Management.Infrastructure.Data.Repositories.Product;
+using TechWayFit.Licensing.Management.Infrastructure.Data.Repositories.Consumer;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Audit;
+using TechWayFit.Licensing.Management.Infrastructure.Implementations.Repositories.Audit;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.License;
+using TechWayFit.Licensing.Management.Infrastructure.Data.Repositories.License;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Notification;
+using TechWayFit.Licensing.Management.Infrastructure.Data.Repositories.Notification;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Settings;
 using TechWayFit.Licensing.Management.Services.Implementations.User;
-using TechWayFit.Licensing.Infrastructure.Data.Repositories.Settings;
-using TechWayFit.Licensing.Infrastructure.Contracts.Repositories;
+using TechWayFit.Licensing.Management.Infrastructure.Data.Repositories.Settings;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories;
 using TechWayFit.Licensing.Management.Services.Implementations.Account;
+using Serilog;
+using Serilog.Events;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.User;
+using TechWayFit.Licensing.Management.Infrastructure.Implementations.Repositories.User;
+using TechWayFit.Licensing.Management.Web.Extensions;
 
-var builder = WebApplication.CreateBuilder(args);
+// Configure Serilog early to capture startup issues
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+    .Enrich.FromLogContext()
+    .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
+    .WriteTo.File("Logs/startup-.log", 
+        rollingInterval: RollingInterval.Day,
+        outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} {Level:u3}] {Message:lj}{NewLine}{Exception}")
+    .CreateBootstrapLogger();
 
-// Configure authentication settings
-builder.Services.Configure<AuthenticationSettings>(
-    builder.Configuration.GetSection("Authentication"));
-
-// Add authentication services
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
-    {
-        options.LoginPath = "/Account/Login";
-        options.LogoutPath = "/Account/Logout";
-        options.AccessDeniedPath = "/Account/AccessDenied";
-        options.ExpireTimeSpan = TimeSpan.FromHours(8);
-        options.SlidingExpiration = true;
-        options.Cookie.Name = "TechWayFitLicensing";
-        options.Cookie.HttpOnly = true;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-    });
-
-builder.Services.AddAuthorization();
-
-// Register authentication service
-builder.Services.AddScoped<IAuthenticationService, AccountService>();
-builder.Services.AddScoped<AuthenticationManager>();
-// Add services to the container.
-builder.Services.AddControllersWithViews()
-    .AddRazorOptions(options =>
-    {
-        // Ensure tag helpers are enabled
-        options.ViewLocationFormats.Add("/Views/{1}/{0}.cshtml");
-        options.ViewLocationFormats.Add("/Views/Shared/{0}.cshtml");
-    });
-
-// Add Razor runtime compilation for development
-builder.Services.AddRazorPages()
-    .AddRazorRuntimeCompilation();
-
-// Add memory cache for performance
-builder.Services.AddMemoryCache();
-
-// Configure Entity Framework with PostgreSQL (Database First approach)
-builder.Services.AddDbContext<LicensingDbContext>(options =>
+try
 {
-    var connectionString = builder.Configuration.GetConnectionString("PostgreSQL");
-    options.UseNpgsql(connectionString, npgsqlOptions =>
+    Log.Information("Starting TechWayFit Licensing Management Web Application");
+
+    var builder = WebApplication.CreateBuilder(args);
+
+    // Clear default logging providers and use Serilog
+    builder.Logging.ClearProviders();
+    builder.Host.UseSerilog((context, services, configuration) => configuration
+        .ReadFrom.Configuration(context.Configuration)
+        .ReadFrom.Services(services)
+        .Enrich.FromLogContext());
+
+
+    // Add authentication services
+    builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+        .AddCookie(options =>
+        {
+            options.LoginPath = "/Account/Login";
+            options.LogoutPath = "/Account/Logout";
+            options.AccessDeniedPath = "/Account/AccessDenied";
+            options.ExpireTimeSpan = TimeSpan.FromHours(8);
+            options.SlidingExpiration = true;
+            options.Cookie.Name = "TechWayFitLicensing";
+            options.Cookie.HttpOnly = true;
+            options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+        });
+
+    builder.Services.AddAuthorization();
+
+    // Add services to the container.
+    builder.Services.AddControllersWithViews()
+        .AddRazorOptions(options =>
+        {
+            // Ensure tag helpers are enabled
+            options.ViewLocationFormats.Add("/Views/{1}/{0}.cshtml");
+            options.ViewLocationFormats.Add("/Views/Shared/{0}.cshtml");
+        });
+
+    // Add Razor runtime compilation for development
+    builder.Services.AddRazorPages()
+        .AddRazorRuntimeCompilation();
+
+    // Add memory cache for performance
+    builder.Services.AddMemoryCache();
+
+    // Configure EF Core logging services
+    builder.Services.ConfigureEfCoreLogging();
+
+    // Configure Entity Framework with PostgreSQL (Database First approach)
+    builder.Services.AddDbContext<LicensingDbContext>((serviceProvider, options) =>
     {
-        // Database First: Assume database schema exists
-        // No migrations - schema managed via SQL scripts
-        npgsqlOptions.MigrationsAssembly((string?)null);
-    })
-    // Configure PostgreSQL to use snake_case naming convention
-    .UseSnakeCaseNamingConvention();
+        var connectionString = builder.Configuration.GetConnectionString("PostgreSQL");
+        options.UseNpgsql(connectionString, npgsqlOptions =>
+        {
+            // Database First: Assume database schema exists
+            // No migrations - schema managed via SQL scripts
+            npgsqlOptions.MigrationsAssembly((string?)null);
+        })
+        // Configure PostgreSQL to use snake_case naming convention
+        .UseSnakeCaseNamingConvention();
+
+        // Add custom SQL logging interceptor
+        var sqlInterceptor = serviceProvider.GetService<SqlLoggingInterceptor>();
+        if (sqlInterceptor != null)
+        {
+            options.AddInterceptors(sqlInterceptor);
+        }
+
+        // Enable sensitive data logging in development
+        if (builder.Environment.IsDevelopment())
+        {
+            options.EnableSensitiveDataLogging();
+            options.EnableDetailedErrors();
+            
+            // Enable SQL query logging with detailed information
+            options.LogTo(query => Log.Information("EF Core SQL: {Query}", query), 
+                new[] { 
+                    DbLoggerCategory.Database.Command.Name,
+                    DbLoggerCategory.Database.Connection.Name,
+                    DbLoggerCategory.Database.Transaction.Name
+                },
+                LogLevel.Information);
+                
+            // Alternative: Log to console for immediate visibility during development
+            // options.LogTo(Console.WriteLine, LogLevel.Information);
+        }
+        else
+        {
+            // In production, log only warnings and errors for performance
+            options.LogTo(query => Log.Warning("EF Core SQL Warning/Error: {Query}", query), 
+                new[] { 
+                    DbLoggerCategory.Database.Command.Name,
+                    DbLoggerCategory.Database.Connection.Name,
+                    DbLoggerCategory.Database.Transaction.Name
+                },
+                LogLevel.Warning);
+        }
+    });
+
+    RegisterRepositories(builder);
+    RegisterServices(builder);    
+    builder.Services.AddScoped<AuthenticationManager>();
     
-    // Enable sensitive data logging in development
-    if (builder.Environment.IsDevelopment())
+    var app = builder.Build();
+
+    // Use Serilog for request logging
+    app.UseSerilogRequestLogging(options =>
     {
-        options.EnableSensitiveDataLogging();
-        options.EnableDetailedErrors();
+        options.MessageTemplate = "HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.0000} ms";
+        options.GetLevel = (httpContext, elapsed, ex) => ex != null
+            ? LogEventLevel.Error
+            : httpContext.Response.StatusCode > 499
+                ? LogEventLevel.Error
+                : LogEventLevel.Information;
+        options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
+        {
+            diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value);
+            diagnosticContext.Set("RequestScheme", httpContext.Request.Scheme);
+            var userAgent = httpContext.Request.Headers["User-Agent"].FirstOrDefault();
+            diagnosticContext.Set("UserAgent", userAgent ?? "Unknown");
+        };
+    });
+
+    // Create logs directory
+    var logsPath = Path.Combine(app.Environment.ContentRootPath, "Logs");
+    if (!Directory.Exists(logsPath))
+    {
+        Directory.CreateDirectory(logsPath);
+        Log.Information("Created logs directory: {LogsPath}", logsPath);
     }
-});
 
-// Configure paths
-var contentRootPath = builder.Environment.ContentRootPath;
-var keyStorePath = Path.Combine(contentRootPath, "Keys");
-var dataPath = Path.Combine(contentRootPath, "Data");
+    // Initialize database if using PostgreSQL
+    // await app.InitializeDatabaseAsync(builder.Configuration);
 
-// Ensure directories exist
-Directory.CreateDirectory(keyStorePath);
-Directory.CreateDirectory(dataPath);
+    // Configure the HTTP request pipeline.
+    if (!app.Environment.IsDevelopment())
+    {
+        app.UseExceptionHandler("/Home/Error");
+    }
 
-// Configure repository type based on configuration
-// TODO: Step 1 - Temporarily commented out until we rebuild repository configuration
-// builder.Services.ConfigureRepositories(builder.Configuration);
+    app.UseStaticFiles();
+    app.UseRouting();
 
-// TODO: Step-by-step service registration as we build each layer
+    // Add authentication middleware
+    app.UseAuthentication();
+    app.UseAuthorization();
 
-// Step 1: Basic services only (for clean build)
-// Step 2: Authentication services will be added here
-// Step 3: Product management services - IMPLEMENTED (using real service now)
+    app.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// Register repositories
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
-builder.Services.AddScoped<IConsumerAccountRepository, ConsumerAccountRepository>();
-builder.Services.AddScoped<IProductFeatureRepository, ProductFeatureRepository>();
-builder.Services.AddScoped<IAuditEntryRepository, AuditEntryRepository>();
-builder.Services.AddScoped<IProductLicenseRepository, ProductLicenseRepository>();
-builder.Services.AddScoped<INotificationHistoryRepository, NotificationHistoryRepository>();
-builder.Services.AddScoped<INotificationTemplateRepository, NotificationTemplateRepository>();
-builder.Services.AddScoped<IProductTierRepository, ProductTierRepository>();
-builder.Services.AddScoped<IProductVersionRepository, ProductVersionRepository>(); 
-builder.Services.AddScoped<TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Settings.ISettingRepository, TechWayFit.Licensing.Infrastructure.Data.Repositories.Settings.SettingRepository>();
+    Log.Information("TechWayFit Licensing Management Web Application started successfully");
 
-// Register user management repositories
-builder.Services.AddScoped<TechWayFit.Licensing.Infrastructure.Contracts.Repositories.User.IUserProfileRepository, TechWayFit.Licensing.Management.Infrastructure.Implementations.Repositories.User.UserProfileRepository>();
-builder.Services.AddScoped<TechWayFit.Licensing.Infrastructure.Contracts.Repositories.User.IUserRoleRepository, TechWayFit.Licensing.Management.Infrastructure.Implementations.Repositories.User.UserRoleRepository>();
-builder.Services.AddScoped<TechWayFit.Licensing.Infrastructure.Contracts.Repositories.User.IUserRoleMappingRepository, TechWayFit.Licensing.Management.Infrastructure.Implementations.Repositories.User.UserRoleMappingRepository>();
-
-// Register real services (replacing mock)
-builder.Services.AddScoped<IEnterpriseProductService, EnterpriseProductService>();
-
-// Step 4: Consumer management services - IMPLEMENTING NOW
-builder.Services.AddScoped<IConsumerAccountService, ConsumerAccountService>();
-
-// Step 5: License management services
-builder.Services.AddScoped<ILicenseGenerator, StatelessLicenseGenerator>();
-builder.Services.AddScoped<IKeyManagementService, KeyManagementService>();
-builder.Services.AddScoped<IProductLicenseService, ProductLicenseService>();
-builder.Services.AddSingleton<ILicenseValidationService, LicenseValidationService>();
-
-// Step 6: Settings management services
-builder.Services.AddScoped<ISettingService, SettingService>();
-
-// Step 6a: Settings helper services
-//builder.Services.AddScoped<TechWayFit.Licensing.Management.Web.Helpers.SettingsHelper>();
-
-// Step 7: Audit management services
-builder.Services.AddScoped<IAuditService, TechWayFit.Licensing.Management.Services.Implementations.Audit.AuditService>();
-
-// Step 8: Notification management services
-builder.Services.AddScoped<INotificationService, NotificationService>();
-
-// Step 9: User management services
-builder.Services.AddScoped<IUserService, UserService>();
-
-var app = builder.Build();
-
-// Initialize database if using PostgreSQL
-// await app.InitializeDatabaseAsync(builder.Configuration);
-
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+    await app.RunAsync();
+}
+catch (Exception ex)
 {
-    app.UseExceptionHandler("/Home/Error");
+    Log.Fatal(ex, "Application terminated unexpectedly");
+}
+finally
+{
+    Log.Information("TechWayFit Licensing Management Web Application shutting down");
+    Log.CloseAndFlush();
 }
 
-app.UseStaticFiles();
-app.UseRouting();
+static void RegisterRepositories(WebApplicationBuilder builder)
+{
+    // Register repositories
+    builder.Services.AddScoped<IProductRepository, ProductRepository>();
+    builder.Services.AddScoped<IConsumerAccountRepository, ConsumerAccountRepository>();
+    builder.Services.AddScoped<IProductFeatureRepository, ProductFeatureRepository>();
+    builder.Services.AddScoped<IAuditEntryRepository, AuditEntryRepository>();
+    builder.Services.AddScoped<IProductLicenseRepository, ProductLicenseRepository>();
+    builder.Services.AddScoped<INotificationHistoryRepository, NotificationHistoryRepository>();
+    builder.Services.AddScoped<INotificationTemplateRepository, NotificationTemplateRepository>();
+    builder.Services.AddScoped<IProductTierRepository, ProductTierRepository>();
+    builder.Services.AddScoped<IProductVersionRepository, ProductVersionRepository>();
+    builder.Services.AddScoped<ISettingRepository, SettingRepository>();
 
-// Add authentication middleware
-app.UseAuthentication();
-app.UseAuthorization();
+    // Register user management repositories
+    builder.Services.AddScoped<IUserProfileRepository, UserProfileRepository>();
+    builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
+    builder.Services.AddScoped<IUserRoleMappingRepository, UserRoleMappingRepository>();
+}
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+static void RegisterServices(WebApplicationBuilder builder)
+{
+    // Register real services (replacing mock)
+    builder.Services.AddScoped<IEnterpriseProductService, EnterpriseProductService>();
 
-app.Run();
+    // Step 4: Consumer management services - IMPLEMENTING NOW
+    builder.Services.AddScoped<IConsumerAccountService, ConsumerAccountService>();
+
+    // Step 5: License management services
+    builder.Services.AddScoped<ILicenseGenerator, StatelessLicenseGenerator>();
+    builder.Services.AddScoped<IKeyManagementService, KeyManagementService>();
+    builder.Services.AddScoped<IProductLicenseService, ProductLicenseService>();
+    builder.Services.AddSingleton<ILicenseValidationService, LicenseValidationService>();
+
+    // Step 6: Settings management services
+    builder.Services.AddScoped<ISettingService, SettingService>();
+
+    // Step 6a: Settings helper services
+    //builder.Services.AddScoped<TechWayFit.Licensing.Management.Web.Helpers.SettingsHelper>();
+
+    // Step 7: Audit management services
+    builder.Services.AddScoped<IAuditService, TechWayFit.Licensing.Management.Services.Implementations.Audit.AuditService>();
+
+    // Step 8: Notification management services
+    builder.Services.AddScoped<INotificationService, NotificationService>();
+
+    // Step 9: User management services
+    builder.Services.AddScoped<IUserService, UserService>();
+
+    // Register authentication service
+    builder.Services.AddScoped<IAuthenticationService, AccountService>();
+}

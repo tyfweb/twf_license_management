@@ -3,11 +3,11 @@ using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using TechWayFit.Licensing.Infrastructure.Data.Context;
-using TechWayFit.Licensing.Infrastructure.Models.Entities.User;
+using TechWayFit.Licensing.Management.Infrastructure.Data.Context;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.User;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Core.Models.User;
-using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.User;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.User;
 
 namespace TechWayFit.Licensing.Management.Services.Implementations.User;
 

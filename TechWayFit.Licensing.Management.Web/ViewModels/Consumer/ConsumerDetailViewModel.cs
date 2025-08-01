@@ -1,6 +1,6 @@
 using TechWayFit.Licensing.Management.Core.Models.Consumer;
 
-namespace TechWayFit.Licensing.WebUI.ViewModels.Consumer
+namespace TechWayFit.Licensing.Management.Web.ViewModels.Consumer
 {
     /// <summary>
     /// Consumer detail view model

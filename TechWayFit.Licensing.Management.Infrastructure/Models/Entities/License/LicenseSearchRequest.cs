@@ -1,9 +1,9 @@
 using System.Linq.Expressions;
 using TechWayFit.Licensing.Core.Models;
-using TechWayFit.Licensing.Infrastructure.Models.Search;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Search;
 using TechWayFit.Licensing.Management.Core.Models.License;
 
-namespace TechWayFit.Licensing.Infrastructure.Models.Entities.License;
+namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.License;
 
 public class LicenseSearchRequest:SearchRequest<ProductLicenseEntity>
 {

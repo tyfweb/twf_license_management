@@ -1,4 +1,4 @@
-namespace TechWayFit.Licensing.Infrastructure.Models.Search;
+namespace TechWayFit.Licensing.Management.Infrastructure.Models.Search;
 
 public class SearchResponse<T>
 {

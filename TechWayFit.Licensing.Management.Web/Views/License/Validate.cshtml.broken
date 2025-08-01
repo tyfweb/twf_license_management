@@ -1,4 +1,4 @@
-@model TechWayFit.Licensing.WebUI.ViewModels.License.LicenseValidationViewModel
+@model TechWayFit.Licensing.Management.Web.ViewModels.License.LicenseValidationViewModel
 @{
     ViewData["Title"] = "Validate License";
 }

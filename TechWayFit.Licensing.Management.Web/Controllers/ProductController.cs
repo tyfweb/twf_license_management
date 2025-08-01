@@ -2,11 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using TechWayFit.Licensing.Core.Models;
 using TechWayFit.Licensing.Management.Core.Models.Product;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
-using TechWayFit.Licensing.WebUI.ViewModels.Product;
+using TechWayFit.Licensing.Management.Web.ViewModels.Product;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 
-namespace TechWayFit.Licensing.WebUI.Controllers
+namespace TechWayFit.Licensing.Management.Web.Controllers
 {
     /// <summary>
     /// Product Management Controller - Step 3 Implementation

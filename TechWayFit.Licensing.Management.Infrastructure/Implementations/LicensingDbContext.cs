@@ -1,15 +1,15 @@
 using Microsoft.EntityFrameworkCore; 
-using TechWayFit.Licensing.Infrastructure.Data.Entities.Consumer;
-using TechWayFit.Licensing.Infrastructure.Models.Entities.Audit;
-using TechWayFit.Licensing.Infrastructure.Models.Entities;
-using TechWayFit.Licensing.Infrastructure.Models.Entities.Notification;
-using TechWayFit.Licensing.Infrastructure.Models.Entities.Products;
-using TechWayFit.Licensing.Infrastructure.Models.Entities.License;
-using TechWayFit.Licensing.Infrastructure.Models.Entities.Consumer;
-using TechWayFit.Licensing.Infrastructure.Models.Entities.Settings;
-using TechWayFit.Licensing.Infrastructure.Models.Entities.User;
+using TechWayFit.Licensing.Management.Infrastructure.Data.Entities.Consumer;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Audit;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Notification;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Products;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.License;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Consumer;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Settings;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.User;
 
-namespace TechWayFit.Licensing.Infrastructure.Data.Context;
+namespace TechWayFit.Licensing.Management.Infrastructure.Data.Context;
 
 /// <summary>
 /// Entity Framework DbContext for the licensing management system

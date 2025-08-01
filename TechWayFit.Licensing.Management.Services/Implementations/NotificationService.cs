@@ -1,9 +1,9 @@
 using Microsoft.Extensions.Logging;
-using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Notification;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Notification;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Core.Models.License;
 using TechWayFit.Licensing.Management.Core.Models.Notification;
-using TechWayFit.Licensing.Infrastructure.Models.Entities.Notification;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Notification;
 
 namespace TechWayFit.Licensing.Management.Services.Implementations;
 

@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 
-namespace TechWayFit.Licensing.Infrastructure.Models.Search;
+namespace TechWayFit.Licensing.Management.Infrastructure.Models.Search;
 
 public class SearchRequest<TEntity> where TEntity : class
 {

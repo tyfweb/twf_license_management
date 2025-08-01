@@ -1,7 +1,7 @@
-using TechWayFit.Licensing.WebUI.Models;
-using TechWayFit.Licensing.WebUI.ViewModels.License;
+using TechWayFit.Licensing.Management.Web.Models;
+using TechWayFit.Licensing.Management.Web.ViewModels.License;
 
-namespace TechWayFit.Licensing.WebUI.ViewModels.Dashboard
+namespace TechWayFit.Licensing.Management.Web.ViewModels.Dashboard
 {
     public class DashboardViewModel
     {

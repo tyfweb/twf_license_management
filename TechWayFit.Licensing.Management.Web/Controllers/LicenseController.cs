@@ -2,14 +2,14 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TechWayFit.Licensing.Core.Models; 
 using TechWayFit.Licensing.Management.Core.Models.License;
-using TechWayFit.Licensing.WebUI.ViewModels.License;
-using TechWayFit.Licensing.WebUI.ViewModels.Dashboard;
-using TechWayFit.Licensing.WebUI.Models;
+using TechWayFit.Licensing.Management.Web.ViewModels.License;
+using TechWayFit.Licensing.Management.Web.ViewModels.Dashboard;
+using TechWayFit.Licensing.Management.Web.Models;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Web.Extensions;
 using TechWayFit.Licensing.Management.Core.Models.Product;
 
-namespace TechWayFit.Licensing.WebUI.Controllers
+namespace TechWayFit.Licensing.Management.Web.Controllers
 {
     /// <summary>
     /// License Management Controller - Step 5 Implementation

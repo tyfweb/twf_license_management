@@ -1,8 +1,8 @@
-using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Common;
-using TechWayFit.Licensing.Infrastructure.Models.Entities.Notification;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Common;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Notification;
 using TechWayFit.Licensing.Management.Core.Models.Notification;
 
-namespace TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Notification;
+namespace TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Notification;
 
 /// <summary>
 /// Repository interface for NotificationTemplate entities

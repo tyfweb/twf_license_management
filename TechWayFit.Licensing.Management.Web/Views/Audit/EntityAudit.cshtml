@@ -1,4 +1,4 @@
-@model TechWayFit.Licensing.WebUI.ViewModels.Audit.EntityAuditViewModel
+@model TechWayFit.Licensing.Management.Web.ViewModels.Audit.EntityAuditViewModel
 @{
     ViewData["Title"] = $"Audit History - {Model.EntityDisplayName}";
     ViewData["Description"] = $"Complete audit trail for {Model.EntityType} {Model.EntityId}";
@@ -541,7 +541,7 @@
         return "";
     }
 
-    private bool HasChanges(TechWayFit.Licensing.WebUI.ViewModels.Audit.AuditEntryItemViewModel entry)
+    private bool HasChanges(TechWayFit.Licensing.Management.Web.ViewModels.Audit.AuditEntryItemViewModel entry)
     {
         return !string.IsNullOrEmpty(entry.OldValue) || !string.IsNullOrEmpty(entry.NewValue);
     }

@@ -1,10 +1,10 @@
-using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Audit;
-using TechWayFit.Licensing.Infrastructure.Data.Context;
-using TechWayFit.Licensing.Infrastructure.Data.Repositories;
-using TechWayFit.Licensing.Infrastructure.Models.Entities.Audit;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Audit;
+using TechWayFit.Licensing.Management.Infrastructure.Data.Context;
+using TechWayFit.Licensing.Management.Infrastructure.Data.Repositories;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Audit;
 using Microsoft.EntityFrameworkCore;
 
-namespace TechWayFit.Licensing.Infrastructure.Implementations.Repositories.Audit;
+namespace TechWayFit.Licensing.Management.Infrastructure.Implementations.Repositories.Audit;
 
 /// <summary>
 /// Audit entry repository implementation

@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using TechWayFit.Licensing.Management.Core.Models.Consumer;
 
-namespace TechWayFit.Licensing.WebUI.ViewModels.Consumer
+namespace TechWayFit.Licensing.Management.Web.ViewModels.Consumer
 {
     /// <summary>
     /// Consumer view model for list items and details

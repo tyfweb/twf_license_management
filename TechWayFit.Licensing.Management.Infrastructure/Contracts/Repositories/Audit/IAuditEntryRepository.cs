@@ -1,7 +1,7 @@
-using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Common;
-using TechWayFit.Licensing.Infrastructure.Models.Entities.Audit;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Common;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Audit;
 
-namespace TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Audit;
+namespace TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Audit;
 
 /// <summary>
 /// Repository interface for AuditEntry entities

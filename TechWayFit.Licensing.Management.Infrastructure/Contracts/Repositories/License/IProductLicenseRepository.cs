@@ -1,8 +1,8 @@
-using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Common;
-using TechWayFit.Licensing.Infrastructure.Models.Entities.License;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Common;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.License;
 using TechWayFit.Licensing.Management.Core.Models.License;
 
-namespace TechWayFit.Licensing.Infrastructure.Contracts.Repositories.License;
+namespace TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.License;
 
 /// <summary>
 /// Repository interface for ProductLicense entities

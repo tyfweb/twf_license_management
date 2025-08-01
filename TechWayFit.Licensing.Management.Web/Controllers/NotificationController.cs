@@ -2,9 +2,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Core.Models.Notification;
-using TechWayFit.Licensing.WebUI.ViewModels.Notification;
+using TechWayFit.Licensing.Management.Web.ViewModels.Notification;
 
-namespace TechWayFit.Licensing.WebUI.Controllers
+namespace TechWayFit.Licensing.Management.Web.Controllers
 {
     /// <summary>
     /// Notification Management Controller

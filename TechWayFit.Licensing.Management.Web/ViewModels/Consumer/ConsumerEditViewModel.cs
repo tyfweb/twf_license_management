@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace TechWayFit.Licensing.WebUI.ViewModels.Consumer
+namespace TechWayFit.Licensing.Management.Web.ViewModels.Consumer
 {
     /// <summary>
     /// Consumer edit view model

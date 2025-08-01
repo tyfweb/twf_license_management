@@ -1,12 +1,12 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using TechWayFit.Licensing.Infrastructure.Models.Entities;
-using TechWayFit.Licensing.Infrastructure.Models.Entities.Consumer;
-using TechWayFit.Licensing.Infrastructure.Models.Entities.License;
-using TechWayFit.Licensing.Infrastructure.Models.Entities.Products;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Consumer;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.License;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Products;
 using TechWayFit.Licensing.Management.Core.Models.Consumer;
 
-namespace TechWayFit.Licensing.Infrastructure.Data.Entities.Consumer;
+namespace TechWayFit.Licensing.Management.Infrastructure.Data.Entities.Consumer;
 
 /// <summary>
 /// Database entity for ConsumerAccount

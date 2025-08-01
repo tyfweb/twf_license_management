@@ -1,9 +1,9 @@
 using System.ComponentModel.DataAnnotations.Schema;
-using TechWayFit.Licensing.Infrastructure.Models.Entities.License;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.License;
 using TechWayFit.Licensing.Management.Core.Models.License;
 using TechWayFit.Licensing.Management.Core.Models.Product;
 
-namespace TechWayFit.Licensing.Infrastructure.Models.Entities.Products;
+namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Products;
 
 /// <summary>
 /// Database entity for ProductFeature

@@ -1,13 +1,14 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TechWayFit.Licensing.Core.Contracts;
+using TechWayFit.Licensing.Core.Models;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Core.Models.Consumer;
 using TechWayFit.Licensing.Management.Core.Models.License;
 using TechWayFit.Licensing.Management.Web.Extensions;
-using TechWayFit.Licensing.WebUI.ViewModels.Consumer;
+using TechWayFit.Licensing.Management.Web.ViewModels.Consumer;
 
-namespace TechWayFit.Licensing.WebUI.Controllers;
+namespace TechWayFit.Licensing.Management.Web.Controllers;
 
 /// <summary>
 /// Controller for managing consumer accounts
@@ -322,7 +323,7 @@ public class ConsumerController : Controller
             LicenseId = l.LicenseId,
             LicenseCode = l.LicenseCode,
             ProductName = l.LicenseConsumer.Product?.Name ?? "Unknown Product",
-            Tier = Core.Models.LicenseTier.Custom, // Assuming tier is not available in the license model
+            Tier = LicenseTier.Custom, // Assuming tier is not available in the license model
             Status = l.Status,
             ValidFrom = l.ValidFrom,
             ValidTo = l.ValidTo,

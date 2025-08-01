@@ -1,10 +1,10 @@
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
-using TechWayFit.Licensing.Infrastructure.Data.Entities.Consumer;
-using TechWayFit.Licensing.Infrastructure.Models.Entities.Products;
+using TechWayFit.Licensing.Management.Infrastructure.Data.Entities.Consumer;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Products;
 using TechWayFit.Licensing.Management.Core.Models.Consumer;
 
-namespace TechWayFit.Licensing.Infrastructure.Models.Entities.Consumer;
+namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Consumer;
 [Table("product_consumers")]
 public class ProductConsumerEntity : BaseAuditEntity
 {

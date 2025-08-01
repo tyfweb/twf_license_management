@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using TechWayFit.Licensing.Management.Core.Models.Audit;
 
-namespace TechWayFit.Licensing.Infrastructure.Models.Entities.Audit;
+namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Audit;
 
 /// <summary>
 /// Database entity for Audit Entries

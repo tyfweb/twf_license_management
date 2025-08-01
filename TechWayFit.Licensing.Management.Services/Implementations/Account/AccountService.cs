@@ -1,7 +1,7 @@
 using System;
 using System.Net.Http;
 using Microsoft.Extensions.Logging;
-using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.User;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.User;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Core.Models.User;
 

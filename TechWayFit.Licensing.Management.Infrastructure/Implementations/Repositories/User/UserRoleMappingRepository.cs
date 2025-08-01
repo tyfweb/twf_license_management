@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.User;
-using TechWayFit.Licensing.Infrastructure.Data.Context;
-using TechWayFit.Licensing.Infrastructure.Data.Repositories;
-using TechWayFit.Licensing.Infrastructure.Models.Entities.User;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.User;
+using TechWayFit.Licensing.Management.Infrastructure.Data.Context;
+using TechWayFit.Licensing.Management.Infrastructure.Data.Repositories;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.User;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.Implementations.Repositories.User;
 

@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
-using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Product;
-using TechWayFit.Licensing.Infrastructure.Data.Context;
-using TechWayFit.Licensing.Infrastructure.Models.Entities.Products;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Product;
+using TechWayFit.Licensing.Management.Infrastructure.Data.Context;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Products;
 using TechWayFit.Licensing.Management.Core.Models.Product;
 
-namespace TechWayFit.Licensing.Infrastructure.Data.Repositories.Product;
+namespace TechWayFit.Licensing.Management.Infrastructure.Data.Repositories.Product;
 
 /// <summary>
 /// Product repository implementation

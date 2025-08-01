@@ -4,8 +4,8 @@ using Microsoft.Extensions.Caching.Memory;
 using System.Text.Json;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Core.Models.Settings;
-using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Settings;
-using TechWayFit.Licensing.Infrastructure.Models.Entities.Settings;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Settings;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Settings;
 
 namespace TechWayFit.Licensing.Management.Services.Implementations
 {

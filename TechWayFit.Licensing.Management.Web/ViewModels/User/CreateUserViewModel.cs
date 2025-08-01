@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using TechWayFit.Licensing.Management.Core.Models.User;
 
-namespace TechWayFit.Licensing.WebUI.ViewModels.User;
+namespace TechWayFit.Licensing.Management.Web.ViewModels.User;
 
 /// <summary>
 /// View model for creating a new user

@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
-using TechWayFit.Licensing.Infrastructure.Contracts.Repositories.Notification;
-using TechWayFit.Licensing.Infrastructure.Data.Context;
-using TechWayFit.Licensing.Infrastructure.Models.Entities.Notification;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Notification;
+using TechWayFit.Licensing.Management.Infrastructure.Data.Context;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Notification;
 using TechWayFit.Licensing.Management.Core.Models.Notification;
 
-namespace TechWayFit.Licensing.Infrastructure.Data.Repositories.Notification;
+namespace TechWayFit.Licensing.Management.Infrastructure.Data.Repositories.Notification;
 
 /// <summary>
 /// Notification history repository implementation

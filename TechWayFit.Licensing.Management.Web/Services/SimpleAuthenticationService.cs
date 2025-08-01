@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
 using CoreServices = TechWayFit.Licensing.Management.Core.Contracts.Services;
-using TechWayFit.Licensing.WebUI.Models.Authentication;
+using TechWayFit.Licensing.Management.Web.Models.Authentication;
 
-namespace TechWayFit.Licensing.WebUI.Services
+namespace TechWayFit.Licensing.Management.Web.Services
 {
     
 

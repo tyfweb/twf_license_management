@@ -17,7 +17,7 @@ NC='\033[0m' # No Color
 
 # Configuration
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-INFRASTRUCTURE_PROJECT="$PROJECT_DIR/TechWayFit.Licensing.Infrastructure.csproj"
+INFRASTRUCTURE_PROJECT="$PROJECT_DIR/TechWayFit.Licensing.Management.Infrastructure.csproj"
 MIGRATIONS_DIR="$PROJECT_DIR/Migrations"
 
 echo -e "${BLUE}Project Directory: $PROJECT_DIR${NC}"

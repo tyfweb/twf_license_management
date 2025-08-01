@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace TechWayFit.Licensing.Infrastructure.Models.Entities.Settings;
+namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Settings;
 
 /// <summary>
 /// Entity model for system settings storage

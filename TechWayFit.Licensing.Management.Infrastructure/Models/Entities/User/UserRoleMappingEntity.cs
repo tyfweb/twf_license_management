@@ -1,4 +1,4 @@
-namespace TechWayFit.Licensing.Infrastructure.Models.Entities.User;
+namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.User;
 
 /// <summary>
 /// Entity representing the mapping between users and roles
