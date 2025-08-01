@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using System.Data.Common;
 using TechWayFit.Licensing.Management.Core.Contracts.Services.OperationsDashboard;
+using TechWayFit.Licensing.Management.Core.Matrices;
 using TechWayFit.Licensing.Management.Web.Services;
 
 namespace TechWayFit.Licensing.Management.Web.Extensions
@@ -12,7 +13,7 @@ namespace TechWayFit.Licensing.Management.Web.Extensions
     {
         private readonly ILogger<EnhancedSqlInterceptor> _logger;
         private readonly IServiceProvider _serviceProvider;
-
+        private const int SlowQueryThresholdMs = 1; // Threshold for slow queries in milliseconds
         public EnhancedSqlInterceptor(
             ILogger<EnhancedSqlInterceptor> logger,
             IServiceProvider serviceProvider)
@@ -126,7 +127,7 @@ namespace TechWayFit.Licensing.Management.Web.Extensions
                 logArgs = logArgs.Append(result).ToArray();
             }
 
-            if (eventData.Duration.TotalMilliseconds > 1000) // Log slow queries as warnings
+            if (eventData.Duration.TotalMilliseconds > SlowQueryThresholdMs) // Log slow queries as warnings
             {
                 _logger.LogWarning(logMessage + " | ⚠️ SLOW QUERY", logArgs);
             }
@@ -147,19 +148,19 @@ namespace TechWayFit.Licensing.Management.Web.Extensions
                 if (metricsBuffer != null)
                 {
                     var duration = eventData.Duration.TotalMilliseconds;
-                    var isSlowQuery = duration > 1000;
+                    var isSlowQuery = duration > SlowQueryThresholdMs;
                     var table = ExtractTableName(command.CommandText);
 
                     // Add to in-memory buffer instead of immediate DB write
                     await metricsBuffer.AddQueryMetricAsync(new
-                    {
-                        queryType = queryType,
-                        executionTimeMs = (int)duration,
-                        tableName = table,
-                        isSlowQuery = isSlowQuery,
-                        parameterCount = command.Parameters.Count,
-                        commandText = TruncateCommandText(command.CommandText),
-                        timestamp = DateTime.UtcNow
+                    SqlMetric {
+                        QueryType = queryType,
+                        ExecutionTimeMs = (int)duration,
+                        TableName = table,
+                        IsSlowQuery = isSlowQuery,
+                        ParameterCount = command.Parameters.Count,
+                        CommandText = TruncateCommandText(command.CommandText),
+                        Timestamp = DateTime.UtcNow
                     });
                 }
             }
@@ -181,15 +182,17 @@ namespace TechWayFit.Licensing.Management.Web.Extensions
                 {
                     // Add to in-memory buffer instead of immediate DB write
                     await metricsBuffer.AddErrorMetricAsync(new
-                    {
-                        errorMessage = $"SQL Query Failed: {eventData.Exception?.Message}",
-                        errorLevel = "Error",
-                        queryType = GetQueryType(command.CommandText),
-                        executionTimeMs = (int)eventData.Duration.TotalMilliseconds,
-                        tableName = ExtractTableName(command.CommandText),
-                        commandText = TruncateCommandText(command.CommandText),
-                        exceptionType = eventData.Exception?.GetType().Name,
-                        timestamp = DateTime.UtcNow
+                    SqlMetric{
+                        ErrorMessage = $"SQL Query Failed: {eventData.Exception?.Message}",
+                        ErrorLevel = "Error",
+                        QueryType = GetQueryType(command.CommandText),
+                        ExecutionTimeMs = (int)eventData.Duration.TotalMilliseconds,
+                        TableName = ExtractTableName(command.CommandText),
+                        IsSlowQuery = eventData.Duration.TotalMilliseconds > SlowQueryThresholdMs,
+                        ParameterCount = command.Parameters.Count,
+                        CommandText = TruncateCommandText(command.CommandText),
+                        ExceptionType = eventData.Exception?.GetType().Name,
+                        Timestamp = DateTime.UtcNow 
                     });
                 }
             }

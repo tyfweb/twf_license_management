@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using TechWayFit.Licensing.Management.Core.Contracts.Services.OperationsDashboard;
+using TechWayFit.Licensing.Management.Core.Matrices;
 
 namespace TechWayFit.Licensing.Management.Web.Services
 {
@@ -101,7 +102,7 @@ namespace TechWayFit.Licensing.Management.Web.Services
             }
         }
 
-        public async Task AddQueryMetricAsync(object metricData)
+        public async Task AddQueryMetricAsync(SqlMetric metricData)
         {
             if (!_enableBuffering)
             {
@@ -424,7 +425,7 @@ namespace TechWayFit.Licensing.Management.Web.Services
             }
         }
 
-        private async Task FlushSingleQueryMetric(object metricData)
+        private async Task FlushSingleQueryMetric(SqlMetric metricData)
         {
             try
             {
@@ -505,7 +506,7 @@ namespace TechWayFit.Licensing.Management.Web.Services
 
     public class QueryMetricData
     {
-        public object Data { get; set; } = null!;
+        public SqlMetric Data { get; set; } = null!;
         public DateTime Timestamp { get; set; }
     }
 

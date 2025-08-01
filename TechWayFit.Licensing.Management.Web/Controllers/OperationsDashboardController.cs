@@ -237,6 +237,37 @@ public class OperationsDashboardController : Controller
     }
 
     /// <summary>
+    /// Query performance monitoring view
+    /// </summary>
+    /// <param name="hours">Number of hours to analyze (default: 24)</param>
+    /// <returns>Query performance view</returns>
+    [HttpGet("QueryPerformance")]
+    public async Task<IActionResult> QueryPerformance(int hours = 24)
+    {
+        try
+        {
+            var (startTime, endTime) = GetTimeRange(hours);
+
+            var viewModel = new QueryPerformanceViewModel
+            {
+                StartTime = startTime,
+                EndTime = endTime,
+                Hours = hours,
+                SlowestQueries = CastToEnumerable<QueryPerformanceMetricEntity>(await _dashboardService.GetSlowestQueriesAsync(20, startTime, endTime)),
+                QueryMetrics = CastToEnumerable<QueryPerformanceMetricEntity>(await _dashboardService.GetQueryPerformanceAsync(startTime, endTime)),
+                Configuration = GetDefaultConfiguration()
+            };
+
+            return View(viewModel);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error loading query performance data");
+            return View("Error");
+        }
+    }
+
+    /// <summary>
     /// Detailed reports view
     /// </summary>
     /// <param name="startDate">Start date for the report</param>

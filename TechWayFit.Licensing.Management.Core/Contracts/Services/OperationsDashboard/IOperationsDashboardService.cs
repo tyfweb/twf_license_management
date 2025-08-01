@@ -1,3 +1,5 @@
+using TechWayFit.Licensing.Management.Core.Matrices;
+
 namespace TechWayFit.Licensing.Management.Core.Contracts.Services.OperationsDashboard;
 
 /// <summary>
@@ -35,8 +37,8 @@ public interface IOperationsDashboardService
     Task<object> GetQueryPerformanceAsync(DateTime startTime, DateTime endTime);
     Task<object> GetSlowestQueriesAsync(int topCount = 10, DateTime? startTime = null, DateTime? endTime = null);
     Task<object> GetMostFrequentQueriesAsync(int topCount = 10, DateTime? startTime = null, DateTime? endTime = null);
-    Task<object> RecordQueryPerformanceAsync(object queryMetric);
-    Task<object> RecordQueryPerformanceBulkAsync(IEnumerable<object> queryMetrics);
+    Task<object> RecordQueryPerformanceAsync(SqlMetric queryMetric);
+    Task<object> RecordQueryPerformanceBulkAsync(IEnumerable<SqlMetric> queryMetrics);
     
     // System health methods
     Task<object> GetSystemHealthHistoryAsync(DateTime startTime, DateTime endTime);

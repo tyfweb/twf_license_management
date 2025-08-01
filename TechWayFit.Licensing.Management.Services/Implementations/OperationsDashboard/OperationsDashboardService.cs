@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using TechWayFit.Licensing.Management.Core.Matrices;
 
 namespace TechWayFit.Licensing.Management.Services.Implementations.OperationsDashboard;
 
@@ -628,25 +629,43 @@ public class OperationsDashboardService : IOperationsDashboardService
         }
     }
 
-    public async Task<object> RecordQueryPerformanceAsync(object queryMetric)
+    public async Task<object> RecordQueryPerformanceAsync(SqlMetric queryMetric)
     {
         try
         {
-            var json = JsonSerializer.Serialize(queryMetric);
-            var metric = JsonSerializer.Deserialize<QueryPerformanceMetricEntity>(json);
-            
-            if (metric != null)
+            // Create individual query performance record
+            var metric = new QueryPerformanceMetricEntity
             {
-                metric.QueryMetricId = Guid.NewGuid();
-                metric.CreatedOn = DateTime.UtcNow;
-                metric.CreatedBy = "System";
+                QueryMetricId = Guid.NewGuid(),
+                TimestampHour = new DateTime(queryMetric.Timestamp.Year, queryMetric.Timestamp.Month, 
+                    queryMetric.Timestamp.Day, queryMetric.Timestamp.Hour, 0, 0, DateTimeKind.Utc),
+                QueryHash = GenerateQueryHash(queryMetric.CommandText),
+                QueryType = queryMetric.QueryType,
+                TableNames = queryMetric.TableName,
+                QuerySample = queryMetric.CommandText,
+                
+                // For individual records, set counts to 1 and direct values
+                ExecutionCount = 1,
+                TotalExecutionTimeMs = queryMetric.ExecutionTimeMs,
+                AvgExecutionTimeMs = queryMetric.ExecutionTimeMs,
+                MinExecutionTimeMs = queryMetric.ExecutionTimeMs,
+                MaxExecutionTimeMs = queryMetric.ExecutionTimeMs,
+                SlowQueryCount = queryMetric.IsSlowQuery ? 1 : 0,
+                VerySlowQueryCount = queryMetric.ExecutionTimeMs > 5000 ? 1 : 0,
+                TimeoutCount = 0, // This would come from exception handling
+                
+                // Optimization suggestions
+                NeedsOptimization = queryMetric.IsSlowQuery || queryMetric.ExecutionTimeMs > 2000,
+                OptimizationNotes = queryMetric.IsSlowQuery ? "Query execution time exceeds threshold" : null,
+                
+                CreatedOn = DateTime.UtcNow,
+                CreatedBy = "System"
+            };
 
-                var result = await _queryPerformanceMetricRepository.CreateAsync(metric);
-                _logger.LogInformation("Recorded query performance metric {QueryId}", result.QueryMetricId);
-                return result;
-            }
-
-            throw new ArgumentException("Invalid query performance metric data");
+            var result = await _queryPerformanceMetricRepository.CreateAsync(metric);
+            _logger.LogInformation("Recorded individual query performance metric {QueryId} - {QueryType} took {ExecutionTimeMs}ms", 
+                result.QueryMetricId, queryMetric.QueryType, queryMetric.ExecutionTimeMs);
+            return result;
         }
         catch (Exception ex)
         {
@@ -655,7 +674,7 @@ public class OperationsDashboardService : IOperationsDashboardService
         }
     }
 
-    public async Task<object> RecordQueryPerformanceBulkAsync(IEnumerable<object> queryMetrics)
+    public async Task<object> RecordQueryPerformanceBulkAsync(IEnumerable<SqlMetric> queryMetrics)
     {
         try
         {
@@ -663,22 +682,41 @@ public class OperationsDashboardService : IOperationsDashboardService
             
             foreach (var queryMetric in queryMetrics)
             {
-                var json = JsonSerializer.Serialize(queryMetric);
-                var metric = JsonSerializer.Deserialize<QueryPerformanceMetricEntity>(json);
-                
-                if (metric != null)
+                var metric = new QueryPerformanceMetricEntity
                 {
-                    metric.QueryMetricId = Guid.NewGuid();
-                    metric.CreatedOn = DateTime.UtcNow;
-                    metric.CreatedBy = "System";
-                    entities.Add(metric);
-                }
+                    QueryMetricId = Guid.NewGuid(),
+                    TimestampHour = new DateTime(queryMetric.Timestamp.Year, queryMetric.Timestamp.Month, 
+                        queryMetric.Timestamp.Day, queryMetric.Timestamp.Hour, 0, 0, DateTimeKind.Utc),
+                    QueryHash = GenerateQueryHash(queryMetric.CommandText),
+                    QueryType = queryMetric.QueryType,
+                    TableNames = queryMetric.TableName,
+                    QuerySample = queryMetric.CommandText,
+                    
+                    // For individual records, set counts to 1 and direct values
+                    ExecutionCount = 1,
+                    TotalExecutionTimeMs = queryMetric.ExecutionTimeMs,
+                    AvgExecutionTimeMs = queryMetric.ExecutionTimeMs,
+                    MinExecutionTimeMs = queryMetric.ExecutionTimeMs,
+                    MaxExecutionTimeMs = queryMetric.ExecutionTimeMs,
+                    SlowQueryCount = queryMetric.IsSlowQuery ? 1 : 0,
+                    VerySlowQueryCount = queryMetric.ExecutionTimeMs > 5000 ? 1 : 0,
+                    TimeoutCount = 0,
+                    
+                    // Optimization suggestions
+                    NeedsOptimization = queryMetric.IsSlowQuery || queryMetric.ExecutionTimeMs > 2000,
+                    OptimizationNotes = queryMetric.IsSlowQuery ? "Query execution time exceeds threshold" : null,
+                    
+                    CreatedOn = DateTime.UtcNow,
+                    CreatedBy = "System"
+                };
+                
+                entities.Add(metric);
             }
 
             if (entities.Count > 0)
             {
                 await _queryPerformanceMetricRepository.CreateBulkAsync(entities);
-                _logger.LogInformation("Bulk recorded {Count} query performance metrics", entities.Count);
+                _logger.LogInformation("Bulk recorded {Count} individual query performance metrics", entities.Count);
                 return new { RecordCount = entities.Count, Message = "Bulk insert successful" };
             }
 
@@ -1145,6 +1183,17 @@ public class OperationsDashboardService : IOperationsDashboardService
     {
         using var sha256 = SHA256.Create();
         var hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(errorMessage));
+        return Convert.ToHexString(hashBytes)[..16]; // Use first 16 characters
+    }
+
+    private static string GenerateQueryHash(string queryText)
+    {
+        // Normalize query for hashing (remove extra whitespace, normalize case)
+        var normalized = string.Join(" ", queryText.Split(new[] { ' ', '\t', '\n', '\r' }, 
+            StringSplitOptions.RemoveEmptyEntries)).ToLowerInvariant();
+        
+        using var sha256 = SHA256.Create();
+        var hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(normalized));
         return Convert.ToHexString(hashBytes)[..16]; // Use first 16 characters
     }
 }
