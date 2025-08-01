@@ -1,0 +1,476 @@
+@{
+    ViewData["Title"] = "Operations Reports";
+    Layout = "~/Views/Shared/_LicenseHubLayout.cshtml";
+}
+
+<div class="container-fluid py-3">
+    <!-- Header Section -->
+    <div class="header mb-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="mb-1">Operations Reports</h2>
+                <p class="text-muted mb-0">Generate and view comprehensive operational reports and analytics.</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+                </a>
+                <button class="btn btn-outline-primary" onclick="generateReport()">
+                    <i class="fas fa-cogs me-1"></i>Generate Report
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Options -->
+    <div class="row g-2 mb-3">
+        <div class="col-sm-6 col-lg-3">
+            <div class="stats-card stats-card-info hover-card">
+                <div class="stats-row-1">
+                    <div class="stats-icon">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <div class="stats-number">Performance</div>
+                </div>
+                <div class="stats-row-2">
+                    <div class="stats-label">System Performance Report</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="stats-card stats-card-danger hover-card">
+                <div class="stats-row-1">
+                    <div class="stats-icon">
+                        <i class="fas fa-bug"></i>
+                    </div>
+                    <div class="stats-number">Errors</div>
+                </div>
+                <div class="stats-row-2">
+                    <div class="stats-label">Error Analysis Report</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="stats-card stats-card-success hover-card">
+                <div class="stats-row-1">
+                    <div class="stats-icon">
+                        <i class="fas fa-heartbeat"></i>
+                    </div>
+                    <div class="stats-number">Health</div>
+                </div>
+                <div class="stats-row-2">
+                    <div class="stats-label">System Health Report</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="stats-card stats-card-warning hover-card">
+                <div class="stats-row-1">
+                    <div class="stats-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stats-number">Usage</div>
+                </div>
+                <div class="stats-row-2">
+                    <div class="stats-label">Usage Analytics Report</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Generation Form -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <h5><i class="fas fa-file-alt me-2"></i>Generate Custom Report</h5>
+                </div>
+                <div class="section-content">
+                    <form id="reportForm">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label for="reportType" class="form-label">Report Type</label>
+                                <select class="form-select" id="reportType" name="reportType">
+                                    <option value="performance">Performance Report</option>
+                                    <option value="errors">Error Analysis</option>
+                                    <option value="health">System Health</option>
+                                    <option value="usage">Usage Analytics</option>
+                                    <option value="comprehensive">Comprehensive Report</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="dateRange" class="form-label">Date Range</label>
+                                <select class="form-select" id="dateRange" name="dateRange">
+                                    <option value="1">Last 24 Hours</option>
+                                    <option value="7">Last 7 Days</option>
+                                    <option value="30" selected>Last 30 Days</option>
+                                    <option value="90">Last 90 Days</option>
+                                    <option value="custom">Custom Range</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="format" class="form-label">Export Format</label>
+                                <select class="form-select" id="format" name="format">
+                                    <option value="pdf">PDF Report</option>
+                                    <option value="excel">Excel Spreadsheet</option>
+                                    <option value="csv">CSV Data</option>
+                                    <option value="html">HTML Report</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="includeCharts" class="form-label">Include Charts</label>
+                                <select class="form-select" id="includeCharts" name="includeCharts">
+                                    <option value="true" selected>Yes, Include Charts</option>
+                                    <option value="false">No, Data Only</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row g-3 mt-2" id="customDateRange" style="display: none;">
+                            <div class="col-md-6">
+                                <label for="startDate" class="form-label">Start Date</label>
+                                <input type="date" class="form-control" id="startDate" name="startDate">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="endDate" class="form-label">End Date</label>
+                                <input type="date" class="form-control" id="endDate" name="endDate">
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary me-2">
+                                    <i class="fas fa-file-download me-1"></i>Generate & Download Report
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="scheduleReport()">
+                                    <i class="fas fa-clock me-1"></i>Schedule Report
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Reports -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <h5><i class="fas fa-history me-2"></i>Recent Reports</h5>
+                </div>
+                <div class="section-content">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Report Name</th>
+                                    <th>Type</th>
+                                    <th>Generated On</th>
+                                    <th>Date Range</th>
+                                    <th>Format</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentReportsTable">
+                                <tr>
+                                    <td>
+                                        <div class="fw-bold">Monthly Performance Report</div>
+                                        <small class="text-muted">Comprehensive performance analysis</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">Performance</span>
+                                    </td>
+                                    <td>
+                                        <small>Jan 31, 2025 - 09:30 AM</small>
+                                    </td>
+                                    <td>
+                                        <small>Jan 1-31, 2025</small>
+                                    </td>
+                                    <td>
+                                        <i class="fas fa-file-pdf text-danger me-1"></i>PDF
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check me-1"></i>Completed
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <button class="btn btn-outline-primary" onclick="downloadReport('report1')" title="Download">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <button class="btn btn-outline-info" onclick="viewReport('report1')" title="View">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-secondary" onclick="shareReport('report1')" title="Share">
+                                                <i class="fas fa-share"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="fw-bold">Weekly Error Analysis</div>
+                                        <small class="text-muted">Error patterns and resolution tracking</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-danger">Error Analysis</span>
+                                    </td>
+                                    <td>
+                                        <small>Jan 30, 2025 - 02:15 PM</small>
+                                    </td>
+                                    <td>
+                                        <small>Jan 24-30, 2025</small>
+                                    </td>
+                                    <td>
+                                        <i class="fas fa-file-excel text-success me-1"></i>Excel
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check me-1"></i>Completed
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <button class="btn btn-outline-primary" onclick="downloadReport('report2')" title="Download">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <button class="btn btn-outline-info" onclick="viewReport('report2')" title="View">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-secondary" onclick="shareReport('report2')" title="Share">
+                                                <i class="fas fa-share"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="fw-bold">System Health Dashboard</div>
+                                        <small class="text-muted">Daily health monitoring summary</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success">Health</span>
+                                    </td>
+                                    <td>
+                                        <small>Jan 30, 2025 - 08:00 AM</small>
+                                    </td>
+                                    <td>
+                                        <small>Jan 29-30, 2025</small>
+                                    </td>
+                                    <td>
+                                        <i class="fas fa-code text-primary me-1"></i>HTML
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-warning">
+                                            <i class="fas fa-clock me-1"></i>Processing
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <button class="btn btn-outline-primary" disabled title="Processing">
+                                                <i class="fas fa-spinner fa-spin"></i>
+                                            </button>
+                                            <button class="btn btn-outline-secondary" onclick="cancelReport('report3')" title="Cancel">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <h5><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+                </div>
+                <div class="section-content">
+                    <div class="d-flex gap-1 flex-wrap">
+                        <button class="btn btn-outline-primary flex-fill" onclick="generateQuickReport('performance')">
+                            <i class="fas fa-chart-line me-1"></i><span class="d-none d-lg-inline">Performance </span>Report
+                        </button>
+                        <button class="btn btn-outline-danger flex-fill" onclick="generateQuickReport('errors')">
+                            <i class="fas fa-bug me-1"></i><span class="d-none d-lg-inline">Error </span>Report
+                        </button>
+                        <button class="btn btn-outline-success flex-fill" onclick="generateQuickReport('health')">
+                            <i class="fas fa-heartbeat me-1"></i><span class="d-none d-lg-inline">Health </span>Report
+                        </button>
+                        <button class="btn btn-outline-info flex-fill" onclick="generateQuickReport('usage')">
+                            <i class="fas fa-users me-1"></i><span class="d-none d-lg-inline">Usage </span>Report
+                        </button>
+                        <button class="btn btn-outline-secondary flex-fill" onclick="scheduleAllReports()">
+                            <i class="fas fa-calendar me-1"></i><span class="d-none d-lg-inline">Schedule </span>All
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Templates -->
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm hover-card">
+                <div class="card-body text-center">
+                    <div class="h2 text-primary mb-3">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <h5 class="card-title">Executive Summary</h5>
+                    <p class="card-text text-muted">High-level overview for management and stakeholders.</p>
+                    <button class="btn btn-primary" onclick="generateExecutiveReport()">
+                        <i class="fas fa-file-alt me-1"></i>Generate Report
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm hover-card">
+                <div class="card-body text-center">
+                    <div class="h2 text-info mb-3">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <h5 class="card-title">Technical Report</h5>
+                    <p class="card-text text-muted">Detailed technical analysis for development teams.</p>
+                    <button class="btn btn-info" onclick="generateTechnicalReport()">
+                        <i class="fas fa-file-code me-1"></i>Generate Report
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm hover-card">
+                <div class="card-body text-center">
+                    <div class="h2 text-success mb-3">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <h5 class="card-title">Scheduled Reports</h5>
+                    <p class="card-text text-muted">Set up automated recurring reports and notifications.</p>
+                    <button class="btn btn-success" onclick="manageScheduledReports()">
+                        <i class="fas fa-calendar-alt me-1"></i>Manage Schedule
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Handle date range selection
+        document.getElementById('dateRange').addEventListener('change', function() {
+            const customDateRange = document.getElementById('customDateRange');
+            if (this.value === 'custom') {
+                customDateRange.style.display = 'block';
+            } else {
+                customDateRange.style.display = 'none';
+            }
+        });
+
+        // Handle report form submission
+        document.getElementById('reportForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            generateCustomReport();
+        });
+
+        function generateCustomReport() {
+            const formData = new FormData(document.getElementById('reportForm'));
+            const reportType = formData.get('reportType');
+            const dateRange = formData.get('dateRange');
+            const format = formData.get('format');
+            
+            // Show loading state
+            const submitBtn = document.querySelector('#reportForm button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Generating...';
+            submitBtn.disabled = true;
+            
+            // Simulate report generation
+            setTimeout(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                alert(`${reportType.charAt(0).toUpperCase() + reportType.slice(1)} report generated successfully in ${format.toUpperCase()} format!`);
+                
+                // Add to recent reports table (in real implementation, this would be server-side)
+                addToRecentReports(reportType, format);
+            }, 2000);
+        }
+
+        function generateQuickReport(type) {
+            alert(`Generating quick ${type} report for the last 7 days...`);
+        }
+
+        function generateReport() {
+            alert('Opening report generation wizard...');
+        }
+
+        function scheduleReport() {
+            alert('Opening report scheduling interface...');
+        }
+
+        function downloadReport(reportId) {
+            alert(`Downloading report: ${reportId}`);
+        }
+
+        function viewReport(reportId) {
+            alert(`Opening report viewer for: ${reportId}`);
+        }
+
+        function shareReport(reportId) {
+            alert(`Opening sharing options for: ${reportId}`);
+        }
+
+        function cancelReport(reportId) {
+            if (confirm('Cancel report generation?')) {
+                alert(`Report ${reportId} generation cancelled`);
+            }
+        }
+
+        function generateExecutiveReport() {
+            alert('Generating executive summary report...');
+        }
+
+        function generateTechnicalReport() {
+            alert('Generating technical analysis report...');
+        }
+
+        function manageScheduledReports() {
+            alert('Opening scheduled reports management...');
+        }
+
+        function scheduleAllReports() {
+            alert('Setting up automated scheduling for all report types...');
+        }
+
+        function addToRecentReports(type, format) {
+            // This would be implemented to update the recent reports table
+            console.log(`Added ${type} report in ${format} format to recent reports`);
+        }
+
+        // Hover effects for cards
+        document.addEventListener('DOMContentLoaded', function() {
+            const hoverCards = document.querySelectorAll('.hover-card');
+            hoverCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-2px)';
+                    this.style.transition = 'all 0.3s ease';
+                });
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+        });
+    </script>
+}

@@ -33,6 +33,10 @@ using Serilog;
 using Serilog.Events;
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.User;
 using TechWayFit.Licensing.Management.Infrastructure.Implementations.Repositories.User;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.OperationsDashboard;
+using TechWayFit.Licensing.Management.Infrastructure.Implementations.Repositories.OperationsDashboard;
+using TechWayFit.Licensing.Management.Core.Contracts.Services.OperationsDashboard;
+using TechWayFit.Licensing.Management.Services.Implementations.OperationsDashboard;
 using TechWayFit.Licensing.Management.Web.Extensions;
 using TechWayFit.Licensing.Management.Web.Middleware;
 
@@ -190,6 +194,13 @@ static void RegisterRepositories(WebApplicationBuilder builder)
     builder.Services.AddScoped<IUserProfileRepository, UserProfileRepository>();
     builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
     builder.Services.AddScoped<IUserRoleMappingRepository, UserRoleMappingRepository>();
+    
+    // Register operations dashboard repositories
+    builder.Services.AddScoped<ISystemMetricRepository, SystemMetricRepository>();
+    builder.Services.AddScoped<IErrorLogSummaryRepository, ErrorLogSummaryRepository>();
+    builder.Services.AddScoped<IPagePerformanceMetricRepository, PagePerformanceMetricRepository>();
+    builder.Services.AddScoped<IQueryPerformanceMetricRepository, QueryPerformanceMetricRepository>();
+    builder.Services.AddScoped<ISystemHealthSnapshotRepository, SystemHealthSnapshotRepository>();
 }
 
 static void RegisterServices(WebApplicationBuilder builder)
@@ -220,6 +231,9 @@ static void RegisterServices(WebApplicationBuilder builder)
 
     // Step 9: User management services
     builder.Services.AddScoped<IUserService, UserService>();
+
+    // Step 10: Operations Dashboard services
+    builder.Services.AddScoped<IOperationsDashboardService, OperationsDashboardService>();
 
     // Register authentication service
     builder.Services.AddScoped<IAuthenticationService, AccountService>();

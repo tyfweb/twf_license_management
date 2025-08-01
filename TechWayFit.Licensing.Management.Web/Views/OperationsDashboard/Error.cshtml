@@ -1,0 +1,36 @@
+@{
+    ViewData["Title"] = "Error";
+    Layout = "~/Views/Shared/_LicenseHubLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        An Error Occurred
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger" role="alert">
+                        <h6 class="alert-heading">Oops! Something went wrong.</h6>
+                        <p>We encountered an unexpected error while processing your request. Please try again later or contact support if the problem persists.</p>
+                        <hr>
+                        <div class="d-flex justify-content-between">
+                            <a href="@Url.Action("Index", "OperationsDashboard")" class="btn btn-primary">
+                                <i class="fas fa-tachometer-alt mr-1"></i>
+                                Return to Dashboard
+                            </a>
+                            <a href="javascript:history.back()" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left mr-1"></i>
+                                Go Back
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
