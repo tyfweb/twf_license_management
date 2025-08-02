@@ -1,0 +1,105 @@
+# Docker ignore file for TechWayFit Licensing Management System
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+docs/
+README.md
+*.md
+
+# IDE and Editor files
+.vs/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Build outputs
+**/bin/
+**/obj/
+**/out/
+**/publish/
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+nupkgs/
+
+# Test results
+TestResults/
+**/*.trx
+**/*.coverage
+**/*.coveragexml
+
+# Logs
+**/Logs/
+**/*.log
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+**/temp/
+**/tmp/
+**/*.tmp
+**/*.temp
+
+# Node modules (if any)
+node_modules/
+npm-debug.log*
+
+# Environment files
+**/.env
+**/.env.local
+**/.env.*.local
+
+# Keys (security)
+**/Keys/
+**/*.key
+**/*.pem
+**/*.p12
+**/*.pfx
+
+# Database files
+**/*.db
+**/*.sqlite
+**/*.sqlite3
+
+# Docker files (don't copy docker files into image)
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Build and deployment scripts
+builds/
+*.sh
+*.ps1
+*.bat
+*.cmd
+
+# Tests (exclude test projects from production image)
+**/Tests/
+**/*Test*/
+**/*Tests*/
+**/*.Test/
+**/*.Tests/
+tests/
+
+# Local development files
+appsettings.Development.json
+appsettings.Local.json
+
+# Backup files
+*.bak
+*.backup

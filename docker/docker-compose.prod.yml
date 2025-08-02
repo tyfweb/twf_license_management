@@ -1,0 +1,157 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database with production settings
+  postgres:
+    image: postgres:15-alpine
+    container_name: techway-licensing-db-prod
+    environment:
+      POSTGRES_DB: techway_licensing_prod
+      POSTGRES_USER: licensing_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+      - ../source/Database/Scripts:/docker-entrypoint-initdb.d:ro
+      - ./postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf
+    networks:
+      - techway-network-prod
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U licensing_user -d techway_licensing_prod"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 1G
+          cpus: '0.5'
+
+  # TechWayFit Licensing Management Web Application
+  licensing-web:
+    image: techway/licensing-management:latest
+    container_name: techway-licensing-web-prod
+    environment:
+      # Database Configuration
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=techway_licensing_prod;Username=licensing_user;Password=${POSTGRES_PASSWORD};SSL Mode=Require;Trust Server Certificate=false
+      
+      # Application Configuration
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - ASPNETCORE_HTTP_PORTS=8080
+      
+      # License Configuration
+      - LicenseConfiguration__KeyStoragePath=/app/Keys
+      - LicenseConfiguration__LoggingPath=/app/Logs
+      - LicenseConfiguration__DefaultValidityDays=365
+      - LicenseConfiguration__GracePeriodDays=30
+      - LicenseConfiguration__EnableAuditLogging=true
+      
+      # Security Configuration
+      - Security__RequireHttps=true
+      - Security__CookieSecure=true
+      - Security__SessionTimeout=20
+      - Security__EnableRateLimiting=true
+      
+      # Caching Configuration
+      - Caching__Provider=Redis
+      - Caching__Redis__ConnectionString=redis:6379
+      - Caching__Redis__Password=${REDIS_PASSWORD}
+      
+      # Logging Configuration
+      - Logging__LogLevel__Default=Warning
+      - Logging__LogLevel__TechWayFit=Information
+      - Logging__LogLevel__Microsoft.AspNetCore=Error
+      - Logging__LogLevel__Microsoft.EntityFrameworkCore=Error
+      
+    volumes:
+      - licensing_keys_prod:/app/Keys
+      - licensing_logs_prod:/app/Logs
+    networks:
+      - techway-network-prod
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+        reservations:
+          memory: 512M
+          cpus: '0.25'
+
+  # Redis Cache for production
+  redis:
+    image: redis:7-alpine
+    container_name: techway-licensing-cache-prod
+    command: redis-server /etc/redis/redis.conf
+    volumes:
+      - redis_data_prod:/data
+      - ./redis/redis.conf:/etc/redis/redis.conf:ro
+    networks:
+      - techway-network-prod
+    restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.25'
+        reservations:
+          memory: 256M
+          cpus: '0.1'
+
+  # Nginx Reverse Proxy (Optional)
+  nginx:
+    image: nginx:alpine
+    container_name: techway-licensing-nginx-prod
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - techway-network-prod
+    depends_on:
+      - licensing-web
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  techway-network-prod:
+    driver: bridge
+    name: techway-licensing-network-prod
+
+volumes:
+  postgres_data_prod:
+    name: techway-licensing-postgres-data-prod
+  licensing_keys_prod:
+    name: techway-licensing-keys-prod
+  licensing_logs_prod:
+    name: techway-licensing-logs-prod
+  redis_data_prod:
+    name: techway-licensing-redis-data-prod

@@ -53,6 +53,13 @@ two_license_management/
 │   ├── build.ps1                       # PowerShell build script
 │   ├── build.sh                        # Shell build script
 │   └── GITHUB_WORKFLOW.yml            # GitHub Actions workflow
+├── docker/                             # Docker Containerization
+│   ├── Dockerfile                      # Multi-stage Docker build
+│   ├── docker-compose.yml             # Development deployment
+│   ├── docker-compose.prod.yml        # Production deployment
+│   ├── build.sh / build.ps1           # Docker build scripts
+│   ├── deploy.sh                       # Deployment automation
+│   └── README.md                       # Docker documentation
 └── tests/                              # Test Files & Configurations
     ├── test.html                       # Test web page
     ├── create-postgresql-database.sql  # Database setup script
@@ -62,7 +69,49 @@ two_license_management/
 
 ## Quick Start
 
-### 1. Generate a License (Internal Tool)
+### Docker Deployment (Recommended)
+
+The fastest way to get started is using Docker:
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd two_license_management
+
+# Navigate to docker directory
+cd docker
+
+# Copy and configure environment
+cp .env.template .env
+# Edit .env with your configuration
+
+# Build and deploy
+./build.sh
+./deploy.sh development
+```
+
+Access the application at: http://localhost:8080
+
+### Manual Development Setup
+
+1. **Prerequisites**:
+   - .NET 8 SDK
+   - PostgreSQL 15+
+   - Node.js (for frontend assets)
+
+2. **Database Setup**:
+   ```bash
+   # Create database using provided script
+   psql -U postgres -f tests/create-postgresql-database.sql
+   ```
+
+3. **Build and Run**:
+   ```bash
+   cd source
+   dotnet restore
+   dotnet build
+   dotnet run --project TechWayFit.Licensing.Management.Web
+   ```
 
 ```bash
 # Build the license generator

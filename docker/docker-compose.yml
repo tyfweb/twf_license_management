@@ -1,0 +1,107 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: techway-licensing-db
+    environment:
+      POSTGRES_DB: techway_licensing
+      POSTGRES_USER: licensing_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-SecureP@ssw0rd123!}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../source/Database/Scripts:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - techway-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U licensing_user -d techway_licensing"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # TechWayFit Licensing Management Web Application
+  licensing-web:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: techway-licensing-web
+    environment:
+      # Database Configuration
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=techway_licensing;Username=licensing_user;Password=${POSTGRES_PASSWORD:-SecureP@ssw0rd123!};SSL Mode=Prefer;Trust Server Certificate=true
+      
+      # Application Configuration
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - ASPNETCORE_HTTP_PORTS=8080
+      
+      # License Configuration
+      - LicenseConfiguration__KeyStoragePath=/app/Keys
+      - LicenseConfiguration__LoggingPath=/app/Logs
+      - LicenseConfiguration__DefaultValidityDays=365
+      - LicenseConfiguration__GracePeriodDays=30
+      
+      # Security Configuration
+      - Security__RequireHttps=false
+      - Security__CookieSecure=false
+      - Security__SessionTimeout=30
+      
+      # Logging Configuration
+      - Logging__LogLevel__Default=Information
+      - Logging__LogLevel__Microsoft.AspNetCore=Warning
+      - Logging__LogLevel__Microsoft.EntityFrameworkCore=Warning
+      
+    volumes:
+      - licensing_keys:/app/Keys
+      - licensing_logs:/app/Logs
+    ports:
+      - "8080:8080"
+    networks:
+      - techway-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Redis Cache (Optional - for performance)
+  redis:
+    image: redis:7-alpine
+    container_name: techway-licensing-cache
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-RedisP@ssw0rd123!}
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - techway-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+networks:
+  techway-network:
+    driver: bridge
+    name: techway-licensing-network
+
+volumes:
+  postgres_data:
+    name: techway-licensing-postgres-data
+  licensing_keys:
+    name: techway-licensing-keys
+  licensing_logs:
+    name: techway-licensing-logs
+  redis_data:
+    name: techway-licensing-redis-data
