@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>TechWayFit.Licensing.Management.Infrastructure.PostgreSql</AssemblyName>
+    <RootNamespace>TechWayFit.Licensing.Management.Infrastructure.PostgreSql</RootNamespace>
+
+    <!-- Assembly Information -->
+    <AssemblyTitle>TechWayFit Licensing Management Infrastructure PostgreSQL</AssemblyTitle>
+    <AssemblyDescription>PostgreSQL database provider for TechWayFit licensing management system</AssemblyDescription>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.7" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.7" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.7" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.7" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.7" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.7" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.7" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.3" />
+    <PackageReference Include="EFCore.NamingConventions" Version="9.0.0" />
+    <PackageReference Include="AutoMapper" Version="15.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../TechWayFit.Licensing.Management.Core/TechWayFit.Licensing.Management.Core.csproj" />
+    <ProjectReference Include="../TechWayFit.Licensing.Management.Infrastructure/TechWayFit.Licensing.Management.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

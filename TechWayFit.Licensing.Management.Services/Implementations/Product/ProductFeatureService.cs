@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
-using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Product;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Data;
 using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Products;
 using TechWayFit.Licensing.Management.Infrastructure.Models.Search;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
@@ -14,14 +14,14 @@ namespace TechWayFit.Licensing.Management.Services.Implementations.Product;
 /// </summary>
 public class ProductFeatureService : IProductFeatureService
 {
-    private readonly IProductFeatureRepository _productFeatureRepository;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<ProductFeatureService> _logger;
 
     public ProductFeatureService(
-        IProductFeatureRepository productFeatureRepository,
+        IUnitOfWork unitOfWork,
         ILogger<ProductFeatureService> logger)
     {
-        _productFeatureRepository = productFeatureRepository ?? throw new ArgumentNullException(nameof(productFeatureRepository));
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -62,7 +62,8 @@ public class ProductFeatureService : IProductFeatureService
             entity.UpdatedOn = DateTime.UtcNow;
 
             // Save to repository
-            var createdEntity = await _productFeatureRepository.AddAsync(entity);
+            var createdEntity = await _unitOfWork.ProductFeatures.AddAsync(entity);
+            await _unitOfWork.SaveChangesAsync();
             
             // Map back to model
             var result = createdEntity.ToModel();
@@ -93,7 +94,7 @@ public class ProductFeatureService : IProductFeatureService
             throw new ArgumentException("FeatureId cannot be null or empty", nameof(feature.FeatureId));
 
         // Check if exists
-        var existingEntity = await _productFeatureRepository.GetByIdAsync(feature.FeatureId);
+        var existingEntity = await _unitOfWork.ProductFeatures.GetByIdAsync(feature.FeatureId);
         if (existingEntity == null)
         {
             throw new InvalidOperationException($"Product feature with ID {feature.FeatureId} not found");
@@ -128,7 +129,8 @@ public class ProductFeatureService : IProductFeatureService
             existingEntity.UpdatedOn = DateTime.UtcNow;
 
             // Update in repository
-            var updatedEntity = await _productFeatureRepository.UpdateAsync(existingEntity);
+            var updatedEntity = await _unitOfWork.ProductFeatures.UpdateAsync(existingEntity);
+            await _unitOfWork.SaveChangesAsync();
             
             // Map back to model
             var result = updatedEntity.ToModel();
@@ -153,7 +155,7 @@ public class ProductFeatureService : IProductFeatureService
 
         try
         {
-            var entity = await _productFeatureRepository.GetByIdAsync(featureId);
+            var entity = await _unitOfWork.ProductFeatures.GetByIdAsync(featureId);
             return entity?.ToModel();
         }
         catch (Exception ex)
@@ -184,7 +186,7 @@ public class ProductFeatureService : IProductFeatureService
                 }
             };
             
-            var searchResult = await _productFeatureRepository.SearchAsync(searchRequest);
+            var searchResult = await _unitOfWork.ProductFeatures.SearchAsync(searchRequest);
             return searchResult.Results.Select(e => e.ToModel());
         }
         catch (Exception ex)
@@ -217,7 +219,7 @@ public class ProductFeatureService : IProductFeatureService
                 }
             };
             
-            var searchResult = await _productFeatureRepository.SearchAsync(searchRequest);
+            var searchResult = await _unitOfWork.ProductFeatures.SearchAsync(searchRequest);
             var entity = searchResult.Results.FirstOrDefault();
             return entity?.ToModel();
         }
@@ -240,7 +242,7 @@ public class ProductFeatureService : IProductFeatureService
 
         try
         {
-            var entity = await _productFeatureRepository.GetByIdAsync(featureId);
+            var entity = await _unitOfWork.ProductFeatures.GetByIdAsync(featureId);
             if (entity == null)
             {
                 _logger.LogWarning("Product feature not found for deletion: {FeatureId}", featureId);
@@ -250,7 +252,8 @@ public class ProductFeatureService : IProductFeatureService
             // TODO: Check for related license features before deletion
             _logger.LogWarning("Delete operation should check for related license features first");
 
-            await _productFeatureRepository.DeleteAsync(featureId);
+            await _unitOfWork.ProductFeatures.DeleteAsync(featureId);
+            await _unitOfWork.SaveChangesAsync();
             
             _logger.LogInformation("Successfully deleted product feature: {FeatureId}", featureId);
             return true;
@@ -272,7 +275,7 @@ public class ProductFeatureService : IProductFeatureService
 
         try
         {
-            var entity = await _productFeatureRepository.GetByIdAsync(featureId);
+            var entity = await _unitOfWork.ProductFeatures.GetByIdAsync(featureId);
             return entity != null;
         }
         catch (Exception ex)
@@ -308,7 +311,7 @@ public class ProductFeatureService : IProductFeatureService
                 searchRequest.Filters.Add(f => f.FeatureId != excludeFeatureId);
             }
             
-            var searchResult = await _productFeatureRepository.SearchAsync(searchRequest);
+            var searchResult = await _unitOfWork.ProductFeatures.SearchAsync(searchRequest);
             return searchResult.Results.Any();
         }
         catch (Exception ex)
@@ -402,7 +405,7 @@ public class ProductFeatureService : IProductFeatureService
                 _logger.LogWarning("Feature type filtering not implemented - FeatureType property missing in entity");
             }
             
-            var searchResult = await _productFeatureRepository.SearchAsync(searchRequest);
+            var searchResult = await _unitOfWork.ProductFeatures.SearchAsync(searchRequest);
             return searchResult.Results.Select(e => e.ToModel());
         }
         catch (Exception ex)
@@ -439,7 +442,7 @@ public class ProductFeatureService : IProductFeatureService
                 _logger.LogWarning("Feature type filtering not implemented - FeatureType property missing in entity");
             }
             
-            var searchResult = await _productFeatureRepository.SearchAsync(searchRequest);
+            var searchResult = await _unitOfWork.ProductFeatures.SearchAsync(searchRequest);
             return searchResult.TotalCount;
         }
         catch (Exception ex)
@@ -550,7 +553,7 @@ public class ProductFeatureService : IProductFeatureService
                 Filters = new List<Expression<Func<ProductFeatureEntity, bool>>>()
             };
             
-            var searchResult = await _productFeatureRepository.SearchAsync(searchRequest);
+            var searchResult = await _unitOfWork.ProductFeatures.SearchAsync(searchRequest);
             var features = searchResult.Results;
 
             // Basic statistics

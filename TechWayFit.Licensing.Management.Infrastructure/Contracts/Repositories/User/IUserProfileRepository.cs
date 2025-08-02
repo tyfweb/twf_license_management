@@ -82,4 +82,15 @@ public interface IUserProfileRepository : IBaseRepository<UserProfileEntity>
     /// <param name="password"></param>
     /// <returns></returns>
     Task<bool> ValidatePasswordAsync(string username, string password);
+    /// <summary>
+    /// Gets a user profile by ID
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    Task<UserProfileEntity?> GetByIdAsync(Guid userId);
+    /// <summary>
+    /// Gets all available departments from user profiles
+    /// </summary>
+    /// <returns></returns>
+    Task<IEnumerable<string>> GetAvailableDepartmentsAsync();
 }

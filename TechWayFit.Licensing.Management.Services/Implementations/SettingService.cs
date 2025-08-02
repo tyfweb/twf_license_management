@@ -4,7 +4,7 @@ using Microsoft.Extensions.Caching.Memory;
 using System.Text.Json;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Core.Models.Settings;
-using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Settings;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Data;
 using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Settings;
 
 namespace TechWayFit.Licensing.Management.Services.Implementations
@@ -14,7 +14,7 @@ namespace TechWayFit.Licensing.Management.Services.Implementations
     /// </summary>
     public class SettingService : ISettingService
     {
-        private readonly ISettingRepository _settingRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IConfiguration _configuration;
         private readonly ILogger<SettingService> _logger;
         private readonly IMemoryCache _cache;
@@ -25,12 +25,12 @@ namespace TechWayFit.Licensing.Management.Services.Implementations
         private readonly TimeSpan CACHE_EXPIRATION = TimeSpan.FromMinutes(30);
 
         public SettingService(
-            ISettingRepository settingRepository,
+            IUnitOfWork unitOfWork,
             IConfiguration configuration,
             ILogger<SettingService> logger,
             IMemoryCache cache)
         {
-            _settingRepository = settingRepository;
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _configuration = configuration;
             _logger = logger;
             _cache = cache;
@@ -48,7 +48,7 @@ namespace TechWayFit.Licensing.Management.Services.Implementations
                 }
 
                 // Not in cache, fetch from database
-                var entities = await _settingRepository.GetAllGroupedByCategoryAsync();
+                var entities = await _unitOfWork.Settings.GetAllGroupedByCategoryAsync();
                 var settings = entities.ToDictionary(
                     kvp => kvp.Key,
                     kvp => kvp.Value.Select(e => e.ToModel())
@@ -71,7 +71,7 @@ namespace TechWayFit.Licensing.Management.Services.Implementations
         {
             try
             {
-                var entities = await _settingRepository.GetByCategoryAsync(category);
+                var entities = await _unitOfWork.Settings.GetByCategoryAsync(category);
                 return entities.Select(e => e.ToModel()).ToList();
             }
             catch (Exception ex)
@@ -85,7 +85,7 @@ namespace TechWayFit.Licensing.Management.Services.Implementations
         {
             try
             {
-                var entity = await _settingRepository.GetByKeyAsync(category, key);
+                var entity = await _unitOfWork.Settings.GetByKeyAsync(category, key);
                 return entity?.ToModel();
             }
             catch (Exception ex)
@@ -99,7 +99,7 @@ namespace TechWayFit.Licensing.Management.Services.Implementations
         {
             try
             {
-                var value = await _settingRepository.GetValueAsync<T>(category, key, defaultValue);
+                var value = await _unitOfWork.Settings.GetValueAsync<T>(category, key, defaultValue);
                 return value;
             }
             catch (Exception ex)
@@ -113,12 +113,13 @@ namespace TechWayFit.Licensing.Management.Services.Implementations
         {
             try
             {
-                var entity = await _settingRepository.GetByIdAsync(settingId);
+                var entity = await _unitOfWork.Settings.GetByIdAsync(settingId);
                 if (entity == null)
                     throw new ArgumentException($"Setting with ID {settingId} not found");
 
                 // Use the SetValueAsync method which handles the update
-                var updatedEntity = await _settingRepository.SetValueAsync(entity.Category, entity.Key, value, updatedBy);
+                var updatedEntity = await _unitOfWork.Settings.SetValueAsync(entity.Category, entity.Key, value, updatedBy);
+                await _unitOfWork.SaveChangesAsync();
                 
                 // Invalidate cache
                 InvalidateCache();
@@ -136,7 +137,8 @@ namespace TechWayFit.Licensing.Management.Services.Implementations
         {
             try
             {
-                var entities = await _settingRepository.UpdateMultipleAsync(settings, updatedBy);
+                var entities = await _unitOfWork.Settings.UpdateMultipleAsync(settings, updatedBy);
+                await _unitOfWork.SaveChangesAsync();
                 
                 // Invalidate cache
                 InvalidateCache();
@@ -154,7 +156,7 @@ namespace TechWayFit.Licensing.Management.Services.Implementations
         {
             try
             {
-                var entity = await _settingRepository.ResetToDefaultAsync(settingId, updatedBy);
+                var entity = await _unitOfWork.Settings.ResetToDefaultAsync(settingId, updatedBy);
                 
                 // Invalidate cache if reset was successful
                 if (entity != null)
@@ -175,7 +177,7 @@ namespace TechWayFit.Licensing.Management.Services.Implementations
         {
             try
             {
-                var entities = await _settingRepository.ResetCategoryToDefaultAsync(category, updatedBy);
+                var entities = await _unitOfWork.Settings.ResetCategoryToDefaultAsync(category, updatedBy);
                 
                 // Invalidate cache
                 InvalidateCache();
@@ -193,7 +195,7 @@ namespace TechWayFit.Licensing.Management.Services.Implementations
         {
             try
             {
-                var entities = await _settingRepository.SearchAsync(searchTerm);
+                var entities = await _unitOfWork.Settings.SearchAsync(searchTerm);
                 return entities.Select(e => e.ToModel()).ToList();
             }
             catch (Exception ex)
@@ -207,7 +209,7 @@ namespace TechWayFit.Licensing.Management.Services.Implementations
         {
             try
             {
-                return await _settingRepository.GetCategoriesAsync();
+                return await _unitOfWork.Settings.GetCategoriesAsync();
             }
             catch (Exception ex)
             {
@@ -220,7 +222,7 @@ namespace TechWayFit.Licensing.Management.Services.Implementations
         {
             try
             {
-                return await _settingRepository.ExistsAsync(category, key);
+                return await _unitOfWork.Settings.ExistsAsync(category, key);
             }
             catch (Exception ex)
             {
@@ -233,7 +235,7 @@ namespace TechWayFit.Licensing.Management.Services.Implementations
         {
             try
             {
-                return await _settingRepository.ValidateAllAsync();
+                return await _unitOfWork.Settings.ValidateAllAsync();
             }
             catch (Exception ex)
             {
@@ -287,7 +289,7 @@ namespace TechWayFit.Licensing.Management.Services.Implementations
         {
             try
             {
-                var entities = await _settingRepository.GetRequiringRestartAsync();
+                var entities = await _unitOfWork.Settings.GetRequiringRestartAsync();
                 return entities.Select(e => e.ToModel()).ToList();
             }
             catch (Exception ex)
@@ -317,7 +319,7 @@ namespace TechWayFit.Licensing.Management.Services.Implementations
         {
             try
             {
-                var entities = await _settingRepository.GetAllAsync(CancellationToken.None);
+                var entities = await _unitOfWork.Settings.GetAllAsync(CancellationToken.None);
                 var settings = entities.Select(e => e.ToModel()).ToList();
                 return JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true });
             }
@@ -344,15 +346,15 @@ namespace TechWayFit.Licensing.Management.Services.Implementations
                     setting.UpdatedBy = updatedBy;
 
                     var entity = SettingEntity.FromModel(setting);
-                    var existing = await _settingRepository.GetByIdAsync(setting.SettingId);
+                    var existing = await _unitOfWork.Settings.GetByIdAsync(setting.SettingId);
 
                     if (existing != null)
                     {
-                        await _settingRepository.UpdateAsync(entity);
+                        await _unitOfWork.Settings.UpdateAsync(entity);
                     }
                     else
                     {
-                        await _settingRepository.AddAsync(entity);
+                        await _unitOfWork.Settings.AddAsync(entity);
                     }
 
                     restoredCount++;
@@ -371,7 +373,7 @@ namespace TechWayFit.Licensing.Management.Services.Implementations
         {
             try
             {
-                var entities = await _settingRepository.GetByTagsAsync(tags);
+                var entities = await _unitOfWork.Settings.GetByTagsAsync(tags);
                 return entities.Select(e => e.ToModel()).ToList();
             }
             catch (Exception ex)
@@ -385,7 +387,7 @@ namespace TechWayFit.Licensing.Management.Services.Implementations
         {
             try
             {
-                var entities = await _settingRepository.GetByEnvironmentAsync(environment);
+                var entities = await _unitOfWork.Settings.GetByEnvironmentAsync(environment);
                 return entities.Select(e => e.ToModel()).ToList();
             }
             catch (Exception ex)

@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
-using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Product;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Data;
 using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Products;
 using TechWayFit.Licensing.Management.Infrastructure.Models.Search;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
@@ -14,14 +14,14 @@ namespace TechWayFit.Licensing.Management.Services.Implementations.Product;
 /// </summary>
 public class EnterpriseProductService : IEnterpriseProductService
 {
-    private readonly IProductRepository _productRepository;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<EnterpriseProductService> _logger;
 
     public EnterpriseProductService(
-        IProductRepository productRepository,
+        IUnitOfWork unitOfWork,
         ILogger<EnterpriseProductService> logger)
     {
-        _productRepository = productRepository ?? throw new ArgumentNullException(nameof(productRepository));
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -64,7 +64,8 @@ public class EnterpriseProductService : IEnterpriseProductService
             productEntity.UpdatedOn = DateTime.UtcNow;
 
             // Save to repository
-            var createdEntity = await _productRepository.AddAsync(productEntity);
+            var createdEntity = await _unitOfWork.Products.AddAsync(productEntity);
+            await _unitOfWork.SaveChangesAsync();
             
             // Map back to model
             var result = createdEntity.ToModel();
@@ -97,7 +98,7 @@ public class EnterpriseProductService : IEnterpriseProductService
         try
         {
             // Get existing product
-            var existingEntity = await _productRepository.GetByIdAsync(product.ProductId);
+            var existingEntity = await _unitOfWork.Products.GetByIdAsync(product.ProductId);
             if (existingEntity == null)
             {
                 throw new InvalidOperationException($"Product with ID {product.ProductId} not found");
@@ -127,7 +128,8 @@ public class EnterpriseProductService : IEnterpriseProductService
             existingEntity.UpdatedOn = DateTime.UtcNow;
 
             // Update in repository
-            var updatedEntity = await _productRepository.UpdateAsync(existingEntity);
+            var updatedEntity = await _unitOfWork.Products.UpdateAsync(existingEntity);
+            await _unitOfWork.SaveChangesAsync();
             
             // Map back to model
             var result = updatedEntity.ToModel();
@@ -152,7 +154,7 @@ public class EnterpriseProductService : IEnterpriseProductService
 
         try
         {
-            var entity = await _productRepository.GetByIdAsync(productId);
+            var entity = await _unitOfWork.Products.GetByIdAsync(productId);
             return entity?.ToModel();
         }
         catch (Exception ex)
@@ -183,7 +185,7 @@ public class EnterpriseProductService : IEnterpriseProductService
                 }
             };
             
-            var searchResult = await _productRepository.SearchAsync(searchRequest);
+            var searchResult = await _unitOfWork.Products.SearchAsync(searchRequest);
             var entity = searchResult.Results.FirstOrDefault();
             
             return entity?.ToModel();
@@ -223,7 +225,7 @@ public class EnterpriseProductService : IEnterpriseProductService
                     p.Description.ToLower().Contains(term));
             }
 
-            var searchResult = await _productRepository.SearchAsync(searchRequest);
+            var searchResult = await _unitOfWork.Products.SearchAsync(searchRequest);
             return searchResult.Results.Select(e => e.ToModel());
         }
         catch (Exception ex)

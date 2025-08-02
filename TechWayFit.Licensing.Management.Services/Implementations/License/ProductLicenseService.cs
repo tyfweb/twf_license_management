@@ -2,9 +2,7 @@ using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
 using TechWayFit.Licensing.Generator.Models;
 using TechWayFit.Licensing.Generator.Services;
-using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.License;
-using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Product;
-using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Consumer;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Data;
 using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.License;
 using TechWayFit.Licensing.Management.Infrastructure.Models.Search;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
@@ -22,18 +20,18 @@ namespace TechWayFit.Licensing.Management.Services.Implementations.License;
 /// </summary>
 public class ProductLicenseService : IProductLicenseService
 {
-    private readonly IProductLicenseRepository _productLicenseRepository;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly ILicenseGenerator _licenseGenerator;
     private readonly IKeyManagementService _keyManagementService;
     private readonly ILogger<ProductLicenseService> _logger;
 
     public ProductLicenseService(
-        IProductLicenseRepository productLicenseRepository,
+        IUnitOfWork unitOfWork,
         ILicenseGenerator licenseGenerator,
         IKeyManagementService keyManagementService,
         ILogger<ProductLicenseService> logger)
     {
-        _productLicenseRepository = productLicenseRepository ?? throw new ArgumentNullException(nameof(productLicenseRepository));
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _licenseGenerator = licenseGenerator ?? throw new ArgumentNullException(nameof(licenseGenerator));
         _keyManagementService = keyManagementService ?? throw new ArgumentNullException(nameof(keyManagementService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -115,7 +113,8 @@ public class ProductLicenseService : IProductLicenseService
             _logger.LogWarning("Some license properties not set - entity structure incomplete");
 
             // Save to repository
-            var createdEntity = await _productLicenseRepository.AddAsync(licenseEntity);
+            var createdEntity = await _unitOfWork.Licenses.AddAsync(licenseEntity);
+            await _unitOfWork.SaveChangesAsync();
 
             // Map to model
             var result = createdEntity.ToModel();
@@ -151,7 +150,7 @@ public class ProductLicenseService : IProductLicenseService
                 }
             };
 
-            var searchResult = await _productLicenseRepository.SearchAsync(searchRequest);
+            var searchResult = await _unitOfWork.Licenses.SearchAsync(searchRequest);
             var entity = searchResult.Results.FirstOrDefault();
 
             return entity?.ToModel();
@@ -229,7 +228,7 @@ public class ProductLicenseService : IProductLicenseService
 
     public async Task<ProductLicense?> GetLicenseByIdAsync(string licenseId)
     {
-        var response = await _productLicenseRepository.GetByIdWithAllIncludesAsync(licenseId);
+        var response = await _unitOfWork.Licenses.GetByIdWithAllIncludesAsync(licenseId);
         if (response == null)
         {
             _logger.LogWarning("License with ID {LicenseId} not found", licenseId);
@@ -240,7 +239,7 @@ public class ProductLicenseService : IProductLicenseService
 
     public async Task<IEnumerable<ProductLicense>> GetLicensesByConsumerAsync(string consumerId, LicenseStatus? status = null, int pageNumber = 1, int pageSize = 50)
     {
-        var response = await _productLicenseRepository.GetByConsumerIdAsync(consumerId);
+        var response = await _unitOfWork.Licenses.GetByConsumerIdAsync(consumerId);
         if (response == null || !response.Any())
         {
             return Enumerable.Empty<ProductLicense>();
@@ -509,11 +508,12 @@ public class ProductLicenseService : IProductLicenseService
 
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
-            searchRequest.Filters.Add(license => license.Consumer.CompanyName.Contains(searchTerm) ||
-            license.Product.Name.Contains(searchTerm));
+            searchRequest.Filters.Add(license => 
+                (license.Consumer != null && license.Consumer.CompanyName != null && license.Consumer.CompanyName.Contains(searchTerm)) ||
+                (license.Product != null && license.Product.Name != null && license.Product.Name.Contains(searchTerm)));
         }
 
-        return await _productLicenseRepository.SearchAsync(searchRequest)
+        return await _unitOfWork.Licenses.SearchAsync(searchRequest)
             .ContinueWith(task => task.Result.Results.Select(license => license.ToModel()).ToList());
     }
 

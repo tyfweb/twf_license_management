@@ -15,7 +15,7 @@
     <PackageReference Include="Serilog.Expressions" Version="5.0.0" />
     <PackageReference Include="System.Text.Json" Version="9.0.7" />
     <PackageReference Include="Npgsql" Version="9.0.3" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.2" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.7" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.7" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.7" />
@@ -38,6 +38,7 @@
     <ProjectReference Include="..\TechWayFit.Licensing.Generator\TechWayFit.Licensing.Generator.csproj" />
     <ProjectReference Include="..\TechWayFit.Licensing.Management.Services\TechWayFit.Licensing.Management.Services.csproj" />
     <ProjectReference Include="..\TechWayFit.Licensing.Management.Infrastructure\TechWayFit.Licensing.Management.Infrastructure.csproj" />
+    <ProjectReference Include="..\TechWayFit.Licensing.Management.Infrastructure.PostgreSql\TechWayFit.Licensing.Management.Infrastructure.PostgreSql.csproj" />
   </ItemGroup>
 
   <ItemGroup>

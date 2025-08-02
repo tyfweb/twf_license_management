@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 using TechWayFit.Licensing.Core.Models;
-using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Audit;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Data;
 using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Audit;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Core.Models.Audit;
@@ -13,14 +13,14 @@ namespace TechWayFit.Licensing.Management.Services.Implementations.Audit;
 /// </summary>
 public class AuditService : IAuditService
 {
-    private readonly IAuditEntryRepository _auditEntryRepository;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<AuditService> _logger;
 
     public AuditService(
-        IAuditEntryRepository auditEntryRepository,
+        IUnitOfWork unitOfWork,
         ILogger<AuditService> logger)
     {
-        _auditEntryRepository = auditEntryRepository ?? throw new ArgumentNullException(nameof(auditEntryRepository));
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -53,7 +53,8 @@ public class AuditService : IAuditService
             var auditEntity = AuditEntryEntity.FromModel(entry);
 
             // Save to repository
-            var createdEntity = await _auditEntryRepository.AddAsync(auditEntity);
+            var createdEntity = await _unitOfWork.AuditEntries.AddAsync(auditEntity);
+            await _unitOfWork.SaveChangesAsync();
             
             _logger.LogInformation("Successfully logged audit entry with ID: {AuditId}", createdEntity.AuditEntryId);
             return createdEntity.AuditEntryId;
@@ -81,7 +82,7 @@ public class AuditService : IAuditService
         try
         {
             // Use repository method if available
-            var entities = await _auditEntryRepository.GetByEntityAsync("License", licenseId);
+            var entities = await _unitOfWork.AuditEntries.GetByEntityAsync("License", licenseId);
 
             // Apply date filters
             if (fromDate.HasValue)
@@ -119,7 +120,7 @@ public class AuditService : IAuditService
         try
         {
             // Use repository method if available
-            var entities = await _auditEntryRepository.GetByEntityAsync("Consumer", consumerId);
+            var entities = await _unitOfWork.AuditEntries.GetByEntityAsync("Consumer", consumerId);
 
             // Apply date filters
             if (fromDate.HasValue)
@@ -176,7 +177,7 @@ public class AuditService : IAuditService
     {
         try
         {
-            var entities = await _auditEntryRepository.GetRecentEntriesAsync(1000);
+            var entities = await _unitOfWork.AuditEntries.GetRecentEntriesAsync(1000);
 
             // Filter by action type
             entities = entities.Where(e => e.ActionType.Equals(action, StringComparison.OrdinalIgnoreCase));
@@ -241,7 +242,7 @@ public class AuditService : IAuditService
     {
         try
         {
-            var entities = await _auditEntryRepository.GetRecentEntriesAsync(1000);
+            var entities = await _unitOfWork.AuditEntries.GetRecentEntriesAsync(1000);
             return entities.Select(e => e.ActionType).Distinct().ToList();
         }
         catch (Exception ex)
@@ -255,7 +256,7 @@ public class AuditService : IAuditService
     {
         try
         {
-            var entities = await _auditEntryRepository.GetRecentEntriesAsync(1000);
+            var entities = await _unitOfWork.AuditEntries.GetRecentEntriesAsync(1000);
             return entities.Select(e => e.EntityType).Distinct().ToList();
         }        catch (Exception ex)
         {
@@ -272,7 +273,7 @@ public class AuditService : IAuditService
     {
         try
         {
-            var entities = await _auditEntryRepository.GetRecentEntriesAsync(1000);
+            var entities = await _unitOfWork.AuditEntries.GetRecentEntriesAsync(1000);
 
             // Filter by security-related actions
             var securityActions = new[] { "LOGIN", "LOGOUT", "ACCESS_DENIED", "PERMISSION_CHANGE", "DELETE", "ADMIN_ACCESS" };
@@ -339,7 +340,7 @@ public class AuditService : IAuditService
     {
         try
         {
-            var entities = await _auditEntryRepository.GetRecentEntriesAsync(1000);
+            var entities = await _unitOfWork.AuditEntries.GetRecentEntriesAsync(1000);
 
             // Apply filters
             if (!string.IsNullOrEmpty(entityType))
@@ -383,7 +384,7 @@ public class AuditService : IAuditService
     {
         try
         {
-            var entities = await _auditEntryRepository.GetRecentEntriesAsync(1000);
+            var entities = await _unitOfWork.AuditEntries.GetRecentEntriesAsync(1000);
 
             // Apply filters
             if (!string.IsNullOrEmpty(entityType))
@@ -457,7 +458,7 @@ public class AuditService : IAuditService
     {
         try
         {
-            var entities = await _auditEntryRepository.GetRecentEntriesAsync(1000);
+            var entities = await _unitOfWork.AuditEntries.GetRecentEntriesAsync(1000);
 
             // Apply date filters
             if (fromDate.HasValue)

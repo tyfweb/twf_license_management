@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Consumer;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Data;
 using TechWayFit.Licensing.Management.Infrastructure.Data.Entities.Consumer;
 using TechWayFit.Licensing.Management.Infrastructure.Models.Search;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
@@ -15,14 +15,14 @@ namespace TechWayFit.Licensing.Management.Services.Implementations.Consumer;
 /// </summary>
 public class ConsumerAccountService : IConsumerAccountService
 {
-    private readonly IConsumerAccountRepository _consumerAccountRepository;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<ConsumerAccountService> _logger;
 
     public ConsumerAccountService(
-        IConsumerAccountRepository consumerAccountRepository,
+        IUnitOfWork unitOfWork,
         ILogger<ConsumerAccountService> logger)
     {
-        _consumerAccountRepository = consumerAccountRepository ?? throw new ArgumentNullException(nameof(consumerAccountRepository));
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -56,8 +56,9 @@ public class ConsumerAccountService : IConsumerAccountService
             entity.UpdatedBy = createdBy;
             entity.UpdatedOn = DateTime.UtcNow;
 
-            // Save to repository
-            var createdEntity = await _consumerAccountRepository.AddAsync(entity);
+            // Save to repository using Unit of Work
+            var createdEntity = await _unitOfWork.Consumers.AddAsync(entity);
+            await _unitOfWork.SaveChangesAsync();
             
             // Map back to model
             var result = createdEntity.ToModel();
@@ -88,7 +89,7 @@ public class ConsumerAccountService : IConsumerAccountService
             throw new ArgumentException("ConsumerId cannot be null or empty", nameof(consumerAccount.ConsumerId));
 
         // Check if exists
-        var existingEntity = await _consumerAccountRepository.GetByIdAsync(consumerAccount.ConsumerId);
+        var existingEntity = await _unitOfWork.Consumers.GetByIdAsync(consumerAccount.ConsumerId);
         if (existingEntity == null)
         {
             throw new InvalidOperationException($"Consumer account with ID {consumerAccount.ConsumerId} not found");
@@ -127,8 +128,9 @@ public class ConsumerAccountService : IConsumerAccountService
             existingEntity.UpdatedBy = updatedBy;
             existingEntity.UpdatedOn = DateTime.UtcNow;
 
-            // Update in repository
-            var updatedEntity = await _consumerAccountRepository.UpdateAsync(existingEntity);
+            // Update in repository using Unit of Work
+            var updatedEntity = await _unitOfWork.Consumers.UpdateAsync(existingEntity);
+            await _unitOfWork.SaveChangesAsync();
             
             // Map back to model
             var result = updatedEntity.ToModel();
@@ -153,7 +155,7 @@ public class ConsumerAccountService : IConsumerAccountService
 
         try
         {
-            var entity = await _consumerAccountRepository.GetByIdAsync(consumerId);
+            var entity = await _unitOfWork.Consumers.GetByIdAsync(consumerId);
             return entity?.ToModel();
         }
         catch (Exception ex)
@@ -186,7 +188,7 @@ public class ConsumerAccountService : IConsumerAccountService
                 }
             };
             
-            var searchResult = await _consumerAccountRepository.SearchAsync(searchRequest);
+            var searchResult = await _unitOfWork.Consumers.SearchAsync(searchRequest);
             var entity = searchResult.Results.FirstOrDefault();
             
             return entity?.ToModel();
@@ -232,7 +234,7 @@ public class ConsumerAccountService : IConsumerAccountService
             searchRequest.Page = pageNumber;
             searchRequest.PageSize = pageSize;
             
-            var searchResult = await _consumerAccountRepository.SearchAsync(searchRequest);
+            var searchResult = await _unitOfWork.Consumers.SearchAsync(searchRequest);
             return searchResult.Results.Select(e => e.ToModel());
         }
         catch (Exception ex)
@@ -270,7 +272,7 @@ public class ConsumerAccountService : IConsumerAccountService
                      EF.Functions.Like(e.CompanyName, $"%{searchTerm}%"));
             }
 
-            var searchResult = await _consumerAccountRepository.SearchAsync(searchRequest);
+            var searchResult = await _unitOfWork.Consumers.SearchAsync(searchRequest);
             return searchResult.TotalCount;
         }
         catch (Exception ex)
@@ -292,7 +294,7 @@ public class ConsumerAccountService : IConsumerAccountService
 
         try
         {
-            var entity = await _consumerAccountRepository.GetByIdAsync(consumerId);
+            var entity = await _unitOfWork.Consumers.GetByIdAsync(consumerId);
             if (entity == null)
             {
                 _logger.LogWarning("Consumer account not found for activation: {ConsumerId}", consumerId);
@@ -304,7 +306,8 @@ public class ConsumerAccountService : IConsumerAccountService
             entity.UpdatedBy = activatedBy;
             entity.UpdatedOn = DateTime.UtcNow;
 
-            await _consumerAccountRepository.UpdateAsync(entity);
+            await _unitOfWork.Consumers.UpdateAsync(entity);
+            await _unitOfWork.SaveChangesAsync();
             
             _logger.LogInformation("Successfully activated consumer account: {ConsumerId}", consumerId);
             return true;
@@ -328,7 +331,7 @@ public class ConsumerAccountService : IConsumerAccountService
 
         try
         {
-            var entity = await _consumerAccountRepository.GetByIdAsync(consumerId);
+            var entity = await _unitOfWork.Consumers.GetByIdAsync(consumerId);
             if (entity == null)
             {
                 _logger.LogWarning("Consumer account not found for deactivation: {ConsumerId}", consumerId);
@@ -342,7 +345,8 @@ public class ConsumerAccountService : IConsumerAccountService
             entity.UpdatedBy = deactivatedBy;
             entity.UpdatedOn = DateTime.UtcNow;
 
-            await _consumerAccountRepository.UpdateAsync(entity);
+            await _unitOfWork.Consumers.UpdateAsync(entity);
+            await _unitOfWork.SaveChangesAsync();
             
             _logger.LogInformation("Successfully deactivated consumer account: {ConsumerId}", consumerId);
             return true;
@@ -366,7 +370,7 @@ public class ConsumerAccountService : IConsumerAccountService
 
         try
         {
-            var entity = await _consumerAccountRepository.GetByIdAsync(consumerId);
+            var entity = await _unitOfWork.Consumers.GetByIdAsync(consumerId);
             if (entity == null)
             {
                 _logger.LogWarning("Consumer account not found for status update: {ConsumerId}", consumerId);
@@ -379,7 +383,8 @@ public class ConsumerAccountService : IConsumerAccountService
             entity.UpdatedBy = updatedBy;
             entity.UpdatedOn = DateTime.UtcNow;
 
-            await _consumerAccountRepository.UpdateAsync(entity);
+            await _unitOfWork.Consumers.UpdateAsync(entity);
+            await _unitOfWork.SaveChangesAsync();
             
             _logger.LogInformation("Successfully updated consumer status: {ConsumerId} to {Status}", consumerId, status);
             return true;
@@ -403,7 +408,7 @@ public class ConsumerAccountService : IConsumerAccountService
 
         try
         {
-            var entity = await _consumerAccountRepository.GetByIdAsync(consumerId);
+            var entity = await _unitOfWork.Consumers.GetByIdAsync(consumerId);
             if (entity == null)
             {
                 _logger.LogWarning("Consumer account not found for deletion: {ConsumerId}", consumerId);
@@ -413,7 +418,8 @@ public class ConsumerAccountService : IConsumerAccountService
             // TODO: Check for related licenses before deletion
             _logger.LogWarning("Delete operation should check for related licenses first");
 
-            await _consumerAccountRepository.DeleteAsync(entity.ConsumerId);
+            await _unitOfWork.Consumers.DeleteAsync(entity.ConsumerId);
+            await _unitOfWork.SaveChangesAsync();
             
             _logger.LogInformation("Successfully deleted consumer account: {ConsumerId}", consumerId);
             return true;
@@ -435,7 +441,7 @@ public class ConsumerAccountService : IConsumerAccountService
 
         try
         {
-            var entity = await _consumerAccountRepository.GetByIdAsync(consumerId);
+            var entity = await _unitOfWork.Consumers.GetByIdAsync(consumerId);
             return entity != null;
         }
         catch (Exception ex)

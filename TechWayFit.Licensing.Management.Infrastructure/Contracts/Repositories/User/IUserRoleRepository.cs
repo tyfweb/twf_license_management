@@ -22,4 +22,5 @@ public interface IUserRoleRepository : IBaseRepository<UserRoleEntity>
     /// Checks if role name exists
     /// </summary>
     Task<bool> RoleNameExistsAsync(string roleName, Guid? excludeRoleId = null, CancellationToken cancellationToken = default);
+    Task<IEnumerable<UserRoleEntity>> GetActiveRolesByIdsAsync(List<Guid> roleIds);
 }

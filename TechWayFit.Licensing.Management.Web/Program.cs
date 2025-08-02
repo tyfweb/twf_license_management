@@ -13,32 +13,21 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging;
-using TechWayFit.Licensing.Management.Infrastructure.Data.Context;
-using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Product;
-using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Consumer;
-using TechWayFit.Licensing.Management.Infrastructure.Data.Repositories.Product;
-using TechWayFit.Licensing.Management.Infrastructure.Data.Repositories.Consumer;
-using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Audit;
-using TechWayFit.Licensing.Management.Infrastructure.Implementations.Repositories.Audit;
-using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.License;
-using TechWayFit.Licensing.Management.Infrastructure.Data.Repositories.License;
-using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Notification;
-using TechWayFit.Licensing.Management.Infrastructure.Data.Repositories.Notification;
-using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Settings;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Data;
+using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Extensions;
 using TechWayFit.Licensing.Management.Services.Implementations.User;
-using TechWayFit.Licensing.Management.Infrastructure.Data.Repositories.Settings;
-using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories;
 using TechWayFit.Licensing.Management.Services.Implementations.Account;
 using Serilog;
 using Serilog.Events;
-using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.User;
-using TechWayFit.Licensing.Management.Infrastructure.Implementations.Repositories.User;
-using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.OperationsDashboard;
-using TechWayFit.Licensing.Management.Infrastructure.Implementations.Repositories.OperationsDashboard;
-using TechWayFit.Licensing.Management.Core.Contracts.Services.OperationsDashboard;
-using TechWayFit.Licensing.Management.Services.Implementations.OperationsDashboard;
+// OPERATIONS DASHBOARD - DISABLED FOR CORE FOCUS
+// using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.OperationsDashboard;
+// using TechWayFit.Licensing.Management.Infrastructure.Implementations.Repositories.OperationsDashboard;
+// using TechWayFit.Licensing.Management.Core.Contracts.Services.OperationsDashboard;
+// using TechWayFit.Licensing.Management.Services.Implementations.OperationsDashboard;
 using TechWayFit.Licensing.Management.Web.Extensions;
 using TechWayFit.Licensing.Management.Web.Middleware;
+// OPERATIONS DASHBOARD MIDDLEWARE - DISABLED FOR CORE FOCUS
+// using TechWayFit.Licensing.Management.Web.Middleware;
 
 // Configure Serilog early to capture startup issues
 Log.Logger = new LoggerConfiguration()
@@ -94,50 +83,20 @@ try
     // Configure EF Core logging services
     builder.Services.ConfigureEfCoreLogging();
 
-    // Configure Entity Framework with PostgreSQL (Database First approach)
-    builder.Services.AddDbContext<LicensingDbContext>((serviceProvider, options) =>
-    {
-        var connectionString = builder.Configuration.GetConnectionString("PostgreSQL");
-        options.UseNpgsql(connectionString, npgsqlOptions =>
-        {
-            // Database First: Assume database schema exists
-            // No migrations - schema managed via SQL scripts
-            npgsqlOptions.MigrationsAssembly((string?)null);
-        })
-        // Configure PostgreSQL to use snake_case naming convention
-        .UseSnakeCaseNamingConvention();
+    // Configure PostgreSQL Database to be used
+    // This will register the PostgreSQL DbContext and configure it with the connection string
+    // and other options from the configuration
+    builder.Services.AddPostgreSqlInfrastructure(builder.Configuration);
 
-        // Add custom SQL logging interceptor
-        var sqlInterceptor = serviceProvider.GetService<SqlLoggingInterceptor>();
-        if (sqlInterceptor != null)
-        {
-            options.AddInterceptors(sqlInterceptor);
-        }
-
-        // Add enhanced SQL interceptor for operations dashboard metrics
-        var enhancedSqlInterceptor = serviceProvider.GetService<EnhancedSqlInterceptor>();
-        if (enhancedSqlInterceptor != null)
-        {
-            options.AddInterceptors(enhancedSqlInterceptor);
-        }
-
-        // Enable sensitive data logging in development
-        if (builder.Environment.IsDevelopment())
-        {
-            options.EnableSensitiveDataLogging();
-            options.EnableDetailedErrors();
-        }
-    });
-
-    RegisterRepositories(builder);
     RegisterServices(builder);    
     builder.Services.AddScoped<AuthenticationManager>();
     
+    // OPERATIONS DASHBOARD - DISABLED FOR CORE FOCUS
     // Register operations dashboard data collection services
-    builder.Services.AddScoped<EnhancedSqlInterceptor>();
-    builder.Services.AddSingleton<MetricsBufferService>();
-    builder.Services.AddHostedService<MetricsBufferService>(provider => provider.GetService<MetricsBufferService>()!);
-    builder.Services.AddHostedService<SystemHealthCollectionService>();
+    // builder.Services.AddScoped<EnhancedSqlInterceptor>();
+    // builder.Services.AddSingleton<MetricsBufferService>();
+    // builder.Services.AddHostedService<MetricsBufferService>(provider => provider.GetService<MetricsBufferService>()!);
+    // builder.Services.AddHostedService<SystemHealthCollectionService>();
     
     var app = builder.Build();
 
@@ -147,9 +106,10 @@ try
     // Use Serilog for request logging with correlation ID support
     app.ConfigureSerilogRequestLogging();
 
+    // OPERATIONS DASHBOARD - DISABLED FOR CORE FOCUS
     // Add operations dashboard middlewares for data collection
-    app.UsePerformanceTracking();
-    app.UseErrorTracking();
+    // app.UsePerformanceTracking();
+    // app.UseErrorTracking();
 
     // Create logs directory
     var logsPath = Path.Combine(app.Environment.ContentRootPath, "Logs");
@@ -193,39 +153,12 @@ finally
     Log.CloseAndFlush();
 }
 
-static void RegisterRepositories(WebApplicationBuilder builder)
-{
-    // Register repositories
-    builder.Services.AddScoped<IProductRepository, ProductRepository>();
-    builder.Services.AddScoped<IConsumerAccountRepository, ConsumerAccountRepository>();
-    builder.Services.AddScoped<IProductFeatureRepository, ProductFeatureRepository>();
-    builder.Services.AddScoped<IAuditEntryRepository, AuditEntryRepository>();
-    builder.Services.AddScoped<IProductLicenseRepository, ProductLicenseRepository>();
-    builder.Services.AddScoped<INotificationHistoryRepository, NotificationHistoryRepository>();
-    builder.Services.AddScoped<INotificationTemplateRepository, NotificationTemplateRepository>();
-    builder.Services.AddScoped<IProductTierRepository, ProductTierRepository>();
-    builder.Services.AddScoped<IProductVersionRepository, ProductVersionRepository>();
-    builder.Services.AddScoped<ISettingRepository, SettingRepository>();
-
-    // Register user management repositories
-    builder.Services.AddScoped<IUserProfileRepository, UserProfileRepository>();
-    builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
-    builder.Services.AddScoped<IUserRoleMappingRepository, UserRoleMappingRepository>();
-    
-    // Register operations dashboard repositories
-    builder.Services.AddScoped<ISystemMetricRepository, SystemMetricRepository>();
-    builder.Services.AddScoped<IErrorLogSummaryRepository, ErrorLogSummaryRepository>();
-    builder.Services.AddScoped<IPagePerformanceMetricRepository, PagePerformanceMetricRepository>();
-    builder.Services.AddScoped<IQueryPerformanceMetricRepository, QueryPerformanceMetricRepository>();
-    builder.Services.AddScoped<ISystemHealthSnapshotRepository, SystemHealthSnapshotRepository>();
-}
-
 static void RegisterServices(WebApplicationBuilder builder)
 {
-    // Register real services (replacing mock)
+    // Register real services  
     builder.Services.AddScoped<IEnterpriseProductService, EnterpriseProductService>();
 
-    // Step 4: Consumer management services - IMPLEMENTING NOW
+    // Step 4: Consumer management services  
     builder.Services.AddScoped<IConsumerAccountService, ConsumerAccountService>();
 
     // Step 5: License management services
@@ -249,8 +182,9 @@ static void RegisterServices(WebApplicationBuilder builder)
     // Step 9: User management services
     builder.Services.AddScoped<IUserService, UserService>();
 
+    // OPERATIONS DASHBOARD - DISABLED FOR CORE FOCUS
     // Step 10: Operations Dashboard services
-    builder.Services.AddScoped<IOperationsDashboardService, OperationsDashboardService>();
+    // builder.Services.AddScoped<IOperationsDashboardService, OperationsDashboardService>();
 
     // Register authentication service
     builder.Services.AddScoped<IAuthenticationService, AccountService>();

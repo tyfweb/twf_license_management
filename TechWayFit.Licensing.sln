@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TechWayFit.Licensing.Manage
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TechWayFit.Licensing.Management.Infrastructure", "TechWayFit.Licensing.Management.Infrastructure\TechWayFit.Licensing.Management.Infrastructure.csproj", "{D1EA7DC3-0C61-4E1C-81B9-D35BE2DC93BB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TechWayFit.Licensing.Management.Infrastructure.PostgreSql", "TechWayFit.Licensing.Management.Infrastructure.PostgreSql\TechWayFit.Licensing.Management.Infrastructure.PostgreSql.csproj", "{A1B2C3D4-E5F6-789A-BCDE-F0123456789A}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TechWayFit.Licensing.Management.Services", "TechWayFit.Licensing.Management.Services\TechWayFit.Licensing.Management.Services.csproj", "{0F5E0C90-C594-43E1-B9AE-0BD2C65C1BEE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TechWayFit.Licensing.Management.Web", "TechWayFit.Licensing.Management.Web\TechWayFit.Licensing.Management.Web.csproj", "{37D308A0-4AC6-4597-9CB8-E2CCD7686C15}"
@@ -83,6 +85,18 @@ Global
 		{37D308A0-4AC6-4597-9CB8-E2CCD7686C15}.Release|x64.Build.0 = Release|Any CPU
 		{37D308A0-4AC6-4597-9CB8-E2CCD7686C15}.Release|x86.ActiveCfg = Release|Any CPU
 		{37D308A0-4AC6-4597-9CB8-E2CCD7686C15}.Release|x86.Build.0 = Release|Any CPU
+		{A1B2C3D4-E5F6-789A-BCDE-F0123456789A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1B2C3D4-E5F6-789A-BCDE-F0123456789A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1B2C3D4-E5F6-789A-BCDE-F0123456789A}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A1B2C3D4-E5F6-789A-BCDE-F0123456789A}.Debug|x64.Build.0 = Debug|Any CPU
+		{A1B2C3D4-E5F6-789A-BCDE-F0123456789A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A1B2C3D4-E5F6-789A-BCDE-F0123456789A}.Debug|x86.Build.0 = Debug|Any CPU
+		{A1B2C3D4-E5F6-789A-BCDE-F0123456789A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1B2C3D4-E5F6-789A-BCDE-F0123456789A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1B2C3D4-E5F6-789A-BCDE-F0123456789A}.Release|x64.ActiveCfg = Release|Any CPU
+		{A1B2C3D4-E5F6-789A-BCDE-F0123456789A}.Release|x64.Build.0 = Release|Any CPU
+		{A1B2C3D4-E5F6-789A-BCDE-F0123456789A}.Release|x86.ActiveCfg = Release|Any CPU
+		{A1B2C3D4-E5F6-789A-BCDE-F0123456789A}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

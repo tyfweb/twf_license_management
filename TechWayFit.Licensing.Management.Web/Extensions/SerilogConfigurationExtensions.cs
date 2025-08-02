@@ -41,12 +41,13 @@ namespace TechWayFit.Licensing.Management.Web.Extensions
             });
         }
     }
-
+    
     /// <summary>
     /// Extension methods for configuring Serilog with separate log files and correlation IDs
     /// </summary>
     public static class SerilogConfigurationExtensions
     {
+        static string TimeStampFolder => DateTime.UtcNow.ToString("yyyy-MM-dd");
         /// <summary>
         /// Configure Serilog with separate log files for SQL queries, requests, and general application logs
         /// </summary>
@@ -62,37 +63,37 @@ namespace TechWayFit.Licensing.Management.Web.Extensions
                 .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
                 .Enrich.FromLogContext()
                 .Enrich.WithProperty("Application", "TechWayFit.Licensing.Management")
-                
+
                 // Console output with correlation ID
                 .WriteTo.Console(outputTemplate: consoleOutputTemplate)
-                
+
                 // SQL queries log file - only SQL interceptor and EF Core database logs
                 .WriteTo.Logger(lc => lc
-                    .Filter.ByIncludingOnly(e => 
-                        e.Properties.ContainsKey("SourceContext") && 
-                        (e.Properties["SourceContext"].ToString().Contains("SqlLoggingInterceptor") || 
+                    .Filter.ByIncludingOnly(e =>
+                        e.Properties.ContainsKey("SourceContext") &&
+                        (e.Properties["SourceContext"].ToString().Contains("SqlLoggingInterceptor") ||
                          e.Properties["SourceContext"].ToString().Contains("Microsoft.EntityFrameworkCore.Database.Command") ||
                          e.Properties["SourceContext"].ToString().Contains("Microsoft.EntityFrameworkCore.Model.Validation")))
-                    .WriteTo.File("Logs/sql-queries-.log",
+                    .WriteTo.File($"Logs/{TimeStampFolder}/sql-queries-.log",
                         rollingInterval: RollingInterval.Day,
                         retainedFileCountLimit: 30,
                         outputTemplate: baseOutputTemplate))
-                
+
                 // Request logs file - only request logging middleware
                 .WriteTo.Logger(lc => lc
-                    .Filter.ByIncludingOnly(e => 
-                        e.Properties.ContainsKey("SourceContext") && 
+                    .Filter.ByIncludingOnly(e =>
+                        e.Properties.ContainsKey("SourceContext") &&
                         (e.Properties["SourceContext"].ToString().Contains("Serilog.AspNetCore.RequestLoggingMiddleware") ||
                          e.Properties["SourceContext"].ToString().Contains("Microsoft.AspNetCore.Hosting.Diagnostics")))
-                    .WriteTo.File("Logs/requests-.log",
+                    .WriteTo.File($"Logs/{TimeStampFolder}/requests-.log",
                         rollingInterval: RollingInterval.Day,
                         retainedFileCountLimit: 30,
                         outputTemplate: baseOutputTemplate))
-                
+
                 // Application logs - exclude SQL, requests, and Microsoft framework logs
                 .WriteTo.Logger(lc => lc
-                    .Filter.ByExcluding(e => 
-                        e.Properties.ContainsKey("SourceContext") && 
+                    .Filter.ByExcluding(e =>
+                        e.Properties.ContainsKey("SourceContext") &&
                         (e.Properties["SourceContext"].ToString().Contains("SqlLoggingInterceptor") ||
                          e.Properties["SourceContext"].ToString().Contains("Microsoft.EntityFrameworkCore") ||
                          e.Properties["SourceContext"].ToString().Contains("Serilog.AspNetCore.RequestLoggingMiddleware") ||
@@ -105,15 +106,15 @@ namespace TechWayFit.Licensing.Management.Web.Extensions
                          e.Properties["SourceContext"].ToString().Contains("Microsoft.AspNetCore.DataProtection") ||
                          e.Properties["SourceContext"].ToString().Contains("Microsoft.Hosting.Lifetime") ||
                          e.Properties["SourceContext"].ToString().Contains("Microsoft.AspNetCore.Server.Kestrel")))
-                    .WriteTo.File("Logs/application-.log",
+                    .WriteTo.File($"Logs/{TimeStampFolder}/application-.log",
                         rollingInterval: RollingInterval.Day,
                         retainedFileCountLimit: 30,
                         outputTemplate: baseOutputTemplate))
-                
+
                 // Error logs file (all errors from any source)
                 .WriteTo.Logger(lc => lc
                     .Filter.ByIncludingOnly(e => e.Level >= LogEventLevel.Error)
-                    .WriteTo.File("Logs/errors-.log",
+                    .WriteTo.File($"Logs/{TimeStampFolder}/errors-.log",
                         rollingInterval: RollingInterval.Day,
                         retainedFileCountLimit: 90,
                         outputTemplate: baseOutputTemplate));
@@ -132,7 +133,7 @@ namespace TechWayFit.Licensing.Management.Web.Extensions
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
                 .Enrich.FromLogContext()
                 .WriteTo.Console(outputTemplate: consoleOutputTemplate)
-                .WriteTo.File("Logs/startup-.log", 
+                .WriteTo.File($"Logs/{TimeStampFolder}/startup-.log",
                     rollingInterval: RollingInterval.Day,
                     outputTemplate: outputTemplate);
         }
