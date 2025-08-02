@@ -11,16 +11,12 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Product
 [Table("product_features")]
 public class ProductFeatureEntity : BaseAuditEntity
 {
-    public string ProductId { get; set; } = string.Empty;
-    /// <summary>
-    /// Unique identifier for the product feature
-    /// </summary>
-    public string FeatureId { get; set; } = string.Empty;
+    public Guid ProductId { get; set; } = Guid.NewGuid();
 
     /// <summary>
     /// Foreign key to Product Tier
     /// </summary>
-    public string TierId { get; set; } = string.Empty;
+    public Guid TierId { get; set; } = Guid.NewGuid();
 
     /// <summary>
     /// Name of the feature
@@ -66,8 +62,8 @@ public class ProductFeatureEntity : BaseAuditEntity
     {
         return new ProductFeatureEntity
         {
+            Id = model.FeatureId,
             ProductId = model.ProductId,
-            FeatureId = model.FeatureId,
             TierId = model.TierId,
             Name = model.Name,
             Description = model.Description,
@@ -87,7 +83,7 @@ public class ProductFeatureEntity : BaseAuditEntity
     {
         return new ProductFeature
         {
-            FeatureId = FeatureId,
+            FeatureId = Id,
             TierId = TierId,
             Name = Name,
             Description = Description,
@@ -97,7 +93,7 @@ public class ProductFeatureEntity : BaseAuditEntity
             SupportFromVersion = SupportFromVersion,
             SupportToVersion = SupportToVersion,
             Usage = FromJson<ProductFeatureUsage>(FeatureUsageJson), // Assuming Usage is deserialized
-            ProductId = Tier?.ProductId ?? string.Empty // Assuming ProductId is derived from Tier
+            ProductId = Tier?.ProductId ?? Guid.Empty
         };
     }
 }

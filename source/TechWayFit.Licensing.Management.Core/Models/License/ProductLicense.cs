@@ -11,7 +11,7 @@ public class ProductLicense
     /// <summary>
     /// Unique identifier for the product license
     /// </summary>
-    public string LicenseId { get; set; } = Guid.NewGuid().ToString();
+    public Guid LicenseId { get; set; } = Guid.NewGuid();
     public string LicenseCode { get; set; } = string.Empty;
     /// <summary>
     /// Product and Consumer relationship
@@ -99,8 +99,8 @@ public class ProductLicense
     {
         return new TechWayFit.Licensing.Core.Models.License
         {
-            LicenseId = LicenseId,
-            ProductId = LicenseConsumer.Product.ProductId,
+            LicenseId = LicenseId.ToString(),
+            ProductId = LicenseConsumer.Product.ProductId.ToString(),
             // Update this line to use the correct property from LicenseConsumer, e.g. LicenseConsumer.Consumer.ConsumerId if Consumer is a property of ProductConsumer
             ConsumerId = LicenseConsumer.Consumer.ConsumerId,
             ValidFrom = ValidFrom,
@@ -112,7 +112,7 @@ public class ProductLicense
             Metadata = Metadata,
             FeaturesIncluded = Features.Select(f => new LicenseFeature
             {
-                Id = f.FeatureId,
+                Id = f.FeatureId.ToString(),
                 Name = f.Name,
                 Description = f.Description,
                 IsCurrentlyValid = f.IsEnabled

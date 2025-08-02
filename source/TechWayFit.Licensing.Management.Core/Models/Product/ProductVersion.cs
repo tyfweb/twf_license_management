@@ -4,11 +4,11 @@ namespace TechWayFit.Licensing.Management.Core.Models.Product;
 
 public class ProductVersion
 {
-    public string ProductId { get; set; } = string.Empty;
+    public Guid ProductId { get; set; } = Guid.NewGuid();
     /// <summary>
     /// Unique identifier for the product version
     /// </summary>
-    public string VersionId { get; set; } = string.Empty;
+    public Guid VersionId { get; set; } = Guid.NewGuid();
     public bool IsCurrent { get; set; } = false;
     /// <summary>
     /// Version number of the product

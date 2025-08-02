@@ -10,14 +10,8 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Product
 [Table("product_tiers")]
 public class ProductTierEntity : BaseAuditEntity
 {
-    /// <summary>
-    /// Unique identifier for the product tier
-    /// </summary>
-    public string TierId { get; set; } = string.Empty;
 
     public int DisplayOrder { get; set; } = 0;
-
-    public bool IsActive { get; set; } = true;
 
     /// <summary>
     /// Name of the product tier
@@ -34,7 +28,7 @@ public class ProductTierEntity : BaseAuditEntity
     /// </summary>
     public string SupportSLAJson { get; set; } = "{}";
 
-    public string ProductId { get; set; } = string.Empty;
+    public Guid ProductId { get; set; } = Guid.NewGuid();
 
     /// <summary>
     /// Navigation property to Product
@@ -52,7 +46,7 @@ public class ProductTierEntity : BaseAuditEntity
     {
         return new ProductTierEntity
         {
-            TierId = model.TierId,
+            Id = model.TierId,
             Name = model.Name,
             DisplayOrder = model.DisplayOrder,
             Description = model.Description,
@@ -71,11 +65,11 @@ public class ProductTierEntity : BaseAuditEntity
     {
         return new ProductTier
         {
-            TierId = TierId,
+            TierId = Id,
+            ProductId = ProductId,
             Name = Name,
             Description = Description,
             SupportSLA = FromJson<ProductSupportSLA>(SupportSLAJson),
-            ProductId = ProductId,
             IsActive = IsActive,
             Price = Price,
             DisplayOrder = DisplayOrder,

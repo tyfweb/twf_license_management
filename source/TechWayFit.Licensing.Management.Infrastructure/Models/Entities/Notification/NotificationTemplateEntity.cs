@@ -10,7 +10,6 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Notific
 [Table("notification_templates")]
 public class NotificationTemplateEntity : BaseAuditEntity
 {
-    public string NotificationTemplateId { get; set; } = string.Empty;
     public string TemplateName { get; set; } = string.Empty;
     public string NotificationType { get; set; } = string.Empty;
     public string NotificationMode { get; set; } = string.Empty; 
@@ -29,7 +28,7 @@ public class NotificationTemplateEntity : BaseAuditEntity
     {
         return new NotificationTemplateEntity
         {
-            NotificationTemplateId = model.TemplateId,
+            Id = model.TemplateId,
             TemplateName = model.TemplateName,
             NotificationType = model.NotificationType.ToString(),
             NotificationMode = model.Preferences.Mode.ToString(), 

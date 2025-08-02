@@ -9,15 +9,11 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Product
 [Table("product_versions")]
 public class ProductVersionEntity : BaseAuditEntity
 {
-    /// <summary>
-    /// Unique identifier for the product version
-    /// </summary>
-    public string VersionId { get; set; } = string.Empty;
 
     /// <summary>
     /// Foreign key to Product
     /// </summary>
-    public string ProductId { get; set; } = string.Empty;
+    public Guid ProductId { get; set; } = Guid.NewGuid();
 
     /// <summary>
     /// Version number
@@ -61,7 +57,7 @@ public class ProductVersionEntity : BaseAuditEntity
     {
         return new ProductVersionEntity
         {
-            VersionId = model.VersionId,
+            Id = model.VersionId,
             ProductId = model.ProductId,
             Version = model.Version,
             ReleaseDate = model.ReleaseDate,
@@ -79,7 +75,7 @@ public class ProductVersionEntity : BaseAuditEntity
     {
         return new ProductVersion
         {
-            VersionId = this.VersionId,
+            VersionId = this.Id,
             ProductId = this.ProductId,
             Version = this.Version,
             ReleaseDate = this.ReleaseDate,

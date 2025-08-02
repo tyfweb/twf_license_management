@@ -4,11 +4,11 @@ namespace TechWayFit.Licensing.Management.Core.Models.Product;
 
 public class ProductTier
 {
-    public string ProductId { get; set; } = string.Empty;
+    public Guid ProductId { get; set; } = Guid.NewGuid();
     /// <summary>
     /// Unique identifier for the product tier
     /// </summary>
-    public string TierId { get; set; } = string.Empty;
+    public Guid TierId { get; set; } = Guid.NewGuid();
 
     /// <summary>
     /// Name of the product tier
@@ -43,9 +43,10 @@ public class ProductTier
         IsActive = true;
     }
 
+    static Guid DefaultTierId = Guid.Parse("00000000-0000-0000-0000-000000000001");
     public static ProductTier Default => new ProductTier
     {
-        TierId = "default",
+        TierId = DefaultTierId,
         Name = "Default Tier",
         Description = "Default product tier with basic features",
         SupportSLA = ProductSupportSLA.NoSLA

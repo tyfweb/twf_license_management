@@ -5,8 +5,8 @@ namespace TechWayFit.Licensing.Management.Core.Models.Notification;
 /// </summary>
 public class NotificationHistory
 {
-    public string NotificationId { get; set; } = string.Empty;
-    public string EntityId { get; set; } = string.Empty;
+    public Guid NotificationId { get; set; } = Guid.NewGuid();
+    public Guid EntityId { get; set; } = Guid.NewGuid();
     public string EntityType { get; set; } = string.Empty;
     public NotificationMode NotificationMode { get; set; }
     public string NotificationTemplateId { get; set; } = string.Empty;

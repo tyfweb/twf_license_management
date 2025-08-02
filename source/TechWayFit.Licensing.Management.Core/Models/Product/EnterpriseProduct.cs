@@ -5,7 +5,7 @@ public class EnterpriseProduct
     /// <summary>
     /// Unique identifier for the product
     /// </summary>
-    public string ProductId { get; set; } = string.Empty;
+    public Guid ProductId { get; set; } = Guid.NewGuid();
 
     /// <summary>
     /// Name of the product

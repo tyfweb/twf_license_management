@@ -11,7 +11,7 @@ namespace TechWayFit.Licensing.Management.Core.Models.Settings
         /// <summary>
         /// Unique identifier for the setting
         /// </summary>
-        public string SettingId { get; set; } = string.Empty;
+        public Guid SettingId { get; set; } = Guid.NewGuid();
 
         /// <summary>
         /// Category group for organizing settings (e.g., Branding, License, Security)

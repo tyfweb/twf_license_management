@@ -12,10 +12,6 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Product
 [Table("products")]
 public class ProductEntity : BaseAuditEntity
 {
-    /// <summary>
-    /// Unique identifier for the product
-    /// </summary>
-    public string ProductId { get; set; } = string.Empty;
 
     /// <summary>
     /// Name of the product
@@ -73,7 +69,7 @@ public class ProductEntity : BaseAuditEntity
     {
         return new ProductEntity
         {
-            ProductId = model.ProductId,
+            Id = model.ProductId,
             Name = model.Name,
             Description = model.Description,
             ReleaseDate = model.ReleaseDate,
@@ -87,7 +83,7 @@ public class ProductEntity : BaseAuditEntity
     {
         return new EnterpriseProduct
         {
-            ProductId = this.ProductId,
+            ProductId = this.Id,
             Name = this.Name,
             Description = this.Description,
             ReleaseDate = this.ReleaseDate,

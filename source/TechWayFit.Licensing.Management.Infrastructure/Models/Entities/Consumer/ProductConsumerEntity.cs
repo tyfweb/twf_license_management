@@ -8,20 +8,16 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Consume
 [Table("product_consumers")]
 public class ProductConsumerEntity : BaseAuditEntity
 {
-    /// <summary>
-    /// Unique identifier for the product consumer
-    /// </summary>
-    public string ProductConsumerId { get; set; } = Guid.NewGuid().ToString();
 
     /// <summary>
     /// Identifier for the associated product
     /// </summary>
-    public string ProductId { get; set; } = string.Empty;
+    public Guid ProductId { get; set; } = Guid.NewGuid();
 
     /// <summary>
     /// Identifier for the associated consumer
     /// </summary>
-    public string ConsumerId { get; set; } = string.Empty;
+    public Guid ConsumerId { get; set; } = Guid.NewGuid();
 
     public string AccountManagerName { get; set; } = string.Empty;
     public string AccountManagerEmail { get; set; } = string.Empty;
@@ -34,7 +30,7 @@ public class ProductConsumerEntity : BaseAuditEntity
     {
         return new ProductConsumerEntity
         {
-            ProductConsumerId = model.ProductConsumerId,
+            Id = model.ProductConsumerId,
             ProductId = model.Product.ProductId,
             ConsumerId = model.Consumer.ConsumerId,
             AccountManagerName = model.AccountManager.Name,
@@ -52,7 +48,7 @@ public class ProductConsumerEntity : BaseAuditEntity
     {
         return new ProductConsumer
         {
-            ProductConsumerId = ProductConsumerId,
+            ProductConsumerId = Id,
             Consumer = Consumer.ToModel(),
             Product = Product.ToModel(),
             AccountManager = new ContactPerson

@@ -10,7 +10,6 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Notific
 [Table("notification_history")]
 public class NotificationHistoryEntity : BaseAuditEntity
 {
-    public string NotificationId { get; set; } = string.Empty;
     public string EntityId { get; set; } = string.Empty;
     public string EntityType { get; set; } = string.Empty;
     public string NotificationMode { get; set; } = string.Empty;
@@ -30,7 +29,7 @@ public class NotificationHistoryEntity : BaseAuditEntity
     {
         return new NotificationHistoryEntity
         {
-            NotificationId = model.NotificationId,
+            Id = model.NotificationId,
             EntityId = model.EntityId,
             EntityType = model.EntityType,
             NotificationMode = model.NotificationMode.ToString(),
@@ -50,7 +49,7 @@ public class NotificationHistoryEntity : BaseAuditEntity
     {
         return new NotificationHistory
         {
-            NotificationId = NotificationId,
+            NotificationId = Id,
             EntityId = EntityId,
             EntityType = EntityType,
             NotificationMode =  NotificationMode.ToEnum<NotificationMode>(),

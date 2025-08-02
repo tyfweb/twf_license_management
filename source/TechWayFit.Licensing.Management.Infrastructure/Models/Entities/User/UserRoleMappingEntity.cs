@@ -5,10 +5,6 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.User;
 /// </summary>
 public class UserRoleMappingEntity : BaseAuditEntity
 {
-    /// <summary>
-    /// Unique identifier for the mapping
-    /// </summary>
-    public Guid MappingId { get; set; } = Guid.NewGuid();
 
     /// <summary>
     /// Foreign key to UserProfile

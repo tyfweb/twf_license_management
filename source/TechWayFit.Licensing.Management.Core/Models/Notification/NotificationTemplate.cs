@@ -5,7 +5,7 @@ namespace TechWayFit.Licensing.Management.Core.Models.Notification;
 /// </summary>
 public class NotificationTemplate
 {
-    public string TemplateId { get; set; } = string.Empty;
+    public Guid TemplateId { get; set; } = Guid.NewGuid();
     public string TemplateName { get; set; } = string.Empty;
     public NotificationType NotificationType { get; set; }
     public NotificationPreferences Preferences { get; set; } = new NotificationPreferences();

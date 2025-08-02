@@ -5,10 +5,6 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.User;
 /// </summary>
 public class UserRoleEntity : BaseAuditEntity
 {
-    /// <summary>
-    /// Unique identifier for the role
-    /// </summary>
-    public Guid RoleId { get; set; } = Guid.NewGuid();
 
     /// <summary>
     /// Name of the role

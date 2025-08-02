@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities;
 
 /// <summary>
@@ -6,9 +8,21 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities;
 public abstract class BaseAuditEntity
 {
     /// <summary>
+    /// Unique identifier for the entity (Primary Key)
+    /// </summary>
+    [Key]
+    public Guid Id { get; set; } = Guid.NewGuid();
+
+    /// <summary>
     /// Is the entity active? This is used for soft deletes
     /// </summary>
     public bool IsActive { get; set; } = true;
+
+    /// <summary>
+    /// Is the entity deleted? This is used for soft deletes
+    /// </summary>
+    public bool IsDeleted { get; set; } = false;
+
     /// <summary>
     /// User who created the entity
     /// </summary>
@@ -28,6 +42,16 @@ public abstract class BaseAuditEntity
     /// Date and time when the entity was last updated
     /// </summary>
     public DateTime? UpdatedOn { get; set; }
+
+    /// <summary>
+    /// User who deleted the entity (for soft deletes)
+    /// </summary>
+    public string? DeletedBy { get; set; }
+
+    /// <summary>
+    /// Date and time when the entity was deleted (for soft deletes)
+    /// </summary>
+    public DateTime? DeletedOn { get; set; }
 
     protected static string ToJson(object obj)
     {

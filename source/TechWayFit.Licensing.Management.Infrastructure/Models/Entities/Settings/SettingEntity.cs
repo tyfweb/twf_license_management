@@ -7,11 +7,6 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Setting
 /// </summary>
 public class SettingEntity : BaseAuditEntity
 {
-    /// <summary>
-    /// Unique identifier for the setting
-    /// </summary>
-    [Key]
-    public string SettingId { get; set; } = Guid.NewGuid().ToString();
 
     /// <summary>
     /// Category of the setting (e.g., "System", "Branding", "Email", "Security")
@@ -152,7 +147,7 @@ public class SettingEntity : BaseAuditEntity
     {
         return new SettingEntity
         {
-            SettingId = model.SettingId,
+            Id = model.SettingId,
             Category = model.Category,
             Key = model.Key,
             Value = model.Value,
@@ -190,7 +185,7 @@ public class SettingEntity : BaseAuditEntity
     {
         return new TechWayFit.Licensing.Management.Core.Models.Settings.Setting
         {
-            SettingId = SettingId,
+            SettingId = Id,
             Category = Category,
             Key = Key,
             Value = Value,

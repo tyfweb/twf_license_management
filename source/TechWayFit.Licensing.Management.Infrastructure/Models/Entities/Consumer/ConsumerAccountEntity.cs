@@ -14,11 +14,6 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Data.Entities.Consumer;
 [Table("consumer_accounts")]
 public class ConsumerAccountEntity : BaseAuditEntity
 {
-    /// <summary>
-    /// Unique identifier for the consumer
-    /// </summary>
-    [Key]
-    public string ConsumerId { get; set; } = string.Empty;
     
     /// <summary>
     ///  Company or organization name
@@ -99,7 +94,7 @@ public class ConsumerAccountEntity : BaseAuditEntity
     {
         return new ConsumerAccountEntity
         {
-            ConsumerId = model.ConsumerId,
+            Id = model.ConsumerId,
             CompanyName = model.CompanyName,
             PrimaryContactName = model.PrimaryContact.Name,
             PrimaryContactEmail = model.PrimaryContact.Email,
@@ -124,7 +119,7 @@ public class ConsumerAccountEntity : BaseAuditEntity
     {
         return new ConsumerAccount
         {
-            ConsumerId = this.ConsumerId,
+            ConsumerId = this.Id,
             CompanyName = this.CompanyName,
             PrimaryContact = new ContactPerson
             {

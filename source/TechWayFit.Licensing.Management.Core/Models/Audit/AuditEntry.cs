@@ -5,9 +5,9 @@ namespace TechWayFit.Licensing.Management.Core.Models.Audit;
 /// </summary>
 public class AuditEntry
 {
-    public string EntryId { get; set; } = string.Empty;
+    public Guid EntryId { get; set; } = Guid.NewGuid();
     public string EntityType { get; set; } = string.Empty;
-    public string EntityId { get; set; } = string.Empty;
+    public Guid EntityId { get; set; } = Guid.NewGuid();
     public string ActionType { get; set; } = string.Empty;
     public string? OldValue { get; set; }
     public string? NewValue { get; set; } 

@@ -11,7 +11,7 @@ public class ConsumerAccount
     /// <summary>
     /// Unique identifier for the consumer
     /// </summary>
-    public string ConsumerId { get; set; } = string.Empty;
+    public Guid ConsumerId { get; set; } = Guid.NewGuid();
     /// <summary>
     ///  Company or organization name
     /// </summary>

@@ -14,11 +14,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.License
 [Table("product_licenses")]
 public class ProductLicenseEntity : BaseAuditEntity
 {
-    #region BaseEntityProperties
-    /// <summary>
-    /// Unique identifier for the product license
-    /// </summary>
-    public string LicenseId { get; set; } = string.Empty;
+    #region BaseEntityProperties 
     /// <summary>
     /// License code used for validation and activation
     /// </summary>
@@ -27,12 +23,12 @@ public class ProductLicenseEntity : BaseAuditEntity
     /// <summary>
     /// Foreign key to Product
     /// </summary>
-    public string ProductId { get; set; } = string.Empty;
+    public Guid ProductId { get; set; } = Guid.NewGuid();
 
     /// <summary>
     /// Foreign key to Consumer
     /// </summary>
-    public string ConsumerId { get; set; } = string.Empty;
+    public Guid ConsumerId { get; set; } = Guid.NewGuid();
  
     /// <summary>
     /// Date when the license becomes valid
@@ -122,7 +118,7 @@ public class ProductLicenseEntity : BaseAuditEntity
     {
         return new ProductLicenseEntity
         {
-            LicenseId = model.LicenseId,
+            Id = model.LicenseId,
             LicenseCode = model.LicenseCode,
             ProductId = model.LicenseConsumer.Product.ProductId,
             ConsumerId = model.LicenseConsumer.Consumer.ConsumerId, 
@@ -145,7 +141,7 @@ public class ProductLicenseEntity : BaseAuditEntity
     {
         return new ProductLicense
         {
-            LicenseId = LicenseId,
+            LicenseId = Id,
             LicenseConsumer = new ProductConsumer
             {
                 Product = Product?.ToModel()?? new EnterpriseProduct(){

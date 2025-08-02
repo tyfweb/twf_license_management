@@ -7,10 +7,6 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.User;
 /// </summary>
 public class UserProfileEntity : BaseAuditEntity
 {
-    /// <summary>
-    /// Unique identifier for the user
-    /// </summary>
-    public Guid UserId { get; set; } = Guid.NewGuid();
 
     /// <summary>
     /// Unique username for authentication
@@ -81,7 +77,7 @@ public class UserProfileEntity : BaseAuditEntity
     {
         return new UserProfileEntity
         {
-            UserId = model.UserId,
+            Id = model.UserId,
             UserName = model.UserName,
             FullName = model.FullName,
             Email = model.Email,
@@ -98,7 +94,7 @@ public class UserProfileEntity : BaseAuditEntity
     {
         return new UserProfile
         {
-            UserId = UserId,
+            UserId = Id,
             UserName = UserName,
             FullName = FullName,
             Email = Email,
@@ -111,7 +107,7 @@ public class UserProfileEntity : BaseAuditEntity
             LockedDate = LockedDate,
             Roles = UserRoles.Select(urm => urm.Role).Select(role => new UserRole
             {
-                RoleId = role.RoleId,
+                RoleId = role.Id,
                 RoleName = role.RoleName,
                 RoleDescription = role.RoleDescription,
                 IsAdmin = role.IsAdmin,

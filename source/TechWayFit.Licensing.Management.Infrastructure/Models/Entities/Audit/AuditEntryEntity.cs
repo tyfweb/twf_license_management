@@ -9,12 +9,8 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Audit;
 [Table("audit_entries")]
 public class AuditEntryEntity : BaseAuditEntity
 {
-    /// <summary>
-    /// Unique identifier for the audit entry
-    /// </summary>
-    public string AuditEntryId { get; set; } = string.Empty;
     public string EntityType { get; set; } = string.Empty;
-    public string EntityId { get; set; } = string.Empty;
+    public Guid EntityId { get; set; } = Guid.NewGuid();
     public string ActionType { get; set; } = string.Empty;
     public string? OldValue { get; set; }
     public string? NewValue { get; set; }
@@ -27,7 +23,7 @@ public class AuditEntryEntity : BaseAuditEntity
     {
         return new AuditEntryEntity
         {
-            AuditEntryId = model.EntityId,
+            Id = model.EntityId,
             EntityType = model.EntityType,
             EntityId = model.EntityId,
             ActionType = model.ActionType,
@@ -44,7 +40,7 @@ public class AuditEntryEntity : BaseAuditEntity
     {
         return new AuditEntry
         {
-            EntryId = AuditEntryId,
+            EntryId = Id,
             EntityType = EntityType,
             EntityId = EntityId,
             ActionType = ActionType,
