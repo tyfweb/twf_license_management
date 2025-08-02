@@ -30,19 +30,34 @@ The TechWayFit Licensing System provides tamper-proof license generation and val
 - **Cryptographic Security**: Integrates with KeyManagementService for secure private key handling
 - **Stateless Design**: Generator operates independently without database dependencies
 
-## Project Structure
+## Repository Structure
 
 ```
-LICENSING/
-├── TechWayFit.Licensing.Core/           # Core models and interfaces
-│   ├── Models/                          # License, Feature, and validation models
-│   └── Services/                        # Service interfaces
-├── TechWayFit.Licensing.Generator/      # Internal license generation tool
-│   ├── Services/LicenseGenerator.cs     # License generation service
-│   └── Program.cs                       # Console application
-└── TechWayFit.Licensing.Validation/     # License validation for API/Web
-    ├── Services/LicenseValidator.cs     # License validation service
-    └── Attributes/FeatureGateAttribute.cs # Controller protection attributes
+two_license_management/
+├── source/                              # Source Code
+│   ├── TechWayFit.Licensing.Core/       # Core models and interfaces
+│   ├── TechWayFit.Licensing.Generator/  # License generation service
+│   ├── TechWayFit.Licensing.Management.Core/ # Management core logic
+│   ├── TechWayFit.Licensing.Management.Infrastructure/ # Infrastructure layer
+│   ├── TechWayFit.Licensing.Management.Infrastructure.PostgreSql/ # PostgreSQL provider
+│   ├── TechWayFit.Licensing.Management.Services/ # Business services
+│   ├── TechWayFit.Licensing.Management.Web/ # Web interface
+│   ├── TechWayFit.Licensing.Validation/ # License validation service
+│   ├── Database/                        # Database scripts and migrations
+│   └── TechWayFit.Licensing.sln        # Solution file
+├── docs/                               # Documentation
+│   ├── TECHNICAL_DESIGN_DOCUMENT.md    # Technical architecture and design
+│   ├── FUNCTIONAL_DESIGN_DOCUMENT.md   # Functional requirements and specifications
+│   └── UPCOMING_FEATURES_AND_RELEASES.md # Future enhancements and roadmap
+├── builds/                             # Build Scripts & CI/CD
+│   ├── build.ps1                       # PowerShell build script
+│   ├── build.sh                        # Shell build script
+│   └── GITHUB_WORKFLOW.yml            # GitHub Actions workflow
+└── tests/                              # Test Files & Configurations
+    ├── test.html                       # Test web page
+    ├── create-postgresql-database.sql  # Database setup script
+    ├── sample-license-configuration.json # Sample license config
+    └── sample-postgresql-configuration.json # Sample DB config
 ```
 
 ## Quick Start

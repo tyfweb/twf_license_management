@@ -1,6 +1,22 @@
 #!/bin/bash
 
-# TechWayFit Licensing Build Script
+# TechWayFi# Clean previous builds
+echo "🧹 Cleaning previous builds..."
+dotnet clean $SOLUTION_PATH --configuration $CONFIGURATION
+rm -rf $OUTPUT_DIR
+mkdir -p $OUTPUT_DIR
+
+# Restore dependencies
+echo "📦 Restoring dependencies..."
+dotnet restore $SOLUTION_PATH
+
+# Build solution
+echo "🔨 Building solution..."
+if [ ! -z "$VERSION_SUFFIX" ]; then
+    dotnet build $SOLUTION_PATH --configuration $CONFIGURATION --no-restore --version-suffix $VERSION_SUFFIX
+else
+    dotnet build $SOLUTION_PATH --configuration $CONFIGURATION --no-restore
+fi Script
 # This script builds all projects and creates NuGet packages
 
 set -e
@@ -10,11 +26,13 @@ echo "====================================="
 
 # Configuration
 CONFIGURATION=${1:-Release}
-OUTPUT_DIR="./nupkgs"
+OUTPUT_DIR="../nupkgs"
 VERSION_SUFFIX=${2:-""}
+SOLUTION_PATH="../source/TechWayFit.Licensing.sln"
 
 echo "Configuration: $CONFIGURATION"
 echo "Output Directory: $OUTPUT_DIR"
+echo "Solution Path: $SOLUTION_PATH"
 if [ ! -z "$VERSION_SUFFIX" ]; then
     echo "Version Suffix: $VERSION_SUFFIX"
 fi

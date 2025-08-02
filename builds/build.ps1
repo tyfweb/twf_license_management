@@ -10,10 +10,12 @@ Write-Host "🚀 TechWayFit Licensing Build Script" -ForegroundColor Green
 Write-Host "=====================================" -ForegroundColor Green
 
 # Configuration
-$OutputDir = "./nupkgs"
+$OutputDir = "../nupkgs"
+$SolutionPath = "../source/TechWayFit.Licensing.sln"
 
 Write-Host "Configuration: $Configuration" -ForegroundColor Yellow
-Write-Host "Output Directory: $OutputDir" -ForegroundColor Yellow
+Write-Host "Output Directory: $OutputDir" -ForegroundColor Yellow  
+Write-Host "Solution Path: $SolutionPath" -ForegroundColor Yellow
 if ($VersionSuffix) {
     Write-Host "Version Suffix: $VersionSuffix" -ForegroundColor Yellow
 }
@@ -22,7 +24,7 @@ Write-Host ""
 try {
     # Clean previous builds
     Write-Host "🧹 Cleaning previous builds..." -ForegroundColor Blue
-    dotnet clean --configuration $Configuration
+    dotnet clean $SolutionPath --configuration $Configuration
     if (Test-Path $OutputDir) {
         Remove-Item $OutputDir -Recurse -Force
     }
@@ -30,14 +32,14 @@ try {
 
     # Restore packages
     Write-Host "📦 Restoring NuGet packages..." -ForegroundColor Blue
-    dotnet restore
+    dotnet restore $SolutionPath
 
     # Build solution
     Write-Host "🔨 Building solution..." -ForegroundColor Blue
     if ($VersionSuffix) {
-        dotnet build --configuration $Configuration --no-restore --version-suffix $VersionSuffix
+        dotnet build $SolutionPath --configuration $Configuration --no-restore --version-suffix $VersionSuffix
     } else {
-        dotnet build --configuration $Configuration --no-restore
+        dotnet build $SolutionPath --configuration $Configuration --no-restore
     }
 
     # Create NuGet packages
@@ -46,7 +48,7 @@ try {
     # Pack Core library
     Write-Host "  📦 Packing TechWayFit.Licensing.Core..." -ForegroundColor Cyan
     if ($VersionSuffix) {
-        dotnet pack ./TechWayFit.Licensing.Core/TechWayFit.Licensing.Core.csproj `
+        dotnet pack ../source/TechWayFit.Licensing.Core/TechWayFit.Licensing.Core.csproj `
             --configuration $Configuration `
             --no-build `
             --output $OutputDir `
