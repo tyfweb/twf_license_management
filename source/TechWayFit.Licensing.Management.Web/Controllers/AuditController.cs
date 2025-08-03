@@ -201,7 +201,7 @@ public class AuditController : Controller
             };
 
             // Get related entries for the same entity
-            if (!string.IsNullOrEmpty(entry.EntityType) && entry.EntityId != Guid.Empty)
+            if (!string.IsNullOrEmpty(entry.EntityType) && !string.IsNullOrEmpty(entry.EntityId))
             {
                 var relatedEntries = await _auditService.GetAuditEntriesAsync(
                     entityType: entry.EntityType,
@@ -455,7 +455,7 @@ public class AuditController : Controller
         {
             EntryId = entry.EntryId.ConvertToString(),
             EntityType = entry.EntityType,
-            EntityId = entry.EntityId.ConvertToString(),
+            EntityId = entry.EntityId,
             ActionType = entry.ActionType,
             OldValue = entry.OldValue,
             NewValue = entry.NewValue,
@@ -472,20 +472,165 @@ public class AuditController : Controller
     {
         var changes = new List<AuditChangeViewModel>();
 
-        // Simple change detection - can be enhanced with JSON comparison
-        if (!string.IsNullOrEmpty(entry.OldValue) || !string.IsNullOrEmpty(entry.NewValue))
+        try
         {
-            changes.Add(new AuditChangeViewModel
+            // Parse old and new values if they are JSON
+            Dictionary<string, object?>? oldValues = null;
+            Dictionary<string, object?>? newValues = null;
+
+            if (!string.IsNullOrEmpty(entry.OldValue))
             {
-                PropertyName = "Value",
-                OldValue = entry.OldValue,
-                NewValue = entry.NewValue,
-                ChangeType = string.IsNullOrEmpty(entry.OldValue) ? "Added" :
-                           string.IsNullOrEmpty(entry.NewValue) ? "Removed" : "Modified"
-            });
+                try
+                {
+                    oldValues = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object?>>(entry.OldValue);
+                }
+                catch
+                {
+                    // If not JSON, treat as single value
+                    oldValues = new Dictionary<string, object?> { { "Value", entry.OldValue } };
+                }
+            }
+
+            if (!string.IsNullOrEmpty(entry.NewValue))
+            {
+                try
+                {
+                    newValues = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object?>>(entry.NewValue);
+                }
+                catch
+                {
+                    // If not JSON, treat as single value
+                    newValues = new Dictionary<string, object?> { { "Value", entry.NewValue } };
+                }
+            }
+
+            // Get all property names from both old and new values
+            var allProperties = new HashSet<string>();
+            if (oldValues != null) allProperties.UnionWith(oldValues.Keys);
+            if (newValues != null) allProperties.UnionWith(newValues.Keys);
+
+            // Create changes for each property
+            foreach (var propertyName in allProperties.OrderBy(p => p))
+            {
+                var oldValue = oldValues?.GetValueOrDefault(propertyName);
+                var newValue = newValues?.GetValueOrDefault(propertyName);
+
+                // Skip properties that haven't changed
+                var oldValueStr = oldValue?.ToString();
+                var newValueStr = newValue?.ToString();
+
+                if (oldValueStr == newValueStr)
+                    continue;
+
+                // Determine change type
+                string changeType;
+                if (oldValue == null)
+                    changeType = "Added";
+                else if (newValue == null)
+                    changeType = "Removed";
+                else
+                    changeType = "Modified";
+
+                // Format values for display
+                var formattedOldValue = FormatPropertyValue(oldValue);
+                var formattedNewValue = FormatPropertyValue(newValue);
+
+                changes.Add(new AuditChangeViewModel
+                {
+                    PropertyName = FormatPropertyName(propertyName),
+                    OldValue = formattedOldValue,
+                    NewValue = formattedNewValue,
+                    ChangeType = changeType
+                });
+            }
+
+            // If no structured changes found but we have raw values, create a generic change
+            if (!changes.Any() && (!string.IsNullOrEmpty(entry.OldValue) || !string.IsNullOrEmpty(entry.NewValue)))
+            {
+                changes.Add(new AuditChangeViewModel
+                {
+                    PropertyName = "Entity Data",
+                    OldValue = entry.OldValue,
+                    NewValue = entry.NewValue,
+                    ChangeType = string.IsNullOrEmpty(entry.OldValue) ? "Added" :
+                               string.IsNullOrEmpty(entry.NewValue) ? "Removed" : "Modified"
+                });
+            }
+        }
+        catch (Exception)
+        {
+            // Fallback to original simple change detection
+            if (!string.IsNullOrEmpty(entry.OldValue) || !string.IsNullOrEmpty(entry.NewValue))
+            {
+                changes.Add(new AuditChangeViewModel
+                {
+                    PropertyName = "Value",
+                    OldValue = entry.OldValue,
+                    NewValue = entry.NewValue,
+                    ChangeType = string.IsNullOrEmpty(entry.OldValue) ? "Added" :
+                               string.IsNullOrEmpty(entry.NewValue) ? "Removed" : "Modified"
+                });
+            }
         }
 
         return changes;
+    }
+
+    /// <summary>
+    /// Format property names for better display
+    /// </summary>
+    private static string FormatPropertyName(string propertyName)
+    {
+        if (string.IsNullOrEmpty(propertyName))
+            return "Unknown";
+
+        // Convert PascalCase to Title Case with spaces
+        var result = System.Text.RegularExpressions.Regex.Replace(propertyName, "([A-Z])", " $1").Trim();
+        
+        // Capitalize first letter
+        if (result.Length > 0)
+            result = char.ToUpper(result[0]) + result.Substring(1);
+
+        return result;
+    }
+
+    /// <summary>
+    /// Format property values for better display
+    /// </summary>
+    private static string? FormatPropertyValue(object? value)
+    {
+        if (value == null)
+            return null;
+
+        // Handle different value types
+        return value switch
+        {
+            bool b => b ? "Yes" : "No",
+            DateTime dt => dt.ToString("yyyy-MM-dd HH:mm:ss UTC"),
+            decimal d => d.ToString("N2"),
+            double d => d.ToString("N2"),
+            float f => f.ToString("N2"),
+            System.Text.Json.JsonElement json => FormatJsonElement(json),
+            _ => value.ToString()
+        };
+    }
+
+    /// <summary>
+    /// Format JSON elements for display
+    /// </summary>
+    private static string FormatJsonElement(System.Text.Json.JsonElement element)
+    {
+        return element.ValueKind switch
+        {
+            System.Text.Json.JsonValueKind.String => element.GetString() ?? "",
+            System.Text.Json.JsonValueKind.Number => element.GetDecimal().ToString("N2"),
+            System.Text.Json.JsonValueKind.True => "Yes",
+            System.Text.Json.JsonValueKind.False => "No",
+            System.Text.Json.JsonValueKind.Null => "",
+            System.Text.Json.JsonValueKind.Array => $"[{element.GetArrayLength()} items]",
+            System.Text.Json.JsonValueKind.Object => "[Object]",
+            _ => element.ToString()
+        };
     }
 
     private static string? FormatValue(string? value)

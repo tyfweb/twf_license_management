@@ -104,8 +104,7 @@ public class PostgreSqlSettingRepository : PostgreSqlBaseRepository<SettingEntit
                 DisplayName = $"{category}.{key}",
                 CreatedBy = updatedBy,
                 CreatedOn = DateTime.UtcNow,
-                UpdatedOn = DateTime.UtcNow,
-                ValueSource = "Database"
+                UpdatedOn = DateTime.UtcNow
             };
             await _dbSet.AddAsync(setting);
         }
@@ -115,7 +114,6 @@ public class PostgreSqlSettingRepository : PostgreSqlBaseRepository<SettingEntit
             setting.Value = stringValue;
             setting.UpdatedBy = updatedBy;
             setting.UpdatedOn = DateTime.UtcNow;
-            setting.ValueSource = "Database";
             _dbSet.Update(setting);
         }
 
@@ -165,7 +163,6 @@ public class PostgreSqlSettingRepository : PostgreSqlBaseRepository<SettingEntit
         setting.Value = setting.DefaultValue;
         setting.UpdatedBy = updatedBy;
         setting.UpdatedOn = DateTime.UtcNow;
-        setting.ValueSource = "Default";
 
         _dbSet.Update(setting);
         await _context.SaveChangesAsync();
@@ -186,7 +183,6 @@ public class PostgreSqlSettingRepository : PostgreSqlBaseRepository<SettingEntit
             setting.Value = setting.DefaultValue;
             setting.UpdatedBy = updatedBy;
             setting.UpdatedOn = DateTime.UtcNow;
-            setting.ValueSource = "Default";
         }
 
         _dbSet.UpdateRange(settings);
@@ -202,8 +198,7 @@ public class PostgreSqlSettingRepository : PostgreSqlBaseRepository<SettingEntit
         return await _dbSet
             .Where(s => s.IsActive && 
                        (s.DisplayName.Contains(searchTerm) || 
-                        s.Description != null && s.Description.Contains(searchTerm) ||
-                        s.Tags != null && s.Tags.Contains(searchTerm)))
+                        s.Description != null && s.Description.Contains(searchTerm)))
             .OrderBy(s => s.Category)
             .ThenBy(s => s.DisplayOrder)
             .ToListAsync();
@@ -272,8 +267,10 @@ public class PostgreSqlSettingRepository : PostgreSqlBaseRepository<SettingEntit
     /// </summary>
     public async Task<IEnumerable<SettingEntity>> GetByEnvironmentAsync(string environment)
     {
+        // Environment property no longer exists in SettingEntity
+        // Return all active settings as environment filtering is not supported
         return await _dbSet
-            .Where(s => s.IsActive && (s.Environment == environment || s.Environment == "All"))
+            .Where(s => s.IsActive)
             .OrderBy(s => s.Category)
             .ThenBy(s => s.DisplayOrder)
             .ToListAsync();
@@ -284,11 +281,9 @@ public class PostgreSqlSettingRepository : PostgreSqlBaseRepository<SettingEntit
     /// </summary>
     public async Task<IEnumerable<SettingEntity>> GetRequiringRestartAsync()
     {
-        return await _dbSet
-            .Where(s => s.IsActive && s.RequiresRestart)
-            .OrderBy(s => s.Category)
-            .ThenBy(s => s.DisplayOrder)
-            .ToListAsync();
+        // RequiresRestart property no longer exists in SettingEntity
+        // Return empty list as restart requirements are not tracked
+        return await Task.FromResult(new List<SettingEntity>());
     }
 
     /// <summary>
@@ -296,11 +291,9 @@ public class PostgreSqlSettingRepository : PostgreSqlBaseRepository<SettingEntit
     /// </summary>
     public async Task<IEnumerable<SettingEntity>> GetDeprecatedAsync()
     {
-        return await _dbSet
-            .Where(s => s.IsActive && s.IsDeprecated)
-            .OrderBy(s => s.Category)
-            .ThenBy(s => s.DisplayOrder)
-            .ToListAsync();
+        // IsDeprecated property no longer exists in SettingEntity
+        // Return empty list as deprecation status is not tracked
+        return await Task.FromResult(new List<SettingEntity>());
     }
 
     /// <summary>
@@ -308,14 +301,9 @@ public class PostgreSqlSettingRepository : PostgreSqlBaseRepository<SettingEntit
     /// </summary>
     public async Task<IEnumerable<SettingEntity>> GetByTagsAsync(params string[] tags)
     {
-        if (tags == null || tags.Length == 0)
-            return new List<SettingEntity>();
-
-        return await _dbSet
-            .Where(s => s.IsActive && s.Tags != null && tags.Any(tag => s.Tags.Contains(tag)))
-            .OrderBy(s => s.Category)
-            .ThenBy(s => s.DisplayOrder)
-            .ToListAsync();
+        // Tags property no longer exists in SettingEntity
+        // Return empty list as tag-based filtering is not supported
+        return await Task.FromResult(new List<SettingEntity>());
     }
 
     #region Private Helper Methods

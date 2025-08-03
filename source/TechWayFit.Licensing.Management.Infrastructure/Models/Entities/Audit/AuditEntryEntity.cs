@@ -10,7 +10,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Audit;
 public class AuditEntryEntity : BaseAuditEntity
 {
     public string EntityType { get; set; } = string.Empty;
-    public Guid EntityId { get; set; } = Guid.NewGuid();
+    public string EntityId { get; set; } = string.Empty;
     public string ActionType { get; set; } = string.Empty;
     public string? OldValue { get; set; }
     public string? NewValue { get; set; }

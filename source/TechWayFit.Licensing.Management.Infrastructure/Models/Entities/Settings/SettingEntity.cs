@@ -99,46 +99,6 @@ public class SettingEntity : BaseAuditEntity
     public string FullKey => $"{Category}.{Key}";
 
     /// <summary>
-    /// Source of the current value (Default, Configuration, Database, User)
-    /// </summary>
-    [MaxLength(50)]
-    public string ValueSource { get; set; } = "Database";
-
-    /// <summary>
-    /// Tags for categorization and searching
-    /// </summary>
-    [MaxLength(500)]
-    public string? Tags { get; set; }
-
-    /// <summary>
-    /// Whether this setting requires application restart to take effect
-    /// </summary>
-    public bool RequiresRestart { get; set; } = false;
-
-    /// <summary>
-    /// Environment where this setting applies (Development, Staging, Production, All)
-    /// </summary>
-    [MaxLength(50)]
-    public string Environment { get; set; } = "All";
-
-    /// <summary>
-    /// Version when this setting was introduced
-    /// </summary>
-    [MaxLength(20)]
-    public string? IntroducedInVersion { get; set; }
-
-    /// <summary>
-    /// Whether this setting is deprecated
-    /// </summary>
-    public bool IsDeprecated { get; set; } = false;
-
-    /// <summary>
-    /// Deprecation message
-    /// </summary>
-    [MaxLength(500)]
-    public string? DeprecationMessage { get; set; }
-
-    /// <summary>
     /// Convert from Core model to Entity
     /// </summary>
     /// <param name="model">Core Setting model</param>
@@ -162,13 +122,6 @@ public class SettingEntity : BaseAuditEntity
             IsSensitive = false, // Set based on your business logic
             ValidationRules = model.ValidationPattern,
             PossibleValues = null, // Set if you have this data
-            ValueSource = "Database",
-            Tags = null, // Set if you have tags
-            RequiresRestart = false, // Set based on your business logic
-            Environment = "All",
-            IntroducedInVersion = null,
-            IsDeprecated = false,
-            DeprecationMessage = null,
             IsActive = true,
             CreatedBy = model.CreatedBy,
             CreatedOn = model.CreatedAt,

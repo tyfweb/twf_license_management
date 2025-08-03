@@ -42,8 +42,8 @@ public class AuditService : IAuditService
         try
         {
             // Set audit entry ID if not provided
-            if (entry.EntityId == Guid.Empty)
-                entry.EntityId = Guid.NewGuid();
+            if (string.IsNullOrEmpty(entry.EntityId))
+                entry.EntityId = Guid.NewGuid().ToString();
 
             // Set timestamp if not provided
             if (entry.Timestamp == default)

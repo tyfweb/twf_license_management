@@ -97,7 +97,7 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Id).IsRequired();
             entity.Property(e => e.EntityType).HasMaxLength(100).IsRequired();
-            entity.Property(e => e.EntityId).IsRequired();
+            entity.Property(e => e.EntityId).HasMaxLength(50).IsRequired();
             entity.Property(e => e.CreatedBy).HasMaxLength(100).IsRequired();
             entity.Property(e => e.Reason).HasMaxLength(1000);
             entity.Property(e => e.OldValue).HasMaxLength(4000);
@@ -463,23 +463,12 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
 
             entity.Property(e => e.PossibleValues).HasMaxLength(2000);
 
-            entity.Property(e => e.ValueSource).HasMaxLength(50).IsRequired();
-
-            entity.Property(e => e.Tags).HasMaxLength(500);
-
-            entity.Property(e => e.Environment).HasMaxLength(50).IsRequired();
-
-            entity.Property(e => e.IntroducedInVersion).HasMaxLength(20);
-
-            entity.Property(e => e.DeprecationMessage).HasMaxLength(500);
-
             // Unique constraint on Category + Key combination
             entity.HasIndex(e => new { e.Category, e.Key })
                 .IsUnique();
 
             // Performance indexes
             entity.HasIndex(e => e.Category);
-            entity.HasIndex(e => e.Environment);
             entity.HasIndex(e => new { e.Category, e.DisplayOrder });
 
             // Computed column for FullKey (ignored since it's a computed property)
@@ -493,6 +482,7 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
     public override int SaveChanges()
     {
         UpdateAuditFields();
+        CreateAuditEntries();
         ConvertDateTimesToUtc();
         return base.SaveChanges();
     }
@@ -503,6 +493,7 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         UpdateAuditFields();
+        CreateAuditEntries();
         ConvertDateTimesToUtc();
         return base.SaveChangesAsync(cancellationToken);
     }
@@ -530,6 +521,146 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
                     break;
             }
         }
+    }
+
+    /// <summary>
+    /// Create audit entries for all entity changes (add/update)
+    /// </summary>
+    private void CreateAuditEntries()
+    {
+        var entries = ChangeTracker.Entries<BaseAuditEntity>()
+            .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified)
+            .ToList();
+
+        foreach (var entry in entries)
+        {
+            // Skip creating audit entries for AuditEntryEntity itself to avoid recursion
+            if (entry.Entity is AuditEntryEntity)
+                continue;
+
+            var auditEntry = CreateAuditEntry(entry);
+            if (auditEntry != null)
+            {
+                AuditEntries.Add(auditEntry);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Create an individual audit entry for an entity change
+    /// </summary>
+    private AuditEntryEntity? CreateAuditEntry(Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry<BaseAuditEntity> entry)
+    {
+        var entityType = entry.Entity.GetType().Name;
+        var entityId = entry.Entity.Id.ToString(); // Convert Guid to string for generic audit table
+        var actionType = entry.State == EntityState.Added ? "CREATE" : "UPDATE";
+        var currentUser = entry.State == EntityState.Added ? entry.Entity.CreatedBy : entry.Entity.UpdatedBy ?? "System";
+
+        // Determine if this is a security audit (User/UserProfile related changes)
+        var isSecurityAudit = entityType.Contains("User", StringComparison.OrdinalIgnoreCase);
+        var auditCategory = isSecurityAudit ? "Security Audit" : "Standard Audit";
+
+        var auditEntry = new AuditEntryEntity
+        {
+            Id = Guid.NewGuid(),
+            EntityType = entityType,
+            EntityId = entityId,
+            ActionType = actionType,
+            CreatedBy = currentUser,
+            CreatedOn = DateTime.UtcNow,
+            IsActive = true,
+            Reason = auditCategory
+        };
+
+        // Capture old and new values for updates
+        if (entry.State == EntityState.Modified)
+        {
+            var oldValues = new Dictionary<string, object?>();
+            var newValues = new Dictionary<string, object?>();
+
+            foreach (var property in entry.Properties)
+            {
+                if (property.IsModified && 
+                    !IsAuditField(property.Metadata.Name) && 
+                    !IsSensitiveField(property.Metadata.Name))
+                {
+                    oldValues[property.Metadata.Name] = property.OriginalValue;
+                    newValues[property.Metadata.Name] = property.CurrentValue;
+                }
+            }
+
+            if (oldValues.Any())
+            {
+                auditEntry.OldValue = System.Text.Json.JsonSerializer.Serialize(oldValues);
+                auditEntry.NewValue = System.Text.Json.JsonSerializer.Serialize(newValues);
+            }
+        }
+        else if (entry.State == EntityState.Added)
+        {
+            // For new entities, capture the entity data (excluding sensitive fields)
+            var entityData = new Dictionary<string, object?>();
+            
+            foreach (var property in entry.Properties)
+            {
+                if (!IsAuditField(property.Metadata.Name) && 
+                    !IsSensitiveField(property.Metadata.Name))
+                {
+                    entityData[property.Metadata.Name] = property.CurrentValue;
+                }
+            }
+
+            auditEntry.NewValue = System.Text.Json.JsonSerializer.Serialize(entityData);
+        }
+
+        // Add metadata for security audits
+        if (isSecurityAudit)
+        {
+            var metadata = new Dictionary<string, object>
+            {
+                ["AuditCategory"] = "Security",
+                ["RequiresReview"] = true,
+                ["Timestamp"] = DateTime.UtcNow,
+                ["EntityType"] = entityType
+            };
+            auditEntry.Metadata = System.Text.Json.JsonSerializer.Serialize(metadata);
+        }
+
+        return auditEntry;
+    }
+
+    /// <summary>
+    /// Check if a property is an audit field that should not be included in audit logs
+    /// </summary>
+    private static bool IsAuditField(string propertyName)
+    {
+        var auditFields = new[]
+        {
+            nameof(BaseAuditEntity.CreatedBy),
+            nameof(BaseAuditEntity.CreatedOn),
+            nameof(BaseAuditEntity.UpdatedBy),
+            nameof(BaseAuditEntity.UpdatedOn),
+            nameof(BaseAuditEntity.DeletedBy),
+            nameof(BaseAuditEntity.DeletedOn),
+            nameof(BaseAuditEntity.IsActive),
+            nameof(BaseAuditEntity.IsDeleted)
+        };
+
+        return auditFields.Contains(propertyName, StringComparer.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Check if a property contains sensitive data that should not be logged
+    /// </summary>
+    private static bool IsSensitiveField(string propertyName)
+    {
+        var sensitiveFields = new[]
+        {
+            "Password", "PasswordHash", "PasswordSalt", "Token", "Secret", 
+            "Key", "PrivateKey", "ConnectionString", "ApiKey", "LicenseKey"
+        };
+
+        return sensitiveFields.Any(field => 
+            propertyName.Contains(field, StringComparison.OrdinalIgnoreCase));
     }
 
     /// <summary>
