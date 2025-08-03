@@ -9,7 +9,7 @@ public class NotificationHistory
     public Guid EntityId { get; set; } = Guid.NewGuid();
     public string EntityType { get; set; } = string.Empty;
     public NotificationMode NotificationMode { get; set; }
-    public string NotificationTemplateId { get; set; } = string.Empty;
+    public Guid NotificationTemplateId { get; set; } = Guid.Empty;
     public NotificationType NotificationType { get; set; }
     public NotificationPreferences Recipients { get; set; } = new NotificationPreferences();
     public DateTime SentDate { get; set; }

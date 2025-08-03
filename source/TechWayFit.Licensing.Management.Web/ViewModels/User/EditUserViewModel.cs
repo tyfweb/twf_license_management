@@ -8,7 +8,7 @@ namespace TechWayFit.Licensing.Management.Web.ViewModels.User;
 /// </summary>
 public class EditUserViewModel
 {
-    public Guid UserId { get; set; }
+    public string UserId { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Username is required")]
     [StringLength(50, ErrorMessage = "Username cannot exceed 50 characters")]

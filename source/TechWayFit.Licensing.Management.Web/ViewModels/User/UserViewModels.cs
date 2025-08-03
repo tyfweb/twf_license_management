@@ -51,7 +51,7 @@ public class UserDetailsViewModel
 /// </summary>
 public class ChangePasswordViewModel
 {
-    public Guid UserId { get; set; }
+    public string UserId { get; set; } = string.Empty;
     public string UserName { get; set; } = string.Empty;
 
     [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Current password is required")]

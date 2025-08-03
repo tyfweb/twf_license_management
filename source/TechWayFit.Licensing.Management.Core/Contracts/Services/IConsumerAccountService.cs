@@ -29,7 +29,7 @@ public interface IConsumerAccountService
     /// </summary>
     /// <param name="consumerId">Consumer ID</param>
     /// <returns>Consumer account or null if not found</returns>
-    Task<ConsumerAccount?> GetConsumerAccountByIdAsync(string consumerId);
+    Task<ConsumerAccount?> GetConsumerAccountByIdAsync(Guid consumerId);
 
     /// <summary>
     /// Gets a consumer account by email address
@@ -72,7 +72,7 @@ public interface IConsumerAccountService
     /// <param name="consumerId">Consumer ID</param>
     /// <param name="activatedBy">User activating the account</param>
     /// <returns>True if activated successfully</returns>
-    Task<bool> ActivateConsumerAccountAsync(string consumerId, string activatedBy);
+    Task<bool> ActivateConsumerAccountAsync(Guid consumerId, string activatedBy);
 
     /// <summary>
     /// Deactivates a consumer account
@@ -81,7 +81,7 @@ public interface IConsumerAccountService
     /// <param name="deactivatedBy">User deactivating the account</param>
     /// <param name="reason">Reason for deactivation</param>
     /// <returns>True if deactivated successfully</returns>
-    Task<bool> DeactivateConsumerAccountAsync(string consumerId, string deactivatedBy, string reason);
+    Task<bool> DeactivateConsumerAccountAsync(Guid consumerId, string deactivatedBy, string reason);
 
     /// <summary>
     /// Updates consumer status
@@ -90,7 +90,7 @@ public interface IConsumerAccountService
     /// <param name="status">New status</param>
     /// <param name="updatedBy">User updating the status</param>
     /// <returns>True if updated successfully</returns>
-    Task<bool> UpdateConsumerStatusAsync(string consumerId, ConsumerStatus status, string updatedBy);
+    Task<bool> UpdateConsumerStatusAsync(Guid consumerId, ConsumerStatus status, string updatedBy);
 
     /// <summary>
     /// Deletes a consumer account
@@ -98,14 +98,14 @@ public interface IConsumerAccountService
     /// <param name="consumerId">Consumer ID</param>
     /// <param name="deletedBy">User deleting the account</param>
     /// <returns>True if deleted successfully</returns>
-    Task<bool> DeleteConsumerAccountAsync(string consumerId, string deletedBy);
+    Task<bool> DeleteConsumerAccountAsync(Guid consumerId, string deletedBy);
 
     /// <summary>
     /// Checks if a consumer account exists
     /// </summary>
     /// <param name="consumerId">Consumer ID</param>
     /// <returns>True if exists</returns>
-    Task<bool> ConsumerAccountExistsAsync(string consumerId);
+    Task<bool> ConsumerAccountExistsAsync(Guid consumerId);
 
     /// <summary>
     /// Validates consumer account data
@@ -124,7 +124,7 @@ public interface IConsumerAccountService
     /// <param name="pageSize">Page size</param>
     /// <returns>List of consumer accounts managed by the account manager</returns>
     Task<IEnumerable<ConsumerAccount>> GetConsumersByAccountManagerAsync(
-        string accountManagerId,
+        Guid accountManagerId,
         ConsumerStatus? status = null,
         bool? isActive = null,
         int pageNumber = 1,
@@ -138,7 +138,7 @@ public interface IConsumerAccountService
     /// <param name="isActive">Filter by active status</param>
     /// <returns>Total count of consumers managed by the account manager</returns>
     Task<int> GetConsumerCountByAccountManagerAsync(
-        string accountManagerId,
+        Guid accountManagerId,
         ConsumerStatus? status = null,
         bool? isActive = null);
 
@@ -153,7 +153,7 @@ public interface IConsumerAccountService
     /// <param name="pageSize">Page size</param>
     /// <returns>List of consumer accounts with licenses for the product</returns>
     Task<IEnumerable<ConsumerAccount>> GetConsumersByProductAsync(
-        string productId,
+        Guid productId,
         ConsumerStatus? status = null,
         bool? isActive = null,
         string? licenseStatus = null,
@@ -169,7 +169,7 @@ public interface IConsumerAccountService
     /// <param name="licenseStatus">Filter by license status</param>
     /// <returns>Total count of consumers with licenses for the product</returns>
     Task<int> GetConsumerCountByProductAsync(
-        string productId,
+        Guid productId,
         ConsumerStatus? status = null,
         bool? isActive = null,
         string? licenseStatus = null);
@@ -186,8 +186,8 @@ public interface IConsumerAccountService
     /// <param name="pageSize">Page size</param>
     /// <returns>List of consumer accounts managed by the account manager with licenses for the product</returns>
     Task<IEnumerable<ConsumerAccount>> GetConsumersByAccountManagerAndProductAsync(
-        string accountManagerId,
-        string productId,
+        Guid accountManagerId,
+        Guid productId,
         ConsumerStatus? status = null,
         bool? isActive = null,
         string? licenseStatus = null,
@@ -204,8 +204,8 @@ public interface IConsumerAccountService
     /// <param name="licenseStatus">Filter by license status</param>
     /// <returns>Total count of consumers managed by the account manager with licenses for the product</returns>
     Task<int> GetConsumerCountByAccountManagerAndProductAsync(
-        string accountManagerId,
-        string productId,
+        Guid accountManagerId,
+        Guid productId,
         ConsumerStatus? status = null,
         bool? isActive = null,
         string? licenseStatus = null);
@@ -220,7 +220,7 @@ public interface IConsumerAccountService
     /// <param name="pageSize">Page size</param>
     /// <returns>List of consumer accounts without licenses for the product</returns>
     Task<IEnumerable<ConsumerAccount>> GetConsumersWithoutProductAsync(
-        string productId,
+        Guid productId,
         ConsumerStatus? status = null,
         bool? isActive = null,
         int pageNumber = 1,
@@ -237,8 +237,8 @@ public interface IConsumerAccountService
     /// <param name="pageSize">Page size</param>
     /// <returns>List of consumer accounts managed by the account manager without licenses for the product</returns>
     Task<IEnumerable<ConsumerAccount>> GetConsumersByAccountManagerWithoutProductAsync(
-        string accountManagerId,
-        string productId,
+        Guid accountManagerId,
+        Guid productId,
         ConsumerStatus? status = null,
         bool? isActive = null,
         int pageNumber = 1,

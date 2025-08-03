@@ -15,21 +15,21 @@ public class PostgreSqlProductFeatureRepository : PostgreSqlBaseRepository<Produ
     { 
     }
 
-    public async Task<IEnumerable<ProductFeatureEntity>> GetFeaturesByProductIdAsync(string productId)
+    public async Task<IEnumerable<ProductFeatureEntity>> GetFeaturesByProductIdAsync(Guid productId)
     {
         return await _dbSet.Where(f => f.ProductId == productId && f.IsActive)
                          .OrderBy(f => f.DisplayOrder)
                          .ToListAsync();
     }
 
-    public async Task<IEnumerable<ProductFeatureEntity>> GetByTierIdAsync(string tierId)
+    public async Task<IEnumerable<ProductFeatureEntity>> GetByTierIdAsync(Guid tierId)
     {
         return await _dbSet.Where(f => f.TierId == tierId && f.IsActive)
                          .OrderBy(f => f.DisplayOrder)
                          .ToListAsync();
     }
 
-    public async Task<ProductFeatureEntity?> GetFeatureByCodeAsync(string productId, string featureCode)
+    public async Task<ProductFeatureEntity?> GetFeatureByCodeAsync(Guid productId, string featureCode)
     {
         return await _dbSet.FirstOrDefaultAsync(f => 
             f.ProductId == productId && 
@@ -37,17 +37,17 @@ public class PostgreSqlProductFeatureRepository : PostgreSqlBaseRepository<Produ
             f.IsActive);
     }
 
-    public async Task<bool> IsFeatureCodeUniqueAsync(string productId, string featureCode, string? excludeFeatureId = null)
+    public async Task<bool> IsFeatureCodeUniqueAsync(Guid productId, string featureCode, Guid? excludeFeatureId = null)
     {
         var query = _dbSet.Where(f => f.ProductId == productId && f.Code == featureCode);
-        
-        if (!string.IsNullOrEmpty(excludeFeatureId))
-            query = query.Where(f => f.FeatureId != excludeFeatureId);
+
+        if (excludeFeatureId.HasValue)
+            query = query.Where(f => f.Id != excludeFeatureId.Value);
             
         return !await query.AnyAsync();
     }
 
-    public async Task<IEnumerable<ProductFeatureEntity>> GetFeaturesByProductVersionAsync(string productId, string productVersion)
+    public async Task<IEnumerable<ProductFeatureEntity>> GetFeaturesByProductVersionAsync(Guid productId, string productVersion)
     {
         return await _dbSet.Where(f => f.ProductId == productId &&
                      string.Compare(f.SupportFromVersion, productVersion) < 0 &&
@@ -57,13 +57,13 @@ public class PostgreSqlProductFeatureRepository : PostgreSqlBaseRepository<Produ
                      .ToListAsync();
     }
 
-    public Task<bool> IsCodeUniqueAsync(string productId, string code, string? excludeId)
+    public Task<bool> IsCodeUniqueAsync(Guid productId, string code, Guid? excludeId)
     {
         var query = _dbSet.Where(f => f.ProductId == productId && f.Code == code);
-        
-        if (!string.IsNullOrEmpty(excludeId))
-            query = query.Where(f => f.FeatureId != excludeId);
-            
+
+        if (excludeId.HasValue)
+            query = query.Where(f => f.Id != excludeId.Value);
+
         return query.AnyAsync();
     }
 }

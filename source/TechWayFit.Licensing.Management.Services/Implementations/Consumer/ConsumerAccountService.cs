@@ -85,8 +85,8 @@ public class ConsumerAccountService : IConsumerAccountService
             throw new ArgumentNullException(nameof(consumerAccount));
         if (string.IsNullOrWhiteSpace(updatedBy))
             throw new ArgumentException("UpdatedBy cannot be null or empty", nameof(updatedBy));
-        if (string.IsNullOrWhiteSpace(consumerAccount.ConsumerId))
-            throw new ArgumentException("ConsumerId cannot be null or empty", nameof(consumerAccount.ConsumerId));
+        if (consumerAccount.ConsumerId == Guid.Empty)
+            throw new ArgumentException("ConsumerId cannot be empty", nameof(consumerAccount.ConsumerId));
 
         // Check if exists
         var existingEntity = await _unitOfWork.Consumers.GetByIdAsync(consumerAccount.ConsumerId);
@@ -148,10 +148,10 @@ public class ConsumerAccountService : IConsumerAccountService
     /// <summary>
     /// Gets a consumer account by ID
     /// </summary>
-    public async Task<ConsumerAccount?> GetConsumerAccountByIdAsync(string consumerId)
+    public async Task<ConsumerAccount?> GetConsumerAccountByIdAsync(Guid consumerId)
     {
-        if (string.IsNullOrWhiteSpace(consumerId))
-            throw new ArgumentException("ConsumerId cannot be null or empty", nameof(consumerId));
+        if (consumerId == Guid.Empty)
+            throw new ArgumentException("ConsumerId cannot be empty", nameof(consumerId));
 
         try
         {
@@ -285,10 +285,10 @@ public class ConsumerAccountService : IConsumerAccountService
     /// <summary>
     /// Activates a consumer account
     /// </summary>
-    public async Task<bool> ActivateConsumerAccountAsync(string consumerId, string activatedBy)
+    public async Task<bool> ActivateConsumerAccountAsync(Guid consumerId, string activatedBy)
     {
-        if (string.IsNullOrWhiteSpace(consumerId))
-            throw new ArgumentException("ConsumerId cannot be null or empty", nameof(consumerId));
+        if (consumerId == Guid.Empty)
+            throw new ArgumentException("ConsumerId cannot be empty", nameof(consumerId));
         if (string.IsNullOrWhiteSpace(activatedBy))
             throw new ArgumentException("ActivatedBy cannot be null or empty", nameof(activatedBy));
 
@@ -322,10 +322,10 @@ public class ConsumerAccountService : IConsumerAccountService
     /// <summary>
     /// Deactivates a consumer account
     /// </summary>
-    public async Task<bool> DeactivateConsumerAccountAsync(string consumerId, string deactivatedBy, string reason)
+    public async Task<bool> DeactivateConsumerAccountAsync(Guid consumerId, string deactivatedBy, string reason)
     {
-        if (string.IsNullOrWhiteSpace(consumerId))
-            throw new ArgumentException("ConsumerId cannot be null or empty", nameof(consumerId));
+        if (consumerId == Guid.Empty)
+            throw new ArgumentException("ConsumerId cannot be empty", nameof(consumerId));
         if (string.IsNullOrWhiteSpace(deactivatedBy))
             throw new ArgumentException("DeactivatedBy cannot be null or empty", nameof(deactivatedBy));
 
@@ -361,10 +361,10 @@ public class ConsumerAccountService : IConsumerAccountService
     /// <summary>
     /// Updates consumer status
     /// </summary>
-    public async Task<bool> UpdateConsumerStatusAsync(string consumerId, ConsumerStatus status, string updatedBy)
+    public async Task<bool> UpdateConsumerStatusAsync(Guid consumerId, ConsumerStatus status, string updatedBy)
     {
-        if (string.IsNullOrWhiteSpace(consumerId))
-            throw new ArgumentException("ConsumerId cannot be null or empty", nameof(consumerId));
+        if (consumerId == Guid.Empty)
+            throw new ArgumentException("ConsumerId cannot be empty", nameof(consumerId));
         if (string.IsNullOrWhiteSpace(updatedBy))
             throw new ArgumentException("UpdatedBy cannot be null or empty", nameof(updatedBy));
 
@@ -399,10 +399,10 @@ public class ConsumerAccountService : IConsumerAccountService
     /// <summary>
     /// Deletes a consumer account
     /// </summary>
-    public async Task<bool> DeleteConsumerAccountAsync(string consumerId, string deletedBy)
+    public async Task<bool> DeleteConsumerAccountAsync(Guid consumerId, string deletedBy)
     {
-        if (string.IsNullOrWhiteSpace(consumerId))
-            throw new ArgumentException("ConsumerId cannot be null or empty", nameof(consumerId));
+        if (consumerId == Guid.Empty)
+            throw new ArgumentException("ConsumerId cannot be empty", nameof(consumerId));
         if (string.IsNullOrWhiteSpace(deletedBy))
             throw new ArgumentException("DeletedBy cannot be null or empty", nameof(deletedBy));
 
@@ -418,7 +418,7 @@ public class ConsumerAccountService : IConsumerAccountService
             // TODO: Check for related licenses before deletion
             _logger.LogWarning("Delete operation should check for related licenses first");
 
-            await _unitOfWork.Consumers.DeleteAsync(entity.ConsumerId);
+            await _unitOfWork.Consumers.DeleteAsync(entity.Id);
             await _unitOfWork.SaveChangesAsync();
             
             _logger.LogInformation("Successfully deleted consumer account: {ConsumerId}", consumerId);
@@ -434,9 +434,9 @@ public class ConsumerAccountService : IConsumerAccountService
     /// <summary>
     /// Checks if a consumer account exists
     /// </summary>
-    public async Task<bool> ConsumerAccountExistsAsync(string consumerId)
+    public async Task<bool> ConsumerAccountExistsAsync(Guid consumerId)
     {
-        if (string.IsNullOrWhiteSpace(consumerId))
+        if (consumerId == Guid.Empty)
             return false;
 
         try
@@ -477,7 +477,7 @@ public class ConsumerAccountService : IConsumerAccountService
             errors.Add("Primary contact email is not valid");
 
         // Business rule validations
-        if (!string.IsNullOrWhiteSpace(consumerAccount.ConsumerId))
+        if (consumerAccount.ConsumerId != Guid.Empty)
         {
             // Check for duplicate consumer ID (for create operations, this should be auto-generated)
             try
@@ -511,7 +511,7 @@ public class ConsumerAccountService : IConsumerAccountService
     /// Gets consumer accounts managed by a specific account manager
     /// </summary>
     public async Task<IEnumerable<ConsumerAccount>> GetConsumersByAccountManagerAsync(
-        string accountManagerId,
+        Guid accountManagerId,
         ConsumerStatus? status = null,
         bool? isActive = null,
         int pageNumber = 1,
@@ -527,7 +527,7 @@ public class ConsumerAccountService : IConsumerAccountService
     /// Gets the count of consumer accounts managed by a specific account manager
     /// </summary>
     public async Task<int> GetConsumerCountByAccountManagerAsync(
-        string accountManagerId,
+        Guid accountManagerId,
         ConsumerStatus? status = null,
         bool? isActive = null)
     {
@@ -541,7 +541,7 @@ public class ConsumerAccountService : IConsumerAccountService
     /// Gets consumer accounts that have licenses for a specific product
     /// </summary>
     public async Task<IEnumerable<ConsumerAccount>> GetConsumersByProductAsync(
-        string productId,
+        Guid productId,
         ConsumerStatus? status = null,
         bool? isActive = null,
         string? licenseStatus = null,
@@ -558,7 +558,7 @@ public class ConsumerAccountService : IConsumerAccountService
     /// Gets the count of consumer accounts that have licenses for a specific product
     /// </summary>
     public async Task<int> GetConsumerCountByProductAsync(
-        string productId,
+        Guid productId,
         ConsumerStatus? status = null,
         bool? isActive = null,
         string? licenseStatus = null)
@@ -573,8 +573,8 @@ public class ConsumerAccountService : IConsumerAccountService
     /// Gets consumer accounts linked to both a specific account manager and product
     /// </summary>
     public async Task<IEnumerable<ConsumerAccount>> GetConsumersByAccountManagerAndProductAsync(
-        string accountManagerId,
-        string productId,
+        Guid accountManagerId,
+        Guid productId,
         ConsumerStatus? status = null,
         bool? isActive = null,
         string? licenseStatus = null,
@@ -591,8 +591,8 @@ public class ConsumerAccountService : IConsumerAccountService
     /// Gets the count of consumer accounts linked to both a specific account manager and product
     /// </summary>
     public async Task<int> GetConsumerCountByAccountManagerAndProductAsync(
-        string accountManagerId,
-        string productId,
+        Guid accountManagerId,
+        Guid productId,
         ConsumerStatus? status = null,
         bool? isActive = null,
         string? licenseStatus = null)
@@ -607,7 +607,7 @@ public class ConsumerAccountService : IConsumerAccountService
     /// Gets consumer accounts that don't have any licenses for a specific product
     /// </summary>
     public async Task<IEnumerable<ConsumerAccount>> GetConsumersWithoutProductAsync(
-        string productId,
+        Guid productId,
         ConsumerStatus? status = null,
         bool? isActive = null,
         int pageNumber = 1,
@@ -623,8 +623,8 @@ public class ConsumerAccountService : IConsumerAccountService
     /// Gets consumer accounts managed by an account manager that don't have licenses for a specific product
     /// </summary>
     public async Task<IEnumerable<ConsumerAccount>> GetConsumersByAccountManagerWithoutProductAsync(
-        string accountManagerId,
-        string productId,
+        Guid accountManagerId,
+        Guid productId,
         ConsumerStatus? status = null,
         bool? isActive = null,
         int pageNumber = 1,

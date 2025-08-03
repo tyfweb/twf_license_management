@@ -42,8 +42,8 @@ public class AuditService : IAuditService
         try
         {
             // Set audit entry ID if not provided
-            if (string.IsNullOrWhiteSpace(entry.EntryId))
-                entry.EntryId = Guid.NewGuid().ToString();
+            if (entry.EntityId == Guid.Empty)
+                entry.EntityId = Guid.NewGuid();
 
             // Set timestamp if not provided
             if (entry.Timestamp == default)
@@ -55,9 +55,9 @@ public class AuditService : IAuditService
             // Save to repository
             var createdEntity = await _unitOfWork.AuditEntries.AddAsync(auditEntity);
             await _unitOfWork.SaveChangesAsync();
-            
-            _logger.LogInformation("Successfully logged audit entry with ID: {AuditId}", createdEntity.AuditEntryId);
-            return createdEntity.AuditEntryId;
+
+            _logger.LogInformation("Successfully logged audit entry with ID: {AuditId}", createdEntity.Id);
+            return createdEntity.Id.ToString();
         }
         catch (Exception ex)
         {
@@ -70,14 +70,14 @@ public class AuditService : IAuditService
     /// Gets audit entries for a specific license
     /// </summary>
     public async Task<IEnumerable<AuditEntry>> GetLicenseAuditEntriesAsync(
-        string licenseId,
+        Guid licenseId,
         DateTime? fromDate = null,
         DateTime? toDate = null,
         int pageNumber = 1,
         int pageSize = 50)
     {
-        if (string.IsNullOrWhiteSpace(licenseId))
-            throw new ArgumentException("LicenseId cannot be null or empty", nameof(licenseId));
+        if (licenseId == Guid.Empty)
+            throw new ArgumentException("LicenseId cannot be empty", nameof(licenseId));
 
         try
         {
@@ -108,14 +108,14 @@ public class AuditService : IAuditService
     /// Gets audit entries for a specific consumer
     /// </summary>
     public async Task<IEnumerable<AuditEntry>> GetConsumerAuditEntriesAsync(
-        string consumerId,
+        Guid consumerId,
         DateTime? fromDate = null,
         DateTime? toDate = null,
         int pageNumber = 1,
         int pageSize = 50)
     {
-        if (string.IsNullOrWhiteSpace(consumerId))
-            throw new ArgumentException("ConsumerId cannot be null or empty", nameof(consumerId));
+        if (consumerId == Guid.Empty)
+            throw new ArgumentException("ConsumerId cannot be empty", nameof(consumerId));
 
         try
         {
@@ -345,10 +345,10 @@ public class AuditService : IAuditService
             // Apply filters
             if (!string.IsNullOrEmpty(entityType))
                 entities = entities.Where(e => e.EntityType.Equals(entityType, StringComparison.OrdinalIgnoreCase));
-
-            if (!string.IsNullOrEmpty(entityId))
-                entities = entities.Where(e => e.EntityId.Equals(entityId, StringComparison.OrdinalIgnoreCase));
-
+            Guid entityGuid;
+            if (!string.IsNullOrEmpty(entityId) && Guid.TryParse(entityId, out entityGuid))
+                entities = entities.Where(e => e.Id == entityGuid);
+            
             if (!string.IsNullOrEmpty(actionType))
                 entities = entities.Where(e => e.ActionType.Equals(actionType, StringComparison.OrdinalIgnoreCase));
 
@@ -390,8 +390,8 @@ public class AuditService : IAuditService
             if (!string.IsNullOrEmpty(entityType))
                 entities = entities.Where(e => e.EntityType.Equals(entityType, StringComparison.OrdinalIgnoreCase));
 
-            if (!string.IsNullOrEmpty(entityId))
-                entities = entities.Where(e => e.EntityId.Equals(entityId, StringComparison.OrdinalIgnoreCase));
+            if (!string.IsNullOrEmpty(entityId) && Guid.TryParse(entityId, out var entityGuid))
+                entities = entities.Where(e => e.Id == entityGuid);
 
             if (!string.IsNullOrEmpty(actionType))
                 entities = entities.Where(e => e.ActionType.Equals(actionType, StringComparison.OrdinalIgnoreCase));

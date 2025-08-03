@@ -1,3 +1,4 @@
+using TechWayFit.Licensing.Management.Core.Helpers;
 using TechWayFit.Licensing.Management.Core.Models.Common;
 
 namespace TechWayFit.Licensing.Management.Core.Models.Product;
@@ -8,15 +9,15 @@ public class ProductFeature
     /// <summary>
     /// Unique identifier for the product feature
     /// </summary>
-    public Guid FeatureId { get; set; } = Guid.NewGuid();
+    public Guid FeatureId { get; set; } = Guid.Empty;
     /// <summary>
     /// Unique identifier for the product feature
     /// </summary>
-    public Guid ProductId { get; set; } = Guid.NewGuid();
+    public Guid ProductId { get; set; } = Guid.Empty;
     /// <summary>
     /// Unique identifier for the product feature
     /// </summary>
-    public Guid TierId { get; set; } = Guid.NewGuid();
+    public Guid TierId { get; set; } = Guid.Empty;
     /// <summary>
     /// Unique identifier for the product feature
     /// </summary>
@@ -52,14 +53,13 @@ public class ProductFeature
     /// The version until which this feature is supported
     /// </summary>
     public SemanticVersion SupportToVersion { get; set; } = SemanticVersion.Max;
-
-    static Guid _defaultFeatureId = Guid.Parse("00000000-0000-0000-0000-000000000002");
+ 
     /// <summary>
     /// Default product feature with basic functionality
     /// </summary>
     public static ProductFeature Default => new ProductFeature
     {
-        FeatureId = _defaultFeatureId,
+        FeatureId = IdConstants.DefaultFeatureId,
         Name = "Default Feature",
         Description = "Default product feature with basic functionality",
         IsEnabled = true,

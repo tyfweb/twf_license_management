@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Web.ViewModels.Audit;
 using TechWayFit.Licensing.Management.Core.Models.Audit;
+using TechWayFit.Licensing.Management.Web.Helpers;
 
 namespace TechWayFit.Licensing.Management.Web.Controllers;
 
@@ -98,13 +99,14 @@ public class AuditController : Controller
         string sortBy = "Timestamp",
         string sortOrder = "desc")
     {
+        var entityGuid = Guid.TryParse(entityId, out var guid) ? guid : Guid.Empty;
         try
         {
             var filter = new AuditFilterViewModel
             {
                 SearchTerm = searchTerm,
                 EntityType = entityType,
-                EntityId = entityId,
+                EntityId = entityGuid.ConvertToString(),
                 ActionType = actionType,
                 UserName = userName,
                 StartDate = startDate,
@@ -118,7 +120,7 @@ public class AuditController : Controller
             // Get audit entries
             var entries = await _auditService.GetAuditEntriesAsync(
                 entityType: filter.EntityType,
-                entityId: filter.EntityId,
+                entityId: filter.EntityId.ToString(),
                 actionType: filter.ActionType,
                 userId: filter.UserName,
                 fromDate: filter.StartDate,
@@ -129,7 +131,7 @@ public class AuditController : Controller
             // Get total count
             var totalCount = await _auditService.GetAuditEntryCountAsync(
                 entityType: filter.EntityType,
-                entityId: filter.EntityId,
+                entityId: filter.EntityId.ToString(),
                 actionType: filter.ActionType,
                 userId: filter.UserName,
                 fromDate: filter.StartDate,
@@ -168,9 +170,16 @@ public class AuditController : Controller
     [HttpGet("Entry/{entryId}")]
     public async Task<IActionResult> EntryDetails(string entryId)
     {
+        if (!Guid.TryParse(entryId, out var entryIdGuid))
+        {
+            TempData["ErrorMessage"] = "Invalid audit entry ID.";
+            return RedirectToAction(nameof(Entries));
+        }
+
+        var entryGuid = Guid.TryParse(entryId, out var guid) ? guid : Guid.Empty;
         try
         {
-            if (string.IsNullOrEmpty(entryId))
+            if (entryGuid == Guid.Empty)
             {
                 TempData["ErrorMessage"] = "Invalid audit entry ID.";
                 return RedirectToAction(nameof(Entries));
@@ -178,7 +187,7 @@ public class AuditController : Controller
 
             // Get the main entry
             var entries = await _auditService.GetAuditEntriesAsync(pageNumber: 1, pageSize: 1);
-            var entry = entries.FirstOrDefault(e => e.EntryId == entryId);
+            var entry = entries.FirstOrDefault(e => e.EntryId == entryGuid);
 
             if (entry == null)
             {
@@ -192,16 +201,16 @@ public class AuditController : Controller
             };
 
             // Get related entries for the same entity
-            if (!string.IsNullOrEmpty(entry.EntityType) && !string.IsNullOrEmpty(entry.EntityId))
+            if (!string.IsNullOrEmpty(entry.EntityType) && entry.EntityId != Guid.Empty)
             {
                 var relatedEntries = await _auditService.GetAuditEntriesAsync(
                     entityType: entry.EntityType,
-                    entityId: entry.EntityId,
+                    entityId: entry.EntityId.ToString(),
                     pageNumber: 1,
                     pageSize: 10);
 
                 viewModel.RelatedEntries = relatedEntries
-                    .Where(e => e.EntryId != entryId)
+                    .Where(e => e.EntryId != entryGuid)
                     .Select(MapToViewModel);
             }
 
@@ -273,7 +282,8 @@ public class AuditController : Controller
     {
         try
         {
-            if (string.IsNullOrEmpty(entityType) || string.IsNullOrEmpty(entityId))
+            var entityGuid = Guid.TryParse(entityId, out var guid) ? guid : Guid.Empty;
+            if (string.IsNullOrEmpty(entityType) || entityGuid == Guid.Empty)
             {
                 TempData["ErrorMessage"] = "Invalid entity information.";
                 return RedirectToAction(nameof(Entries));
@@ -282,7 +292,7 @@ public class AuditController : Controller
             var viewModel = new EntityAuditViewModel
             {
                 EntityType = entityType,
-                EntityId = entityId,
+                EntityId = entityGuid.ConvertToString(),
                 EntityDisplayName = $"{entityType} ({entityId})",
                 DateRangeStart = startDate,
                 DateRangeEnd = endDate
@@ -354,7 +364,7 @@ public class AuditController : Controller
             var exportData = await _auditService.ExportAuditEntriesAsync(
                 model.Format,
                 model.EntityType,
-                model.EntityId,
+                model.EntityId.ToString(),
                 model.StartDate,
                 model.EndDate);
 
@@ -383,8 +393,9 @@ public class AuditController : Controller
     {
         try
         {
+            var entryGuid = Guid.TryParse(entryId, out var guid) ? guid : Guid.Empty;
             var entries = await _auditService.GetAuditEntriesAsync(pageNumber: 1, pageSize: 1);
-            var entry = entries.FirstOrDefault(e => e.EntryId == entryId);
+            var entry = entries.FirstOrDefault(e => e.EntryId == entryGuid);
 
             if (entry == null)
             {
@@ -442,9 +453,9 @@ public class AuditController : Controller
     {
         return new AuditEntryItemViewModel
         {
-            EntryId = entry.EntryId,
+            EntryId = entry.EntryId.ConvertToString(),
             EntityType = entry.EntityType,
-            EntityId = entry.EntityId,
+            EntityId = entry.EntityId.ConvertToString(),
             ActionType = entry.ActionType,
             OldValue = entry.OldValue,
             NewValue = entry.NewValue,

@@ -102,7 +102,7 @@ public class ProductLicense
             LicenseId = LicenseId.ToString(),
             ProductId = LicenseConsumer.Product.ProductId.ToString(),
             // Update this line to use the correct property from LicenseConsumer, e.g. LicenseConsumer.Consumer.ConsumerId if Consumer is a property of ProductConsumer
-            ConsumerId = LicenseConsumer.Consumer.ConsumerId,
+            ConsumerId = LicenseConsumer.Consumer.ConsumerId.ToString(),
             ValidFrom = ValidFrom,
             ValidTo = ValidTo,
             CreatedAt = CreatedAt,

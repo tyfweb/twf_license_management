@@ -15,9 +15,9 @@ public class PostgreSqlAuditEntryRepository : PostgreSqlBaseRepository<AuditEntr
     public PostgreSqlAuditEntryRepository(PostgreSqlPostgreSqlLicensingDbContext context) : base(context)
     {
     }
-    public async Task<IEnumerable<AuditEntryEntity>> GetByEntityAsync(string entityType, string entityId)
+    public async Task<IEnumerable<AuditEntryEntity>> GetByEntityAsync(string entityType, Guid entityId)
     {
-        return await _dbSet.Where(a => a.EntityType == entityType && a.EntityId == entityId)
+        return await _dbSet.Where(a => a.EntityType == entityType && a.Id == entityId)
                          .OrderByDescending(a => a.CreatedOn)
                          .ToListAsync();
     }

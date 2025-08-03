@@ -29,7 +29,7 @@ public interface IEnterpriseProductService
     /// </summary>
     /// <param name="productId">Product ID</param>
     /// <returns>Product or null if not found</returns>
-    Task<EnterpriseProduct?> GetProductByIdAsync(string productId);
+    Task<EnterpriseProduct?> GetProductByIdAsync(Guid productId);
 
     /// <summary>
     /// Gets a product by name
@@ -67,7 +67,7 @@ public interface IEnterpriseProductService
     /// <param name="status">New status</param>
     /// <param name="updatedBy">User updating the status</param>
     /// <returns>True if updated successfully</returns>
-    Task<bool> UpdateProductStatusAsync(string productId, ProductStatus status, string updatedBy);
+    Task<bool> UpdateProductStatusAsync(Guid productId, ProductStatus status, string updatedBy);
 
     /// <summary>
     /// Decommissions a product
@@ -76,7 +76,7 @@ public interface IEnterpriseProductService
     /// <param name="decommissionDate">Decommission date</param>
     /// <param name="decommissionedBy">User decommissioning the product</param>
     /// <returns>True if decommissioned successfully</returns>
-    Task<bool> DecommissionProductAsync(string productId, DateTime decommissionDate, string decommissionedBy);
+    Task<bool> DecommissionProductAsync(Guid productId, DateTime decommissionDate, string decommissionedBy);
 
     /// <summary>
     /// Deletes a product
@@ -84,14 +84,14 @@ public interface IEnterpriseProductService
     /// <param name="productId">Product ID</param>
     /// <param name="deletedBy">User deleting the product</param>
     /// <returns>True if deleted successfully</returns>
-    Task<bool> DeleteProductAsync(string productId, string deletedBy);
+    Task<bool> DeleteProductAsync(Guid productId, string deletedBy);
 
     /// <summary>
     /// Checks if a product exists
     /// </summary>
     /// <param name="productId">Product ID</param>
     /// <returns>True if exists</returns>
-    Task<bool> ProductExistsAsync(string productId);
+    Task<bool> ProductExistsAsync(Guid productId);
 
     /// <summary>
     /// Gets active products only

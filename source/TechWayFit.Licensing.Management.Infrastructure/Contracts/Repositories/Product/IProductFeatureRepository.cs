@@ -8,11 +8,11 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.
 /// </summary>
 public interface IProductFeatureRepository : IBaseRepository<ProductFeatureEntity>
 {
-    Task<IEnumerable<ProductFeatureEntity>> GetFeaturesByProductIdAsync(string productId);
-    Task<IEnumerable<ProductFeatureEntity>> GetByTierIdAsync(string tierId);
-    Task<bool> IsCodeUniqueAsync(string productId, string code, string? excludeId);
-    Task<IEnumerable<ProductFeatureEntity>> GetFeaturesByProductVersionAsync(string productId, string productVersion);
-    Task<ProductFeatureEntity?> GetFeatureByCodeAsync(string productId, string featureCode);
-    Task<bool> IsFeatureCodeUniqueAsync(string productId, string featureCode, string? excludeFeatureId = null); 
+    Task<IEnumerable<ProductFeatureEntity>> GetFeaturesByProductIdAsync(Guid productId);
+    Task<IEnumerable<ProductFeatureEntity>> GetByTierIdAsync(Guid tierId);
+    Task<bool> IsCodeUniqueAsync(Guid productId, string code, Guid? excludeId);
+    Task<IEnumerable<ProductFeatureEntity>> GetFeaturesByProductVersionAsync(Guid productId, string productVersion);
+    Task<ProductFeatureEntity?> GetFeatureByCodeAsync(Guid productId, string featureCode);
+    Task<bool> IsFeatureCodeUniqueAsync(Guid productId, string featureCode, Guid? excludeFeatureId = null);
     
 }

@@ -89,7 +89,7 @@ namespace TechWayFit.Licensing.Management.Web.ViewModels.Notification
         public DateTime? SentFromDate { get; set; }
         public DateTime? SentToDate { get; set; }
         public string EntityType { get; set; } = string.Empty;
-        public string EntityId { get; set; } = string.Empty;
+        public Guid EntityId { get; set; }
     }
 
     /// <summary>
@@ -233,7 +233,8 @@ namespace TechWayFit.Licensing.Management.Web.ViewModels.Notification
     {
         public int TotalUsage { get; set; }
         public int SuccessfulDeliveries { get; set; }
-        public int FailedDeliveries { get; set; }        public DateTime? LastUsed { get; set; }
+        public int FailedDeliveries { get; set; }       
+        public DateTime? LastUsed { get; set; }
         public double SuccessRate { get; set; }
         public TimeSpan? AverageDeliveryTime { get; set; }
         public Dictionary<DateTime, int> UsageByDate { get; set; } = new();
@@ -267,7 +268,7 @@ namespace TechWayFit.Licensing.Management.Web.ViewModels.Notification
         public NotificationMode NotificationMode { get; set; } = NotificationMode.Email;
 
         [Display(Name = "Template")]
-        public string? TemplateId { get; set; }
+        public Guid? TemplateId { get; set; }
 
         [Display(Name = "Schedule Send")]
         public DateTime? ScheduledSendTime { get; set; }

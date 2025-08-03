@@ -46,7 +46,7 @@ public class NotificationTemplateEntity : BaseAuditEntity
     {
         return new NotificationTemplate
         {
-            TemplateId = NotificationTemplateId,
+            TemplateId = Id,
             TemplateName = TemplateName,
             NotificationType = NotificationType.ToEnum<NotificationType>(),
             Preferences = new NotificationPreferences

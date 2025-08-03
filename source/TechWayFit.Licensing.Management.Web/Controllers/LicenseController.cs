@@ -8,6 +8,7 @@ using TechWayFit.Licensing.Management.Web.Models;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Web.Extensions;
 using TechWayFit.Licensing.Management.Core.Models.Product;
+using TechWayFit.Licensing.Management.Web.Helpers;
 
 namespace TechWayFit.Licensing.Management.Web.Controllers
 {
@@ -99,7 +100,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                     .Take(pageSize)
                     .Select(l => new LicenseItemViewModel
                     {
-                        LicenseId = l.LicenseId,
+                        LicenseId = l.LicenseId.ConvertToString(),
                         LicenseCode = l.LicenseCode,
                         ConsumerName = l.LicenseConsumer.Consumer.CompanyName,
                         ContactEmail = l.LicenseConsumer.Consumer.PrimaryContact.Email,
@@ -182,8 +183,8 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 // Map ViewModel to Core request model
                 var licenseRequest = new LicenseGenerationRequest
                 {
-                    ProductId = model.ProductId,
-                    ConsumerId = model.ConsumerId,
+                    ProductId = model.ProductId.ToGuid(),
+                    ConsumerId = model.ConsumerId.ToGuid(),
                     TierId = model.Tier.ToString(),
                     ExpiryDate = model.ValidTo, // Use ValidTo as ExpiryDate
                     MaxUsers = (int?)model.MaxApiCallsPerMonth, // Map API calls to Max Users for now
@@ -211,8 +212,8 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 if (license != null)
                 {
                     // Get additional data for the view
-                    var product = await _productService.GetProductByIdAsync(model.ProductId);
-                    var consumer = await _consumerService.GetConsumerAccountByIdAsync(model.ConsumerId);
+                    var product = await _productService.GetProductByIdAsync(model.ProductId.ToGuid());
+                    var consumer = await _consumerService.GetConsumerAccountByIdAsync(model.ConsumerId.ToGuid());
 
                     // Return view with success
                     var viewModel = new LicenseDetailViewModel
@@ -242,11 +243,11 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         /// <summary>
         /// Show license details
         /// </summary>
-        public async Task<IActionResult> Details(string id)
+        public async Task<IActionResult> Details(Guid id)
         {
             try
             {
-                if (string.IsNullOrEmpty(id))
+                if (id == Guid.Empty)
                 {
                     return NotFound("License ID is required");
                 }
@@ -287,11 +288,11 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         /// Download License Key - Generate and download license file
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> Download(string id)
+        public async Task<IActionResult> Download(Guid id)
         {
             try
             {
-                if (string.IsNullOrEmpty(id))
+                if (id == Guid.Empty)
                 {
                     TempData["ErrorMessage"] = "License ID is required.";
                     return RedirectToAction(nameof(Index));
@@ -335,11 +336,11 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         /// Download License as JSON format
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> DownloadJson(string id)
+        public async Task<IActionResult> DownloadJson(Guid id)
         {
             try
             {
-                if (string.IsNullOrEmpty(id))
+                if (id == Guid.Empty)
                 {
                     TempData["ErrorMessage"] = "License ID is required.";
                     return RedirectToAction(nameof(Index));
@@ -379,11 +380,11 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         /// Download License as ZIP bundle containing both formats
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> DownloadZip(string id)
+        public async Task<IActionResult> DownloadZip(Guid id)
         {
             try
             {
-                if (string.IsNullOrEmpty(id))
+                if (id == Guid.Empty)
                 {
                     TempData["ErrorMessage"] = "License ID is required.";
                     return RedirectToAction(nameof(Index));
@@ -701,18 +702,18 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 var products = await _productService.GetProductsAsync(pageNumber: 1, pageSize: 100);
                 ViewBag.AvailableProducts = products.Select(p => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
                 {
-                    Value = p.ProductId,
+                    Value = p.ProductId.ConvertToString(),
                     Text = p.Name,
-                    Selected = p.ProductId == model.ProductId
+                    Selected = p.ProductId.ConvertToString() == model.ProductId
                 }).ToList();
 
                 // Get consumers
                 var consumers = await _consumerService.GetConsumerAccountsAsync(pageNumber: 1, pageSize: 100);
                 ViewBag.AvailableConsumers = consumers.Select(c => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
                 {
-                    Value = c.ConsumerId,
+                    Value = c.ConsumerId.ConvertToString(),
                     Text = c.CompanyName,
-                    Selected = c.ConsumerId == model.ConsumerId
+                    Selected = c.ConsumerId.ConvertToString() == model.ConsumerId
                 }).ToList();
             }
             catch (Exception ex)

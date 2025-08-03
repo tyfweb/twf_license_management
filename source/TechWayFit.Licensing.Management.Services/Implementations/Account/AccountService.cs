@@ -44,7 +44,7 @@ public class AccountService : IAuthenticationService
             _logger.LogWarning("User not found for sign out: {Username}", username);
             return;
         }
-        await _unitOfWork.Users.UpdateLastLoginAsync(user.UserId);
+        await _unitOfWork.Users.UpdateLastLoginAsync(user.Id);
         await _unitOfWork.SaveChangesAsync();
         _logger.LogInformation("User {Username} signed out successfully", username);
     }

@@ -4,6 +4,7 @@ using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Core.Models.License;
 using TechWayFit.Licensing.Management.Core.Models.Notification;
 using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Notification;
+using TechWayFit.Licensing.Management.Core.Helpers;
 
 namespace TechWayFit.Licensing.Management.Services.Implementations;
 
@@ -40,11 +41,11 @@ public class NotificationService : INotificationService
             // Create notification history entry
             var notification = new NotificationHistory
             {
-                NotificationId = Guid.NewGuid().ToString(),
+                NotificationId = Guid.NewGuid(),
                 EntityId = license.LicenseId,
                 EntityType = "License",
                 NotificationMode = NotificationMode.Email,
-                NotificationTemplateId = template.NotificationTemplateId,
+                NotificationTemplateId = template.Id,
                 NotificationType = NotificationType.LicenseExpiration,
                 Recipients = new NotificationPreferences { Mode = NotificationMode.Email },
                 SentDate = DateTime.UtcNow,
@@ -81,11 +82,11 @@ public class NotificationService : INotificationService
 
             var notification = new NotificationHistory
             {
-                NotificationId = Guid.NewGuid().ToString(),
+                NotificationId = Guid.NewGuid(),
                 EntityId = license.LicenseId,
                 EntityType = "License",
                 NotificationMode = NotificationMode.Email,
-                NotificationTemplateId = template.NotificationTemplateId,
+                NotificationTemplateId = template.Id,
                 NotificationType = NotificationType.LicenseActivation,
                 Recipients = new NotificationPreferences { Mode = NotificationMode.Email },
                 SentDate = DateTime.UtcNow,
@@ -121,11 +122,11 @@ public class NotificationService : INotificationService
 
             var notification = new NotificationHistory
             {
-                NotificationId = Guid.NewGuid().ToString(),
+                NotificationId = Guid.NewGuid(),
                 EntityId = license.LicenseId,
                 EntityType = "License",
                 NotificationMode = NotificationMode.Email,
-                NotificationTemplateId = template.NotificationTemplateId,
+                NotificationTemplateId = template.Id,
                 NotificationType = NotificationType.LicenseRevocation,
                 Recipients = new NotificationPreferences { Mode = NotificationMode.Email },
                 SentDate = DateTime.UtcNow,
@@ -161,11 +162,11 @@ public class NotificationService : INotificationService
 
             var notification = new NotificationHistory
             {
-                NotificationId = Guid.NewGuid().ToString(),
+                NotificationId = Guid.NewGuid(),
                 EntityId = license.LicenseId,
                 EntityType = "License",
                 NotificationMode = NotificationMode.Email,
-                NotificationTemplateId = template.NotificationTemplateId,
+                NotificationTemplateId = template.Id,
                 NotificationType = NotificationType.LicenseRenewal,
                 Recipients = new NotificationPreferences { Mode = NotificationMode.Email },
                 SentDate = DateTime.UtcNow,
@@ -201,11 +202,11 @@ public class NotificationService : INotificationService
 
             var notification = new NotificationHistory
             {
-                NotificationId = Guid.NewGuid().ToString(),
+                NotificationId = Guid.NewGuid(),
                 EntityId = license.LicenseId,
                 EntityType = "License",
                 NotificationMode = NotificationMode.Email,
-                NotificationTemplateId = template.NotificationTemplateId,
+                NotificationTemplateId = template.Id,
                 NotificationType = NotificationType.LicenseSuspension,
                 Recipients = new NotificationPreferences { Mode = NotificationMode.Email },
                 SentDate = DateTime.UtcNow,
@@ -243,11 +244,11 @@ public class NotificationService : INotificationService
             {
                 var notification = new NotificationHistory
                 {
-                    NotificationId = Guid.NewGuid().ToString(),
+                    NotificationId = Guid.NewGuid(),
                     EntityId = license.LicenseId,
                     EntityType = "BulkAlert",
                     NotificationMode = NotificationMode.Email,
-                    NotificationTemplateId = template.NotificationTemplateId,
+                    NotificationTemplateId = template.Id,
                     NotificationType = NotificationType.SystemAlert,
                     Recipients = new NotificationPreferences { Mode = NotificationMode.Email },
                     SentDate = DateTime.UtcNow,
@@ -269,7 +270,7 @@ public class NotificationService : INotificationService
         }
     }
 
-    public async Task<bool> SendValidationFailureAlertAsync(string licenseKey, string validationError, Dictionary<string, object> attemptInfo)
+    public async Task<bool> SendValidationFailureAlertAsync(Guid licenseId, string validationError, Dictionary<string, object> attemptInfo)
     {
         try
         {
@@ -284,11 +285,11 @@ public class NotificationService : INotificationService
 
             var notification = new NotificationHistory
             {
-                NotificationId = Guid.NewGuid().ToString(),
-                EntityId = licenseKey,
+                NotificationId = Guid.NewGuid(),
+                EntityId = licenseId,
                 EntityType = "ValidationFailure",
                 NotificationMode = NotificationMode.Email,
-                NotificationTemplateId = template.NotificationTemplateId,
+                NotificationTemplateId = template.Id,
                 NotificationType = NotificationType.ValidationFailure,
                 Recipients = new NotificationPreferences { Mode = NotificationMode.Email },
                 SentDate = DateTime.UtcNow,
@@ -298,18 +299,18 @@ public class NotificationService : INotificationService
             var entity = NotificationHistoryEntity.FromModel(notification);
             await _unitOfWork.NotificationHistory.AddAsync(entity);
             await _unitOfWork.SaveChangesAsync();
-            
-            _logger.LogInformation("Validation failure alert sent for license key {LicenseKey}", licenseKey);
+
+            _logger.LogInformation("Validation failure alert sent for license key {LicenseId}", licenseId);
             return true;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to send validation failure alert for license key {LicenseKey}", licenseKey);
+            _logger.LogError(ex, "Failed to send validation failure alert for license key {LicenseId}", licenseId);
             return false;
         }
     }
 
-    public async Task<bool> SendUsageThresholdAlertAsync(string productId, int currentUsage, int threshold)
+    public async Task<bool> SendUsageThresholdAlertAsync(Guid productId, int currentUsage, int threshold)
     {
         try
         {
@@ -324,11 +325,11 @@ public class NotificationService : INotificationService
 
             var notification = new NotificationHistory
             {
-                NotificationId = Guid.NewGuid().ToString(),
+                NotificationId = Guid.NewGuid(),
                 EntityId = productId,
                 EntityType = "Product",
                 NotificationMode = NotificationMode.Email,
-                NotificationTemplateId = template.NotificationTemplateId,
+                NotificationTemplateId = template.Id,
                 NotificationType = NotificationType.UsageThreshold,
                 Recipients = new NotificationPreferences { Mode = NotificationMode.Email },
                 SentDate = DateTime.UtcNow,
@@ -355,11 +356,11 @@ public class NotificationService : INotificationService
         {
             var notification = new NotificationHistory
             {
-                NotificationId = Guid.NewGuid().ToString(),
-                EntityId = "custom",
+                NotificationId = Guid.NewGuid(),
+                EntityId = IdConstants.CustomNotificationEntityId,
                 EntityType = "Custom",
                 NotificationMode = NotificationMode.Email,
-                NotificationTemplateId = "custom-template",
+                NotificationTemplateId = Guid.NewGuid(),
                 NotificationType = notificationType,
                 Recipients = new NotificationPreferences { Mode = NotificationMode.Email },
                 SentDate = DateTime.UtcNow,
@@ -380,7 +381,7 @@ public class NotificationService : INotificationService
         }
     }
 
-    public async Task<IEnumerable<NotificationHistory>> GetLicenseNotificationHistoryAsync(string licenseId, DateTime? fromDate = null, DateTime? toDate = null, int pageNumber = 1, int pageSize = 50)
+    public async Task<IEnumerable<NotificationHistory>> GetLicenseNotificationHistoryAsync(Guid licenseId, DateTime? fromDate = null, DateTime? toDate = null, int pageNumber = 1, int pageSize = 50)
     {
         try
         {
@@ -407,14 +408,14 @@ public class NotificationService : INotificationService
         }
     }
 
-    public async Task<IEnumerable<NotificationHistory>> GetConsumerNotificationHistoryAsync(string consumerId, DateTime? fromDate = null, DateTime? toDate = null, int pageNumber = 1, int pageSize = 50)
+    public async Task<IEnumerable<NotificationHistory>> GetConsumerNotificationHistoryAsync(Guid consumerId, DateTime? fromDate = null, DateTime? toDate = null, int pageNumber = 1, int pageSize = 50)
     {
         try
         {
             var entities = await _unitOfWork.NotificationHistory.GetAllAsync(CancellationToken.None);
             var filtered = entities.Where(e => e.EntityId == consumerId);
 
-            if (fromDate.HasValue)
+            if (fromDate.HasValue) 
                 filtered = filtered.Where(e => e.SentDate >= fromDate.Value);
 
             if (toDate.HasValue)
@@ -475,8 +476,8 @@ public class NotificationService : INotificationService
             }
             else
             {
-                template.TemplateId = Guid.NewGuid().ToString();
-                entity.NotificationTemplateId = template.TemplateId;
+                template.TemplateId = Guid.NewGuid();
+                entity.Id = template.TemplateId;
                 await _unitOfWork.NotificationTemplates.AddAsync(entity);
             }
 
@@ -488,7 +489,7 @@ public class NotificationService : INotificationService
             _logger.LogError(ex, "Failed to save notification template");
             throw;
         }
-    }    public Task<NotificationPreferences> GetNotificationPreferencesAsync(string consumerId)
+    }    public Task<NotificationPreferences> GetNotificationPreferencesAsync(Guid consumerId)
     {
         try
         {
@@ -506,7 +507,7 @@ public class NotificationService : INotificationService
         }
     }
 
-    public Task<NotificationPreferences> UpdateNotificationPreferencesAsync(string consumerId, NotificationPreferences preferences)
+    public Task<NotificationPreferences> UpdateNotificationPreferencesAsync(Guid consumerId, NotificationPreferences preferences)
     {
         try
         {
@@ -552,4 +553,7 @@ public class NotificationService : INotificationService
         
         return totalCount > 0 ? Math.Round((double)sentCount / totalCount * 100, 2) : 0.0;
     }
+
+     
+ 
 }

@@ -128,7 +128,7 @@ public class PostgreSqlUserProfileRepository : PostgreSqlBaseRepository<UserProf
 
         if (excludeUserId.HasValue)
         {
-            query = query.Where(u => u.UserId != excludeUserId.Value);
+            query = query.Where(u => u.Id != excludeUserId.Value);
         }
 
         return await query.AnyAsync(cancellationToken);
@@ -140,7 +140,7 @@ public class PostgreSqlUserProfileRepository : PostgreSqlBaseRepository<UserProf
 
         if (excludeUserId.HasValue)
         {
-            query = query.Where(u => u.UserId != excludeUserId.Value);
+            query = query.Where(u => u.Id != excludeUserId.Value);
         }
 
         return await query.AnyAsync(cancellationToken);
@@ -238,7 +238,7 @@ public class PostgreSqlUserProfileRepository : PostgreSqlBaseRepository<UserProf
         return await _dbSet
             .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role)
-            .FirstOrDefaultAsync(u => u.UserId == userId && u.IsActive && !u.IsDeleted);
+            .FirstOrDefaultAsync(u => u.Id == userId && u.IsActive && !u.IsDeleted);
     }
 
     public async Task<IEnumerable<string>> GetAvailableDepartmentsAsync()

@@ -149,7 +149,7 @@ namespace TechWayFit.Licensing.Management.Web.ViewModels.Product
         [Display(Name = "Created Date")]
         public DateTime? CreatedDate { get; set; }
 
-        public bool IsEditMode => !string.IsNullOrEmpty(ProductId);
+        public bool IsEditMode => !string.IsNullOrWhiteSpace(ProductId);
     }
 
     /// <summary>

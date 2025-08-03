@@ -29,14 +29,14 @@ public interface IProductFeatureService
     /// </summary>
     /// <param name="featureId">Feature ID</param>
     /// <returns>Feature or null if not found</returns>
-    Task<ProductFeature?> GetFeatureByIdAsync(string featureId);
+    Task<ProductFeature?> GetFeatureByIdAsync(Guid featureId);
 
     /// <summary>
     /// Gets features for a specific tier
     /// </summary>
     /// <param name="tierId">Tier ID</param>
     /// <returns>List of features for the tier</returns>
-    Task<IEnumerable<ProductFeature>> GetFeaturesByTierAsync(string tierId);
+    Task<IEnumerable<ProductFeature>> GetFeaturesByTierAsync(Guid tierId);
 
     /// <summary>
     /// Gets a feature by tier and feature code
@@ -44,7 +44,7 @@ public interface IProductFeatureService
     /// <param name="tierId">Tier ID</param>
     /// <param name="featureCode">Feature code</param>
     /// <returns>Feature or null if not found</returns>
-    Task<ProductFeature?> GetFeatureByCodeAsync(string tierId, string featureCode);
+    Task<ProductFeature?> GetFeatureByCodeAsync(Guid tierId, string featureCode);
 
     /// <summary>
     /// Deletes a feature
@@ -52,14 +52,14 @@ public interface IProductFeatureService
     /// <param name="featureId">Feature ID</param>
     /// <param name="deletedBy">User deleting the feature</param>
     /// <returns>True if deleted successfully</returns>
-    Task<bool> DeleteFeatureAsync(string featureId, string deletedBy);
+    Task<bool> DeleteFeatureAsync(Guid featureId, string deletedBy);
 
     /// <summary>
     /// Checks if a feature exists
     /// </summary>
     /// <param name="featureId">Feature ID</param>
     /// <returns>True if exists</returns>
-    Task<bool> FeatureExistsAsync(string featureId);
+    Task<bool> FeatureExistsAsync(Guid featureId);
 
     /// <summary>
     /// Checks if a feature code exists for a tier
@@ -68,7 +68,7 @@ public interface IProductFeatureService
     /// <param name="featureCode">Feature code</param>
     /// <param name="excludeFeatureId">Feature ID to exclude from check (for updates)</param>
     /// <returns>True if code exists</returns>
-    Task<bool> FeatureCodeExistsAsync(string tierId, string featureCode, string? excludeFeatureId = null);
+    Task<bool> FeatureCodeExistsAsync(Guid tierId, string featureCode, Guid? excludeFeatureId = null);
 
     /// <summary>
     /// Validates feature data
@@ -113,7 +113,7 @@ public interface IProductFeatureService
     /// <param name="targetTierId">Target tier ID</param>
     /// <param name="copiedBy">User copying the features</param>
     /// <returns>Number of features copied</returns>
-    Task<int> CopyFeaturesAsync(string sourceTierId, string targetTierId, string copiedBy);
+    Task<int> CopyFeaturesAsync(Guid sourceTierId, Guid targetTierId, string copiedBy);
 
     /// <summary>
     /// Gets usage statistics for features

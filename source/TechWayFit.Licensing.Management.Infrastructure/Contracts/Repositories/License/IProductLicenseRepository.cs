@@ -28,7 +28,7 @@ public interface IProductLicenseRepository : IBaseRepository<ProductLicenseEntit
     /// </summary>
     /// <param name="consumerId"></param>
     /// <returns></returns>
-    Task<IEnumerable<ProductLicenseEntity>> GetByConsumerIdAsync(string consumerId);
+    Task<IEnumerable<ProductLicenseEntity>> GetByConsumerIdAsync(Guid consumerId);
     /// <summary>
     /// Get licenses expiring soon for a specific customer
     /// </summary>
@@ -36,7 +36,7 @@ public interface IProductLicenseRepository : IBaseRepository<ProductLicenseEntit
     /// <param name="customerId"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<IEnumerable<ProductLicenseEntity>> GetExpiringLicensesForCustomerAsync(int daysAhead = 30, string customerId = "", CancellationToken cancellationToken = default);
+    Task<IEnumerable<ProductLicenseEntity>> GetExpiringLicensesForCustomerAsync(int daysAhead = 30, Guid customerId = default, CancellationToken cancellationToken = default);
     /// <summary>
     /// Validate if a license is valid
     /// </summary>
@@ -51,12 +51,12 @@ public interface IProductLicenseRepository : IBaseRepository<ProductLicenseEntit
     /// <param name="consumerId">Optional consumer ID filter</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Usage statistics</returns>
-    Task<LicenseUsageStatistics> GetUsageStatisticsAsync(string? productId = null, string? consumerId = null, CancellationToken cancellationToken = default);
+    Task<LicenseUsageStatistics> GetUsageStatisticsAsync(Guid? productId = null, Guid? consumerId = null, CancellationToken cancellationToken = default);
     /// <summary>
     /// Get license by ID with all includes
     /// </summary>
     /// <param name="id"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<ProductLicenseEntity?> GetByIdWithAllIncludesAsync(string id, CancellationToken cancellationToken = default);
+    Task<ProductLicenseEntity?> GetByIdWithAllIncludesAsync(Guid id, CancellationToken cancellationToken = default);
 }

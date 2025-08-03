@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Core.Models.Notification;
+using TechWayFit.Licensing.Management.Web.Helpers;
 using TechWayFit.Licensing.Management.Web.ViewModels.Notification;
 
 namespace TechWayFit.Licensing.Management.Web.Controllers
@@ -33,7 +34,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
             {
                 var statistics = await _notificationService.GetNotificationStatisticsAsync();
                 var recentNotifications = await _notificationService.GetConsumerNotificationHistoryAsync(
-                    "", // All consumers
+                    Guid.Empty, // All consumers
                     DateTime.UtcNow.AddDays(-30),
                     null,
                     1,
@@ -45,7 +46,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                     .Take(5)
                     .Select(t => new NotificationTemplateItemViewModel
                     {
-                        TemplateId = t.TemplateId,
+                        TemplateId = t.TemplateId.ConvertToString(),
                         TemplateName = t.TemplateName,
                         NotificationType = t.NotificationType,
                         NotificationMode = t.Preferences.Mode,
@@ -71,11 +72,11 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                     },
                     RecentNotifications = recentNotifications.Select(n => new NotificationItemViewModel
                     {
-                        NotificationId = n.NotificationId,
-                        EntityId = n.EntityId,
+                        NotificationId = n.NotificationId.ConvertToString(),
+                        EntityId = n.EntityId.ConvertToString(),
                         EntityType = n.EntityType,
                         NotificationMode = n.NotificationMode,
-                        NotificationTemplateId = n.NotificationTemplateId,
+                        NotificationTemplateId = n.NotificationTemplateId.ConvertToString(),
                         NotificationType = n.NotificationType,
                         Recipients = n.Recipients,
                         SentDate = n.SentDate,
@@ -113,7 +114,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
             DateTime? sentFromDate = null,
             DateTime? sentToDate = null,
             string entityType = "",
-            string entityId = "",
+            Guid entityId = default,
             int page = 1,
             int pageSize = 25)
         {
@@ -133,7 +134,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 if (!string.IsNullOrEmpty(searchTerm))
                 {
                     filteredNotifications = filteredNotifications.Where(n =>
-                        n.EntityId.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                        n.EntityId.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
                         n.EntityType.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
                 }
 
@@ -166,11 +167,11 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 {
                     Notifications = notificationList.Select(n => new NotificationItemViewModel
                     {
-                        NotificationId = n.NotificationId,
-                        EntityId = n.EntityId,
+                        NotificationId = n.NotificationId.ConvertToString(),
+                        EntityId = n.EntityId.ConvertToString(),
                         EntityType = n.EntityType,
                         NotificationMode = n.NotificationMode,
-                        NotificationTemplateId = n.NotificationTemplateId,
+                        NotificationTemplateId = n.NotificationTemplateId.ConvertToString(),
                         NotificationType = n.NotificationType,
                         Recipients = n.Recipients,
                         SentDate = n.SentDate,
@@ -246,7 +247,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 {
                     Templates = filteredTemplates.Select(t => new NotificationTemplateItemViewModel
                     {
-                        TemplateId = t.TemplateId,
+                        TemplateId = t.TemplateId.ConvertToString(),
                         TemplateName = t.TemplateName,
                         NotificationType = t.NotificationType,
                         NotificationMode = t.Preferences.Mode,
@@ -274,7 +275,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         /// <summary>
         /// Display template details
         /// </summary>
-        public async Task<IActionResult> TemplateDetails(string id)
+        public async Task<IActionResult> TemplateDetails(Guid id)
         {
             try
             {
@@ -288,7 +289,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
 
                 // Get recent usage of this template
                 var recentUsage = await _notificationService.GetConsumerNotificationHistoryAsync(
-                    "", // All consumers
+                    Guid.Empty, // All consumers
                     DateTime.UtcNow.AddDays(-30),
                     null,
                     1,
@@ -298,11 +299,11 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                     .Where(n => n.NotificationTemplateId == id)
                     .Select(n => new NotificationItemViewModel
                     {
-                        NotificationId = n.NotificationId,
-                        EntityId = n.EntityId,
+                        NotificationId = n.NotificationId.ConvertToString(),
+                        EntityId = n.EntityId.ConvertToString(),
                         EntityType = n.EntityType,
                         NotificationMode = n.NotificationMode,
-                        NotificationTemplateId = n.NotificationTemplateId,
+                        NotificationTemplateId = n.NotificationTemplateId.ConvertToString(),
                         NotificationType = n.NotificationType,
                         Recipients = n.Recipients,
                         SentDate = n.SentDate,
@@ -313,7 +314,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
 
                 var viewModel = new NotificationTemplateDetailViewModel
                 {
-                    TemplateId = template.TemplateId,
+                    TemplateId = template.TemplateId.ConvertToString(),
                     TemplateName = template.TemplateName,
                     NotificationType = template.NotificationType,
                     Preferences = template.Preferences,
@@ -363,7 +364,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         /// Edit existing notification template
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> EditTemplate(string id)
+        public async Task<IActionResult> EditTemplate(Guid id)
         {
             try
             {
@@ -377,7 +378,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
 
                 var viewModel = new NotificationTemplateEditViewModel
                 {
-                    TemplateId = template.TemplateId,
+                    TemplateId = template.TemplateId.ConvertToString(),
                     TemplateName = template.TemplateName,
                     NotificationType = template.NotificationType,
                     NotificationMode = template.Preferences.Mode,
@@ -414,9 +415,10 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
 
             try
             {
+                var modeltemplateId= model.TemplateId.ToGuid();
                 var template = new NotificationTemplate
                 {
-                    TemplateId = string.IsNullOrEmpty(model.TemplateId) ? Guid.NewGuid().ToString() : model.TemplateId,
+                    TemplateId = modeltemplateId == Guid.Empty ? Guid.NewGuid() : modeltemplateId,
                     TemplateName = model.TemplateName,
                     NotificationType = model.NotificationType,
                     Preferences = new NotificationPreferences { Mode = model.NotificationMode },
@@ -456,7 +458,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 var activeTemplates = templates.Where(t => t.IsActive)
                     .Select(t => new NotificationTemplateItemViewModel
                     {
-                        TemplateId = t.TemplateId,
+                        TemplateId = t.TemplateId.ConvertToString(),
                         TemplateName = t.TemplateName,
                         NotificationType = t.NotificationType,
                         NotificationMode = t.Preferences.Mode,
@@ -535,7 +537,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 var activeTemplates = templates.Where(t => t.IsActive)
                     .Select(t => new NotificationTemplateItemViewModel
                     {
-                        TemplateId = t.TemplateId,
+                        TemplateId = t.TemplateId.ConvertToString(),
                         TemplateName = t.TemplateName,
                         NotificationType = t.NotificationType,
                         NotificationMode = t.Preferences.Mode,
@@ -606,12 +608,12 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         /// Get notification details via AJAX
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> GetNotificationDetails(string id)
+        public async Task<IActionResult> GetNotificationDetails(Guid id)
         {
             try
             {
                 // TODO: Implement GetNotificationById in service
-                var history = await _notificationService.GetConsumerNotificationHistoryAsync("", null, null, 1, 1000);
+                var history = await _notificationService.GetConsumerNotificationHistoryAsync(Guid.Empty, null, null, 1, 1000);
                 var notification = history.FirstOrDefault(n => n.NotificationId == id);
 
                 if (notification == null)
@@ -621,11 +623,11 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
 
                 var viewModel = new NotificationItemViewModel
                 {
-                    NotificationId = notification.NotificationId,
-                    EntityId = notification.EntityId,
+                    NotificationId = notification.NotificationId.ConvertToString(),
+                    EntityId = notification.EntityId.ConvertToString(),
                     EntityType = notification.EntityType,
                     NotificationMode = notification.NotificationMode,
-                    NotificationTemplateId = notification.NotificationTemplateId,
+                    NotificationTemplateId = notification.NotificationTemplateId.ConvertToString(),
                     NotificationType = notification.NotificationType,
                     Recipients = notification.Recipients,
                     SentDate = notification.SentDate,
@@ -701,7 +703,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 model.AvailableTemplates = templates.Where(t => t.IsActive)
                     .Select(t => new NotificationTemplateItemViewModel
                     {
-                        TemplateId = t.TemplateId,
+                        TemplateId = t.TemplateId.ConvertToString(),
                         TemplateName = t.TemplateName,
                         NotificationType = t.NotificationType,
                         NotificationMode = t.Preferences.Mode,
@@ -727,7 +729,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 model.AvailableTemplates = templates.Where(t => t.IsActive)
                     .Select(t => new NotificationTemplateItemViewModel
                     {
-                        TemplateId = t.TemplateId,
+                        TemplateId = t.TemplateId.ConvertToString(),
                         TemplateName = t.TemplateName,
                         NotificationType = t.NotificationType,
                         NotificationMode = t.Preferences.Mode,

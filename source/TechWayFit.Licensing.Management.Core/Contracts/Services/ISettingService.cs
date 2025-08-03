@@ -45,7 +45,7 @@ public interface ISettingService
     /// <param name="value">New value</param>
     /// <param name="updatedBy">User making the update</param>
     /// <returns>Updated setting</returns>
-    Task<Setting> UpdateSettingAsync(string settingId, object? value, string updatedBy);
+    Task<Setting> UpdateSettingAsync(Guid settingId, object? value, string updatedBy);
 
     /// <summary>
     /// Update multiple settings in a single transaction
@@ -61,7 +61,7 @@ public interface ISettingService
     /// <param name="settingId">ID of the setting to reset</param>
     /// <param name="updatedBy">User performing the reset</param>
     /// <returns>Reset setting</returns>
-    Task<Setting?> ResetSettingAsync(string settingId, string updatedBy);
+    Task<Setting?> ResetSettingAsync(Guid settingId, string updatedBy);
 
     /// <summary>
     /// Reset all settings in a category to their default values

@@ -68,7 +68,7 @@ public class ProductLicenseService : IProductLicenseService
             var generationRequest = new SimplifiedLicenseGenerationRequest
             {
                 ProductId = request.ProductId,
-                LicensedTo = request.ConsumerId, // Map ConsumerId to LicensedTo
+                LicensedTo = request.ConsumerId.ToString(), // Map ConsumerId to LicensedTo
                 ValidFrom = DateTime.UtcNow,
                 ValidTo = request.ExpiryDate ?? DateTime.UtcNow.AddYears(1),
                 CustomData = request.Metadata ?? new Dictionary<string, object>(),
@@ -94,7 +94,6 @@ public class ProductLicenseService : IProductLicenseService
             // Create license entity for database storage
             var licenseEntity = new ProductLicenseEntity
             {
-                LicenseId = licenseId,
                 ProductId = request.ProductId,
                 ConsumerId = request.ConsumerId,
                 LicenseKey = signedLicense.LicenseData, // Store the signed license data
@@ -165,11 +164,11 @@ public class ProductLicenseService : IProductLicenseService
     /// <summary>
     /// Validates a license
     /// </summary>
-    public async Task<LicenseValidationResult> ValidateLicenseAsync(string licenseKey, string productId, bool checkActivation = true)
+    public async Task<LicenseValidationResult> ValidateLicenseAsync(string licenseKey, Guid productId, bool checkActivation = true)
     {
         if (string.IsNullOrWhiteSpace(licenseKey))
             throw new ArgumentException("LicenseKey cannot be null or empty", nameof(licenseKey));
-        if (string.IsNullOrWhiteSpace(productId))
+        if (Guid.Empty.Equals(productId))
             throw new ArgumentException("ProductId cannot be null or empty", nameof(productId));
 
         try
@@ -210,7 +209,7 @@ public class ProductLicenseService : IProductLicenseService
 
     #region TODO: Missing Interface Methods - Require Implementation
 
-    public async Task<ProductLicense> UpdateLicenseAsync(string licenseId, LicenseUpdateRequest request, string updatedBy)
+    public async Task<ProductLicense> UpdateLicenseAsync(Guid licenseId, LicenseUpdateRequest request, string updatedBy)
     {
         // TODO: Implement when entity properties are available
         _logger.LogWarning("UpdateLicenseAsync not fully implemented - entity properties missing");
@@ -218,7 +217,7 @@ public class ProductLicenseService : IProductLicenseService
         throw new NotImplementedException("UpdateLicenseAsync not implemented - entity structure incomplete");
     }
 
-    public async Task<ProductLicense> RegenerateLicenseKeyAsync(string licenseId, string regeneratedBy, string reason)
+    public async Task<ProductLicense> RegenerateLicenseKeyAsync(Guid licenseId, string regeneratedBy, string reason)
     {
         // TODO: Implement
         _logger.LogWarning("RegenerateLicenseKeyAsync not implemented");
@@ -226,7 +225,7 @@ public class ProductLicenseService : IProductLicenseService
         throw new NotImplementedException();
     }
 
-    public async Task<ProductLicense?> GetLicenseByIdAsync(string licenseId)
+    public async Task<ProductLicense?> GetLicenseByIdAsync(Guid licenseId)
     {
         var response = await _unitOfWork.Licenses.GetByIdWithAllIncludesAsync(licenseId);
         if (response == null)
@@ -237,7 +236,7 @@ public class ProductLicenseService : IProductLicenseService
         return response.ToModel();
     }
 
-    public async Task<IEnumerable<ProductLicense>> GetLicensesByConsumerAsync(string consumerId, LicenseStatus? status = null, int pageNumber = 1, int pageSize = 50)
+    public async Task<IEnumerable<ProductLicense>> GetLicensesByConsumerAsync(Guid consumerId, LicenseStatus? status = null, int pageNumber = 1, int pageSize = 50)
     {
         var response = await _unitOfWork.Licenses.GetByConsumerIdAsync(consumerId);
         if (response == null || !response.Any())
@@ -252,7 +251,7 @@ public class ProductLicenseService : IProductLicenseService
             .ToList();
     }
 
-    public async Task<IEnumerable<ProductLicense>> GetLicensesByProductAsync(string productId, LicenseStatus? status = null, int pageNumber = 1, int pageSize = 50)
+    public async Task<IEnumerable<ProductLicense>> GetLicensesByProductAsync(Guid productId, LicenseStatus? status = null, int pageNumber = 1, int pageSize = 50)
     {
         // TODO: Implement when repository methods are available
         _logger.LogWarning("GetLicensesByProductAsync not implemented");
@@ -276,7 +275,7 @@ public class ProductLicenseService : IProductLicenseService
         return Enumerable.Empty<ProductLicense>();
     }
 
-    public async Task<bool> ActivateLicenseAsync(string licenseId, ActivationInfo activationInfo)
+    public async Task<bool> ActivateLicenseAsync(Guid licenseId, ActivationInfo activationInfo)
     {
         // TODO: Implement
         _logger.LogWarning("ActivateLicenseAsync not implemented");
@@ -284,7 +283,7 @@ public class ProductLicenseService : IProductLicenseService
         return false;
     }
 
-    public async Task<bool> DeactivateLicenseAsync(string licenseId, string deactivatedBy, string? reason = null)
+    public async Task<bool> DeactivateLicenseAsync(Guid licenseId, string deactivatedBy, string? reason = null)
     {
         // TODO: Implement
         _logger.LogWarning("DeactivateLicenseAsync not implemented");
@@ -292,7 +291,7 @@ public class ProductLicenseService : IProductLicenseService
         return false;
     }
 
-    public async Task<bool> SuspendLicenseAsync(string licenseId, string suspendedBy, string reason, DateTime? suspendUntil = null)
+    public async Task<bool> SuspendLicenseAsync(Guid licenseId, string suspendedBy, string reason, DateTime? suspendUntil = null)
     {
         // TODO: Implement
         _logger.LogWarning("SuspendLicenseAsync not implemented");
@@ -300,7 +299,7 @@ public class ProductLicenseService : IProductLicenseService
         return false;
     }
 
-    public async Task<bool> RevokeLicenseAsync(string licenseId, string revokedBy, string reason)
+    public async Task<bool> RevokeLicenseAsync(Guid licenseId, string revokedBy, string reason)
     {
         // TODO: Implement
         _logger.LogWarning("RevokeLicenseAsync not implemented");
@@ -308,7 +307,7 @@ public class ProductLicenseService : IProductLicenseService
         return false;
     }
 
-    public async Task<bool> RenewLicenseAsync(string licenseId, DateTime newExpiryDate, string renewedBy)
+    public async Task<bool> RenewLicenseAsync(Guid licenseId, DateTime newExpiryDate, string renewedBy)
     {
         // TODO: Implement
         _logger.LogWarning("RenewLicenseAsync not implemented");
@@ -316,7 +315,7 @@ public class ProductLicenseService : IProductLicenseService
         return false;
     }
 
-    public async Task<bool> UpdateLicenseStatusAsync(string licenseId, LicenseStatus status, string updatedBy, string? reason = null)
+    public async Task<bool> UpdateLicenseStatusAsync(Guid licenseId, LicenseStatus status, string updatedBy, string? reason = null)
     {
         // TODO: Implement
         _logger.LogWarning("UpdateLicenseStatusAsync not implemented");
@@ -324,7 +323,7 @@ public class ProductLicenseService : IProductLicenseService
         return false;
     }
 
-    public async Task<bool> DeleteLicenseAsync(string licenseId, string deletedBy)
+    public async Task<bool> DeleteLicenseAsync(Guid licenseId, string deletedBy)
     {
         // TODO: Implement
         _logger.LogWarning("DeleteLicenseAsync not implemented");
@@ -356,7 +355,7 @@ public class ProductLicenseService : IProductLicenseService
         return ValidationResult.Success();
     }
 
-    public async Task<ValidationResult> ValidateLicenseUpdateRequestAsync(string licenseId, LicenseUpdateRequest request)
+    public async Task<ValidationResult> ValidateLicenseUpdateRequestAsync(Guid licenseId, LicenseUpdateRequest request)
     {
         // TODO: Implement
         _logger.LogWarning("ValidateLicenseUpdateRequestAsync not implemented");
@@ -380,7 +379,7 @@ public class ProductLicenseService : IProductLicenseService
         return 0;
     }
 
-    public async Task<LicenseUsageStatistics> GetLicenseUsageStatisticsAsync(string? productId = null, string? consumerId = null)
+    public async Task<LicenseUsageStatistics> GetLicenseUsageStatisticsAsync(Guid? productId = null, Guid? consumerId = null)
     {
         // TODO: Implement
         _logger.LogWarning("GetLicenseUsageStatisticsAsync not implemented");
@@ -388,7 +387,7 @@ public class ProductLicenseService : IProductLicenseService
         return new LicenseUsageStatistics();
     }
 
-    public async Task<IEnumerable<LicenseAuditEntry>> GetLicenseAuditHistoryAsync(string licenseId)
+    public async Task<IEnumerable<LicenseAuditEntry>> GetLicenseAuditHistoryAsync(Guid licenseId)
     {
         // TODO: Implement
         _logger.LogWarning("GetLicenseAuditHistoryAsync not implemented");
@@ -414,7 +413,7 @@ public class ProductLicenseService : IProductLicenseService
 
     private static CoreModels.LicenseTier MapTierFromRequest(string? tierId)
     {
-        if (string.IsNullOrWhiteSpace(tierId))
+        if (string.IsNullOrEmpty(tierId))
             return CoreModels.LicenseTier.Community;
 
         return tierId.ToLowerInvariant() switch
@@ -516,6 +515,7 @@ public class ProductLicenseService : IProductLicenseService
         return await _unitOfWork.Licenses.SearchAsync(searchRequest)
             .ContinueWith(task => task.Result.Results.Select(license => license.ToModel()).ToList());
     }
+
 
     #endregion
 }

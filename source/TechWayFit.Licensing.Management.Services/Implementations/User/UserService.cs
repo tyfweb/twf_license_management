@@ -53,7 +53,7 @@ public class UserService : IUserService
             );
             return [.. users.Users.Select(u => new UserProfile
             {
-                UserId = u.UserId,
+                UserId = u.Id,
                 UserName = u.UserName,
                 FullName = u.FullName,
                 Email = u.Email,
@@ -106,7 +106,7 @@ public class UserService : IUserService
     {
         try
         {
-            var user = await _unitOfWork.Users.GetByIdAsync(userId.ToString());
+            var user = await _unitOfWork.Users.GetByIdAsync(userId);
             return user != null ? MapToUserProfile(user) : null;
         }
         catch (Exception ex)
@@ -188,7 +188,7 @@ public class UserService : IUserService
             // Create user entity
             var userEntity = new UserProfileEntity
             {
-                UserId = Guid.NewGuid(),
+                Id = Guid.NewGuid(),
                 UserName = username.Trim(),
                 PasswordHash = hash,
                 PasswordSalt = salt,
@@ -207,7 +207,7 @@ public class UserService : IUserService
             {
                 var roleMapping = new UserRoleMappingEntity
                 {
-                    UserId = userEntity.UserId,
+                    UserId = userEntity.Id,
                     RoleId = roleId,
                     AssignedDate = DateTime.UtcNow,
                     CreatedBy = createdBy,
@@ -220,7 +220,7 @@ public class UserService : IUserService
 
             _logger.LogInformation("User created successfully: {Username} by {CreatedBy}", username, createdBy);
 
-            var createdUser = await GetUserByIdAsync(userEntity.UserId);
+            var createdUser = await GetUserByIdAsync(userEntity.Id);
             return (true, "User created successfully", createdUser);
         }
         catch (Exception ex)
@@ -518,7 +518,7 @@ public class UserService : IUserService
     {
         try
         {
-            var role = await _unitOfWork.UserRoles.GetByIdAsync(roleId.ToString());
+            var role = await _unitOfWork.UserRoles.GetByIdAsync(roleId);
 
             return role != null ? MapToUserRole(role) : null;
         }
@@ -560,7 +560,7 @@ public class UserService : IUserService
 
             var roleEntity = new UserRoleEntity
             {
-                RoleId = Guid.NewGuid(),
+                Id = Guid.NewGuid(),
                 RoleName = roleName.Trim(),
                 RoleDescription = roleDescription?.Trim(),
                 IsAdmin = isAdmin,
@@ -592,7 +592,7 @@ public class UserService : IUserService
     {
         try
         {
-            var role = await _unitOfWork.UserRoles.GetByIdAsync(roleId.ToString());
+            var role = await _unitOfWork.UserRoles.GetByIdAsync(roleId);
             if (role == null || !role.IsActive)
             {
                 return (false, "Role not found");
@@ -600,7 +600,7 @@ public class UserService : IUserService
 
             // Check if role name already exists (excluding current role)
             var existingRole = await _unitOfWork.UserRoles.GetByNameAsync(roleName);
-            if (existingRole != null && existingRole.RoleId != roleId)
+            if (existingRole != null && existingRole.Id != roleId)
             {
                 return (false, "Role name already exists");
             }
@@ -627,7 +627,7 @@ public class UserService : IUserService
     {
         try
         {
-            var role = await _unitOfWork.UserRoles.GetByIdAsync(roleId.ToString());
+            var role = await _unitOfWork.UserRoles.GetByIdAsync(roleId);
             if (role == null || !role.IsActive)
             {
                 return (false, "Role not found");
@@ -709,13 +709,13 @@ public class UserService : IUserService
         try
         {
             // Check if user exists
-            var userExists = await _unitOfWork.Users.GetByIdAsync(userId.ToString());
+            var userExists = await _unitOfWork.Users.GetByIdAsync(userId);
             if (!userExists?.IsActive ?? false)
             {
                 return (false, "User not found");
             }
             // Check if role exists
-            var roleExists = await _unitOfWork.UserRoles.GetByIdAsync(roleId.ToString());
+            var roleExists = await _unitOfWork.UserRoles.GetByIdAsync(roleId);
             if (roleExists == null || !roleExists.IsActive)
             {
                 return (false, "Role not found");
@@ -865,7 +865,7 @@ public class UserService : IUserService
         {
             var user = await _unitOfWork.Users.GetByUsernameAsync(username);
 
-            if (excludeUserId.HasValue && user?.UserId == excludeUserId.Value)
+            if (excludeUserId.HasValue && user?.Id == excludeUserId.Value)
             {
                 return true;
             }
@@ -890,7 +890,7 @@ public class UserService : IUserService
                 return true;
             }
 
-            if (excludeUserId.HasValue && user.UserId == excludeUserId.Value)
+            if (excludeUserId.HasValue && user.Id == excludeUserId.Value)
             {
                 return true;
             }
@@ -957,7 +957,7 @@ public class UserService : IUserService
     {
         return new UserProfile
         {
-            UserId = entity.UserId,
+            UserId = entity.Id,
             UserName = entity.UserName,
             FullName = entity.FullName,
             Email = entity.Email,
@@ -983,7 +983,7 @@ public class UserService : IUserService
     {
         return new UserRole
         {
-            RoleId = entity.RoleId,
+            RoleId = entity.Id,
             RoleName = entity.RoleName,
             RoleDescription = entity.RoleDescription,
             IsAdmin = entity.IsAdmin,

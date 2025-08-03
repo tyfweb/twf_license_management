@@ -15,16 +15,16 @@ public class PostgreSqlProductTierRepository : PostgreSqlBaseRepository<ProductT
     {
     }
 
-    public async Task<IEnumerable<ProductTierEntity>> GetByProductIdAsync(string productId)
+    public async Task<IEnumerable<ProductTierEntity>> GetByProductIdAsync(Guid productId)
     {
         return await _dbSet.Where(t => t.ProductId == productId && t.IsActive)
                      .OrderBy(t => t.DisplayOrder)
                      .ToListAsync();
     }
 
-    public Task<ProductTierEntity?> GetWithFeaturesAsync(string tierId)
+    public Task<ProductTierEntity?> GetWithFeaturesAsync(Guid tierId)
     {
         return _dbSet.Include(t => t.Features)
-                     .FirstOrDefaultAsync(t => t.TierId == tierId && t.IsActive);
+                     .FirstOrDefaultAsync(t => t.Id == tierId && t.IsActive);
     }
 }

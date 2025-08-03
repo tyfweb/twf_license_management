@@ -56,9 +56,9 @@ public class AuditListViewModel
 /// </summary>
 public class AuditEntryItemViewModel
 {
-    public string EntryId { get; set; } = string.Empty;
+    public string EntryId { get; set; }
     public string EntityType { get; set; } = string.Empty;
-    public string EntityId { get; set; } = string.Empty;
+    public string? EntityId { get; set; }
     public string ActionType { get; set; } = string.Empty;
     public string? OldValue { get; set; }
     public string? NewValue { get; set; }
@@ -218,7 +218,7 @@ public class SecurityAuditViewModel
 public class EntityAuditViewModel
 {
     public string EntityType { get; set; } = string.Empty;
-    public string EntityId { get; set; } = string.Empty;
+    public string EntityId { get; set; }
     public string EntityDisplayName { get; set; } = string.Empty;
     public IEnumerable<AuditEntryItemViewModel> Entries { get; set; } = new List<AuditEntryItemViewModel>();
     public PaginationViewModel Pagination { get; set; } = new();

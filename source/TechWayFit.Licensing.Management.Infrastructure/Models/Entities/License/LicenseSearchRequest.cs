@@ -16,10 +16,11 @@ public class LicenseSearchRequest:SearchRequest<ProductLicenseEntity>
         ConsumerId = consumerId;
         Status = status;
         Filters = new List<Expression<Func<ProductLicenseEntity, bool>>>();
-        if (!string.IsNullOrEmpty(productId))
-            Filters.Add(license => license.ProductId == productId);
-        if (!string.IsNullOrEmpty(consumerId))
-            Filters.Add(license => license.ConsumerId == consumerId);
+
+        if (!string.IsNullOrEmpty(productId) && Guid.TryParse(productId, out var productGuid))
+            Filters.Add(license => license.ProductId == productGuid);
+        if (!string.IsNullOrEmpty(consumerId) && Guid.TryParse(consumerId, out var consumerGuid))
+            Filters.Add(license => license.ConsumerId == consumerGuid);
         if (status.HasValue)
             Filters.Add(license => license.Status == status.Value.ToString());
     }

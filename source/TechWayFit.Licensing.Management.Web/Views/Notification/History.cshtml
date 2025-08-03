@@ -36,8 +36,9 @@
                         <i class="fas fa-bell"></i>
                     </div>
                     <div class="stats-number">@Model.Statistics.TotalNotifications.ToString("N0")</div>
-                </div>
-                <div class="stats-row-2">
+    using TechWayFit.Licensing.Management.Web.Helpers;
+#line default
+            <div class="stats-row-2">
                     <div class="stats-label">Total Notifications</div>
                 </div>
             </div>
@@ -375,7 +376,7 @@
             ["sentFromDate"] = Model.Filter.SentFromDate?.ToString("yyyy-MM-dd") ?? "",
             ["sentToDate"] = Model.Filter.SentToDate?.ToString("yyyy-MM-dd") ?? "",
             ["entityType"] = Model.Filter.EntityType ?? "",
-            ["entityId"] = Model.Filter.EntityId ?? ""
+            ["entityId"] = Model.Filter.EntityId.ConvertToString() ?? ""
         };
         
         return Url.Action("History", routeValues) ?? "#";

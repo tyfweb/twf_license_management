@@ -3,6 +3,7 @@ using TechWayFit.Licensing.Core.Models;
 using TechWayFit.Licensing.Management.Core.Models.Product;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Web.ViewModels.Product;
+using TechWayFit.Licensing.Management.Web.Helpers;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 
@@ -46,7 +47,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 // Map to ProductConfiguration for view compatibility
                 var products = enterpriseProducts.Select(ep => new ProductConfiguration
                 {
-                    ProductId = ep.ProductId,
+                    ProductId = ep.ProductId.ConvertToString(),
                     ProductName = ep.Name,
                     Description = ep.Description,
                     Version = ep.Version,
@@ -65,8 +66,8 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                         ProductType = p.ProductType,
                         Version = p.Version,
                         IsActive = p.IsActive,
-                        LicenseCount = await GetLicenseCountAsync(p.ProductId),
-                        ConsumerCount = await GetConsumerCountAsync(p.ProductId),
+                        LicenseCount = await GetLicenseCountAsync(p.ProductId.ToGuid()),
+                        ConsumerCount = await GetConsumerCountAsync(p.ProductId.ToGuid()),
                         CreatedAt = p.CreatedAt,
                         UpdatedAt = p.UpdatedAt
                     }))).ToList(),
@@ -89,11 +90,12 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         }
 
         /// <summary>
-        /// Product details page with comprehensive information
+        /// Product details view
         /// </summary>
-        public async Task<IActionResult> Details(string id)
+        /// <param name="id">Product ID</param>
+        public async Task<IActionResult> Details(Guid id)
         {
-            if (string.IsNullOrEmpty(id))
+            if (id == Guid.Empty)
             {
                 return NotFound();
             }
@@ -162,7 +164,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
             try
             {
                 // Check if product ID already exists
-                var existingProduct = await GetProductByIdAsync(model.ProductId);
+                var existingProduct = await GetProductByIdAsync(model.ProductId.ToGuid());
                 if (existingProduct != null)
                 {
                     ModelState.AddModelError("ProductId", "A product with this ID already exists.");
@@ -174,7 +176,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
 
                 var productConfig = new ProductConfiguration
                 {
-                    ProductId = model.ProductId,
+                    ProductId = model.ProductId.ToString(),
                     ProductName = model.ProductName,
                     Description = model.Description ?? "",
                     ProductType = model.ProductType,
@@ -208,9 +210,9 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         /// <summary>
         /// Edit existing product form
         /// </summary>
-        public async Task<IActionResult> Edit(string id)
+        public async Task<IActionResult> Edit(Guid id)
         {
-            if (string.IsNullOrEmpty(id))
+            if (id == Guid.Empty)
             {
                 return NotFound();
             }
@@ -268,7 +270,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
 
             try
             {
-                var existingProduct = await GetProductByIdAsync(model.ProductId);
+                var existingProduct = await GetProductByIdAsync(model.ProductId.ToGuid());
                 if (existingProduct == null)
                 {
                     return NotFound();
@@ -304,9 +306,9 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         /// <summary>
         /// Delete product confirmation
         /// </summary>
-        public async Task<IActionResult> Delete(string id)
+        public async Task<IActionResult> Delete(Guid id)
         {
-            if (string.IsNullOrEmpty(id))
+            if (id == Guid.Empty)
             {
                 return NotFound();
             }
@@ -340,7 +342,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         /// </summary>
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(string id)
+        public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
             try
             {
@@ -378,7 +380,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
             var enterpriseProducts = await _productService.GetProductsAsync();
             return enterpriseProducts.Select(ep => new ProductConfiguration
             {
-                ProductId = ep.ProductId,
+                ProductId = ep.ProductId.ToString(),
                 ProductName = ep.Name,
                 Description = ep.Description,
                 Version = ep.Version,
@@ -389,14 +391,14 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
             }).ToList();
         }
 
-        private async Task<ProductConfiguration?> GetProductByIdAsync(string productId)
+        private async Task<ProductConfiguration?> GetProductByIdAsync(Guid productId)
         {
             var enterpriseProduct = await _productService.GetProductByIdAsync(productId);
             if (enterpriseProduct == null) return null;
 
             return new ProductConfiguration
             {
-                ProductId = enterpriseProduct.ProductId,
+                ProductId = enterpriseProduct.ProductId.ToString(),
                 ProductName = enterpriseProduct.Name,
                 Description = enterpriseProduct.Description,
                 Version = enterpriseProduct.Version,
@@ -411,7 +413,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         {
             var enterpriseProduct = new EnterpriseProduct
             {
-                ProductId = product.ProductId,
+                ProductId = Guid.Parse(product.ProductId),
                 Name = product.ProductName,
                 Description = product.Description,
                 Version = product.Version,
@@ -419,7 +421,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 ReleaseDate = product.CreatedAt
             };
 
-            if (await _productService.GetProductByIdAsync(product.ProductId) != null)
+            if (await _productService.GetProductByIdAsync(Guid.Parse(product.ProductId)) != null)
             {
                 await _productService.UpdateProductAsync(enterpriseProduct, "system");
             }
@@ -429,12 +431,12 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
             }
         }
 
-        private async Task DeleteProductAsync(string productId)
+        private async Task DeleteProductAsync(Guid productId)
         {
             await _productService.DeleteProductAsync(productId, "system");
         }
 
-        private async Task<int> GetLicenseCountAsync(string productId)
+        private async Task<int> GetLicenseCountAsync(Guid productId)
         {
             var licenses = await _licenseService.GetLicensesByProductAsync(productId);
             // TODO: Implement actual license counting logic
@@ -442,7 +444,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
             return licenses.Count();
         }
 
-        private async Task<int> GetConsumerCountAsync(string productId)
+        private async Task<int> GetConsumerCountAsync(Guid productId)
         {
             var consumers = await _consumerService.GetConsumersByProductAsync(productId);
             // TODO: Implement actual consumer counting logic
@@ -450,7 +452,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
             return consumers.Count();
         }
 
-        private async Task<List<ConsumerSummaryViewModel>> GetProductConsumersAsync(string productId)
+        private async Task<List<ConsumerSummaryViewModel>> GetProductConsumersAsync(Guid productId)
         {
             // TODO: Implement actual consumer retrieval logic
             // For now, return sample data
@@ -458,7 +460,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
             {
                 new ConsumerSummaryViewModel
                 {
-                    ConsumerId = "demo-consumer-1",
+                    ConsumerId = Guid.NewGuid().ConvertToString(),
                     OrganizationName = "Demo Organization",
                     ContactPerson = "John Doe",
                     ContactEmail = "john@demo.com",
@@ -469,7 +471,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
             };
         }
 
-        private async Task<List<LicenseSummaryViewModel>> GetRecentLicensesAsync(string productId)
+        private async Task<List<LicenseSummaryViewModel>> GetRecentLicensesAsync(Guid productId)
         {
             // TODO: Implement actual license retrieval logic
             // For now, return sample data
@@ -477,7 +479,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
             {
                 new LicenseSummaryViewModel
                 {
-                    LicenseId = "demo-license-1",
+                    LicenseId = Guid.NewGuid().ConvertToString(),
                     ConsumerName = "Demo Organization",
                     Tier = LicenseTier.Professional,
                     Status = LicenseStatus.Active,
@@ -487,7 +489,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
             };
         }
 
-        private async Task<ProductStatisticsViewModel> GetProductStatisticsAsync(string productId)
+        private async Task<ProductStatisticsViewModel> GetProductStatisticsAsync(Guid productId)
         {
             // TODO: Implement actual statistics calculation
             // For now, return sample data
@@ -525,7 +527,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                     {
                         new FeatureDefinitionViewModel
                         {
-                            FeatureId = "basic-gateway",
+                            FeatureId = Guid.NewGuid().ConvertToString(),
                             Name = "Basic API Gateway",
                             Description = "Basic API routing and proxy functionality",
                             Category = FeatureCategory.Core,
@@ -540,7 +542,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                     {
                         new FeatureDefinitionViewModel
                         {
-                            FeatureId = "rate-limiting",
+                            FeatureId = Guid.NewGuid().ConvertToString(),
                             Name = "Rate Limiting",
                             Description = "Advanced rate limiting and throttling",
                             Category = FeatureCategory.Performance,
@@ -555,7 +557,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                     {
                         new FeatureDefinitionViewModel
                         {
-                            FeatureId = "advanced-analytics",
+                            FeatureId = Guid.NewGuid().ConvertToString(),
                             Name = "Advanced Analytics",
                             Description = "Comprehensive analytics and reporting",
                             Category = FeatureCategory.BusinessIntelligence,
@@ -573,7 +575,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
             {
                 new FeatureDefinitionViewModel
                 {
-                    FeatureId = "authentication",
+                    FeatureId = Guid.NewGuid().ConvertToString(),
                     Name = "Authentication",
                     Description = "User authentication and authorization",
                     Category = FeatureCategory.Security,
@@ -582,7 +584,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 },
                 new FeatureDefinitionViewModel
                 {
-                    FeatureId = "logging",
+                    FeatureId = Guid.NewGuid().ConvertToString(),
                     Name = "Request Logging",
                     Description = "Comprehensive request and response logging",
                     Category = FeatureCategory.Core,
@@ -598,7 +600,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 kvp => kvp.Key,
                 kvp => kvp.Value.Select(f => new ProductFeatureDefinition
                 {
-                    FeatureId = f.FeatureId,
+                    FeatureId = f.FeatureId.ToString(),
                     Name = f.Name,
                     Description = f.Description,
                     Category = f.Category,
@@ -614,7 +616,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         {
             return features.Select(f => new ProductFeatureDefinition
             {
-                FeatureId = f.FeatureId,
+                FeatureId = f.FeatureId.ToString(),
                 Name = f.Name,
                 Description = f.Description,
                 Category = f.Category,

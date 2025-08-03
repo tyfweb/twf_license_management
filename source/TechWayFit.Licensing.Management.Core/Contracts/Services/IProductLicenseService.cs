@@ -24,7 +24,7 @@ public interface IProductLicenseService
     /// <param name="request">License update request parameters</param>
     /// <param name="updatedBy">User updating the license</param>
     /// <returns>Updated license</returns>
-    Task<ProductLicense> UpdateLicenseAsync(string licenseId, LicenseUpdateRequest request, string updatedBy);
+    Task<ProductLicense> UpdateLicenseAsync(Guid licenseId, LicenseUpdateRequest request, string updatedBy);
 
     /// <summary>
     /// Regenerates license key and cryptographic data
@@ -33,7 +33,7 @@ public interface IProductLicenseService
     /// <param name="regeneratedBy">User regenerating the license</param>
     /// <param name="reason">Reason for regeneration</param>
     /// <returns>License with new key and cryptographic data</returns>
-    Task<ProductLicense> RegenerateLicenseKeyAsync(string licenseId, string regeneratedBy, string reason);
+    Task<ProductLicense> RegenerateLicenseKeyAsync(Guid licenseId, string regeneratedBy, string reason);
 
     /// <summary>
     /// Validates a license
@@ -42,7 +42,7 @@ public interface IProductLicenseService
     /// <param name="productId">Product ID</param>
     /// <param name="checkActivation">Whether to check activation status</param>
     /// <returns>Validation result with license details</returns>
-    Task<LicenseValidationResult> ValidateLicenseAsync(string licenseKey, string productId, bool checkActivation = true);
+    Task<LicenseValidationResult> ValidateLicenseAsync(string licenseKey, Guid productId, bool checkActivation = true);
 
     /// <summary>
     /// Gets a license by license key
@@ -56,7 +56,7 @@ public interface IProductLicenseService
     /// </summary>
     /// <param name="licenseId">License ID</param>
     /// <returns>License or null if not found</returns>
-    Task<ProductLicense?> GetLicenseByIdAsync(string licenseId);
+    Task<ProductLicense?> GetLicenseByIdAsync(Guid licenseId);
 
     /// <summary>
     /// Gets licenses for a consumer
@@ -67,7 +67,7 @@ public interface IProductLicenseService
     /// <param name="pageSize">Page size</param>
     /// <returns>List of licenses</returns>
     Task<IEnumerable<ProductLicense>> GetLicensesByConsumerAsync(
-        string consumerId,
+        Guid consumerId,
         LicenseStatus? status = null,
         int pageNumber = 1,
         int pageSize = 50);
@@ -94,7 +94,7 @@ public interface IProductLicenseService
     /// <param name="pageSize">Page size</param>
     /// <returns>List of licenses</returns>
     Task<IEnumerable<ProductLicense>> GetLicensesByProductAsync(
-        string productId,
+        Guid productId,
         LicenseStatus? status = null,
         int pageNumber = 1,
         int pageSize = 50);
@@ -107,24 +107,24 @@ public interface IProductLicenseService
     /// <param name="updatedBy">User updating the status</param>
     /// <param name="reason">Reason for status change</param>
     /// <returns>True if updated successfully</returns>
-    Task<bool> UpdateLicenseStatusAsync(string licenseId, LicenseStatus status, string updatedBy, string? reason = null);
+    Task<bool> UpdateLicenseStatusAsync(Guid licenseId, LicenseStatus status, string updatedBy, string? reason = null);
 
     /// <summary>
     /// Activates a license
     /// </summary>
-    /// <param name="licenseKey">License key</param>
+    /// <param name="licenseId">License ID</param>
     /// <param name="activationInfo">Activation information</param>
     /// <returns>True if activated successfully</returns>
-    Task<bool> ActivateLicenseAsync(string licenseKey, ActivationInfo activationInfo);
+    Task<bool> ActivateLicenseAsync(Guid licenseId, ActivationInfo activationInfo);
 
     /// <summary>
     /// Deactivates a license
     /// </summary>
-    /// <param name="licenseKey">License key</param>
+    /// <param name="licenseId">License ID</param>
     /// <param name="deactivatedBy">User deactivating the license</param>
     /// <param name="reason">Reason for deactivation</param>
     /// <returns>True if deactivated successfully</returns>
-    Task<bool> DeactivateLicenseAsync(string licenseKey, string deactivatedBy, string? reason = null);
+    Task<bool> DeactivateLicenseAsync(Guid licenseId, string deactivatedBy, string? reason = null);
 
     /// <summary>
     /// Revokes a license
@@ -133,7 +133,7 @@ public interface IProductLicenseService
     /// <param name="revokedBy">User revoking the license</param>
     /// <param name="reason">Reason for revocation</param>
     /// <returns>True if revoked successfully</returns>
-    Task<bool> RevokeLicenseAsync(string licenseId, string revokedBy, string reason);
+    Task<bool> RevokeLicenseAsync(Guid licenseId, string revokedBy, string reason);
 
     /// <summary>
     /// Suspends a license
@@ -143,7 +143,7 @@ public interface IProductLicenseService
     /// <param name="reason">Reason for suspension</param>
     /// <param name="suspensionEndDate">End date of suspension (optional)</param>
     /// <returns>True if suspended successfully</returns>
-    Task<bool> SuspendLicenseAsync(string licenseId, string suspendedBy, string reason, DateTime? suspensionEndDate = null);
+    Task<bool> SuspendLicenseAsync(Guid licenseId, string suspendedBy, string reason, DateTime? suspensionEndDate = null);
 
     /// <summary>
     /// Renews a license
@@ -152,7 +152,7 @@ public interface IProductLicenseService
     /// <param name="newExpiryDate">New expiry date</param>
     /// <param name="renewedBy">User renewing the license</param>
     /// <returns>True if renewed successfully</returns>
-    Task<bool> RenewLicenseAsync(string licenseId, DateTime newExpiryDate, string renewedBy);
+    Task<bool> RenewLicenseAsync(Guid licenseId, DateTime newExpiryDate, string renewedBy);
 
     /// <summary>
     /// Gets licenses expiring within specified days
@@ -173,7 +173,7 @@ public interface IProductLicenseService
     /// <param name="productId">Product ID (optional)</param>
     /// <param name="consumerId">Consumer ID (optional)</param>
     /// <returns>License usage statistics</returns>
-    Task<LicenseUsageStatistics> GetLicenseUsageStatisticsAsync(string? productId = null, string? consumerId = null);
+    Task<LicenseUsageStatistics> GetLicenseUsageStatisticsAsync(Guid? productId = null, Guid? consumerId = null);
 
     /// <summary>
     /// Checks if a license exists
@@ -187,7 +187,7 @@ public interface IProductLicenseService
     /// </summary>
     /// <param name="licenseId">License ID</param>
     /// <returns>List of audit entries</returns>
-    Task<IEnumerable<LicenseAuditEntry>> GetLicenseAuditHistoryAsync(string licenseId);
+    Task<IEnumerable<LicenseAuditEntry>> GetLicenseAuditHistoryAsync(Guid licenseId);
 
     /// <summary>
     /// Validates license generation request data
@@ -202,5 +202,5 @@ public interface IProductLicenseService
     /// <param name="licenseId">License ID being updated</param>
     /// <param name="request">License update request to validate</param>
     /// <returns>Validation result</returns>
-    Task<ValidationResult> ValidateLicenseUpdateRequestAsync(string licenseId, LicenseUpdateRequest request);
+    Task<ValidationResult> ValidateLicenseUpdateRequestAsync(Guid licenseId, LicenseUpdateRequest request);
 }

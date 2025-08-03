@@ -60,11 +60,11 @@ public interface INotificationService
     /// <summary>
     /// Sends license validation failure alert
     /// </summary>
-    /// <param name="licenseKey">License key that failed validation</param>
+    /// <param name="licenseId">License ID that failed validation</param>
     /// <param name="validationError">Validation error details</param>
     /// <param name="attemptInfo">Information about the validation attempt</param>
     /// <returns>True if alert sent successfully</returns>
-    Task<bool> SendValidationFailureAlertAsync(string licenseKey, string validationError, Dictionary<string, object> attemptInfo);
+    Task<bool> SendValidationFailureAlertAsync(Guid licenseId, string validationError, Dictionary<string, object> attemptInfo);
 
     /// <summary>
     /// Sends license usage threshold alert
@@ -73,7 +73,7 @@ public interface INotificationService
     /// <param name="currentUsage">Current usage count</param>
     /// <param name="threshold">Usage threshold</param>
     /// <returns>True if alert sent successfully</returns>
-    Task<bool> SendUsageThresholdAlertAsync(string productId, int currentUsage, int threshold);
+    Task<bool> SendUsageThresholdAlertAsync(Guid productId, int currentUsage, int threshold);
 
     /// <summary>
     /// Sends custom notification
@@ -101,7 +101,7 @@ public interface INotificationService
     /// <param name="pageSize">Page size</param>
     /// <returns>List of notification history entries</returns>
     Task<IEnumerable<NotificationHistory>> GetLicenseNotificationHistoryAsync(
-        string licenseId,
+        Guid licenseId,
         DateTime? fromDate = null,
         DateTime? toDate = null,
         int pageNumber = 1,
@@ -117,7 +117,7 @@ public interface INotificationService
     /// <param name="pageSize">Page size</param>
     /// <returns>List of notification history entries</returns>
     Task<IEnumerable<NotificationHistory>> GetConsumerNotificationHistoryAsync(
-        string consumerId,
+        Guid consumerId,
         DateTime? fromDate = null,
         DateTime? toDate = null,
         int pageNumber = 1,
@@ -143,7 +143,7 @@ public interface INotificationService
     /// </summary>
     /// <param name="consumerId">Consumer ID</param>
     /// <returns>Notification preferences</returns>
-    Task<NotificationPreferences> GetNotificationPreferencesAsync(string consumerId);
+    Task<NotificationPreferences> GetNotificationPreferencesAsync(Guid consumerId);
 
     /// <summary>
     /// Updates notification preferences for a consumer
@@ -151,7 +151,7 @@ public interface INotificationService
     /// <param name="consumerId">Consumer ID</param>
     /// <param name="preferences">Notification preferences</param>
     /// <returns>Updated preferences</returns>
-    Task<NotificationPreferences> UpdateNotificationPreferencesAsync(string consumerId, NotificationPreferences preferences);
+    Task<NotificationPreferences> UpdateNotificationPreferencesAsync(Guid consumerId, NotificationPreferences preferences);
 
     /// <summary>
     /// Gets notification statistics

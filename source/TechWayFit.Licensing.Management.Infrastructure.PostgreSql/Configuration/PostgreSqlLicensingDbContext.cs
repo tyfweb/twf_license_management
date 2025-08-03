@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore; 
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -35,7 +35,7 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
     public DbSet<ProductConsumerEntity> ProductConsumers { get; set; }
 
     // License related entities
-    public DbSet<ProductLicenseEntity> ProductLicenses { get; set; } 
+    public DbSet<ProductLicenseEntity> ProductLicenses { get; set; }
 
     // Consumer related entities
     public DbSet<ConsumerAccountEntity> ConsumerAccounts { get; set; }
@@ -67,7 +67,7 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
- 
+
 
         ConfigureAuditEntities(modelBuilder);
         ConfigureConsumerEntities(modelBuilder);
@@ -75,7 +75,7 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
         // Configure entities
         ConfigureProductEntities(modelBuilder);
         ConfigureLicenseEntities(modelBuilder);
-        
+
         ConfigureNotificationEntities(modelBuilder);
         ConfigureSettingsEntities(modelBuilder);
         ConfigureUserEntities(modelBuilder);
@@ -85,7 +85,7 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
         ConfigureIndexes(modelBuilder);
     }
 
-     
+
     /// <summary>
     /// Configure Audit related entities
     /// </summary>
@@ -94,10 +94,10 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
         // AuditEntryEntity configuration
         modelBuilder.Entity<AuditEntryEntity>(entity =>
         {
-            entity.HasKey(e => e.AuditEntryId);
-            entity.Property(e => e.AuditEntryId).HasMaxLength(50).IsRequired();
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).IsRequired();
             entity.Property(e => e.EntityType).HasMaxLength(100).IsRequired();
-            entity.Property(e => e.EntityId).HasMaxLength(50).IsRequired(); 
+            entity.Property(e => e.EntityId).IsRequired();
             entity.Property(e => e.CreatedBy).HasMaxLength(100).IsRequired();
             entity.Property(e => e.Reason).HasMaxLength(1000);
             entity.Property(e => e.OldValue).HasMaxLength(4000);
@@ -124,8 +124,8 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
         // ConsumerAccountEntity configuration
         modelBuilder.Entity<ConsumerAccountEntity>(entity =>
         {
-            entity.HasKey(e => e.ConsumerId);
-            entity.Property(e => e.ConsumerId).HasMaxLength(50).IsRequired();
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).IsRequired();
             entity.Property(e => e.CompanyName).HasMaxLength(200).IsRequired();
             entity.Property(e => e.AccountCode).HasMaxLength(50);
 
@@ -156,11 +156,11 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
             entity.HasIndex(e => e.Status);
             entity.HasIndex(e => e.IsActive);
         });
-        
+
         modelBuilder.Entity<ProductConsumerEntity>(entity =>
         {
-            entity.HasKey(e => e.ProductConsumerId);
-            entity.Property(e => e.ProductConsumerId).HasMaxLength(50).IsRequired();
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).IsRequired();
             entity.Property(e => e.ProductId).HasMaxLength(50).IsRequired();
             entity.Property(e => e.ConsumerId).HasMaxLength(50).IsRequired();
             entity.Property(e => e.AccountManagerName).HasMaxLength(100);
@@ -187,7 +187,7 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
             entity.HasIndex(e => new { e.ConsumerId, e.ProductId }).IsUnique();
         });
     }
-    
+
 
     /// <summary>
     /// Configure Product related entities
@@ -197,12 +197,12 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
         // ProductEntity configuration
         modelBuilder.Entity<ProductEntity>(entity =>
         {
-            entity.HasKey(e => e.ProductId);
-            entity.Property(e => e.ProductId).HasMaxLength(50).IsRequired();
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).IsRequired();
             entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
-            entity.Property(e => e.Description).HasMaxLength(1000); 
+            entity.Property(e => e.Description).HasMaxLength(1000);
             entity.Property(e => e.SupportEmail).HasMaxLength(255);
-            entity.Property(e => e.SupportPhone).HasMaxLength(50); 
+            entity.Property(e => e.SupportPhone).HasMaxLength(50);
 
             // Audit fields
             entity.Property(e => e.CreatedBy).HasMaxLength(100).IsRequired();
@@ -216,8 +216,8 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
         // ProductVersionEntity configuration
         modelBuilder.Entity<ProductVersionEntity>(entity =>
         {
-            entity.HasKey(e => e.VersionId);
-            entity.Property(e => e.VersionId).HasMaxLength(50).IsRequired();
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).IsRequired();
             entity.Property(e => e.ProductId).HasMaxLength(50).IsRequired();
             entity.Property(e => e.Version).HasMaxLength(50).IsRequired();
             entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
@@ -245,8 +245,8 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
         // ProductTierEntity configuration
         modelBuilder.Entity<ProductTierEntity>(entity =>
         {
-            entity.HasKey(e => e.TierId);
-            entity.Property(e => e.TierId).HasMaxLength(50).IsRequired();
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).IsRequired();
             entity.Property(e => e.ProductId).HasMaxLength(50).IsRequired();
             entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
             entity.Property(e => e.Description).HasMaxLength(1000);
@@ -272,10 +272,10 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
         // ProductFeatureEntity configuration
         modelBuilder.Entity<ProductFeatureEntity>(entity =>
         {
-            entity.HasKey(e => e.FeatureId);
-            entity.Property(e => e.FeatureId).HasMaxLength(50).IsRequired();
-            entity.Property(e => e.ProductId).HasMaxLength(50).IsRequired();
-            entity.Property(e => e.TierId).HasMaxLength(50).IsRequired();
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).IsRequired();
+            entity.Property(e => e.ProductId).IsRequired();
+            entity.Property(e => e.TierId).IsRequired();
             entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
             entity.Property(e => e.Description).HasMaxLength(1000);
             entity.Property(e => e.Code).HasMaxLength(100).IsRequired();
@@ -297,7 +297,7 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
 
             // Indexes
             entity.HasIndex(e => new { e.TierId, e.Code }).IsUnique();
-            entity.HasIndex(e => e.IsEnabled); 
+            entity.HasIndex(e => e.IsEnabled);
             entity.HasIndex(e => e.Code);
         });
     }
@@ -310,10 +310,10 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
         // ProductLicenseEntity configuration
         modelBuilder.Entity<ProductLicenseEntity>(entity =>
         {
-            entity.HasKey(e => e.LicenseId);
-            entity.Property(e => e.LicenseId).HasMaxLength(50).IsRequired();
-            entity.Property(e => e.ProductId).HasMaxLength(50).IsRequired();
-            entity.Property(e => e.ConsumerId).HasMaxLength(50).IsRequired(); 
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).IsRequired();
+            entity.Property(e => e.ProductId).IsRequired();
+            entity.Property(e => e.ConsumerId).IsRequired();
             entity.Property(e => e.Encryption).HasMaxLength(50).IsRequired();
             entity.Property(e => e.Signature).HasMaxLength(50).IsRequired();
             entity.Property(e => e.LicenseKey).HasMaxLength(2000).IsRequired();
@@ -340,7 +340,7 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
                   .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasMany(e => e.Features)
-                  .WithMany(t => t.ProductLicenses) ;
+                  .WithMany(t => t.ProductLicenses);
 
             // Indexes
             entity.HasIndex(e => e.LicenseKey).IsUnique();
@@ -352,9 +352,9 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
         });
     }
 
-    
 
-    
+
+
 
     /// <summary>
     /// Configure Notification related entities
@@ -364,12 +364,12 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
         // NotificationTemplateEntity configuration
         modelBuilder.Entity<NotificationTemplateEntity>(entity =>
         {
-            entity.HasKey(e => e.NotificationTemplateId);
-            entity.Property(e => e.NotificationTemplateId).HasMaxLength(50).IsRequired();
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasMaxLength(50).IsRequired();
             entity.Property(e => e.TemplateName).HasMaxLength(200).IsRequired();
             entity.Property(e => e.MessageTemplate).HasMaxLength(4000).IsRequired();
             entity.Property(e => e.NotificationType).HasMaxLength(20);
-            entity.Property(e => e.Subject).HasMaxLength(500); 
+            entity.Property(e => e.Subject).HasMaxLength(500);
             entity.Property(e => e.TemplateVariableJson).HasMaxLength(1000);
             entity.Property(e => e.IsActive).IsRequired();
             entity.Property(e => e.NotificationMode).HasConversion<string>();
@@ -388,15 +388,15 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
         // NotificationHistoryEntity configuration
         modelBuilder.Entity<NotificationHistoryEntity>(entity =>
         {
-            entity.HasKey(e => e.NotificationId);
-            entity.Property(e => e.NotificationId).HasMaxLength(50).IsRequired();
-            entity.Property(e => e.EntityId).HasMaxLength(50);
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).IsRequired();
+            entity.Property(e => e.EntityId);
             entity.Property(e => e.EntityType).HasConversion<string>();
             entity.Property(e => e.RecipientsJson).HasMaxLength(1000);
             entity.Property(e => e.NotificationMode).HasMaxLength(20);
             entity.Property(e => e.NotificationTemplateId).HasMaxLength(50);
             entity.Property(e => e.NotificationType).HasMaxLength(20);
-            entity.Property(e => e.SentDate).IsRequired(); 
+            entity.Property(e => e.SentDate).IsRequired();
             entity.Property(e => e.DeliveryStatus).HasConversion<string>();
             entity.Property(e => e.DeliveryError).HasMaxLength(2000);
 
@@ -404,7 +404,7 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
             entity.Property(e => e.CreatedBy).HasMaxLength(100).IsRequired();
             entity.Property(e => e.UpdatedBy).HasMaxLength(100);
             entity.Property(e => e.CreatedOn).IsRequired();
-            
+
 
             // Relationships
             entity.HasOne(e => e.Template)
@@ -439,62 +439,39 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
         // Configure SettingEntity
         modelBuilder.Entity<SettingEntity>(entity =>
         {
-            entity.HasKey(e => e.SettingId);
+            entity.HasKey(e => e.Id);
 
-            entity.Property(e => e.SettingId)
-                .HasMaxLength(36)
-                .IsRequired();
+            entity.Property(e => e.Id).IsRequired();
 
-            entity.Property(e => e.Category)
-                .HasMaxLength(100)
-                .IsRequired();
+            entity.Property(e => e.Category).HasMaxLength(100).IsRequired();
 
-            entity.Property(e => e.Key)
-                .HasMaxLength(100)
-                .IsRequired();
+            entity.Property(e => e.Key).HasMaxLength(100).IsRequired();
 
-            entity.Property(e => e.Value)
-                .HasMaxLength(4000);
+            entity.Property(e => e.Value).HasMaxLength(4000);
 
-            entity.Property(e => e.DefaultValue)
-                .HasMaxLength(4000);
+            entity.Property(e => e.DefaultValue).HasMaxLength(4000);
 
-            entity.Property(e => e.DataType)
-                .HasMaxLength(50)
-                .IsRequired();
+            entity.Property(e => e.DataType).HasMaxLength(50).IsRequired();
 
-            entity.Property(e => e.DisplayName)
-                .HasMaxLength(200)
-                .IsRequired();
+            entity.Property(e => e.DisplayName).HasMaxLength(200).IsRequired();
 
-            entity.Property(e => e.Description)
-                .HasMaxLength(1000);
+            entity.Property(e => e.Description).HasMaxLength(1000);
 
-            entity.Property(e => e.GroupName)
-                .HasMaxLength(100);
+            entity.Property(e => e.GroupName).HasMaxLength(100);
 
-            entity.Property(e => e.ValidationRules)
-                .HasMaxLength(2000);
+            entity.Property(e => e.ValidationRules).HasMaxLength(2000);
 
-            entity.Property(e => e.PossibleValues)
-                .HasMaxLength(2000);
+            entity.Property(e => e.PossibleValues).HasMaxLength(2000);
 
-            entity.Property(e => e.ValueSource)
-                .HasMaxLength(50)
-                .IsRequired();
+            entity.Property(e => e.ValueSource).HasMaxLength(50).IsRequired();
 
-            entity.Property(e => e.Tags)
-                .HasMaxLength(500);
+            entity.Property(e => e.Tags).HasMaxLength(500);
 
-            entity.Property(e => e.Environment)
-                .HasMaxLength(50)
-                .IsRequired();
+            entity.Property(e => e.Environment).HasMaxLength(50).IsRequired();
 
-            entity.Property(e => e.IntroducedInVersion)
-                .HasMaxLength(20);
+            entity.Property(e => e.IntroducedInVersion).HasMaxLength(20);
 
-            entity.Property(e => e.DeprecationMessage)
-                .HasMaxLength(500);
+            entity.Property(e => e.DeprecationMessage).HasMaxLength(500);
 
             // Unique constraint on Category + Key combination
             entity.HasIndex(e => new { e.Category, e.Key })
@@ -543,6 +520,7 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
             switch (entry.State)
             {
                 case EntityState.Added:
+                    entry.Entity.Id = Guid.NewGuid();// Ensure Id is set for new entities
                     entry.Entity.CreatedOn = currentTime;
                     break;
                 case EntityState.Modified:
@@ -567,11 +545,11 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
         {
             foreach (var property in entry.Properties)
             {
-                if (property.Metadata.ClrType == typeof(DateTime) || 
+                if (property.Metadata.ClrType == typeof(DateTime) ||
                     property.Metadata.ClrType == typeof(DateTime?))
                 {
                     var value = property.CurrentValue;
-                    
+
                     if (value is DateTime dateTime)
                     {
                         // Convert Local or Unspecified DateTime to UTC
@@ -599,8 +577,8 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
         // UserProfileEntity configuration
         modelBuilder.Entity<UserProfileEntity>(entity =>
         {
-            entity.HasKey(e => e.UserId);
-            entity.Property(e => e.UserId).IsRequired();
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).IsRequired();
             entity.Property(e => e.UserName).HasMaxLength(50).IsRequired();
             entity.Property(e => e.PasswordHash).HasMaxLength(256).IsRequired();
             entity.Property(e => e.PasswordSalt).HasMaxLength(128).IsRequired();
@@ -625,8 +603,8 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
         // UserRoleEntity configuration
         modelBuilder.Entity<UserRoleEntity>(entity =>
         {
-            entity.HasKey(e => e.RoleId);
-            entity.Property(e => e.RoleId).IsRequired();
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).IsRequired();
             entity.Property(e => e.RoleName).HasMaxLength(50).IsRequired();
             entity.Property(e => e.RoleDescription).HasMaxLength(500);
             entity.Property(e => e.CreatedBy).HasMaxLength(100).IsRequired();
@@ -642,8 +620,8 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
         // UserRoleMappingEntity configuration
         modelBuilder.Entity<UserRoleMappingEntity>(entity =>
         {
-            entity.HasKey(e => e.MappingId);
-            entity.Property(e => e.MappingId).IsRequired();
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).IsRequired();
             entity.Property(e => e.UserId).IsRequired();
             entity.Property(e => e.RoleId).IsRequired();
             entity.Property(e => e.CreatedBy).HasMaxLength(100).IsRequired();

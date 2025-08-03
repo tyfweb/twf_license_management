@@ -34,10 +34,10 @@ public class KeyManagementService : IKeyManagementService
         _logger.LogInformation("KeyManagementService initialized with storage path: {KeyStorePath}", _keyStorePath);
     }
 
-    public async Task<string> GetPrivateKeyAsync(string productId)
+    public async Task<string> GetPrivateKeyAsync(Guid productId)
     {
-        if (string.IsNullOrWhiteSpace(productId))
-            throw new ArgumentException("ProductId cannot be null or empty", nameof(productId));
+        if (productId == Guid.Empty)
+            throw new ArgumentException("ProductId cannot be empty", nameof(productId));
 
         try
         {
@@ -70,10 +70,10 @@ public class KeyManagementService : IKeyManagementService
         }
     }
 
-    public async Task StorePrivateKeyAsync(string productId, string privateKeyPem, string? encryptionPassword = null)
+    public async Task StorePrivateKeyAsync(Guid productId, string privateKeyPem, string? encryptionPassword = null)
     {
-        if (string.IsNullOrWhiteSpace(productId))
-            throw new ArgumentException("ProductId cannot be null or empty", nameof(productId));
+        if (productId == Guid.Empty)
+            throw new ArgumentException("ProductId cannot be empty", nameof(productId));
         if (string.IsNullOrWhiteSpace(privateKeyPem))
             throw new ArgumentException("PrivateKeyPem cannot be null or empty", nameof(privateKeyPem));
 
@@ -112,10 +112,10 @@ public class KeyManagementService : IKeyManagementService
         }
     }
 
-    public async Task<string> GenerateKeyPairForProductAsync(string productId, int keySize = 2048, string? encryptionPassword = null)
+    public async Task<string> GenerateKeyPairForProductAsync(Guid productId, int keySize = 2048, string? encryptionPassword = null)
     {
-        if (string.IsNullOrWhiteSpace(productId))
-            throw new ArgumentException("ProductId cannot be null or empty", nameof(productId));
+        if (productId == Guid.Empty)
+            throw new ArgumentException("ProductId cannot be empty", nameof(productId));
 
         try
         {
@@ -139,10 +139,10 @@ public class KeyManagementService : IKeyManagementService
         }
     }
 
-    public async Task<string> GetPublicKeyAsync(string productId)
+    public async Task<string> GetPublicKeyAsync(Guid productId)
     {
-        if (string.IsNullOrWhiteSpace(productId))
-            throw new ArgumentException("ProductId cannot be null or empty", nameof(productId));
+        if (productId == Guid.Empty)
+            throw new ArgumentException("ProductId cannot be empty", nameof(productId));
 
         try
         {
@@ -173,9 +173,9 @@ public class KeyManagementService : IKeyManagementService
         }
     }
 
-    public async Task<bool> HasValidKeysAsync(string productId)
+    public async Task<bool> HasValidKeysAsync(Guid productId)
     {
-        if (string.IsNullOrWhiteSpace(productId))
+        if (productId == Guid.Empty)
             return false;
 
         try
@@ -222,10 +222,10 @@ public class KeyManagementService : IKeyManagementService
         }
     }
 
-    public async Task<string> RotateKeysAsync(string productId, int keySize = 2048, string? encryptionPassword = null)
+    public async Task<string> RotateKeysAsync(Guid productId, int keySize = 2048, string? encryptionPassword = null)
     {
-        if (string.IsNullOrWhiteSpace(productId))
-            throw new ArgumentException("ProductId cannot be null or empty", nameof(productId));
+        if (productId == Guid.Empty)
+            throw new ArgumentException("ProductId cannot be empty", nameof(productId));
 
         try
         {
@@ -249,17 +249,17 @@ public class KeyManagementService : IKeyManagementService
 
     #region Private Helper Methods
 
-    private string GetPrivateKeyPath(string productId)
+    private string GetPrivateKeyPath(Guid productId)
     {
         return Path.Combine(_keyStorePath, $"private_key_{productId}.pem");
     }
 
-    private string GetPublicKeyPath(string productId)
+    private string GetPublicKeyPath(Guid productId)
     {
         return Path.Combine(_keyStorePath, $"public_key_{productId}.pem");
     }
 
-    private Task ArchiveExistingKeysAsync(string productId)
+    private Task ArchiveExistingKeysAsync(Guid productId)
     {
         try
         {

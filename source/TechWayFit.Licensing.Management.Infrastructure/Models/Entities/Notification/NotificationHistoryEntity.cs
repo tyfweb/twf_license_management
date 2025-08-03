@@ -10,10 +10,10 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Notific
 [Table("notification_history")]
 public class NotificationHistoryEntity : BaseAuditEntity
 {
-    public string EntityId { get; set; } = string.Empty;
+    public Guid EntityId { get; set; } = Guid.Empty;
     public string EntityType { get; set; } = string.Empty;
     public string NotificationMode { get; set; } = string.Empty;
-    public string NotificationTemplateId { get; set; } = string.Empty;
+    public Guid NotificationTemplateId { get; set; } = Guid.Empty;
     public string NotificationType { get; set; } = string.Empty;
     public string RecipientsJson { get; set; } = "{}";
     public DateTime SentDate { get; set; }

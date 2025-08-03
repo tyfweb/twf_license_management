@@ -157,9 +157,9 @@ public class PostgreSqlSettingRepository : PostgreSqlBaseRepository<SettingEntit
     /// <summary>
     /// Reset a setting to its default value
     /// </summary>
-    public async Task<SettingEntity?> ResetToDefaultAsync(string settingId, string updatedBy)
+    public async Task<SettingEntity?> ResetToDefaultAsync(Guid settingId, string updatedBy)
     {
-        var setting = await _dbSet.FirstOrDefaultAsync(s => s.SettingId == settingId && s.IsActive);
+        var setting = await _dbSet.FirstOrDefaultAsync(s => s.Id == settingId && s.IsActive);
         if (setting == null) return null;
 
         setting.Value = setting.DefaultValue;
@@ -246,7 +246,7 @@ public class PostgreSqlSettingRepository : PostgreSqlBaseRepository<SettingEntit
                 // Check required settings
                 if (setting.IsRequired && string.IsNullOrEmpty(setting.Value))
                 {
-                    errors[setting.SettingId] = $"Setting '{setting.DisplayName}' is required but has no value.";
+                    errors[setting.Id.ToString()] = $"Setting '{setting.DisplayName}' is required but has no value.";
                     continue;
                 }
 
@@ -260,7 +260,7 @@ public class PostgreSqlSettingRepository : PostgreSqlBaseRepository<SettingEntit
             }
             catch (Exception ex)
             {
-                errors[setting.SettingId] = $"Validation error for '{setting.DisplayName}': {ex.Message}";
+                errors[setting.Id.ToString()] = $"Validation error for '{setting.DisplayName}': {ex.Message}";
             }
         }
 

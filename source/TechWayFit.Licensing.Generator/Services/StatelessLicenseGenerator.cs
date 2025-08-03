@@ -45,7 +45,7 @@ namespace TechWayFit.Licensing.Generator.Services
                 // Create the license object
                 var license = new License
                 {
-                    LicenseId = request.LicenseId,
+                    LicenseId = request.LicenseId.ToString(),
                     LicensedTo = request.LicensedTo,
                     ContactPerson = request.ContactPerson,
                     ContactEmail = request.ContactEmail,

@@ -14,11 +14,11 @@ public class PostgreSqlProductRepository : PostgreSqlBaseRepository<ProductEntit
     public PostgreSqlProductRepository(PostgreSqlPostgreSqlLicensingDbContext context) : base(context)
     {
     }
-    public async Task<ProductEntity?> GetWithDetailsAsync(string productId)
+    public async Task<ProductEntity?> GetWithDetailsAsync(Guid productId)
     {
         return await _dbSet.Include(p => p.Versions)
                          .Include(p => p.Tiers)
-                         .FirstOrDefaultAsync(p => p.ProductId == productId);
+                         .FirstOrDefaultAsync(p => p.Id == productId);
     }
     public async Task<IEnumerable<ProductEntity>> GetActiveProductsAsync()
     {
@@ -26,11 +26,11 @@ public class PostgreSqlProductRepository : PostgreSqlBaseRepository<ProductEntit
                          .OrderBy(p => p.Name)
                          .ToListAsync();
     }
-    public async Task<bool> IsNameUniqueAsync(string name, string? excludeId = null)
+    public async Task<bool> IsNameUniqueAsync(string name, Guid? excludeId = null)
     {
         var query = _dbSet.Where(p => p.Name == name);
         if (excludeId != null)
-            query = query.Where(p => p.ProductId != excludeId);
+            query = query.Where(p => p.Id != excludeId);
         return !await query.AnyAsync();
     }
 

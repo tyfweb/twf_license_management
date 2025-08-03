@@ -44,12 +44,12 @@ public partial class PostgreSqlBaseRepository<TEntity> : IBaseRepository<TEntity
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     /// <exception cref="ArgumentNullException"></exception>
-    public async Task<bool> DeleteAsync(string id, CancellationToken cancellationToken = default)
+    public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrEmpty(id))
+        if (id == Guid.Empty)
             throw new ArgumentNullException(nameof(id));
 
-        var entity = await _dbSet.FindAsync([id], cancellationToken);
+        var entity = await _dbSet.FindAsync(id, cancellationToken);
         if (entity == null)
             return false;
 
@@ -100,12 +100,12 @@ public partial class PostgreSqlBaseRepository<TEntity> : IBaseRepository<TEntity
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     /// <exception cref="ArgumentNullException"></exception>
-    public async Task<TEntity?> GetByIdAsync(string id, CancellationToken cancellationToken = default)
+    public async Task<TEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrEmpty(id))
+        if (id == Guid.Empty)
             throw new ArgumentNullException(nameof(id));
 
-        return await _dbSet.FindAsync([id], cancellationToken);
+        return await _dbSet.FindAsync(id, cancellationToken);
     }
     /// <summary>
     /// Searches for entities based on the provided request.
@@ -159,21 +159,21 @@ public partial class PostgreSqlBaseRepository<TEntity> : IBaseRepository<TEntity
         return entity;
     }
 
-    public async Task<bool> IsActiveAsync(string id, CancellationToken cancellationToken = default)
+    public async Task<bool> IsActiveAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrEmpty(id))
+        if (id == Guid.Empty)
             throw new ArgumentNullException(nameof(id));
 
-        var entity = await _dbSet.FindAsync(new object[] { id }, cancellationToken);
+        var entity = await _dbSet.FindAsync(id, cancellationToken);
         return entity?.IsActive ?? false;
     }
 
-    public async Task<bool> MarkAsInactiveAsync(string id, CancellationToken cancellationToken = default)
+    public async Task<bool> MarkAsInactiveAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrEmpty(id))
+        if (id == Guid.Empty)
             throw new ArgumentNullException(nameof(id));
 
-        var entity = await _dbSet.FindAsync(new object[] { id }, cancellationToken);
+        var entity = await _dbSet.FindAsync(id, cancellationToken);
         if (entity == null)
             return false;
 

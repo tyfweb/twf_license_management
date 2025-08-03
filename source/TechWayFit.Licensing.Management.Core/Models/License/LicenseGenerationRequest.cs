@@ -5,8 +5,8 @@ namespace TechWayFit.Licensing.Management.Core.Models.License;
 /// </summary>
 public class LicenseGenerationRequest
 {
-    public string ProductId { get; set; } = string.Empty;
-    public string ConsumerId { get; set; } = string.Empty;
+    public Guid ProductId { get; set; } = Guid.Empty;
+    public Guid ConsumerId { get; set; } = Guid.Empty;
     public string? TierId { get; set; }
     public DateTime? ExpiryDate { get; set; }
     public int? MaxUsers { get; set; }

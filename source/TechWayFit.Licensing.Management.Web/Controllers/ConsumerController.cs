@@ -6,6 +6,7 @@ using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Core.Models.Consumer;
 using TechWayFit.Licensing.Management.Core.Models.License;
 using TechWayFit.Licensing.Management.Web.Extensions;
+using TechWayFit.Licensing.Management.Web.Helpers;
 using TechWayFit.Licensing.Management.Web.ViewModels.Consumer;
 
 namespace TechWayFit.Licensing.Management.Web.Controllers;
@@ -80,9 +81,9 @@ public class ConsumerController : Controller
     }    /// <summary>
          /// Display consumer account details
          /// </summary>
-    public async Task<IActionResult> Details(string id)
+    public async Task<IActionResult> Details(Guid id)
     {
-        if (string.IsNullOrWhiteSpace(id))
+        if (id == Guid.Empty)
         {
             return BadRequest("Consumer ID is required");
         }
@@ -138,7 +139,7 @@ public class ConsumerController : Controller
             // Map from view model to domain model
             var consumer = new ConsumerAccount
             {
-                ConsumerId = Guid.NewGuid().ToString(),
+                ConsumerId = Guid.NewGuid(),
                 CompanyName = model.OrganizationName,
                 PrimaryContact = new ContactPerson
                 {
@@ -189,7 +190,7 @@ public class ConsumerController : Controller
 
         try
         {
-            var consumer = await _consumerAccountService.GetConsumerAccountByIdAsync(id);
+            var consumer = await _consumerAccountService.GetConsumerAccountByIdAsync(id.ToGuid());
             if (consumer == null)
             {
                 return NotFound($"Consumer account with ID '{id}' not found");
@@ -198,7 +199,7 @@ public class ConsumerController : Controller
             // Map to edit view model
             var viewModel = new ConsumerEditViewModel
             {
-                ConsumerId = consumer.ConsumerId,
+                ConsumerId = consumer.ConsumerId.ConvertToString(),
                 OrganizationName = consumer.CompanyName,
                 ContactPerson = consumer.PrimaryContact?.Name ?? string.Empty,
                 ContactEmail = consumer.PrimaryContact?.Email ?? string.Empty,
@@ -246,7 +247,7 @@ public class ConsumerController : Controller
         try
         {
             // Get existing consumer
-            var existingConsumer = await _consumerAccountService.GetConsumerAccountByIdAsync(id);
+            var existingConsumer = await _consumerAccountService.GetConsumerAccountByIdAsync(id.ToGuid());
             if (existingConsumer == null)
             {
                 return NotFound($"Consumer account with ID '{id}' not found");
@@ -299,7 +300,7 @@ public class ConsumerController : Controller
     {
         return new ConsumerViewModel
         {
-            ConsumerId = consumer.ConsumerId,
+            ConsumerId = consumer.ConsumerId.ConvertToString(),
             CompanyName = consumer.CompanyName,
             AccountCode = string.Empty, // This field is not in the domain model yet
             PrimaryContactName = consumer.PrimaryContact?.Name ?? string.Empty,
@@ -320,7 +321,7 @@ public class ConsumerController : Controller
     {
         var licenseSummary = licenses.Select(l => new LicenseSummaryViewModel
         {
-            LicenseId = l.LicenseId,
+            LicenseId = l.LicenseId.ConvertToString(),
             LicenseCode = l.LicenseCode,
             ProductName = l.LicenseConsumer.Product?.Name ?? "Unknown Product",
             Tier = LicenseTier.Custom, // Assuming tier is not available in the license model

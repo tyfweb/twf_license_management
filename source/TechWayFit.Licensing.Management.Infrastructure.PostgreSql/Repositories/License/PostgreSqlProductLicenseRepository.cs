@@ -46,7 +46,7 @@ public class PostgreSqlProductLicenseRepository : PostgreSqlBaseRepository<Produ
     /// </summary>
     /// <param name="consumerId"></param>
     /// <returns></returns>
-    public async Task<IEnumerable<ProductLicenseEntity>> GetByConsumerIdAsync(string consumerId)
+    public async Task<IEnumerable<ProductLicenseEntity>> GetByConsumerIdAsync(Guid consumerId)
     {
         return await _dbSet.Where(l => l.ConsumerId == consumerId)
                          .Include(l => l.Product)
@@ -61,9 +61,9 @@ public class PostgreSqlProductLicenseRepository : PostgreSqlBaseRepository<Produ
     /// <param name="customerId"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public async Task<IEnumerable<ProductLicenseEntity>> GetExpiringLicensesForCustomerAsync(int daysAhead = 30, string customerId = "", CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<ProductLicenseEntity>> GetExpiringLicensesForCustomerAsync(int daysAhead = 30, Guid customerId = default, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrEmpty(customerId))
+        if (customerId == default)
         {
             return await GetExpiringLicensesAsync(daysAhead);
         }
@@ -94,16 +94,16 @@ public class PostgreSqlProductLicenseRepository : PostgreSqlBaseRepository<Produ
     /// <param name="consumerId"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public async Task<LicenseUsageStatistics> GetUsageStatisticsAsync(string? productId = null, string? consumerId = null, CancellationToken cancellationToken = default)
+    public async Task<LicenseUsageStatistics> GetUsageStatisticsAsync(Guid? productId = null, Guid? consumerId = null, CancellationToken cancellationToken = default)
     {
         var query = _dbSet.AsQueryable();
 
-        if (!string.IsNullOrEmpty(productId))
+        if (productId.HasValue)
         {
             query = query.Where(license => license.ProductId == productId);
         }
 
-        if (!string.IsNullOrEmpty(consumerId))
+        if (consumerId.HasValue)
         {
             query = query.Where(license => license.ConsumerId == consumerId);
         }
@@ -131,7 +131,7 @@ public class PostgreSqlProductLicenseRepository : PostgreSqlBaseRepository<Produ
             SuspendedLicenses = licenseCountGroupByStatus.GetValueOrDefault(LicenseStatus.Suspended, 0),
             LicensesByProduct = await query
                 .GroupBy(license => license.ProductId)
-                .ToDictionaryAsync(group => group.Key, group => group.Count(), cancellationToken),
+                .ToDictionaryAsync(group => group.Key.ToString(), group => group.Count(), cancellationToken),
             LicensesByStatus = licenseCountGroupByStatus
         };
     }
@@ -141,10 +141,10 @@ public class PostgreSqlProductLicenseRepository : PostgreSqlBaseRepository<Produ
     /// <param name="id"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public Task<ProductLicenseEntity?> GetByIdWithAllIncludesAsync(string id, CancellationToken cancellationToken = default)
+    public Task<ProductLicenseEntity?> GetByIdWithAllIncludesAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return _dbSet.Include(l => l.Product).Include(l => l.Consumer)
-                      .FirstOrDefaultAsync(l => l.LicenseId == id, cancellationToken);
+                      .FirstOrDefaultAsync(l => l.Id == id, cancellationToken);
     }
 
     protected override IQueryable<ProductLicenseEntity> SearchIncludesQuery(IQueryable<ProductLicenseEntity> query)

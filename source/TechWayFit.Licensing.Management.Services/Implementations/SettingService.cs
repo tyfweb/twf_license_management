@@ -109,7 +109,7 @@ namespace TechWayFit.Licensing.Management.Services.Implementations
             }
         }
 
-        public async Task<Setting> UpdateSettingAsync(string settingId, object? value, string updatedBy)
+        public async Task<Setting> UpdateSettingAsync(Guid settingId, object? value, string updatedBy)
         {
             try
             {
@@ -152,7 +152,7 @@ namespace TechWayFit.Licensing.Management.Services.Implementations
             }
         }
 
-        public async Task<Setting?> ResetSettingAsync(string settingId, string updatedBy)
+        public async Task<Setting?> ResetSettingAsync(Guid settingId, string updatedBy)
         {
             try
             {

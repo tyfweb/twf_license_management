@@ -57,7 +57,6 @@ public class EnterpriseProductService : IEnterpriseProductService
 
             // Map to entity and set audit fields
             var productEntity = ProductEntity.FromModel(product);
-            productEntity.ProductId = product.ProductId ?? Guid.NewGuid().ToString();
             productEntity.CreatedBy = createdBy;
             productEntity.CreatedOn = DateTime.UtcNow;
             productEntity.UpdatedBy = createdBy;
@@ -90,7 +89,7 @@ public class EnterpriseProductService : IEnterpriseProductService
         // Input validation
         if (product == null)
             throw new ArgumentNullException(nameof(product));
-        if (string.IsNullOrWhiteSpace(product.ProductId))
+        if (Guid.Empty.Equals(product.ProductId))
             throw new ArgumentException("ProductId cannot be null or empty", nameof(product));
         if (string.IsNullOrWhiteSpace(updatedBy))
             throw new ArgumentException("UpdatedBy cannot be null or empty", nameof(updatedBy));
@@ -147,9 +146,9 @@ public class EnterpriseProductService : IEnterpriseProductService
     /// <summary>
     /// Gets a product by ID
     /// </summary>
-    public async Task<EnterpriseProduct?> GetProductByIdAsync(string productId)
+    public async Task<EnterpriseProduct?> GetProductByIdAsync(Guid productId)
     {
-        if (string.IsNullOrWhiteSpace(productId))
+        if (Guid.Empty.Equals(productId))
             throw new ArgumentException("ProductId cannot be null or empty", nameof(productId));
 
         try
@@ -237,7 +236,7 @@ public class EnterpriseProductService : IEnterpriseProductService
 
     #region TODO: Missing Interface Methods - Require Implementation
 
-    public async Task<bool> ActivateProductAsync(string productId, string activatedBy)
+    public async Task<bool> ActivateProductAsync(Guid productId, string activatedBy)
     {
         // TODO: Implement
         _logger.LogWarning("ActivateProductAsync not implemented");
@@ -245,7 +244,7 @@ public class EnterpriseProductService : IEnterpriseProductService
         return false;
     }
 
-    public async Task<bool> DeactivateProductAsync(string productId, string deactivatedBy, string? reason = null)
+    public async Task<bool> DeactivateProductAsync(Guid productId, string deactivatedBy, string? reason = null)
     {
         // TODO: Implement
         _logger.LogWarning("DeactivateProductAsync not implemented");
@@ -253,7 +252,7 @@ public class EnterpriseProductService : IEnterpriseProductService
         return false;
     }
 
-    public async Task<bool> DeleteProductAsync(string productId, string deletedBy)
+    public async Task<bool> DeleteProductAsync(Guid productId, string deletedBy)
     {
         // TODO: Implement
         _logger.LogWarning("DeleteProductAsync not implemented");
@@ -261,7 +260,7 @@ public class EnterpriseProductService : IEnterpriseProductService
         return false;
     }
 
-    public async Task<bool> ProductExistsAsync(string productId)
+    public async Task<bool> ProductExistsAsync(Guid productId)
     {
         // TODO: Implement
         _logger.LogWarning("ProductExistsAsync not implemented");
@@ -310,7 +309,7 @@ public class EnterpriseProductService : IEnterpriseProductService
         return Enumerable.Empty<string>();
     }
 
-    public async Task<bool> IsProductCodeUniqueAsync(string productCode, string? excludeProductId = null)
+    public async Task<bool> IsProductCodeUniqueAsync(string productCode, Guid? excludeProductId = null)
     {
         // TODO: Implement
         _logger.LogWarning("IsProductCodeUniqueAsync not implemented");
@@ -318,7 +317,7 @@ public class EnterpriseProductService : IEnterpriseProductService
         return true;
     }
 
-    public async Task<bool> IsProductNameUniqueAsync(string productName, string? excludeProductId = null)
+    public async Task<bool> IsProductNameUniqueAsync(string productName, Guid? excludeProductId = null)
     {
         // TODO: Implement
         _logger.LogWarning("IsProductNameUniqueAsync not implemented");
@@ -326,7 +325,7 @@ public class EnterpriseProductService : IEnterpriseProductService
         return true;
     }
 
-    public async Task<bool> UpdateProductStatusAsync(string productId, ProductStatus status, string updatedBy)
+    public async Task<bool> UpdateProductStatusAsync(Guid productId, ProductStatus status, string updatedBy)
     {
         // TODO: Implement
         _logger.LogWarning("UpdateProductStatusAsync not implemented");
@@ -334,7 +333,7 @@ public class EnterpriseProductService : IEnterpriseProductService
         return false;
     }
 
-    public async Task<bool> DecommissionProductAsync(string productId, DateTime decommissionDate, string decommissionedBy)
+    public async Task<bool> DecommissionProductAsync(Guid productId, DateTime decommissionDate, string decommissionedBy)
     {
         // TODO: Implement
         _logger.LogWarning("DecommissionProductAsync not implemented");

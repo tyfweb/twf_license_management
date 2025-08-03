@@ -26,7 +26,7 @@ public interface IAuditService
     /// <param name="pageSize">Page size</param>
     /// <returns>List of audit entries</returns>
     Task<IEnumerable<AuditEntry>> GetLicenseAuditEntriesAsync(
-        string licenseId,
+        Guid licenseId,
         DateTime? fromDate = null,
         DateTime? toDate = null,
         int pageNumber = 1,
@@ -42,7 +42,7 @@ public interface IAuditService
     /// <param name="pageSize">Page size</param>
     /// <returns>List of audit entries</returns>
     Task<IEnumerable<AuditEntry>> GetConsumerAuditEntriesAsync(
-        string consumerId,
+        Guid consumerId,
         DateTime? fromDate = null,
         DateTime? toDate = null,
         int pageNumber = 1,

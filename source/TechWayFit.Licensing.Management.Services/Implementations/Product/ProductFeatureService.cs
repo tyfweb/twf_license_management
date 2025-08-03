@@ -49,9 +49,9 @@ public class ProductFeatureService : IProductFeatureService
         try
         {
             // Generate ID if not provided
-            if (string.IsNullOrWhiteSpace(feature.FeatureId))
+            if (Guid.Empty.Equals(feature.FeatureId))
             {
-                feature.FeatureId = Guid.NewGuid().ToString();
+                feature.FeatureId = Guid.NewGuid();
             }
 
             // Map to entity
@@ -90,8 +90,8 @@ public class ProductFeatureService : IProductFeatureService
             throw new ArgumentNullException(nameof(feature));
         if (string.IsNullOrWhiteSpace(updatedBy))
             throw new ArgumentException("UpdatedBy cannot be null or empty", nameof(updatedBy));
-        if (string.IsNullOrWhiteSpace(feature.FeatureId))
-            throw new ArgumentException("FeatureId cannot be null or empty", nameof(feature.FeatureId));
+        if (Guid.Empty.Equals(feature.FeatureId))
+            throw new ArgumentException("FeatureId cannot be empty", nameof(feature.FeatureId));
 
         // Check if exists
         var existingEntity = await _unitOfWork.ProductFeatures.GetByIdAsync(feature.FeatureId);
@@ -148,10 +148,10 @@ public class ProductFeatureService : IProductFeatureService
     /// <summary>
     /// Gets a feature by ID
     /// </summary>
-    public async Task<ProductFeature?> GetFeatureByIdAsync(string featureId)
+    public async Task<ProductFeature?> GetFeatureByIdAsync(Guid featureId)
     {
-        if (string.IsNullOrWhiteSpace(featureId))
-            throw new ArgumentException("FeatureId cannot be null or empty", nameof(featureId));
+        if (featureId == Guid.Empty)
+            throw new ArgumentException("FeatureId cannot be empty", nameof(featureId));
 
         try
         {
@@ -168,10 +168,10 @@ public class ProductFeatureService : IProductFeatureService
     /// <summary>
     /// Gets features for a specific tier
     /// </summary>
-    public async Task<IEnumerable<ProductFeature>> GetFeaturesByTierAsync(string tierId)
+    public async Task<IEnumerable<ProductFeature>> GetFeaturesByTierAsync(Guid tierId)
     {
-        if (string.IsNullOrWhiteSpace(tierId))
-            throw new ArgumentException("TierId cannot be null or empty", nameof(tierId));
+        if (tierId == Guid.Empty)
+            throw new ArgumentException("TierId cannot be empty", nameof(tierId));
 
         try
         {
@@ -199,10 +199,10 @@ public class ProductFeatureService : IProductFeatureService
     /// <summary>
     /// Gets a feature by tier and feature code
     /// </summary>
-    public async Task<ProductFeature?> GetFeatureByCodeAsync(string tierId, string featureCode)
+    public async Task<ProductFeature?> GetFeatureByCodeAsync(Guid tierId, string featureCode)
     {
-        if (string.IsNullOrWhiteSpace(tierId))
-            throw new ArgumentException("TierId cannot be null or empty", nameof(tierId));
+        if (tierId == Guid.Empty)
+            throw new ArgumentException("TierId cannot be empty", nameof(tierId));
         if (string.IsNullOrWhiteSpace(featureCode))
             throw new ArgumentException("FeatureCode cannot be null or empty", nameof(featureCode));
 
@@ -233,10 +233,10 @@ public class ProductFeatureService : IProductFeatureService
     /// <summary>
     /// Deletes a feature
     /// </summary>
-    public async Task<bool> DeleteFeatureAsync(string featureId, string deletedBy)
+    public async Task<bool> DeleteFeatureAsync(Guid featureId, string deletedBy)
     {
-        if (string.IsNullOrWhiteSpace(featureId))
-            throw new ArgumentException("FeatureId cannot be null or empty", nameof(featureId));
+        if (featureId == Guid.Empty)
+            throw new ArgumentException("FeatureId cannot be empty", nameof(featureId));
         if (string.IsNullOrWhiteSpace(deletedBy))
             throw new ArgumentException("DeletedBy cannot be null or empty", nameof(deletedBy));
 
@@ -268,9 +268,9 @@ public class ProductFeatureService : IProductFeatureService
     /// <summary>
     /// Checks if a feature exists
     /// </summary>
-    public async Task<bool> FeatureExistsAsync(string featureId)
+    public async Task<bool> FeatureExistsAsync(Guid featureId)
     {
-        if (string.IsNullOrWhiteSpace(featureId))
+        if (featureId == Guid.Empty)
             return false;
 
         try
@@ -288,9 +288,9 @@ public class ProductFeatureService : IProductFeatureService
     /// <summary>
     /// Checks if a feature code exists for a tier
     /// </summary>
-    public async Task<bool> FeatureCodeExistsAsync(string tierId, string featureCode, string? excludeFeatureId = null)
+    public async Task<bool> FeatureCodeExistsAsync(Guid tierId, string featureCode, Guid? excludeFeatureId = null)
     {
-        if (string.IsNullOrWhiteSpace(tierId) || string.IsNullOrWhiteSpace(featureCode))
+        if (tierId == Guid.Empty || string.IsNullOrWhiteSpace(featureCode))
             return false;
 
         try
@@ -306,9 +306,9 @@ public class ProductFeatureService : IProductFeatureService
                 }
             };
 
-            if (!string.IsNullOrWhiteSpace(excludeFeatureId))
+            if (excludeFeatureId.HasValue)
             {
-                searchRequest.Filters.Add(f => f.FeatureId != excludeFeatureId);
+                searchRequest.Filters.Add(f => f.Id != excludeFeatureId.Value);
             }
             
             var searchResult = await _unitOfWork.ProductFeatures.SearchAsync(searchRequest);
@@ -341,14 +341,14 @@ public class ProductFeatureService : IProductFeatureService
         if (string.IsNullOrWhiteSpace(feature.Code))
             errors.Add("Feature code is required");
 
-        if (string.IsNullOrWhiteSpace(feature.ProductId))
+        if (feature.ProductId == Guid.Empty)
             errors.Add("Product ID is required");
 
-        if (string.IsNullOrWhiteSpace(feature.TierId))
+        if (feature.TierId == Guid.Empty)
             errors.Add("Tier ID is required");
 
         // Business rule validations
-        if (!string.IsNullOrWhiteSpace(feature.Code) && !string.IsNullOrWhiteSpace(feature.TierId))
+        if (!string.IsNullOrWhiteSpace(feature.Code) && feature.TierId != Guid.Empty)
         {
             // Check for duplicate feature code within the tier
             try
@@ -477,12 +477,12 @@ public class ProductFeatureService : IProductFeatureService
     /// <summary>
     /// Copies features from one tier to another
     /// </summary>
-    public async Task<int> CopyFeaturesAsync(string sourceTierId, string targetTierId, string copiedBy)
+    public async Task<int> CopyFeaturesAsync(Guid sourceTierId, Guid targetTierId, string copiedBy)
     {
-        if (string.IsNullOrWhiteSpace(sourceTierId))
-            throw new ArgumentException("SourceTierId cannot be null or empty", nameof(sourceTierId));
-        if (string.IsNullOrWhiteSpace(targetTierId))
-            throw new ArgumentException("TargetTierId cannot be null or empty", nameof(targetTierId));
+        if (sourceTierId == Guid.Empty)
+            throw new ArgumentException("SourceTierId cannot be empty", nameof(sourceTierId));
+        if (targetTierId == Guid.Empty)
+            throw new ArgumentException("TargetTierId cannot be empty", nameof(targetTierId));
         if (string.IsNullOrWhiteSpace(copiedBy))
             throw new ArgumentException("CopiedBy cannot be null or empty", nameof(copiedBy));
 
@@ -499,7 +499,7 @@ public class ProductFeatureService : IProductFeatureService
                 // Create a copy with new ID
                 var copiedFeature = new ProductFeature
                 {
-                    FeatureId = Guid.NewGuid().ToString(),
+                    FeatureId = Guid.NewGuid(),
                     ProductId = sourceFeature.ProductId,
                     TierId = targetTierId,
                     Name = sourceFeature.Name,
@@ -562,7 +562,7 @@ public class ProductFeatureService : IProductFeatureService
                 TotalFeatures = features.Count(),
                 FeaturesByType = new Dictionary<string, int>(), // TODO: Group by feature type when available
                 MostUsedFeatures = new Dictionary<string, int>(), // TODO: Implement usage tracking
-                FeaturesByTier = features.GroupBy(f => f.TierId).ToDictionary(g => g.Key, g => g.Count())
+                FeaturesByTier = features.GroupBy(f => f.TierId).ToDictionary(g => g.Key.ToString(), g => g.Count())
             };
 
             await Task.CompletedTask;

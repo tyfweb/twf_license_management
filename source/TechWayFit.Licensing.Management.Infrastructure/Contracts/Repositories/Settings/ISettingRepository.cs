@@ -63,7 +63,7 @@ public interface ISettingRepository : IBaseRepository<SettingEntity>
     /// <param name="settingId">ID of the setting to reset</param>
     /// <param name="updatedBy">User performing the reset</param>
     /// <returns>The reset setting</returns>
-    Task<SettingEntity?> ResetToDefaultAsync(string settingId, string updatedBy);
+    Task<SettingEntity?> ResetToDefaultAsync(Guid settingId, string updatedBy);
 
     /// <summary>
     /// Reset all settings in a category to their default values

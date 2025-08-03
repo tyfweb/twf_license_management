@@ -11,7 +11,7 @@ public interface IKeyManagementService
     /// </summary>
     /// <param name="productId">Product ID</param>
     /// <returns>Private key in PEM format</returns>
-    Task<string> GetPrivateKeyAsync(string productId);
+    Task<string> GetPrivateKeyAsync(Guid productId);
 
     /// <summary>
     /// Stores a private key for a specific product
@@ -19,7 +19,7 @@ public interface IKeyManagementService
     /// <param name="productId">Product ID</param>
     /// <param name="privateKeyPem">Private key in PEM format</param>
     /// <param name="encryptionPassword">Optional password to encrypt the key</param>
-    Task StorePrivateKeyAsync(string productId, string privateKeyPem, string? encryptionPassword = null);
+    Task StorePrivateKeyAsync(Guid productId, string privateKeyPem, string? encryptionPassword = null);
 
     /// <summary>
     /// Generates a new key pair for a product
@@ -28,21 +28,21 @@ public interface IKeyManagementService
     /// <param name="keySize">RSA key size in bits (default: 2048)</param>
     /// <param name="encryptionPassword">Optional password to encrypt the private key</param>
     /// <returns>Public key in PEM format (private key is stored automatically)</returns>
-    Task<string> GenerateKeyPairForProductAsync(string productId, int keySize = 2048, string? encryptionPassword = null);
+    Task<string> GenerateKeyPairForProductAsync(Guid productId, int keySize = 2048, string? encryptionPassword = null);
 
     /// <summary>
     /// Gets the public key for a specific product
     /// </summary>
     /// <param name="productId">Product ID</param>
     /// <returns>Public key in PEM format</returns>
-    Task<string> GetPublicKeyAsync(string productId);
+    Task<string> GetPublicKeyAsync(Guid productId);
 
     /// <summary>
     /// Validates if a product has valid keys configured
     /// </summary>
     /// <param name="productId">Product ID</param>
     /// <returns>True if valid keys exist</returns>
-    Task<bool> HasValidKeysAsync(string productId);
+    Task<bool> HasValidKeysAsync(Guid productId);
 
     /// <summary>
     /// Rotates keys for a product (generates new keys and archives old ones)
@@ -51,5 +51,5 @@ public interface IKeyManagementService
     /// <param name="keySize">RSA key size in bits (default: 2048)</param>
     /// <param name="encryptionPassword">Optional password to encrypt the private key</param>
     /// <returns>New public key in PEM format</returns>
-    Task<string> RotateKeysAsync(string productId, int keySize = 2048, string? encryptionPassword = null);
+    Task<string> RotateKeysAsync(Guid productId, int keySize = 2048, string? encryptionPassword = null);
 }

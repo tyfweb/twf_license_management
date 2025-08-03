@@ -13,7 +13,7 @@ public interface IProductRepository : IBaseRepository<ProductEntity>
     /// </summary>
     /// <param name="productId"></param>
     /// <returns></returns>
-    Task<ProductEntity?> GetWithDetailsAsync(string productId);
+    Task<ProductEntity?> GetWithDetailsAsync(Guid productId);
 
     /// <summary>
     /// Get all active products
@@ -27,5 +27,5 @@ public interface IProductRepository : IBaseRepository<ProductEntity>
     /// <param name="name"></param>
     /// <param name="excludeId"></param>
     /// <returns></returns>
-    Task<bool> IsNameUniqueAsync(string name, string? excludeId = null);
+    Task<bool> IsNameUniqueAsync(string name, Guid? excludeId = null);
 }

@@ -8,6 +8,6 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.
 /// </summary>
 public interface IAuditEntryRepository : IBaseRepository<AuditEntryEntity>
 {
-     Task<IEnumerable<AuditEntryEntity>> GetByEntityAsync(string entityType, string entityId);
+     Task<IEnumerable<AuditEntryEntity>> GetByEntityAsync(string entityType, Guid entityId);
      Task<IEnumerable<AuditEntryEntity>> GetRecentEntriesAsync(int count = 100);
 }

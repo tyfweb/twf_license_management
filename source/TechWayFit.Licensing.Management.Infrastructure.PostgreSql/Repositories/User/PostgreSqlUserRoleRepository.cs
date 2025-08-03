@@ -36,7 +36,7 @@ public class PostgreSqlUserRoleRepository : PostgreSqlBaseRepository<UserRoleEnt
         
         if (excludeRoleId.HasValue)
         {
-            query = query.Where(r => r.RoleId != excludeRoleId.Value);
+            query = query.Where(r => r.Id != excludeRoleId.Value);
         }
 
         return await query.AnyAsync(cancellationToken);
@@ -52,7 +52,7 @@ public class PostgreSqlUserRoleRepository : PostgreSqlBaseRepository<UserRoleEnt
     public async Task<IEnumerable<UserRoleEntity>> GetActiveRolesByIdsAsync(List<Guid> roleIds)
     {
         return await _dbSet
-            .Where(r => roleIds.Contains(r.RoleId) && r.IsActive)
+            .Where(r => roleIds.Contains(r.Id) && r.IsActive)
             .OrderBy(r => r.RoleName)
             .ToListAsync();
     }

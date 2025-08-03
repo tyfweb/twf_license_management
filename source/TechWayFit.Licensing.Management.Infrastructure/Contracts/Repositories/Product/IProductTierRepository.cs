@@ -8,7 +8,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.
 /// </summary>
 public interface IProductTierRepository : IBaseRepository<ProductTierEntity>
 {
-    Task<IEnumerable<ProductTierEntity>> GetByProductIdAsync(string productId);
-    Task<ProductTierEntity?> GetWithFeaturesAsync(string tierId);
-    
+    Task<IEnumerable<ProductTierEntity>> GetByProductIdAsync(Guid productId);
+    Task<ProductTierEntity?> GetWithFeaturesAsync(Guid tierId);
+
 }

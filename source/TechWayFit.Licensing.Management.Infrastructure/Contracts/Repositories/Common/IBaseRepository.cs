@@ -18,12 +18,12 @@ public interface IBaseRepository<TEntity> where TEntity : class
     /// <summary>
     /// Deletes an entity from the repository by its ID.
     /// </summary>
-    Task<bool> DeleteAsync(string id, CancellationToken cancellationToken = default);
+    Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves an entity from the repository by its ID.
     /// </summary>
-    Task<TEntity?> GetByIdAsync(string id, CancellationToken cancellationToken = default);
+    Task<TEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
     /// <summary>
     /// Retrieves all entities from the repository.
     /// </summary>
@@ -47,14 +47,14 @@ public interface IBaseRepository<TEntity> where TEntity : class
     /// <param name="id"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<bool> IsActiveAsync(string id, CancellationToken cancellationToken = default);
+    Task<bool> IsActiveAsync(Guid id, CancellationToken cancellationToken = default);
     /// <summary>
     /// Marks an entity as inactive by its ID.
     /// </summary>
     /// <param name="id"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<bool> MarkAsInactiveAsync(string id, CancellationToken cancellationToken = default);
+    Task<bool> MarkAsInactiveAsync(Guid id, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Searches for entities based on the provided search request.

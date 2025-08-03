@@ -11,12 +11,12 @@ namespace TechWayFit.Licensing.Generator.Models
         /// <summary>
         /// Unique identifier for this license
         /// </summary>
-        public string LicenseId { get; set; } = Guid.NewGuid().ToString();
+        public Guid LicenseId { get; set; } = Guid.NewGuid();
 
         /// <summary>
         /// Product identifier for which the license is being generated
         /// </summary>
-        public string ProductId { get; set; } = string.Empty;
+        public Guid ProductId { get; set; } = Guid.Empty;
 
         /// <summary>
         /// Product name
@@ -99,7 +99,8 @@ namespace TechWayFit.Licensing.Generator.Models
         /// </summary>
         public bool IsValid()
         {
-            return !string.IsNullOrWhiteSpace(ProductId) &&
+            return 
+                   !Guid.Empty.Equals(ProductId) &&
                    !string.IsNullOrWhiteSpace(ProductName) &&
                    !string.IsNullOrWhiteSpace(LicensedTo) &&
                    !string.IsNullOrWhiteSpace(ContactEmail) &&
@@ -114,7 +115,7 @@ namespace TechWayFit.Licensing.Generator.Models
         {
             var errors = new List<string>();
 
-            if (string.IsNullOrWhiteSpace(ProductId))
+            if (Guid.Empty.Equals(ProductId))
                 errors.Add("ProductId is required");
 
             if (string.IsNullOrWhiteSpace(ProductName))

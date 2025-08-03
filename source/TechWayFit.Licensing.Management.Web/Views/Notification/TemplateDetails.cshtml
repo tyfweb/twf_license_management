@@ -234,7 +234,7 @@
                                             </td>
                                             <td>
                                                 <div class="fw-medium">@usage.EntityType</div>
-                                                <small class="text-muted">@usage.EntityId.Substring(0, Math.Min(12, usage.EntityId.Length))...</small>
+                                                <small class="text-muted">@usage.EntityId.ToString().Substring(0, Math.Min(12, usage.EntityId.ToString().Length))...</small>
                                             </td>
                                             <td>
                                                 <div class="text-truncate" style="max-width: 150px;" title="@usage.RecipientDisplay">

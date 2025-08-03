@@ -9,7 +9,7 @@ namespace TechWayFit.Licensing.Management.Web.ViewModels.Consumer
     public class ConsumerViewModel
     {
         public string ConsumerId { get; set; } = string.Empty;
-        
+
         [Display(Name = "Company Name")]
         public string CompanyName { get; set; } = string.Empty;
         

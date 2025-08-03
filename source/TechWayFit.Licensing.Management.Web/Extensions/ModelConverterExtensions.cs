@@ -4,6 +4,7 @@ using TechWayFit.Licensing.Management.Core.Models.Common;
 using TechWayFit.Licensing.Management.Core.Models.Consumer;
 using TechWayFit.Licensing.Management.Core.Models.License;
 using TechWayFit.Licensing.Management.Core.Models.Product;
+using TechWayFit.Licensing.Management.Web.Helpers;
 
 namespace TechWayFit.Licensing.Management.Web.Extensions;
 
@@ -15,7 +16,7 @@ public static class ModelConverterExtensions
 
         return new Consumer
         {
-            ConsumerId = consumer.ConsumerId,
+            ConsumerId = consumer.ConsumerId.ConvertToString(),
             OrganizationName = consumer.CompanyName,
             ContactPerson = consumer.PrimaryContact?.Name ?? string.Empty,
             ContactEmail = consumer.PrimaryContact?.Email ?? string.Empty,
@@ -32,7 +33,7 @@ public static class ModelConverterExtensions
 
         return new ProductConfiguration
         {
-            ProductId = product.ProductId,
+            ProductId = product.ProductId.ConvertToString(),
             ProductName = product.Name,
             ProductType = ProductType.EnterpriseMonitoring,
             Version = product.Version,
@@ -45,10 +46,10 @@ public static class ModelConverterExtensions
     {
         return new License
         {
-            LicenseId = license.LicenseId,
-            ProductId = license.LicenseConsumer.Product.ProductId,
+            LicenseId = license.LicenseId.ToString(),
+            ProductId = license.LicenseConsumer.Product.ProductId.ToString(),
             // Update this line to use the correct property from LicenseConsumer, e.g. LicenseConsumer.Consumer.ConsumerId if Consumer is a property of ProductConsumer
-            ConsumerId = license.LicenseConsumer.Consumer.ConsumerId,
+            ConsumerId = license.LicenseConsumer.Consumer.ConsumerId.ToString(),
             ValidFrom = license.ValidFrom,
             ValidTo = license.ValidTo,
             CreatedAt = license.CreatedAt,
@@ -58,7 +59,7 @@ public static class ModelConverterExtensions
             Metadata = license.Metadata,
             FeaturesIncluded = license.Features.Select(f => new LicenseFeature
             {
-                Id = f.FeatureId,
+                Id = f.FeatureId.ToString(),
                 Name = f.Name,
                 Description = f.Description,
                 IsCurrentlyValid = f.IsEnabled

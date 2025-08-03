@@ -3,6 +3,7 @@ using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Web.ViewModels.Settings;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using TechWayFit.Licensing.Management.Web.Helpers;
 
 namespace TechWayFit.Licensing.Management.Web.Controllers
 {
@@ -44,7 +45,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                         kvp => kvp.Key,
                         kvp => kvp.Value.Select(s => new SettingViewModel
                         {
-                            SettingId = s.SettingId,
+                            SettingId = s.SettingId.ConvertToString(),
                             Category = s.Category,
                             Key = s.Key,
                             Value = s.Value,
@@ -89,7 +90,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 var settings = await _settingService.GetSettingsByCategoryAsync(category);
                 var viewModels = settings.Select(s => new SettingViewModel
                 {
-                    SettingId = s.SettingId,
+                    SettingId = s.SettingId.ConvertToString(),
                     Category = s.Category,
                     Key = s.Key,
                     Value = s.Value,
@@ -133,7 +134,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 }
 
                 var currentUser = GetCurrentUser();
-                var updatedSetting = await _settingService.UpdateSettingAsync(model.SettingId, model.Value, currentUser);
+                var updatedSetting = await _settingService.UpdateSettingAsync(model.SettingId.ToGuid(), model.Value, currentUser);
 
                 return Json(new
                 {
@@ -141,7 +142,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                     message = "Setting updated successfully",
                     setting = new SettingViewModel
                     {
-                        SettingId = updatedSetting.SettingId,
+                        SettingId = updatedSetting.SettingId.ConvertToString(),
                         Category = updatedSetting.Category,
                         Key = updatedSetting.Key,
                         Value = updatedSetting.Value,
@@ -184,7 +185,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 }
 
                 var currentUser = GetCurrentUser();
-                var settingsToUpdate = models.ToDictionary(m => m.SettingId, m => m.Value);
+                var settingsToUpdate = models.ToDictionary(m => m.SettingId.ToString(), m => m.Value);
                 var updatedSettings = await _settingService.UpdateMultipleSettingsAsync(settingsToUpdate, currentUser);
 
                 return Json(new
@@ -193,7 +194,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                     message = $"Successfully updated {updatedSettings.Count()} settings",
                     settings = updatedSettings.Select(s => new SettingViewModel
                     {
-                        SettingId = s.SettingId,
+                        SettingId = s.SettingId.ConvertToString(),
                         Category = s.Category,
                         Key = s.Key,
                         Value = s.Value,
@@ -231,7 +232,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
             try
             {
                 var currentUser = GetCurrentUser();
-                var resetSetting = await _settingService.ResetSettingAsync(settingId, currentUser);
+                var resetSetting = await _settingService.ResetSettingAsync(Guid.Parse(settingId), currentUser);
 
                 if (resetSetting == null)
                 {
@@ -244,7 +245,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                     message = "Setting reset to default value",
                     setting = new SettingViewModel
                     {
-                        SettingId = resetSetting.SettingId,
+                        SettingId = resetSetting.SettingId.ConvertToString(),
                         Category = resetSetting.Category,
                         Key = resetSetting.Key,
                         Value = resetSetting.Value,
@@ -290,7 +291,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                     message = $"Reset {resetSettings.Count()} settings in category '{category}' to default values",
                     settings = resetSettings.Select(s => new SettingViewModel
                     {
-                        SettingId = s.SettingId,
+                        SettingId = s.SettingId.ConvertToString(),
                         Category = s.Category,
                         Key = s.Key,
                         Value = s.Value,
@@ -334,7 +335,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 var settings = await _settingService.SearchSettingsAsync(searchTerm);
                 var viewModels = settings.Select(s => new SettingViewModel
                 {
-                    SettingId = s.SettingId,
+                    SettingId = s.SettingId.ConvertToString(),
                     Category = s.Category,
                     Key = s.Key,
                     Value = s.Value,

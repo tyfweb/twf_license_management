@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Web.ViewModels.User;
 using Microsoft.AspNetCore.Authorization;
+using TechWayFit.Licensing.Management.Web.Helpers;
 
 namespace TechWayFit.Licensing.Management.Web.Controllers;
 
@@ -192,7 +193,7 @@ public class UserController : Controller
 
             var viewModel = new EditUserViewModel
             {
-                UserId = user.UserId,
+                UserId = user.UserId.ConvertToString(),
                 UserName = user.UserName,
                 FullName = user.FullName,
                 Email = user.Email,
@@ -232,7 +233,7 @@ public class UserController : Controller
             if (!ModelState.IsValid)
             {
                 var roles = await _userService.GetAllRolesAsync();
-                var userRoles = await _userService.GetUserRolesAsync(model.UserId);
+                var userRoles = await _userService.GetUserRolesAsync(model.UserId.ToGuid());
                 
                 model.AvailableRoles = roles.ToList();
                 model.CurrentRoles = userRoles.ToList();
@@ -242,7 +243,7 @@ public class UserController : Controller
             var currentUser = GetCurrentUsername();
             
             var result = await _userService.UpdateUserAsync(
-                model.UserId,
+                model.UserId.ToGuid(),
                 model.UserName,
                 model.FullName,
                 model.Email,
@@ -260,8 +261,8 @@ public class UserController : Controller
             ModelState.AddModelError("", result.Message);
             
             var allRoles = await _userService.GetAllRolesAsync();
-            var currentUserRoles = await _userService.GetUserRolesAsync(model.UserId);
-            
+            var currentUserRoles = await _userService.GetUserRolesAsync(model.UserId.ToGuid());
+
             model.AvailableRoles = allRoles.ToList();
             model.CurrentRoles = currentUserRoles.ToList();
             return View(model);
@@ -272,8 +273,8 @@ public class UserController : Controller
             ModelState.AddModelError("", "An error occurred while updating the user.");
             
             var roles = await _userService.GetAllRolesAsync();
-            var userRoles = await _userService.GetUserRolesAsync(model.UserId);
-            
+            var userRoles = await _userService.GetUserRolesAsync(model.UserId.ToGuid());
+
             model.AvailableRoles = roles.ToList();
             model.CurrentRoles = userRoles.ToList();
             return View(model);
@@ -358,7 +359,7 @@ public class UserController : Controller
 
             var viewModel = new ChangePasswordViewModel
             {
-                UserId = user.UserId,
+                UserId = user.UserId.ConvertToString(),
                 UserName = user.UserName
             };
 
@@ -388,7 +389,7 @@ public class UserController : Controller
 
             var currentUser = GetCurrentUsername();
             var result = await _userService.ChangePasswordAsync(
-                model.UserId,
+                model.UserId.ToGuid(),
                 model.CurrentPassword,
                 model.NewPassword,
                 currentUser);

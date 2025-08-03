@@ -23,7 +23,7 @@ public class AuditEntryEntity : BaseAuditEntity
     {
         return new AuditEntryEntity
         {
-            Id = model.EntityId,
+            Id = Guid.NewGuid(),
             EntityType = model.EntityType,
             EntityId = model.EntityId,
             ActionType = model.ActionType,
