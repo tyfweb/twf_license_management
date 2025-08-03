@@ -243,5 +243,18 @@ public partial class PostgreSqlBaseRepository<TEntity> : IBaseRepository<TEntity
     {
         return query;
     }
- 
+
+    public async Task<bool> SoftDeleteAsync(Guid id, string deletedBy, CancellationToken cancellationToken = default)
+    {
+        var entity = await _dbSet.FindAsync(id, cancellationToken);
+        if (entity == null) return false;
+
+        entity.IsDeleted = true;
+        entity.DeletedBy = deletedBy;
+        entity.DeletedOn = DateTime.UtcNow;
+
+        _dbSet.Update(entity);
+        await _context.SaveChangesAsync(cancellationToken);
+        return true;
+    }
 }

@@ -173,4 +173,176 @@ namespace TechWayFit.Licensing.Management.Web.ViewModels.Product
         public Dictionary<string, string> Limitations { get; set; } = new();
         public List<string> Dependencies { get; set; } = new();
     }
+
+    /// <summary>
+    /// Enhanced Product Management View Model
+    /// </summary>
+    public class ProductManagementViewModel
+    {
+        public Guid ProductId { get; set; }
+        
+        [Required]
+        [StringLength(100)]
+        public string ProductName { get; set; } = string.Empty;
+        
+        [StringLength(500)]
+        public string Description { get; set; } = string.Empty;
+        
+        public ProductType ProductType { get; set; }
+        public bool IsActive { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+        
+        // Management sections
+        public List<ProductTierViewModel> ProductTiers { get; set; } = new();
+        public List<ProductVersionViewModel> ProductVersions { get; set; } = new();
+        public List<ProductFeatureViewModel> ProductFeatures { get; set; } = new();
+    }
+
+    /// <summary>
+    /// Product Tier View Model
+    /// </summary>
+    public class ProductTierViewModel
+    {
+        public Guid TierId { get; set; }
+        public Guid ProductId { get; set; }
+        
+        [Required]
+        [StringLength(50)]
+        public string TierName { get; set; } = string.Empty;
+        
+        [StringLength(200)]
+        public string Description { get; set; } = string.Empty;
+        
+        public LicenseTier Tier { get; set; }
+        
+        [Range(0, double.MaxValue)]
+        public decimal? MonthlyPrice { get; set; }
+        
+        [Range(0, double.MaxValue)]
+        public decimal? AnnualPrice { get; set; }
+        
+        public bool IsFree { get; set; }
+        
+        [Range(0, 365)]
+        public int TrialPeriodDays { get; set; }
+        
+        [Range(1, int.MaxValue)]
+        public int? MaxUsers { get; set; }
+        
+        [Range(1, int.MaxValue)]
+        public int? MaxProjects { get; set; }
+        
+        public bool IsActive { get; set; }
+        public bool IsDeleted { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public string CreatedBy { get; set; } = string.Empty;
+        public DateTime? UpdatedAt { get; set; }
+        public string? UpdatedBy { get; set; }
+        public DateTime? DeletedAt { get; set; }
+        public string? DeletedBy { get; set; }
+    }
+
+    /// <summary>
+    /// Product Version View Model
+    /// </summary>
+    public class ProductVersionViewModel
+    {
+        public Guid VersionId { get; set; }
+        public Guid ProductId { get; set; }
+        
+        [Required]
+        [StringLength(20)]
+        public string VersionNumber { get; set; } = string.Empty;
+        
+        [Required]
+        [StringLength(100)]
+        public string VersionName { get; set; } = string.Empty;
+        
+        [StringLength(500)]
+        public string Description { get; set; } = string.Empty;
+        
+        public DateTime ReleaseDate { get; set; } = DateTime.UtcNow;
+        public bool IsStable { get; set; } = true;
+        public bool IsBeta { get; set; } = false;
+        public bool IsActive { get; set; } = true;
+        public bool IsDeleted { get; set; } = false;
+        public bool IsApproved { get; set; } = false;
+        
+        public DateTime? ApprovedAt { get; set; }
+        public string? ApprovedBy { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public string CreatedBy { get; set; } = string.Empty;
+        public DateTime? UpdatedAt { get; set; }
+        public string? UpdatedBy { get; set; }
+        public DateTime? DeletedAt { get; set; }
+        public string? DeletedBy { get; set; }
+    }
+
+    /// <summary>
+    /// Product Feature View Model
+    /// </summary>
+    public class ProductFeatureViewModel
+    {
+        public Guid FeatureId { get; set; }
+        public Guid ProductId { get; set; }
+        
+        [Required]
+        [StringLength(100)]
+        public string Name { get; set; } = string.Empty;
+        
+        [StringLength(500)]
+        public string Description { get; set; } = string.Empty;
+        
+        public FeatureCategory Category { get; set; }
+        public bool IsEnabled { get; set; } = true;
+        
+        [Range(1, int.MaxValue)]
+        public int? MaxUsage { get; set; }
+        
+        public string? ConfigurationSchema { get; set; }
+        public LicenseTier MinimumTier { get; set; } = LicenseTier.Community;
+        
+        public bool IsActive { get; set; } = true;
+        public bool IsDeleted { get; set; } = false;
+        public DateTime CreatedAt { get; set; }
+        public string CreatedBy { get; set; } = string.Empty;
+        public DateTime? UpdatedAt { get; set; }
+        public string? UpdatedBy { get; set; }
+        public DateTime? DeletedAt { get; set; }
+        public string? DeletedBy { get; set; }
+    }
+
+    /// <summary>
+    /// Enhanced Product Edit View Model with tabbed sections
+    /// </summary>
+    public class ProductEnhancedEditViewModel
+    {
+        // Basic Product Information
+        public Guid ProductId { get; set; }
+        
+        [Required]
+        [StringLength(100)]
+        public string ProductName { get; set; } = string.Empty;
+        
+        [StringLength(500)]
+        public string Description { get; set; } = string.Empty;
+        
+        public ProductType ProductType { get; set; }
+        
+        [Required]
+        [StringLength(20)]
+        public string Version { get; set; } = "1.0.0";
+        
+        public bool IsActive { get; set; } = true;
+        
+        // Section indicators for UI
+        public bool HasTiers { get; set; } = false;
+        public bool HasVersions { get; set; } = false;
+        public bool HasFeatures { get; set; } = false;
+        
+        // Tab state management
+        public string ActiveTab { get; set; } = "basic";
+        public string ActiveSection { get; set; } = "basic";
+    }
 }

@@ -31,6 +31,9 @@
                 <a href="@Url.Action("Edit", new { id = Model.Product.ProductId })" class="btn btn-outline-warning">
                     <i class="fas fa-edit me-1"></i><span class="d-none d-md-inline">Edit</span>
                 </a>
+                <a href="@Url.Action("EditEnhanced", new { id = Model.Product.ProductId })" class="btn btn-outline-success">
+                    <i class="fas fa-cogs me-1"></i><span class="d-none d-md-inline">Enhanced Management</span>
+                </a>
                 <a asp-controller="License" asp-action="Create" asp-route-productId="@Model.Product.ProductId" class="btn btn-success">
                     <i class="fas fa-plus me-1"></i><span class="d-none d-md-inline">Generate License</span>
                 </a>
@@ -408,6 +411,9 @@
                         </a>
                         <a href="@Url.Action("Edit", new { id = Model.Product.ProductId })" class="btn btn-outline-warning">
                             <i class="fas fa-edit me-2"></i>Edit Product
+                        </a>
+                        <a href="@Url.Action("EditEnhanced", new { id = Model.Product.ProductId })" class="btn btn-outline-success">
+                            <i class="fas fa-cogs me-2"></i>Enhanced Management
                         </a>
                         <button class="btn btn-outline-secondary" onclick="generateReport()">
                             <i class="fas fa-chart-bar me-2"></i>Generate Report

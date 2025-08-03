@@ -1,0 +1,707 @@
+@model TechWayFit.Licensing.Management.Web.ViewModels.Product.ProductEnhancedEditViewModel
+@{
+    ViewData["Title"] = "Enhanced Product Management";
+    ViewData["Description"] = $"Comprehensive management interface for {Model.ProductName}";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/product-management.css" />
+}
+
+<div class="container-fluid py-4">
+    <!-- Header Section -->
+    <div class="header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="mb-1">Enhanced Product Management</h2>
+                <p class="text-muted mb-0">Comprehensive management interface for @Model.ProductName</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="@Url.Action("Details", new { id = Model.ProductId })" class="btn btn-outline-secondary">
+                    <i class="fas fa-eye me-2"></i>View Details
+                </a>
+                <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Products
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-boxes me-2"></i>
+                        Product Management: @Model.ProductName
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <!-- Tab Navigation -->
+                    <ul class="nav nav-tabs" id="productTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="basic-tab" data-bs-toggle="tab" data-bs-target="#basic" type="button" role="tab" aria-controls="basic" aria-selected="true">
+                                <i class="fas fa-info-circle"></i> Basic Information
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="tiers-tab" data-bs-toggle="tab" data-bs-target="#tiers" type="button" role="tab" aria-controls="tiers" aria-selected="false">
+                                <i class="fas fa-layer-group"></i> Product Tiers
+                                <span class="badge badge-info ms-1" id="tiers-count">0</span>
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="versions-tab" data-bs-toggle="tab" data-bs-target="#versions" type="button" role="tab" aria-controls="versions" aria-selected="false">
+                                <i class="fas fa-code-branch"></i> Versions
+                                <span class="badge badge-info ms-1" id="versions-count">0</span>
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="features-tab" data-bs-toggle="tab" data-bs-target="#features" type="button" role="tab" aria-controls="features" aria-selected="false">
+                                <i class="fas fa-puzzle-piece"></i> Features
+                                <span class="badge badge-info ms-1" id="features-count">0</span>
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!-- Tab Content -->
+                    <div class="tab-content mt-3" id="productTabsContent">
+                        <!-- Basic Information Tab -->
+                        <div class="tab-pane fade show active" id="basic" role="tabpanel" aria-labelledby="basic-tab">
+                            <form id="basicInfoForm" method="post" action="@Url.Action("Edit")">
+                                @Html.AntiForgeryToken()
+                                @Html.HiddenFor(m => m.ProductId)
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label asp-for="ProductName" class="form-label">Product Name</label>
+                                            <input asp-for="ProductName" class="form-control" />
+                                            <span asp-validation-for="ProductName" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label asp-for="ProductType" class="form-label">Product Type</label>
+                                            <select asp-for="ProductType" class="form-control" asp-items="@(ViewBag.ProductTypes as List<SelectListItem>)">
+                                                <option value="">Select Product Type</option>
+                                            </select>
+                                            <span asp-validation-for="ProductType" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label asp-for="Version" class="form-label">Current Version</label>
+                                            <input asp-for="Version" class="form-control" />
+                                            <span asp-validation-for="Version" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <div class="form-check mt-4">
+                                                <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                                                <label asp-for="IsActive" class="form-check-label">
+                                                    Product Active
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label asp-for="Description" class="form-label">Description</label>
+                                    <textarea asp-for="Description" class="form-control" rows="3" placeholder="Enter product description..."></textarea>
+                                    <span asp-validation-for="Description" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save"></i> Update Basic Information
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Product Tiers Tab -->
+                        <div class="tab-pane fade" id="tiers" role="tabpanel" aria-labelledby="tiers-tab">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5>Product Tiers Management</h5>
+                                <button type="button" class="btn btn-success btn-sm" onclick="showAddTierModal()">
+                                    <i class="fas fa-plus"></i> Add New Tier
+                                </button>
+                            </div>
+                            
+                            <div id="tiersLoadingSpinner" class="text-center">
+                                <div class="spinner-border" role="status">
+                                    <span class="sr-only">Loading tiers...</span>
+                                </div>
+                            </div>
+                            
+                            <div id="tiersContainer" style="display: none;">
+                                <div class="table-responsive">
+                                    <table class="table table-striped" id="tiersTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Tier Name</th>
+                                                <th>Description</th>
+                                                <th>Price</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tiersTableBody">
+                                            <!-- Dynamic content loaded via AJAX -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Versions Tab -->
+                        <div class="tab-pane fade" id="versions" role="tabpanel" aria-labelledby="versions-tab">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5>Version Management</h5>
+                                <button type="button" class="btn btn-success btn-sm" onclick="showAddVersionModal()">
+                                    <i class="fas fa-plus"></i> Add New Version
+                                </button>
+                            </div>
+                            
+                            <div id="versionsLoadingSpinner" class="text-center">
+                                <div class="spinner-border" role="status">
+                                    <span class="sr-only">Loading versions...</span>
+                                </div>
+                            </div>
+                            
+                            <div id="versionsContainer" style="display: none;">
+                                <div class="table-responsive">
+                                    <table class="table table-striped" id="versionsTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Version</th>
+                                                <th>Name</th>
+                                                <th>Release Date</th>
+                                                <th>Status</th>
+                                                <th>Approved</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="versionsTableBody">
+                                            <!-- Dynamic content loaded via AJAX -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Features Tab -->
+                        <div class="tab-pane fade" id="features" role="tabpanel" aria-labelledby="features-tab">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5>Features Management</h5>
+                                <button type="button" class="btn btn-success btn-sm" onclick="showAddFeatureModal()">
+                                    <i class="fas fa-plus"></i> Add New Feature
+                                </button>
+                            </div>
+                            
+                            <div id="featuresLoadingSpinner" class="text-center">
+                                <div class="spinner-border" role="status">
+                                    <span class="sr-only">Loading features...</span>
+                                </div>
+                            </div>
+                            
+                            <div id="featuresContainer" style="display: none;">
+                                <div class="table-responsive">
+                                    <table class="table table-striped" id="featuresTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Feature Name</th>
+                                                <th>Description</th>
+                                                <th>Category</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="featuresTableBody">
+                                            <!-- Dynamic content loaded via AJAX -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Tier Modal -->
+<div class="modal fade" id="addTierModal" tabindex="-1" aria-labelledby="addTierModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addTierModalLabel">Add New Product Tier</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addTierForm">
+                    <div class="form-group">
+                        <label for="tierName">Tier Name</label>
+                        <input type="text" class="form-control" id="tierName" name="TierName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="tierDescription">Description</label>
+                        <textarea class="form-control" id="tierDescription" name="Description" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="tierType">Tier Type</label>
+                        <select class="form-control" id="tierType" name="Tier" required>
+                            <option value="">Select Tier Type</option>
+                            @if (ViewBag.LicenseTiers != null)
+                            {
+                                @foreach (var tier in (IEnumerable<dynamic>)ViewBag.LicenseTiers)
+                                {
+                                    <option value="@tier.Value">@tier.Text</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="tierPrice">Monthly Price (USD)</label>
+                        <input type="number" class="form-control" id="tierPrice" name="MonthlyPrice" step="0.01" min="0">
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="tierIsFree" name="IsFree">
+                        <label class="form-check-label" for="tierIsFree">
+                            Free Tier
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addTier()">Add Tier</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Version Modal -->
+<div class="modal fade" id="addVersionModal" tabindex="-1" aria-labelledby="addVersionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addVersionModalLabel">Add New Version</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addVersionForm">
+                    <div class="form-group">
+                        <label for="versionNumber">Version Number</label>
+                        <input type="text" class="form-control" id="versionNumber" name="VersionNumber" placeholder="e.g., 1.2.0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="versionName">Version Name</label>
+                        <input type="text" class="form-control" id="versionName" name="VersionName" placeholder="e.g., Feature Update" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="versionDescription">Description</label>
+                        <textarea class="form-control" id="versionDescription" name="Description" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="versionReleaseDate">Release Date</label>
+                        <input type="date" class="form-control" id="versionReleaseDate" name="ReleaseDate" required>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="versionIsStable" name="IsStable" checked>
+                        <label class="form-check-label" for="versionIsStable">
+                            Stable Release
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="versionIsBeta" name="IsBeta">
+                        <label class="form-check-label" for="versionIsBeta">
+                            Beta Release
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addVersion()">Add Version</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Feature Modal -->
+<div class="modal fade" id="addFeatureModal" tabindex="-1" aria-labelledby="addFeatureModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addFeatureModalLabel">Add New Feature</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addFeatureForm">
+                    <div class="form-group">
+                        <label for="featureName">Feature Name</label>
+                        <input type="text" class="form-control" id="featureName" name="Name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="featureDescription">Description</label>
+                        <textarea class="form-control" id="featureDescription" name="Description" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="featureCategory">Category</label>
+                        <select class="form-control" id="featureCategory" name="Category" required>
+                            <option value="">Select Category</option>
+                            @if (ViewBag.FeatureCategories != null)
+                            {
+                                @foreach (var category in (IEnumerable<dynamic>)ViewBag.FeatureCategories)
+                                {
+                                    <option value="@category.Value">@category.Text</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="featureIsEnabled" name="IsEnabled" checked>
+                        <label class="form-check-label" for="featureIsEnabled">
+                            Feature Enabled
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addFeature()">Add Feature</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const productId = '@Model.ProductId';
+        
+        // Initialize when document is ready
+        $(document).ready(function() {
+            // Set default release date to today
+            $('#versionReleaseDate').val(new Date().toISOString().split('T')[0]);
+            
+            // Load initial tab data based on active tab
+            if ($('#tiers-tab').hasClass('active')) {
+                loadTiers();
+            }
+        });
+
+        // Tab switching event handlers
+        $('#tiers-tab').on('click', function() {
+            loadTiers();
+        });
+
+        $('#versions-tab').on('click', function() {
+            loadVersions();
+        });
+
+        $('#features-tab').on('click', function() {
+            loadFeatures();
+        });
+
+        // Load Tiers
+        function loadTiers() {
+            $('#tiersLoadingSpinner').show();
+            $('#tiersContainer').hide();
+            
+            $.get('/Product/GetProductTiers', { productId: productId })
+                .done(function(response) {
+                    if (response.success) {
+                        renderTiers(response.data);
+                        $('#tiers-count').text(response.data.length);
+                    } else {
+                        showAlert('Error loading tiers: ' + response.message, 'danger');
+                    }
+                })
+                .fail(function() {
+                    showAlert('Error loading tiers. Please try again.', 'danger');
+                })
+                .always(function() {
+                    $('#tiersLoadingSpinner').hide();
+                    $('#tiersContainer').show();
+                });
+        }
+
+        // Load Versions
+        function loadVersions() {
+            $('#versionsLoadingSpinner').show();
+            $('#versionsContainer').hide();
+            
+            $.get('/Product/GetProductVersions', { productId: productId })
+                .done(function(response) {
+                    if (response.success) {
+                        renderVersions(response.data);
+                        $('#versions-count').text(response.data.length);
+                    } else {
+                        showAlert('Error loading versions: ' + response.message, 'danger');
+                    }
+                })
+                .fail(function() {
+                    showAlert('Error loading versions. Please try again.', 'danger');
+                })
+                .always(function() {
+                    $('#versionsLoadingSpinner').hide();
+                    $('#versionsContainer').show();
+                });
+        }
+
+        // Load Features
+        function loadFeatures() {
+            $('#featuresLoadingSpinner').show();
+            $('#featuresContainer').hide();
+            
+            $.get('/Product/GetProductFeatures', { productId: productId })
+                .done(function(response) {
+                    if (response.success) {
+                        renderFeatures(response.data);
+                        $('#features-count').text(response.data.length);
+                    } else {
+                        showAlert('Error loading features: ' + response.message, 'danger');
+                    }
+                })
+                .fail(function() {
+                    showAlert('Error loading features. Please try again.', 'danger');
+                })
+                .always(function() {
+                    $('#featuresLoadingSpinner').hide();
+                    $('#featuresContainer').show();
+                });
+        }
+
+        // Render Tiers Table
+        function renderTiers(tiers) {
+            const tbody = $('#tiersTableBody');
+            tbody.empty();
+            
+            tiers.forEach(function(tier) {
+                const statusBadge = tier.IsActive ? 
+                    '<span class="badge badge-success">Active</span>' : 
+                    '<span class="badge badge-secondary">Inactive</span>';
+                
+                const deleteBtn = tier.CanDelete ? 
+                    `<button class="btn btn-danger btn-sm" onclick="deleteTier('${tier.Id}')">
+                        <i class="fas fa-trash"></i>
+                    </button>` : 
+                    '<span class="text-muted">Protected</span>';
+                
+                const row = `
+                    <tr>
+                        <td>${tier.Name}</td>
+                        <td>${tier.Description}</td>
+                        <td>${tier.Price}</td>
+                        <td>${statusBadge}</td>
+                        <td>
+                            <button class="btn btn-primary btn-sm me-1" onclick="editTier('${tier.Id}')">>
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            ${deleteBtn}
+                        </td>
+                    </tr>
+                `;
+                tbody.append(row);
+            });
+        }
+
+        // Render Versions Table
+        function renderVersions(versions) {
+            const tbody = $('#versionsTableBody');
+            tbody.empty();
+            
+            versions.forEach(function(version) {
+                const statusBadge = version.IsActive ? 
+                    '<span class="badge badge-success">Active</span>' : 
+                    '<span class="badge badge-secondary">Inactive</span>';
+                
+                const approvedBadge = version.IsApproved ? 
+                    '<span class="badge badge-success">Yes</span>' : 
+                    '<span class="badge badge-warning">Pending</span>';
+                
+                const deleteBtn = version.CanDelete ? 
+                    `<button class="btn btn-danger btn-sm" onclick="deleteVersion('${version.Id}')">
+                        <i class="fas fa-trash"></i>
+                    </button>` : 
+                    '<span class="text-muted">Protected</span>';
+                
+                const approveBtn = !version.IsApproved ? 
+                    `<button class="btn btn-success btn-sm me-1" onclick="approveVersion('${version.Id}')">
+                        <i class="fas fa-check"></i> Approve
+                    </button>` : '';
+                
+                const row = `
+                    <tr>
+                        <td>${version.Version}</td>
+                        <td>${version.Name}</td>
+                        <td>${new Date(version.ReleaseDate).toLocaleDateString()}</td>
+                        <td>${statusBadge}</td>
+                        <td>${approvedBadge}</td>
+                        <td>
+                            <button class="btn btn-primary btn-sm me-1" onclick="editVersion('${version.Id}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            ${approveBtn}
+                            ${deleteBtn}
+                        </td>
+                    </tr>
+                `;
+                tbody.append(row);
+            });
+        }
+
+        // Render Features Table
+        function renderFeatures(features) {
+            const tbody = $('#featuresTableBody');
+            tbody.empty();
+            
+            features.forEach(function(feature) {
+                const statusBadge = feature.IsActive ? 
+                    '<span class="badge badge-success">Active</span>' : 
+                    '<span class="badge badge-secondary">Inactive</span>';
+                
+                const deleteBtn = feature.CanDelete ? 
+                    `<button class="btn btn-danger btn-sm" onclick="deleteFeature('${feature.Id}')">
+                        <i class="fas fa-trash"></i>
+                    </button>` : 
+                    '<span class="text-muted">Protected</span>';
+                
+                const row = `
+                    <tr>
+                        <td>${feature.Name}</td>
+                        <td>${feature.Description}</td>
+                        <td><span class="badge badge-info">${feature.Category}</span></td>
+                        <td>${statusBadge}</td>
+                        <td>
+                            <button class="btn btn-primary btn-sm me-1" onclick="editFeature('${feature.Id}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            ${deleteBtn}
+                        </td>
+                    </tr>
+                `;
+                tbody.append(row);
+            });
+        }
+
+        // Modal functions
+        function showAddTierModal() {
+            $('#addTierModal').modal('show');
+        }
+
+        function showAddVersionModal() {
+            $('#addVersionModal').modal('show');
+        }
+
+        function showAddFeatureModal() {
+            $('#addFeatureModal').modal('show');
+        }
+
+        // Add functions (placeholder implementations)
+        function addTier() {
+            // Implementation would submit form data via AJAX
+            showAlert('Tier functionality will be implemented with actual data layer', 'info');
+            $('#addTierModal').modal('hide');
+        }
+
+        function addVersion() {
+            // Implementation would submit form data via AJAX
+            showAlert('Version functionality will be implemented with actual data layer', 'info');
+            $('#addVersionModal').modal('hide');
+        }
+
+        function addFeature() {
+            // Implementation would submit form data via AJAX
+            showAlert('Feature functionality will be implemented with actual data layer', 'info');
+            $('#addFeatureModal').modal('hide');
+        }
+
+        // Edit functions (placeholder implementations)
+        function editTier(id) {
+            showAlert('Edit tier functionality will be implemented', 'info');
+        }
+
+        function editVersion(id) {
+            showAlert('Edit version functionality will be implemented', 'info');
+        }
+
+        function editFeature(id) {
+            showAlert('Edit feature functionality will be implemented', 'info');
+        }
+
+        // Delete functions (with confirmation)
+        function deleteTier(id) {
+            if (confirm('Are you sure you want to delete this tier? This action cannot be undone.')) {
+                showAlert('Delete tier functionality will be implemented with soft delete', 'info');
+            }
+        }
+
+        function deleteVersion(id) {
+            if (confirm('Are you sure you want to delete this version? This action cannot be undone.')) {
+                showAlert('Delete version functionality will be implemented with soft delete', 'info');
+            }
+        }
+
+        function deleteFeature(id) {
+            if (confirm('Are you sure you want to delete this feature? This action cannot be undone.')) {
+                showAlert('Delete feature functionality will be implemented with soft delete', 'info');
+            }
+        }
+
+        // Approve version
+        function approveVersion(id) {
+            if (confirm('Are you sure you want to approve this version? Once approved, it cannot be deleted.')) {
+                showAlert('Approve version functionality will be implemented', 'info');
+            }
+        }
+
+        // Utility function to show alerts
+        function showAlert(message, type) {
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+            
+            // Insert alert at the top of the card body
+            $('.card-body').prepend(alertHtml);
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(function() {
+                $('.alert').alert('close');
+            }, 5000);
+        }
+
+        // Handle free tier checkbox
+        $('#tierIsFree').change(function() {
+            if ($(this).is(':checked')) {
+                $('#tierPrice').val(0).prop('disabled', true);
+            } else {
+                $('#tierPrice').prop('disabled', false);
+            }
+        });
+
+        // Handle beta/stable checkbox conflict
+        $('#versionIsBeta').change(function() {
+            if ($(this).is(':checked')) {
+                $('#versionIsStable').prop('checked', false);
+            }
+        });
+
+        $('#versionIsStable').change(function() {
+            if ($(this).is(':checked')) {
+                $('#versionIsBeta').prop('checked', false);
+            }
+        });
+    </script>
+}

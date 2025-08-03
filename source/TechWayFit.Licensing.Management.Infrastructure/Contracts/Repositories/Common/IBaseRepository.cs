@@ -19,6 +19,14 @@ public interface IBaseRepository<TEntity> where TEntity : class
     /// Deletes an entity from the repository by its ID.
     /// </summary>
     Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
+    /// <summary>
+    /// Soft deletes an entity from the repository by its ID.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="deletedBy"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    Task<bool> SoftDeleteAsync(Guid id, string deletedBy, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves an entity from the repository by its ID.

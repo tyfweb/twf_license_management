@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using TechWayFit.Licensing.Management.Core.Contracts.Services;
+using TechWayFit.Licensing.Management.Web.ViewModels.License;
+using TechWayFit.Licensing.Management.Web.ViewModels.Home;
 
 namespace TechWayFit.Licensing.Management.Web.Controllers
 {
@@ -10,32 +13,41 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly IProductLicenseService _productLicenseService;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, IProductLicenseService productLicenseService)
         {
+            _productLicenseService = productLicenseService;
             _logger = logger;
         }
 
         /// <summary>
         /// Main landing page with step-by-step progress
         /// </summary>
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             // Pass authentication status to view
             ViewBag.IsAuthenticated = User.Identity?.IsAuthenticated ?? false;
             ViewBag.Username = User.Identity?.Name ?? "Anonymous";
             ViewBag.UserRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "None";
-            
-            return View();
+            var licenseStats=await _productLicenseService.GetLicenseUsageStatisticsAsync();
+            var licenseModel= new LicenseStatsViewModel
+            {
+                TotalLicenses = licenseStats.TotalLicenses,
+                ActiveLicenses = licenseStats.ActiveLicenses,
+                ExpiringLicenses = licenseStats.ExpiringInNext30Days,
+                ExpiredLicenses = licenseStats.ExpiredLicenses,
+                PendingApprovals = licenseStats.LicensesByStatus.ContainsKey(Licensing.Core.Models.LicenseStatus.Pending) ? licenseStats.LicensesByStatus[Licensing.Core.Models.LicenseStatus.Pending] : 0,
+
+            };
+            var viewModel = new LicenseHomeViewModel
+            {
+                LicenseStats = licenseModel,
+               // RecentAuditLogs = await _productLicenseService.GetRecentAuditLogsAsync(10) // Fetch last 10 audit logs
+            };
+            return View(viewModel);
         }
 
-        /// <summary>
-        /// Bootstrap test page to verify CSS classes
-        /// </summary>
-        public IActionResult BootstrapTest()
-        {
-            return View();
-        }
 
         /// <summary>
         /// Error page

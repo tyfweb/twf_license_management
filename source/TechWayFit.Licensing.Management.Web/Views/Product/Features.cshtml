@@ -1,0 +1,537 @@
+@model TechWayFit.Licensing.Management.Web.ViewModels.Product.ProductEnhancedEditViewModel
+
+@{
+    ViewData["Title"] = "Product Features - " + Model.ProductName;
+}
+
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="mb-1">Product Features</h4>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item"><a href="@Url.Action("Index")">Products</a></li>
+                            <li class="breadcrumb-item"><a href="@Url.Action("Details", new { id = Model.ProductId })">@Model.ProductName</a></li>
+                            <li class="breadcrumb-item active">Features</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div class="btn-group" role="group">
+                    <a href="@Url.Action("Details", new { id = Model.ProductId })" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Product
+                    </a>
+                    <a href="@Url.Action("Tiers", new { id = Model.ProductId })" class="btn btn-outline-primary">
+                        <i class="fas fa-layer-group me-1"></i>Tiers
+                    </a>
+                    <a href="@Url.Action("Versions", new { id = Model.ProductId })" class="btn btn-outline-primary">
+                        <i class="fas fa-code-branch me-1"></i>Versions
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Info Card -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body py-3">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center">
+                                <div class="product-icon me-3">
+                                    <i class="fas fa-star fa-2x text-primary"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">@Model.ProductName</h6>
+                                    <small class="text-muted">@Model.ProductType • Version @Model.Version</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <span class="badge bg-success me-2">Active</span>
+                            <span class="badge bg-info">
+                                <span id="features-count">0</span> Features
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Management -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">
+                            <i class="fas fa-star me-2"></i>Product Features
+                        </h6>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="showAddFeatureModal()">
+                            <i class="fas fa-plus me-1"></i>Add Feature
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Alert container -->
+                    <div id="alert-container"></div>
+                    
+                    <!-- Features content -->
+                    <div id="features-content">
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-3 text-muted">Loading product features...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Feature Modal -->
+<div class="modal fade" id="featureModal" tabindex="-1" aria-labelledby="featureModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="featureModalLabel">Add Product Feature</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="featureForm">
+                <div class="modal-body">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="ProductId" value="@Model.ProductId" />
+                    <input type="hidden" name="FeatureId" id="featureId" />
+                    
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label for="featureName" class="form-label">Feature Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="featureName" name="FeatureName" required maxlength="100">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="featureType" class="form-label">Feature Type</label>
+                                <select class="form-select" id="featureType" name="FeatureType">
+                                    <option value="Core">Core</option>
+                                    <option value="Premium">Premium</option>
+                                    <option value="Advanced">Advanced</option>
+                                    <option value="Enterprise">Enterprise</option>
+                                </select>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="featureDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="featureDescription" name="Description" rows="3" maxlength="500"></textarea>
+                        <div class="invalid-feedback"></div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="displayOrder" class="form-label">Display Order</label>
+                                <input type="number" class="form-control" id="displayOrder" name="DisplayOrder" min="0" value="0">
+                                <div class="form-text">Lower numbers appear first</div>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="category" class="form-label">Category</label>
+                                <input type="text" class="form-control" id="category" name="Category" maxlength="50" 
+                                       placeholder="e.g., Analytics, Security, Integration">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="isRequired" name="IsRequired">
+                                <label class="form-check-label" for="isRequired">
+                                    Required Feature
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="isActive" name="IsActive" checked>
+                                <label class="form-check-label" for="isActive">
+                                    Active
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="isPublic" name="IsPublic" checked>
+                                <label class="form-check-label" for="isPublic">
+                                    Public
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="featureSubmitBtn">Add Feature</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Load features on page load
+            loadProductFeatures();
+            
+            // Handle feature form submission
+            $('#featureForm').on('submit', function(e) {
+                e.preventDefault();
+                saveFeature();
+            });
+        });
+
+        function loadProductFeatures() {
+            $('#features-content').html('<div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-3 text-muted">Loading product features...</p></div>');
+            
+            $.get('@Url.Action("GetProductFeatures")', { productId: @Model.ProductId })
+                .done(function(response) {
+                    if (response.success && response.data) {
+                        var html = renderProductFeatures(response.data);
+                        $('#features-content').html(html);
+                        $('#features-count').text(response.data.length);
+                    } else {
+                        $('#features-content').html('<div class="text-center py-5"><div class="text-muted"><i class="fas fa-star fa-3x mb-3"></i><p>No product features found.</p><p><small>Click "Add Feature" to create your first feature.</small></p></div></div>');
+                        $('#features-count').text(0);
+                    }
+                })
+                .fail(function(xhr, status, error) {
+                    console.error('Failed to load product features:', error);
+                    $('#features-content').html('<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i>Failed to load product features. Please try again.</div>');
+                    $('#features-count').text(0);
+                });
+        }
+
+        function renderProductFeatures(features) {
+            if (!features || features.length === 0) {
+                return '<div class="text-center py-5"><div class="text-muted"><i class="fas fa-star fa-3x mb-3"></i><p>No product features found.</p><p><small>Click "Add Feature" to create your first feature.</small></p></div></div>';
+            }
+
+            // Group features by category
+            var grouped = {};
+            features.forEach(function(feature) {
+                var category = feature.Category || 'General';
+                if (!grouped[category]) {
+                    grouped[category] = [];
+                }
+                grouped[category].push(feature);
+            });
+
+            var html = '<div class="row">';
+            Object.keys(grouped).forEach(function(category) {
+                html += '<div class="col-12 mb-4">';
+                html += '  <div class="feature-category">';
+                html += '    <h6 class="category-title">' + category + ' <span class="badge bg-light text-dark ms-2">' + grouped[category].length + '</span></h6>';
+                html += '    <div class="row">';
+                
+                grouped[category].forEach(function(feature) {
+                    html += '<div class="col-lg-6 mb-3">';
+                    html += '  <div class="card feature-card h-100">';
+                    html += '    <div class="card-body">';
+                    html += '      <div class="d-flex justify-content-between align-items-start mb-2">';
+                    html += '        <div class="feature-icon me-3">';
+                    
+                    // Feature type icon
+                    switch(feature.FeatureType) {
+                        case 'Core':
+                            html += '          <i class="fas fa-star text-warning"></i>';
+                            break;
+                        case 'Premium':
+                            html += '          <i class="fas fa-gem text-info"></i>';
+                            break;
+                        case 'Advanced':
+                            html += '          <i class="fas fa-cog text-success"></i>';
+                            break;
+                        case 'Enterprise':
+                            html += '          <i class="fas fa-crown text-danger"></i>';
+                            break;
+                        default:
+                            html += '          <i class="fas fa-puzzle-piece text-primary"></i>';
+                    }
+                    
+                    html += '        </div>';
+                    html += '        <div class="flex-grow-1">';
+                    html += '          <h6 class="card-title mb-1">' + feature.Name + '</h6>';
+                    if (feature.Description) {
+                        html += '          <p class="card-text text-muted small mb-2">' + feature.Description + '</p>';
+                    }
+                    html += '        </div>';
+                    html += '        <div class="dropdown">';
+                    html += '          <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">';
+                    html += '            <i class="fas fa-ellipsis-v"></i>';
+                    html += '          </button>';
+                    html += '          <ul class="dropdown-menu dropdown-menu-end">';
+                    html += '            <li><a class="dropdown-item" href="#" onclick="editFeature(\'' + feature.Id + '\')"><i class="fas fa-edit me-2"></i>Edit</a></li>';
+                    if (feature.CanDelete) {
+                        html += '            <li><a class="dropdown-item text-danger" href="#" onclick="deleteFeature(\'' + feature.Id + '\')"><i class="fas fa-trash me-2"></i>Delete</a></li>';
+                    }
+                    html += '          </ul>';
+                    html += '        </div>';
+                    html += '      </div>';
+                    
+                    html += '      <div class="feature-badges">';
+                    html += '        <span class="badge bg-' + getFeatureTypeBadgeColor(feature.FeatureType) + ' me-1">' + feature.FeatureType + '</span>';
+                    if (feature.IsRequired) {
+                        html += '        <span class="badge bg-danger me-1">Required</span>';
+                    }
+                    if (feature.IsActive) {
+                        html += '        <span class="badge bg-success me-1">Active</span>';
+                    } else {
+                        html += '        <span class="badge bg-secondary me-1">Inactive</span>';
+                    }
+                    if (!feature.IsPublic) {
+                        html += '        <span class="badge bg-warning me-1">Private</span>';
+                    }
+                    html += '      </div>';
+                    html += '    </div>';
+                    html += '  </div>';
+                    html += '</div>';
+                });
+                
+                html += '    </div>';
+                html += '  </div>';
+                html += '</div>';
+            });
+            html += '</div>';
+            return html;
+        }
+
+        function getFeatureTypeBadgeColor(type) {
+            switch(type) {
+                case 'Core': return 'warning';
+                case 'Premium': return 'info';
+                case 'Advanced': return 'success';
+                case 'Enterprise': return 'danger';
+                default: return 'primary';
+            }
+        }
+
+        function showAddFeatureModal() {
+            // Reset form and modal
+            $('#featureForm')[0].reset();
+            $('#featureId').val('');
+            $('#featureModalLabel').text('Add Product Feature');
+            $('#featureSubmitBtn').text('Add Feature');
+            clearValidationErrors();
+            
+            // Show modal
+            var modal = new bootstrap.Modal(document.getElementById('featureModal'));
+            modal.show();
+        }
+
+        function editFeature(featureId) {
+            // Get feature data
+            $.get('@Url.Action("GetProductFeature")', { 
+                productId: @Model.ProductId, 
+                featureId: featureId 
+            })
+            .done(function(response) {
+                if (response.success && response.data) {
+                    var feature = response.data;
+                    
+                    // Populate form
+                    $('#featureId').val(feature.FeatureId);
+                    $('#featureName').val(feature.FeatureName);
+                    $('#featureDescription').val(feature.Description);
+                    $('#featureType').val(feature.FeatureType);
+                    $('#displayOrder').val(feature.DisplayOrder);
+                    $('#category').val(feature.Category);
+                    $('#isRequired').prop('checked', feature.IsRequired);
+                    $('#isActive').prop('checked', feature.IsActive);
+                    $('#isPublic').prop('checked', feature.IsPublic);
+                    
+                    // Update modal title and button
+                    $('#featureModalLabel').text('Edit Product Feature');
+                    $('#featureSubmitBtn').text('Update Feature');
+                    clearValidationErrors();
+                    
+                    // Show modal
+                    var modal = new bootstrap.Modal(document.getElementById('featureModal'));
+                    modal.show();
+                } else {
+                    showAlert('Error loading feature data', 'danger');
+                }
+            })
+            .fail(function() {
+                showAlert('Error loading feature data', 'danger');
+            });
+        }
+
+        function deleteFeature(featureId) {
+            if (confirm('Are you sure you want to delete this feature? This action cannot be undone.')) {
+                var formData = new FormData();
+                formData.append('productId', @Model.ProductId);
+                formData.append('featureId', featureId);
+                formData.append('__RequestVerificationToken', $('[name=__RequestVerificationToken]').val());
+
+                $.ajax({
+                    url: '@Url.Action("DeleteProductFeature")',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        if (response.success) {
+                            showAlert(response.message, 'success');
+                            loadProductFeatures(); // Reload the features list
+                        } else {
+                            showAlert(response.message, 'danger');
+                        }
+                    },
+                    error: function() {
+                        showAlert('Error deleting feature', 'danger');
+                    }
+                });
+            }
+        }
+
+        function saveFeature() {
+            var featureId = $('#featureId').val();
+            var isEdit = featureId && featureId !== '';
+            var url = isEdit ? '@Url.Action("EditProductFeature")' : '@Url.Action("AddProductFeature")';
+            
+            var formData = new FormData(document.getElementById('featureForm'));
+            if (isEdit) {
+                formData.append('featureId', featureId);
+            }
+            formData.append('productId', @Model.ProductId);
+
+            // Disable submit button
+            $('#featureSubmitBtn').prop('disabled', true).text('Saving...');
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.success) {
+                        showAlert(response.message, 'success');
+                        $('#featureModal').modal('hide');
+                        loadProductFeatures(); // Reload the features list
+                    } else {
+                        if (response.errors && response.errors.length > 0) {
+                            showValidationErrors(response.errors);
+                        } else {
+                            showAlert(response.message, 'danger');
+                        }
+                    }
+                },
+                error: function() {
+                    showAlert('Error saving feature', 'danger');
+                },
+                complete: function() {
+                    // Re-enable submit button
+                    $('#featureSubmitBtn').prop('disabled', false).text(isEdit ? 'Update Feature' : 'Add Feature');
+                }
+            });
+        }
+
+        function clearValidationErrors() {
+            $('.is-invalid').removeClass('is-invalid');
+            $('.invalid-feedback').empty();
+        }
+
+        function showValidationErrors(errors) {
+            clearValidationErrors();
+            errors.forEach(function(error) {
+                showAlert(error, 'danger');
+            });
+        }
+
+        function showAlert(message, type) {
+            var alertClass = 'alert-' + type;
+            var alertHtml = '<div class="alert ' + alertClass + ' alert-dismissible fade show" role="alert">' +
+                            message +
+                            '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+                            '</div>';
+            
+            // Remove existing alerts
+            $('#alert-container .alert').remove();
+            
+            // Add new alert
+            $('#alert-container').html(alertHtml);
+            
+            // Auto-hide success alerts after 5 seconds
+            if (type === 'success') {
+                setTimeout(function() {
+                    $('.alert-success').alert('close');
+                }, 5000);
+            }
+        }
+    </script>
+
+    <style>
+        .product-icon {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(13, 110, 253, 0.1);
+            border-radius: 10px;
+        }
+
+        .feature-category {
+            margin-bottom: 2rem;
+        }
+
+        .category-title {
+            color: #495057;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            border: 1px solid #e9ecef;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(248, 249, 250, 0.8);
+            border-radius: 8px;
+            font-size: 1.2rem;
+        }
+
+        .feature-badges .badge {
+            font-size: 0.7rem;
+        }
+    </style>
+}

@@ -381,10 +381,9 @@ public class ProductLicenseService : IProductLicenseService
 
     public async Task<LicenseUsageStatistics> GetLicenseUsageStatisticsAsync(Guid? productId = null, Guid? consumerId = null)
     {
-        // TODO: Implement
+        var result = await _unitOfWork.Licenses.GetUsageStatisticsAsync(productId, consumerId);
         _logger.LogWarning("GetLicenseUsageStatisticsAsync not implemented");
-        await Task.CompletedTask;
-        return new LicenseUsageStatistics();
+        return result;
     }
 
     public async Task<IEnumerable<LicenseAuditEntry>> GetLicenseAuditHistoryAsync(Guid licenseId)

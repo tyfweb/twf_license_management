@@ -1,5 +1,5 @@
 @using TechWayFit.Licensing.Core.Models
-@model TechWayFit.Licensing.Management.Web.ViewModels.Dashboard.DashboardViewModel
+@model TechWayFit.Licensing.Management.Web.ViewModels.Home.LicenseHomeViewModel
 @{
     ViewData["Title"] = "Dashboard Overview";
 }
@@ -32,7 +32,7 @@
                             <div class="stats-icon">
                                 <i class="fas fa-key"></i>
                             </div>
-                            <div class="stats-number">@(Model?.TotalLicenses ?? 0)</div>
+                            <div class="stats-number">@(Model?.LicenseStats.TotalLicenses ?? 0)</div>
                         </div>
                         <div class="stats-row-2">
                             <div class="stats-label">Total Licenses</div>
@@ -45,7 +45,7 @@
                             <div class="stats-icon">
                                 <i class="fas fa-check-circle"></i>
                             </div>
-                            <div class="stats-number">@(Model?.ActiveLicenses ?? 0)</div>
+                            <div class="stats-number">@(Model?.LicenseStats.ActiveLicenses ?? 0)</div>
                         </div>
                         <div class="stats-row-2">
                             <div class="stats-label">Active Licenses</div>
@@ -58,7 +58,7 @@
                             <div class="stats-icon">
                                 <i class="fas fa-clock"></i>
                             </div>
-                            <div class="stats-number">@(Model?.ExpiringLicenses ?? 0)</div>
+                            <div class="stats-number">@(Model?.LicenseStats.ExpiringLicenses ?? 0)</div>
                         </div>
                         <div class="stats-row-2">
                             <div class="stats-label">Expiring Soon</div>
@@ -71,7 +71,7 @@
                             <div class="stats-icon">
                                 <i class="fas fa-users"></i>
                             </div>
-                            <div class="stats-number">@(Model?.TotalConsumers ?? 0)</div>
+                            <div class="stats-number">@(Model?.LicenseStats.TotalConsumers ?? 0)</div>
                         </div>
                         <div class="stats-row-2">
                             <div class="stats-label">Consumers</div>
@@ -91,7 +91,7 @@
                     </div>
                 </div>
                 <div class="section-content">
-                    @if (Model?.RecentLicenses?.Any() == true)
+                    @* @if (Model?.RecentLicenses?.Any() == true)
                     {
                         <div class="table-responsive">
                             <table class="table table-hover">
@@ -187,7 +187,7 @@
                                 <i class="fas fa-plus me-2"></i>Create Your First License
                             </a>
                         </div>
-                    }
+                    } *@
                 </div>
             </div>
         </div>

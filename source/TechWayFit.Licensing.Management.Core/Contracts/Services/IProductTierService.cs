@@ -29,14 +29,14 @@ public interface IProductTierService
     /// </summary>
     /// <param name="tierId">Tier ID</param>
     /// <returns>Tier or null if not found</returns>
-    Task<ProductTier?> GetTierByIdAsync(string tierId);
+    Task<ProductTier?> GetTierByIdAsync(Guid tierId);
 
     /// <summary>
     /// Gets tiers for a specific product
     /// </summary>
     /// <param name="productId">Product ID</param>
     /// <returns>List of tiers for the product</returns>
-    Task<IEnumerable<ProductTier>> GetTiersByProductAsync(string productId);
+    Task<IEnumerable<ProductTier>> GetTiersByProductAsync(Guid productId);
 
     /// <summary>
     /// Gets a tier by product and tier name
@@ -44,7 +44,7 @@ public interface IProductTierService
     /// <param name="productId">Product ID</param>
     /// <param name="tierName">Tier name</param>
     /// <returns>Tier or null if not found</returns>
-    Task<ProductTier?> GetTierByNameAsync(string productId, string tierName);
+    Task<ProductTier?> GetTierByNameAsync(Guid productId, string tierName);
 
     /// <summary>
     /// Deletes a tier
@@ -52,14 +52,14 @@ public interface IProductTierService
     /// <param name="tierId">Tier ID</param>
     /// <param name="deletedBy">User deleting the tier</param>
     /// <returns>True if deleted successfully</returns>
-    Task<bool> DeleteTierAsync(string tierId, string deletedBy);
+    Task<bool> DeleteTierAsync(Guid tierId, string deletedBy);
 
     /// <summary>
     /// Checks if a tier exists
     /// </summary>
     /// <param name="tierId">Tier ID</param>
     /// <returns>True if exists</returns>
-    Task<bool> TierExistsAsync(string tierId);
+    Task<bool> TierExistsAsync(Guid tierId);
 
     /// <summary>
     /// Checks if a tier name exists for a product
@@ -68,7 +68,7 @@ public interface IProductTierService
     /// <param name="tierName">Tier name</param>
     /// <param name="excludeTierId">Tier ID to exclude from check (for updates)</param>
     /// <returns>True if name exists</returns>
-    Task<bool> TierNameExistsAsync(string productId, string tierName, string? excludeTierId = null);
+    Task<bool> TierNameExistsAsync(Guid productId, string tierName, Guid? excludeTierId = null);
 
     /// <summary>
     /// Validates tier data
@@ -76,23 +76,4 @@ public interface IProductTierService
     /// <param name="tier">Tier to validate</param>
     /// <returns>Validation result</returns>
     Task<ValidationResult> ValidateTierAsync(ProductTier tier);
-
-    /// <summary>
-    /// Gets all tiers with optional filtering
-    /// </summary>
-    /// <param name="searchTerm">Search term for tier name or description</param>
-    /// <param name="pageNumber">Page number (1-based)</param>
-    /// <param name="pageSize">Page size</param>
-    /// <returns>List of tiers</returns>
-    Task<IEnumerable<ProductTier>> GetAllTiersAsync(
-        string? searchTerm = null,
-        int pageNumber = 1,
-        int pageSize = 50);
-
-    /// <summary>
-    /// Gets the total count of tiers with optional filtering
-    /// </summary>
-    /// <param name="searchTerm">Search term for tier name or description</param>
-    /// <returns>Total count</returns>
-    Task<int> GetTierCountAsync(string? searchTerm = null);
 }

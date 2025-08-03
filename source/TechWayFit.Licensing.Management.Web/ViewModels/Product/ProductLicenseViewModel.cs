@@ -1,4 +1,5 @@
 using TechWayFit.Licensing.Core.Models;
+using TechWayFit.Licensing.Management.Web.ViewModels.License;
 
 namespace TechWayFit.Licensing.Management.Web.ViewModels.Product
 {
@@ -6,7 +7,7 @@ namespace TechWayFit.Licensing.Management.Web.ViewModels.Product
     {
         public ProductConfiguration Product { get; set; } = new();
         public List<ConsumerLicenseViewModel> Consumers { get; set; } = new();
-        public ProductLicenseStatsViewModel Stats { get; set; } = new();
+        public LicenseStatsViewModel Stats { get; set; } = new();
     }
 
     public class ConsumerLicenseViewModel
@@ -15,14 +16,5 @@ namespace TechWayFit.Licensing.Management.Web.ViewModels.Product
         public List<TechWayFit.Licensing.Core.Models.ConsumerLicenseInfo> Licenses { get; set; } = new();
         public bool HasActiveLicense => Licenses.Any(l => l.Status == TechWayFit.Licensing.Core.Models.LicenseStatus.Active && l.ValidTo > DateTime.UtcNow);
         public bool HasExpiringLicense => Licenses.Any(l => l.Status == TechWayFit.Licensing.Core.Models.LicenseStatus.Active && l.ValidTo <= DateTime.UtcNow.AddDays(30) && l.ValidTo > DateTime.UtcNow);
-    }
-
-    public class ProductLicenseStatsViewModel
-    {
-        public int TotalConsumers { get; set; }
-        public int TotalLicenses { get; set; }
-        public int ActiveLicenses { get; set; }
-        public int ExpiringLicenses { get; set; }
-        public int ExpiredLicenses { get; set; }
     }
 }
