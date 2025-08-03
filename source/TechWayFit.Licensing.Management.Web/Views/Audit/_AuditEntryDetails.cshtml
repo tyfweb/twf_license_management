@@ -1,132 +1,167 @@
 @model TechWayFit.Licensing.Management.Web.ViewModels.Audit.AuditEntryDetailViewModel
 
-<div class="modal-header">
-    <h5 class="modal-title">
-        <i class="fas fa-info-circle me-2"></i>
-        Audit Entry Details
-    </h5>
-    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-</div>
-
-<div class="modal-body">
-    @if (Model?.Entry != null)
-    {
-        <!-- Entry Overview -->
-        <div class="card mb-3">
-            <div class="card-header bg-primary text-white">
-                <h6 class="mb-0">
-                    <i class="fas fa-edit me-2"></i>
-                    @Model.Entry.DisplayActionType
-                </h6>
+@if (Model?.Entry != null)
+{
+    <!-- Entry Overview -->
+    <div class="card mb-3">
+        <div class="card-header entry-overview">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="mb-1 text-white">
+                        <i class="fas fa-edit me-2"></i>
+                        @Model.Entry.DisplayActionType
+                    </h6>
+                    <p class="mb-0 text-white-50 small">
+                        <strong>@Model.Entry.DisplayEntityType:</strong> @Model.Entry.EntityId
+                    </p>
+                </div>
+                <span class="badge bg-light text-dark">@Model.Entry.DisplayActionType</span>
             </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <table class="table table-sm table-borderless">
-                            <tbody>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <table class="table table-sm table-borderless">
+                        <tbody>
+                            <tr>
+                                <th width="40%" class="text-muted">Entry ID:</th>
+                                <td><code class="small">@Model.Entry.EntryId</code></td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted">Entity Type:</th>
+                                <td>@Model.Entry.DisplayEntityType</td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted">Entity ID:</th>
+                                <td><code class="small">@Model.Entry.EntityId</code></td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted">Action:</th>
+                                <td><span class="badge @Model.Entry.ActionBadgeClass">@Model.Entry.DisplayActionType</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <table class="table table-sm table-borderless">
+                        <tbody>
+                            <tr>
+                                <th width="40%" class="text-muted">User:</th>
+                                <td>@Model.Entry.UserName</td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted">Timestamp:</th>
+                                <td>@Model.Entry.Timestamp.ToString("yyyy-MM-dd HH:mm:ss UTC")</td>
+                            </tr>
+                            @if (!string.IsNullOrEmpty(Model.Entry.IpAddress))
+                            {
                                 <tr>
-                                    <th width="40%">Entry ID:</th>
-                                    <td><code class="small">@Model.Entry.EntryId</code></td>
+                                    <th class="text-muted">IP Address:</th>
+                                    <td><code class="small">@Model.Entry.IpAddress</code></td>
                                 </tr>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.Entry.Reason))
+                            {
                                 <tr>
-                                    <th>Entity Type:</th>
-                                    <td>@Model.Entry.DisplayEntityType</td>
+                                    <th class="text-muted">Reason:</th>
+                                    <td>@Model.Entry.Reason</td>
                                 </tr>
-                                <tr>
-                                    <th>Entity ID:</th>
-                                    <td><code class="small">@Model.Entry.EntityId</code></td>
-                                </tr>
-                                <tr>
-                                    <th>Action:</th>
-                                    <td><span class="badge @Model.Entry.ActionBadgeClass">@Model.Entry.DisplayActionType</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="col-md-6">
-                        <table class="table table-sm table-borderless">
-                            <tbody>
-                                <tr>
-                                    <th width="40%">User:</th>
-                                    <td>@Model.Entry.UserName</td>
-                                </tr>
-                                <tr>
-                                    <th>Timestamp:</th>
-                                    <td>@Model.Entry.Timestamp.ToString("yyyy-MM-dd HH:mm:ss UTC")</td>
-                                </tr>
-                                @if (!string.IsNullOrEmpty(Model.Entry.IpAddress))
-                                {
-                                    <tr>
-                                        <th>IP Address:</th>
-                                        <td><code class="small">@Model.Entry.IpAddress</code></td>
-                                    </tr>
-                                }
-                                @if (!string.IsNullOrEmpty(Model.Entry.Reason))
-                                {
-                                    <tr>
-                                        <th>Reason:</th>
-                                        <td>@Model.Entry.Reason</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
+                            }
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Changes Section -->
-        @if (Model.Changes.Any())
-        {
-            <div class="card mb-3">
-                <div class="card-header">
-                    <h6 class="mb-0">
-                        <i class="fas fa-list-alt me-2"></i>
-                        Changes Made
-                    </h6>
-                </div>
-                <div class="card-body">
-                    @foreach (var change in Model.Changes)
-                    {
-                        <div class="card border-start-@(GetChangeBorderClass(change.ChangeType)) mb-3">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <strong>@change.PropertyName</strong>
-                                    <span class="badge @GetChangeBadgeClass(change.ChangeType)">@change.ChangeType</span>
-                                </div>
-                                
-                                @if (!string.IsNullOrEmpty(change.OldValue))
-                                {
-                                    <div class="mb-2">
-                                        <small class="text-muted fw-bold">Previous Value:</small>
-                                        <div class="bg-light p-2 rounded small font-monospace">@change.OldValue</div>
-                                    </div>
-                                }
-                                
-                                @if (!string.IsNullOrEmpty(change.NewValue))
-                                {
-                                    <div>
-                                        <small class="text-muted fw-bold">New Value:</small>
-                                        <div class="bg-light p-2 rounded small font-monospace">@change.NewValue</div>
-                                    </div>
-                                }
-                            </div>
-                        </div>
-                    }
+    <!-- Changes Section -->
+    @if (Model.Changes.Any())
+    {
+        <div class="card mb-3">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">
+                    <i class="fas fa-edit me-2 text-primary"></i>
+                    Changes Made (@Model.Changes.Count() properties)
+                </h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm mb-0">
+                        <thead>
+                            <tr>
+                                <th>Property</th>
+                                <th width="80px">Action</th>
+                                <th>Previous</th>
+                                <th>New</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var change in Model.Changes.OrderBy(c => c.PropertyName))
+                            {
+                                <tr class="align-top">
+                                    <td><strong class="small">@change.PropertyName</strong></td>
+                                    <td>
+                                        <span class="badge @(change.ChangeType == "Added" ? "bg-success" : change.ChangeType == "Removed" ? "bg-danger" : "bg-warning text-dark") badge-sm">
+                                            @change.ChangeType
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(change.OldValue))
+                                        {
+                                            if (change.OldValue.Length > 50)
+                                            {
+                                                <div class="text-break small font-monospace bg-light p-1 rounded">@change.OldValue.Substring(0, 50)...</div>
+                                            }
+                                            else
+                                            {
+                                                <div class="text-break small font-monospace bg-light p-1 rounded">@change.OldValue</div>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted fst-italic small">No previous value</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(change.NewValue))
+                                        {
+                                            if (change.NewValue.Length > 50)
+                                            {
+                                                <div class="text-break small font-monospace bg-light p-1 rounded">@change.NewValue.Substring(0, 50)...</div>
+                                            }
+                                            else
+                                            {
+                                                <div class="text-break small font-monospace bg-light p-1 rounded">@change.NewValue</div>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted fst-italic small">Value removed</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
                 </div>
             </div>
-        }
+        </div>
+    }
 
-        <!-- Raw Data Section -->
-        @if (!string.IsNullOrEmpty(Model.FormattedOldValue) || !string.IsNullOrEmpty(Model.FormattedNewValue))
-        {
-            <div class="card mb-3">
-                <div class="card-header">
+    <!-- Raw Data Section (Collapsed by default) -->
+    @if (!string.IsNullOrEmpty(Model.FormattedOldValue) || !string.IsNullOrEmpty(Model.FormattedNewValue))
+    {
+        <div class="card mb-3">
+            <div class="card-header bg-light" data-bs-toggle="collapse" data-bs-target="#modalRawDataCollapse" aria-expanded="false" aria-controls="modalRawDataCollapse" role="button">
+                <div class="d-flex justify-content-between align-items-center">
                     <h6 class="mb-0">
-                        <i class="fas fa-code me-2"></i>
+                        <i class="fas fa-code me-2 text-primary"></i>
                         Raw Data
                     </h6>
+                    <i class="fas fa-chevron-down text-muted" id="modalRawDataChevron"></i>
                 </div>
+            </div>
+            <div class="collapse" id="modalRawDataCollapse">
                 <div class="card-body">
                     @if (!string.IsNullOrEmpty(Model.FormattedOldValue))
                     {
@@ -145,127 +180,153 @@
                     }
                 </div>
             </div>
-        }
+        </div>
+    }
 
-        <!-- Additional Metadata -->
-                @if (Model.Entry.Metadata != null && Model.Entry.Metadata.Any())
-                {
-                    <div class="card mb-3">
-                        <div class="card-header">
-                            <h6 class="mb-0">
-                                <i class="fas fa-info-circle me-2"></i>
-                                Additional Metadata
-                            </h6>
-                        </div>
-                        <div class="card-body">
-                            <pre class="bg-light p-2 rounded small"><code>
-                                @foreach (var kvp in Model.Entry.Metadata)
-                                {
-                                    @($"{kvp.Key}: {kvp.Value}")
-                                }
-                            </code></pre>
-                        </div>
-                    </div>
-                }
-
-        <!-- User Agent -->
-        @if (!string.IsNullOrEmpty(Model.Entry.UserAgent))
-        {
-            <div class="card mb-3">
-                <div class="card-header">
-                    <h6 class="mb-0">
-                        <i class="fas fa-browser me-2"></i>
-                        User Agent
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <div class="small text-muted font-monospace">@Model.Entry.UserAgent</div>
-                </div>
+    <!-- Additional Metadata -->
+    @if (Model.Entry.Metadata != null && Model.Entry.Metadata.Any())
+    {
+        <div class="card mb-3">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">
+                    <i class="fas fa-info-circle me-2 text-primary"></i>
+                    Additional Metadata
+                </h6>
             </div>
-        }
-
-        <!-- Related Entries -->
-        @if (Model.RelatedEntries?.Any() == true)
-        {
-            <div class="card">
-                <div class="card-header">
-                    <h6 class="mb-0">
-                        <i class="fas fa-link me-2"></i>
-                        Related Entries
-                        <span class="badge bg-secondary ms-2">@Model.RelatedEntries.Count()</span>
-                    </h6>
-                </div>
-                <div class="card-body p-0">
-                    <div class="list-group list-group-flush">
-                        @foreach (var relatedEntry in Model.RelatedEntries.Take(5))
+            <div class="card-body">
+                <table class="table table-sm table-borderless">
+                    <tbody>
+                        @foreach (var kvp in Model.Entry.Metadata)
                         {
-                            <div class="list-group-item">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <div class="flex-grow-1">
-                                        <h6 class="mb-1 small">@relatedEntry.DisplayActionType</h6>
-                                        <p class="mb-1 text-muted small">By @relatedEntry.UserName</p>
-                                        <small class="text-muted">@relatedEntry.RelativeTime</small>
-                                    </div>
-                                    <span class="badge @relatedEntry.ActionBadgeClass">@relatedEntry.DisplayActionType</span>
-                                </div>
-                            </div>
+                            <tr>
+                                <th class="text-muted small" style="width: 30%;">@kvp.Key:</th>
+                                <td><code class="small">@kvp.Value</code></td>
+                            </tr>
                         }
-                    </div>
-                    @if (Model.RelatedEntries.Count() > 5)
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+
+    <!-- User Agent -->
+    @if (!string.IsNullOrEmpty(Model.Entry.UserAgent))
+    {
+        <div class="card mb-3">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">
+                    <i class="fas fa-globe me-2 text-primary"></i>
+                    User Agent
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="small text-muted font-monospace">@Model.Entry.UserAgent</div>
+            </div>
+        </div>
+    }
+
+    <!-- Related Entries -->
+    @if (Model.RelatedEntries?.Any() == true)
+    {
+        <div class="card">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">
+                    <i class="fas fa-link me-2 text-primary"></i>
+                    Related Entries
+                    <span class="badge bg-secondary ms-2">@Model.RelatedEntries.Count()</span>
+                </h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    @foreach (var relatedEntry in Model.RelatedEntries.Take(5))
                     {
-                        <div class="card-footer text-center">
-                            <small class="text-muted">@(Model.RelatedEntries.Count() - 5) more related entries</small>
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1 small">@relatedEntry.DisplayActionType</h6>
+                                    <p class="mb-1 text-muted small">By @relatedEntry.UserName</p>
+                                    <small class="text-muted">@relatedEntry.RelativeTime</small>
+                                </div>
+                                <span class="badge bg-secondary small">@relatedEntry.DisplayActionType</span>
+                            </div>
                         </div>
                     }
                 </div>
+                @if (Model.RelatedEntries.Count() > 5)
+                {
+                    <div class="card-footer bg-light text-center">
+                        <small class="text-muted">@(Model.RelatedEntries.Count() - 5) more related entries</small>
+                    </div>
+                }
             </div>
-        }
-    }
-    else
-    {
-        <div class="text-center py-4">
-            <i class="fas fa-exclamation-triangle fa-2x text-warning mb-3"></i>
-            <h5>Entry Not Found</h5>
-            <p class="text-muted">The requested audit entry could not be found.</p>
         </div>
     }
-</div>
 
-<div class="modal-footer">
-    @if (Model?.Entry != null)
-    {
+    <!-- Modal Footer Actions -->
+    <div class="d-flex gap-2 mt-3 pt-3 border-top">
         <a href="@Url.Action("EntryDetails", "Audit", new { entryId = Model.Entry.EntryId })" 
-           class="btn btn-primary">
-            <i class="fas fa-external-link-alt"></i> View Full Details
+           class="btn btn-primary btn-sm">
+            <i class="fas fa-external-link-alt me-1"></i> View Full Details
         </a>
         <a href="@Url.Action("EntityAudit", "Audit", new { entityType = Model.Entry.EntityType, entityId = Model.Entry.EntityId })" 
-           class="btn btn-outline-secondary">
-            <i class="fas fa-history"></i> Entity History
+           class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-history me-1"></i> Entity History
         </a>
-    }
-    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-</div>
-
-@functions {
-    private string GetChangeBorderClass(string changeType)
-    {
-        return changeType?.ToLowerInvariant() switch
-        {
-            "added" => "success",
-            "removed" => "danger",
-            "modified" => "warning",
-            _ => "info"
-        };
-    }
-
-    private string GetChangeBadgeClass(string changeType)
-    {
-        return changeType?.ToLowerInvariant() switch
-        {
-            "added" => "bg-success",
-            "removed" => "bg-danger",
-            "modified" => "bg-warning text-dark",
-            _ => "bg-info"
-        };
-    }
+    </div>
 }
+else
+{
+    <div class="text-center py-4">
+        <i class="fas fa-exclamation-triangle fa-2x text-warning mb-3"></i>
+        <h5>Entry Not Found</h5>
+        <p class="text-muted">The requested audit entry could not be found.</p>
+    </div>
+}
+
+<style>
+    /* Modal-specific styling */
+    .entry-overview {
+        background: linear-gradient(135deg, var(--tw-primary, #007bff) 0%, var(--tw-primary-dark, #0056b3) 100%);
+        color: white;
+    }
+    .badge-sm {
+        font-size: 0.65rem;
+        padding: 0.25rem 0.5rem;
+    }
+    .card-header .btn-link {
+        color: var(--tw-text-secondary, #6c757d) !important;
+        font-size: 1rem;
+        transition: color 0.15s ease-in-out;
+    }
+    .card-header .btn-link:hover {
+        color: var(--tw-primary, #007bff) !important;
+    }
+    .card-header .btn-link:focus {
+        box-shadow: none;
+    }
+    .card-header .btn-link i {
+        transition: transform 0.3s ease;
+    }
+    .card-header .btn-link[aria-expanded="true"] i {
+        transform: rotate(180deg);
+    }
+    .card-header {
+        cursor: pointer;
+    }
+    .card-header:hover {
+        background-color: var(--bs-gray-200, #e9ecef) !important;
+    }
+</style>
+
+<script>
+    // Handle chevron rotation for modal collapsible sections
+    $(document).ready(function() {
+        $('#modalRawDataCollapse').on('show.bs.collapse', function () {
+            $('#modalRawDataChevron').removeClass('fa-chevron-down').addClass('fa-chevron-up');
+        });
+        
+        $('#modalRawDataCollapse').on('hide.bs.collapse', function () {
+            $('#modalRawDataChevron').removeClass('fa-chevron-up').addClass('fa-chevron-down');
+        });
+    });
+</script>

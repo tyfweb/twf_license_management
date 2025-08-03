@@ -5,13 +5,8 @@
 }
 
 @section Styles {
+    <link rel="stylesheet" href="~/css/product-management.css" />
     <style>
-        .entity-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 8px 8px 0 0;
-            padding: 2rem;
-        }
         .timeline-container {
             position: relative;
         }
@@ -21,7 +16,7 @@
             top: 0;
             bottom: 0;
             width: 2px;
-            background: #dee2e6;
+            background: var(--tw-border-color, #dee2e6);
         }
         .timeline-item {
             position: relative;
@@ -35,58 +30,41 @@
             width: 1.5rem;
             height: 1.5rem;
             border-radius: 50%;
-            background: var(--background-primary, #fff);
-            border: 3px solid var(--primary-color, #007bff);
+            background: var(--tw-background-primary, #fff);
+            border: 3px solid var(--tw-primary, #007bff);
             z-index: 2;
         }
         .timeline-marker.create {
-            border-color: var(--success-color, #28a745);
-            background: var(--success-color, #28a745);
+            border-color: var(--tw-success, #28a745);
+            background: var(--tw-success, #28a745);
         }
         .timeline-marker.update {
-            border-color: var(--warning-color, #ffc107);
-            background: var(--warning-color, #ffc107);
+            border-color: var(--tw-warning, #ffc107);
+            background: var(--tw-warning, #ffc107);
         }
         .timeline-marker.delete {
-            border-color: var(--danger-color, #dc3545);
-            background: var(--danger-color, #dc3545);
+            border-color: var(--tw-danger, #dc3545);
+            background: var(--tw-danger, #dc3545);
         }
         .timeline-marker.security {
-            border-color: #fd7e14;
-            background: #fd7e14;
+            border-color: var(--tw-orange, #fd7e14);
+            background: var(--tw-orange, #fd7e14);
         }
         .timeline-content {
-            background: #fff;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
+            background: var(--tw-background-primary, #fff);
+            border: 1px solid var(--tw-border-color, #dee2e6);
+            border-radius: var(--tw-border-radius, 8px);
             padding: 1.5rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: var(--tw-shadow-sm, 0 2px 4px rgba(0,0,0,0.1));
             transition: all 0.2s ease-in-out;
         }
         .timeline-content:hover {
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            box-shadow: var(--tw-shadow-md, 0 4px 8px rgba(0,0,0,0.15));
             transform: translateY(-1px);
         }
-        .entity-card {
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .filter-card {
-            background: #f8f9fa;
-            border-radius: 8px;
-            border: 1px solid #dee2e6;
-        }
-        .stats-card {
-            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
-            color: white;
-            border-radius: 8px;
-            padding: 1.5rem;
-            text-align: center;
-        }
         .entry-changes {
-            background: #f8f9fa;
-            border-radius: 4px;
+            background: var(--tw-background-secondary, #f8f9fa);
+            border-radius: var(--tw-border-radius-sm, 4px);
             padding: 0.75rem;
             margin-top: 1rem;
         }
@@ -95,7 +73,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 0.25rem 0;
-            border-bottom: 1px solid #e9ecef;
+            border-bottom: 1px solid var(--tw-border-color-light, #e9ecef);
         }
         .change-item:last-child {
             border-bottom: none;
@@ -103,7 +81,7 @@
     </style>
 }
 
-<div class="container-fluid">
+<div class="container-fluid py-3">
     <!-- Breadcrumb -->
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
@@ -113,87 +91,65 @@
         </ol>
     </nav>
 
-    <!-- Entity Header -->
-    <div class="card entity-card mb-4">
-        <div class="entity-header">
-            <div class="row align-items-center">
-                <div class="col">
-                    <h1 class="mb-2">
-                        <i class="fas fa-history me-2"></i>
-                        Audit History
-                    </h1>
-                    <h3 class="mb-1">@Model.EntityDisplayName</h3>
-                    <p class="mb-0 opacity-75">
-                        Complete audit trail for this @Model.EntityType.ToLowerInvariant()
-                    </p>
-                </div>
-                <div class="col-auto">
-                    <div class="text-end">
-                        <span class="badge bg-light text-dark fs-6">@Model.EntityType</span>
-                        <div class="mt-2">
-                            <code class="text-light">@Model.EntityId</code>
-                        </div>
-                    </div>
-                </div>
+    <!-- Header Section -->
+    <div class="header mb-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="mb-1">
+                    <i class="fas fa-history me-2"></i>
+                    Audit History - @Model.EntityDisplayName
+                </h2>
+                <p class="text-muted mb-0">
+                    Complete audit trail for this @Model.EntityType.ToLowerInvariant()
+                    <code class="ms-2">@Model.EntityId</code>
+                </p>
             </div>
-        </div>
-    </div>
-
-    <!-- Actions and Filters -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div class="d-flex gap-2">
-            <a href="@Url.Action("Entries", "Audit")" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left"></i> Back to All Entries
-            </a>
-            <a href="@Url.Action("Index", "Audit")" class="btn btn-outline-primary">
-                <i class="fas fa-chart-line"></i> Dashboard
-            </a>
-        </div>
-        <div class="d-flex gap-2">
-            <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#exportModal">
-                <i class="fas fa-download"></i> Export History
-            </button>
-            <div class="dropdown">
-                <button class="btn btn-outline-info dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                    <i class="fas fa-filter"></i> Filter
+            <div class="d-flex gap-2">
+                <a href="@Url.Action("Entries", "Audit")" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to All Entries
+                </a>
+                <a href="@Url.Action("Index", "Audit")" class="btn btn-outline-primary">
+                    <i class="fas fa-chart-line"></i> Dashboard
+                </a>
+                <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#exportModal">
+                    <i class="fas fa-download"></i> Export
                 </button>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="?">All Events</a></li>
-                    <li><a class="dropdown-item" href="?actionFilter=create">Create Events</a></li>
-                    <li><a class="dropdown-item" href="?actionFilter=update">Update Events</a></li>
-                    <li><a class="dropdown-item" href="?actionFilter=delete">Delete Events</a></li>
-                    <li><a class="dropdown-item" href="?actionFilter=security">Security Events</a></li>
-                </ul>
             </div>
         </div>
     </div>
 
     <!-- Date Range Filter -->
-    <div class="filter-card mb-4">
-        <div class="card-body">
-            <form method="get" class="row g-3 align-items-end">
-                <input type="hidden" name="entityType" value="@Model.EntityType" />
-                <input type="hidden" name="entityId" value="@Model.EntityId" />
-                <div class="col-md-4">
-                    <label for="startDate" class="form-label">Start Date</label>
-                    <input type="date" id="startDate" name="startDate" class="form-control" 
-                           value="@Model.DateRangeStart?.ToString("yyyy-MM-dd")">
+    <div class="row g-2 mb-3">
+        <div class="col-12">
+            <div class="search-section">
+                <div class="d-flex gap-2 align-items-end">
+                    <div class="flex-grow-1">
+                        <form method="get" class="row g-2">
+                            <input type="hidden" name="entityType" value="@Model.EntityType" />
+                            <input type="hidden" name="entityId" value="@Model.EntityId" />
+                            <div class="col-md-4">
+                                <label for="startDate" class="form-label">Start Date</label>
+                                <input type="date" id="startDate" name="startDate" class="form-control" 
+                                       value="@Model.DateRangeStart?.ToString("yyyy-MM-dd")">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="endDate" class="form-label">End Date</label>
+                                <input type="date" id="endDate" name="endDate" class="form-control" 
+                                       value="@Model.DateRangeEnd?.ToString("yyyy-MM-dd")">
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end gap-2">
+                                <button type="submit" class="btn btn-primary flex-grow-1">
+                                    <i class="fas fa-search"></i> Apply Filter
+                                </button>
+                                <a href="@Url.Action("EntityAudit", "Audit", new { entityType = Model.EntityType, entityId = Model.EntityId })" 
+                                   class="btn btn-outline-secondary">
+                                    <i class="fas fa-times"></i> Clear
+                                </a>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-                <div class="col-md-4">
-                    <label for="endDate" class="form-label">End Date</label>
-                    <input type="date" id="endDate" name="endDate" class="form-control" 
-                           value="@Model.DateRangeEnd?.ToString("yyyy-MM-dd")">
-                </div>
-                <div class="col-md-4">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-search"></i> Apply Filter
-                    </button>
-                    <a href="@Url.Action("EntityAudit", "Audit", new { entityType = Model.EntityType, entityId = Model.EntityId })" 
-                       class="btn btn-outline-secondary ms-2">
-                        <i class="fas fa-times"></i> Clear
-                    </a>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 
@@ -345,24 +301,31 @@
         <!-- Sidebar -->
         <div class="col-lg-3">
             <!-- Statistics -->
-            <div class="card entity-card mb-4">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">
+            <div class="sidebar-section mb-4">
+                <div class="section-header">
+                    <h5>
                         <i class="fas fa-chart-bar me-2"></i>
                         Statistics
                     </h5>
                 </div>
-                <div class="card-body">
+                <div class="section-content">
                     @if (Model.Statistics != null)
                     {
                         <div class="stats-card mb-3">
-                            <h3 class="mb-0">@Model.Statistics.TotalEntries</h3>
-                            <small>Total Entries</small>
+                            <div class="stats-row-1">
+                                <div class="stats-icon">
+                                    <i class="fas fa-list"></i>
+                                </div>
+                                <div class="stats-number">@Model.Statistics.TotalEntries</div>
+                            </div>
+                            <div class="stats-row-2">
+                                <div class="stats-label">Total Entries</div>
+                            </div>
                         </div>
                         
                         @if (Model.Statistics.TopActions.Any())
                         {
-                            <h6 class="fw-bold">Top Actions:</h6>
+                            <h6 class="fw-bold mb-2">Top Actions:</h6>
                             @foreach (var action in Model.Statistics.TopActions.Take(5))
                             {
                                 <div class="d-flex justify-content-between align-items-center mb-2">
@@ -380,14 +343,14 @@
             </div>
 
             <!-- Entity Info -->
-            <div class="card entity-card mb-4">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">
+            <div class="sidebar-section mb-4">
+                <div class="section-header">
+                    <h5>
                         <i class="fas fa-info-circle me-2"></i>
                         Entity Information
                     </h5>
                 </div>
-                <div class="card-body">
+                <div class="section-content">
                     <table class="table table-sm table-borderless">
                         <tbody>
                             <tr>
@@ -422,14 +385,14 @@
             </div>
 
             <!-- Quick Actions -->
-            <div class="card entity-card">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <h5>
                         <i class="fas fa-tools me-2"></i>
                         Quick Actions
                     </h5>
                 </div>
-                <div class="card-body">
+                <div class="section-content">
                     <div class="d-grid gap-2">
                         <a href="@Url.Action("Entries", "Audit", new { entityType = Model.EntityType, entityId = Model.EntityId })" 
                            class="btn btn-outline-primary btn-sm">

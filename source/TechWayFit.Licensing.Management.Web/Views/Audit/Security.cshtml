@@ -7,34 +7,16 @@
 @section Styles {
     <link rel="stylesheet" href="~/css/product-management.css" />
     <style>
-        .alert-header {
-            background: var(--danger-color);
-            color: white;
-            border-radius: var(--radius) var(--radius) 0 0;
-            padding: 1.5rem;
-        }
-        .warning-header {
-            background: var(--warning-color);
-            color: white;
-            border-radius: var(--radius) var(--radius) 0 0;
-            padding: 1.5rem;
-        }
-        .info-header {
-            background: var(--info-color);
-            color: white;
-            border-radius: var(--radius) var(--radius) 0 0;
-            padding: 1.5rem;
-        }
         .risk-high {
-            border-left: 4px solid var(--danger-color);
+            border-left: 4px solid var(--tw-danger, #dc3545);
             background: rgba(220, 53, 69, 0.05);
         }
         .risk-medium {
-            border-left: 4px solid var(--warning-color);
+            border-left: 4px solid var(--tw-warning, #ffc107);
             background: rgba(255, 193, 7, 0.05);
         }
         .risk-low {
-            border-left: 4px solid var(--success-color);
+            border-left: 4px solid var(--tw-success, #198754);
             background: rgba(40, 167, 69, 0.05);
         }
         .security-timeline {
@@ -42,7 +24,7 @@
             overflow-y: auto;
         }
         .timeline-item {
-            border-left: 3px solid var(--border-color);
+            border-left: 3px solid var(--tw-border-color, #dee2e6);
             padding-left: 1rem;
             margin-bottom: 1rem;
             position: relative;
@@ -55,16 +37,17 @@
             width: 12px;
             height: 12px;
             border-radius: 50%;
-            background-color: var(--gray-500);
-        }        .timeline-item.critical::before { background-color: var(--danger-color); }
-        .timeline-item.warning::before { background-color: var(--warning-color); }
-        .timeline-item.info::before { background-color: var(--info-color); }
+            background-color: var(--tw-text-muted, #6c757d);
+        }
+        .timeline-item.critical::before { background-color: var(--tw-danger, #dc3545); }
+        .timeline-item.warning::before { background-color: var(--tw-warning, #ffc107); }
+        .timeline-item.info::before { background-color: var(--tw-info, #17a2b8); }
     </style>
 }
 
-<div class="container-fluid">
-    <!-- Header -->
-    <div class="header">
+<div class="container-fluid py-3">
+    <!-- Header Section -->
+    <div class="header mb-3">
         <div class="d-flex justify-content-between align-items-center">
             <div>
                 <h2 class="mb-1">
@@ -88,53 +71,89 @@
     </div>
 
     <!-- Date Range Filter -->
-    <div class="filter-card mb-4">
-        <div class="card-body">
-            <form method="get" class="row g-3 align-items-end">
-                <div class="col-md-4">
-                    <label for="startDate" class="form-label">Start Date</label>
-                    <input type="date" id="startDate" name="startDate" class="form-control" 
-                           value="@Model.DateRangeStart?.ToString("yyyy-MM-dd")">
+    <div class="row g-2 mb-3">
+        <div class="col-12">
+            <div class="search-section">
+                <div class="d-flex gap-2 align-items-end">
+                    <div class="flex-grow-1">
+                        <form method="get" class="row g-2">
+                            <div class="col-md-4">
+                                <label for="startDate" class="form-label">Start Date</label>
+                                <input type="date" id="startDate" name="startDate" class="form-control" 
+                                       value="@Model.DateRangeStart?.ToString("yyyy-MM-dd")">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="endDate" class="form-label">End Date</label>
+                                <input type="date" id="endDate" name="endDate" class="form-control" 
+                                       value="@Model.DateRangeEnd?.ToString("yyyy-MM-dd")">
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end gap-2">
+                                <button type="submit" class="btn btn-primary flex-grow-1">
+                                    <i class="fas fa-search"></i> Apply Filter
+                                </button>
+                                <a href="@Url.Action("Security", "Audit")" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times"></i> Clear
+                                </a>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-                <div class="col-md-4">
-                    <label for="endDate" class="form-label">End Date</label>
-                    <input type="date" id="endDate" name="endDate" class="form-control" 
-                           value="@Model.DateRangeEnd?.ToString("yyyy-MM-dd")">
-                </div>
-                <div class="col-md-4">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-search"></i> Apply Filter
-                    </button>
-                    <a href="@Url.Action("Security", "Audit")" class="btn btn-outline-secondary ms-2">
-                        <i class="fas fa-times"></i> Clear
-                    </a>
-                </div>
-            </form>
-        </div>
-    </div>    <!-- Security Metrics -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="stat-card warning">
-                <div class="stat-value">@Model.TotalSecurityEvents</div>
-                <div class="stat-label">Total Events</div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="stat-card" style="border-color: var(--danger-light, #fecaca);">
-                <div class="stat-value" style="color: var(--danger-color);">@Model.HighRiskEvents</div>
-                <div class="stat-label">High Risk</div>
+    </div>
+
+    <!-- Security Metrics -->
+    <div class="row g-2 mb-3">
+        <div class="col-sm-6 col-lg-3">
+            <div class="stats-card stats-card-warning">
+                <div class="stats-row-1">
+                    <div class="stats-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="stats-number">@Model.TotalSecurityEvents.ToString("N0")</div>
+                </div>
+                <div class="stats-row-2">
+                    <div class="stats-label">Total Events</div>
+                </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="stat-card warning">
-                <div class="stat-value">@Model.MediumRiskEvents</div>
-                <div class="stat-label">Medium Risk</div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="stats-card stats-card-danger">
+                <div class="stats-row-1">
+                    <div class="stats-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="stats-number">@Model.HighRiskEvents.ToString("N0")</div>
+                </div>
+                <div class="stats-row-2">
+                    <div class="stats-label">High Risk</div>
+                </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="stat-card success">
-                <div class="stat-value">@Model.LowRiskEvents</div>
-                <div class="stat-label">Low Risk</div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="stats-card stats-card-warning">
+                <div class="stats-row-1">
+                    <div class="stats-icon">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                    <div class="stats-number">@Model.MediumRiskEvents.ToString("N0")</div>
+                </div>
+                <div class="stats-row-2">
+                    <div class="stats-label">Medium Risk</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="stats-card stats-card-success">
+                <div class="stats-row-1">
+                    <div class="stats-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stats-number">@Model.LowRiskEvents.ToString("N0")</div>
+                </div>
+                <div class="stats-row-2">
+                    <div class="stats-label">Low Risk</div>
+                </div>
             </div>
         </div>
     </div>
@@ -145,14 +164,14 @@
             <!-- High Risk Events -->
             @if (Model.SecurityEntries.Any())
             {
-                <div class="card security-card mb-4">
-                    <div class="alert-header">
-                        <h5 class="mb-0">
+                <div class="edit-section mb-4">
+                    <div class="section-header">
+                        <h5>
                             <i class="fas fa-exclamation-triangle me-2"></i>
                             Recent Security Events
                         </h5>
                     </div>
-                    <div class="card-body p-0">
+                    <div class="section-content p-0">
                         @foreach (var entry in Model.SecurityEntries.Take(10))
                         {
                             var riskClass = GetRiskClass(entry.ActionType);
@@ -190,30 +209,30 @@
                                 }
                             </div>
                         }
+                        @if (Model.SecurityEntries.Count() > 10)
+                        {
+                            <div class="p-3 text-center border-top bg-light">
+                                <a href="@Url.Action("Entries", "Audit", new { searchTerm = "security" })" 
+                                   class="btn btn-sm btn-outline-primary">
+                                    View All Security Events
+                                </a>
+                            </div>
+                        }
                     </div>
-                    @if (Model.SecurityEntries.Count() > 10)
-                    {
-                        <div class="card-footer text-center">
-                            <a href="@Url.Action("Entries", "Audit", new { searchTerm = "security" })" 
-                               class="btn btn-sm btn-outline-primary">
-                                View All Security Events
-                            </a>
-                        </div>
-                    }
                 </div>
             }
 
             <!-- Failed Logins -->
             @if (Model.FailedLogins.Any())
             {
-                <div class="card security-card mb-4">
-                    <div class="warning-header">
-                        <h5 class="mb-0">
+                <div class="edit-section mb-4">
+                    <div class="section-header">
+                        <h5>
                             <i class="fas fa-user-times me-2"></i>
                             Recent Failed Login Attempts
                         </h5>
                     </div>
-                    <div class="card-body p-0">
+                    <div class="section-content p-0">
                         @foreach (var entry in Model.FailedLogins.Take(5))
                         {
                             <div class="p-3 border-bottom">
@@ -242,14 +261,14 @@
             <!-- Access Violations -->
             @if (Model.AccessViolations.Any())
             {
-                <div class="card security-card mb-4">
-                    <div class="alert-header">
-                        <h5 class="mb-0">
+                <div class="edit-section mb-4">
+                    <div class="section-header">
+                        <h5>
                             <i class="fas fa-ban me-2"></i>
                             Access Violations
                         </h5>
                     </div>
-                    <div class="card-body p-0">
+                    <div class="section-content p-0">
                         @foreach (var entry in Model.AccessViolations.Take(5))
                         {
                             <div class="p-3 border-bottom risk-high">
@@ -283,14 +302,14 @@
         <!-- Sidebar -->
         <div class="col-lg-4">
             <!-- Security Summary -->
-            <div class="card security-card mb-4">
-                <div class="info-header">
-                    <h5 class="mb-0">
+            <div class="sidebar-section mb-4">
+                <div class="section-header">
+                    <h5>
                         <i class="fas fa-chart-pie me-2"></i>
                         Security Summary
                     </h5>
                 </div>
-                <div class="card-body">
+                <div class="section-content">
                     <div class="row text-center">
                         <div class="col-6 border-end">
                             <h4 class="text-danger">@Model.HighRiskEvents</h4>
@@ -310,14 +329,14 @@
             </div>
 
             <!-- Quick Actions -->
-            <div class="card security-card mb-4">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">
+            <div class="sidebar-section mb-4">
+                <div class="section-header">
+                    <h5>
                         <i class="fas fa-tools me-2"></i>
                         Security Actions
                     </h5>
                 </div>
-                <div class="card-body">
+                <div class="section-content">
                     <div class="d-grid gap-2">
                         <a href="@Url.Action("Entries", "Audit", new { searchTerm = "failed" })" 
                            class="btn btn-outline-warning btn-sm">
@@ -340,14 +359,14 @@
             </div>
 
             <!-- Security Tips -->
-            <div class="card security-card">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <h5>
                         <i class="fas fa-lightbulb me-2"></i>
                         Security Tips
                     </h5>
                 </div>
-                <div class="card-body">
+                <div class="section-content">
                     <ul class="list-unstyled mb-0">
                         <li class="mb-2">
                             <i class="fas fa-check text-success me-2"></i>
