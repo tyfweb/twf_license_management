@@ -19,6 +19,7 @@ CREATE TABLE products (
     support_email VARCHAR(255),
     support_phone VARCHAR(50),
     decommission_date TIMESTAMP WITH TIME ZONE,
+    metadata_json VARCHAR(2000) DEFAULT '{}',
     status VARCHAR(20) NOT NULL DEFAULT 'Active',
     is_active BOOLEAN NOT NULL DEFAULT true,
     is_deleted BOOLEAN NOT NULL DEFAULT false,

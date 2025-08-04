@@ -133,7 +133,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         /// </summary>
         public IActionResult Create()
         {
-            var viewModel = new ProductEditViewModel
+            var viewModel = new ProductCreateViewModel
             {
                 IsActive = true,
                 Version = "1.0.0",
@@ -153,7 +153,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(ProductEditViewModel model)
+        public async Task<IActionResult> Create(ProductCreateViewModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -165,48 +165,61 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
 
             try
             {
-                // Check if product ID already exists
-                var existingProduct = await GetProductByIdAsync(model.ProductId.ToGuid());
+                // Check if product with same name already exists
+                var existingProduct = await GetProductByNameAsync(model.ProductName);
                 if (existingProduct != null)
                 {
-                    ModelState.AddModelError("ProductId", "A product with this ID already exists.");
+                    ModelState.AddModelError("ProductName", "A product with this name already exists.");
                     ViewBag.ProductTypes = Enum.GetValues<ProductType>()
-                        .Select(pt => new SelectListItem { Value = ((int)pt).ToString(), Text = pt.ToString() })
+                        .Select(pt => new { Value = (int)pt, Text = pt.ToString() })
                         .ToList();
                     return View(model);
                 }
+                 var enterpriseProduct = new EnterpriseProduct
+                 {
+                     ProductId = Guid.NewGuid(),
+                     Name = model.ProductName,
+                     Description = model.Description,
+                     Version = model.Version,
+                     Status = model.IsActive ? ProductStatus.Active : ProductStatus.Inactive,
+                     ReleaseDate = model.ReleaseDate,
+                     SupportEmail = model.SupportEmail,
+                     SupportPhone = model.SupportPhone,
+                     Metadata = model.Metadata ?? new Dictionary<string, string>(),
+                    };
 
-                var productConfig = new ProductConfiguration
-                {
-                    ProductId = model.ProductId.ToString(),
-                    ProductName = model.ProductName,
-                    Description = model.Description ?? "",
-                    ProductType = model.ProductType,
-                    Version = model.Version,
-                    IsActive = model.IsActive,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow,
-                    CreatedBy = User.Identity?.Name ?? "system",
-                    FeatureTiers = ConvertFeatureTiers(model.FeatureTiers),
-                    AvailableFeatures = ConvertFeatureDefinitions(model.AvailableFeatures),
-                    DefaultLimitations = model.DefaultLimitations.ToDictionary(kvp => kvp.Key, kvp => (object)kvp.Value),
-                    Metadata = model.Metadata
-                };
-
-                await SaveProductAsync(productConfig);
+                var product = await _productService.CreateProductAsync(enterpriseProduct, User.Identity?.Name ?? "System");
 
                 TempData["SuccessMessage"] = $"Product '{model.ProductName}' created successfully!";
-                return RedirectToAction(nameof(Details), new { id = model.ProductId });
+                return RedirectToAction(nameof(Details), new { id = product.ProductId });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating product {ProductId}", model.ProductId);
+                _logger.LogError(ex, "Error creating product {Product Name}", model.ProductName);
                 ModelState.AddModelError("", "Error creating product. Please try again.");
                 ViewBag.ProductTypes = Enum.GetValues<ProductType>()
                     .Select(pt => new SelectListItem { Value = ((int)pt).ToString(), Text = pt.ToString() })
                     .ToList();
                 return View(model);
             }
+        }
+
+        private async Task<ProductConfiguration?> GetProductByNameAsync(string productName)
+        {
+            var enterpriseProduct = await _productService.GetProductByNameAsync(productName);
+            if (enterpriseProduct == null) return null;
+
+            return new ProductConfiguration
+            {
+                ProductId = enterpriseProduct.ProductId.ToString(),
+                ProductName = enterpriseProduct.Name,
+                Description = enterpriseProduct.Description,
+                Version = enterpriseProduct.Version,
+                ProductType = ProductType.ApiGateway,
+                IsActive = enterpriseProduct.Status == ProductStatus.Active,
+                CreatedAt = enterpriseProduct.ReleaseDate,
+                UpdatedAt = enterpriseProduct.ReleaseDate
+            };
         }
 
         /// <summary>
@@ -415,12 +428,13 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         {
             var enterpriseProduct = new EnterpriseProduct
             {
-                ProductId = Guid.Parse(product.ProductId),
+                ProductId = string.IsNullOrEmpty(product.ProductId) ? Guid.NewGuid() :
+                            Guid.Parse(product.ProductId),
                 Name = product.ProductName,
                 Description = product.Description,
                 Version = product.Version,
                 Status = product.IsActive ? ProductStatus.Active : ProductStatus.Inactive,
-                ReleaseDate = product.CreatedAt
+                ReleaseDate = product.CreatedAt,
             };
 
             if (await _productService.GetProductByIdAsync(Guid.Parse(product.ProductId)) != null)

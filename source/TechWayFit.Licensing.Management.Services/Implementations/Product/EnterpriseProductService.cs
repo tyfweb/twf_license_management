@@ -180,7 +180,7 @@ public class EnterpriseProductService : IEnterpriseProductService
             {
                 Filters = new List<Expression<Func<ProductEntity, bool>>>
                 {
-                    p => p.Name.Equals(productName, StringComparison.OrdinalIgnoreCase)
+                    p => p.Name.ToUpper() == productName.ToUpper()
                 }
             };
             

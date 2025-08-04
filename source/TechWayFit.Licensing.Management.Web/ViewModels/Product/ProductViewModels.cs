@@ -103,7 +103,58 @@ namespace TechWayFit.Licensing.Management.Web.ViewModels.Product
         public Dictionary<LicenseTier, int> LicensesByTier { get; set; } = new();
         public Dictionary<string, int> FeatureUsage { get; set; } = new();
     }
+    public class ProductCreateViewModel
+    {       
+        [Required]
+        [Display(Name = "Product Name")]
+        [StringLength(100, ErrorMessage = "Product name cannot be longer than 100 characters")]
+        public string ProductName { get; set; } = string.Empty;
 
+        [Required]
+        [Display(Name = "Product Type")]
+        public ProductType ProductType { get; set; }
+
+        [Display(Name = "Version")]
+        [StringLength(20, ErrorMessage = "Version cannot be longer than 20 characters")]
+        public string Version { get; set; } = "1.0";
+
+        [Display(Name = "Description")]
+        [StringLength(1000, ErrorMessage = "Description cannot be longer than 1000 characters")]
+        public string Description { get; set; } = string.Empty;
+
+        [Display(Name = "Is Active")]
+        public bool IsActive { get; set; } = true;
+
+        [Display(Name = "Release Date")]
+        [DataType(DataType.Date)]
+        public DateTime ReleaseDate { get; set; } = DateTime.UtcNow;
+
+        [Display(Name = "Support Email")]
+        [EmailAddress(ErrorMessage = "Invalid email address")]
+        [StringLength(255, ErrorMessage = "Email cannot exceed 255 characters")]
+        public string SupportEmail { get; set; } = string.Empty;
+
+        [Display(Name = "Support Phone")]
+        [Phone(ErrorMessage = "Invalid phone number")]
+        [StringLength(20, ErrorMessage = "Phone number cannot exceed 20 characters")]
+        public string SupportPhone { get; set; } = string.Empty;
+
+        [Display(Name = "Feature Tiers")]
+        public Dictionary<LicenseTier, List<FeatureDefinitionViewModel>> FeatureTiers { get; set; } = new();
+
+        [Display(Name = "Available Features")]
+        public List<FeatureDefinitionViewModel> AvailableFeatures { get; set; } = new();
+
+        [Display(Name = "Default Limitations")]
+        public Dictionary<string, string> DefaultLimitations { get; set; } = new();
+
+        [Display(Name = "Metadata")]
+        public Dictionary<string, string> Metadata { get; set; } = new();
+
+        [Display(Name = "Created Date")]
+        public DateTime? CreatedDate { get; set; }
+ 
+    }
     /// <summary>
     /// Create/Edit product view model
     /// </summary>
