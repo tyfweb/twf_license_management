@@ -134,6 +134,20 @@ namespace TechWayFit.Licensing.Management.Web.ViewModels.Product
         [Display(Name = "Is Active")]
         public bool IsActive { get; set; } = true;
 
+        [Display(Name = "Release Date")]
+        [DataType(DataType.Date)]
+        public DateTime ReleaseDate { get; set; } = DateTime.UtcNow;
+
+        [Display(Name = "Support Email")]
+        [EmailAddress(ErrorMessage = "Invalid email address")]
+        [StringLength(255, ErrorMessage = "Email cannot exceed 255 characters")]
+        public string SupportEmail { get; set; } = string.Empty;
+
+        [Display(Name = "Support Phone")]
+        [Phone(ErrorMessage = "Invalid phone number")]
+        [StringLength(20, ErrorMessage = "Phone number cannot exceed 20 characters")]
+        public string SupportPhone { get; set; } = string.Empty;
+
         [Display(Name = "Feature Tiers")]
         public Dictionary<LicenseTier, List<FeatureDefinitionViewModel>> FeatureTiers { get; set; } = new();
 
@@ -277,6 +291,7 @@ namespace TechWayFit.Licensing.Management.Web.ViewModels.Product
         public string? UpdatedBy { get; set; }
         public DateTime? DeletedAt { get; set; }
         public string? DeletedBy { get; set; }
+        public DateTime? EndOfLifeDate { get; internal set; }
     }
 
     /// <summary>

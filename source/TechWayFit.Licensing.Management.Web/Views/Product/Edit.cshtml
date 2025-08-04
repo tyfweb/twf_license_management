@@ -61,7 +61,8 @@
                             <div class="col-md-4">
                                 <div class="form-group mb-3">
                                     <label asp-for="ProductType" class="form-label">Product Type</label>
-                                    <select asp-for="ProductType" class="form-select" asp-items="Html.GetEnumSelectList<TechWayFit.Licensing.Core.Models.ProductType>()">
+                                    <select asp-for="ProductType" class="form-select"
+                                            asp-items="Html.GetEnumSelectList<TechWayFit.Licensing.Core.Models.ProductType>()">
                                         <option value="">Select Type</option>
                                     </select>
                                     <span asp-validation-for="ProductType" class="text-danger"></span>
@@ -86,8 +87,33 @@
 
                         <div class="form-group mb-3">
                             <label asp-for="Description" class="form-label">Description</label>
-                            <textarea asp-for="Description" class="form-control" rows="3" placeholder="Describe the product and its capabilities..."></textarea>
+                            <textarea asp-for="Description" class="form-control" rows="3"
+                                      placeholder="Describe the product and its capabilities..."></textarea>
                             <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group mb-3">
+                                    <label asp-for="ReleaseDate" class="form-label">Release Date</label>
+                                    <input asp-for="ReleaseDate" type="date" class="form-control" />
+                                    <span asp-validation-for="ReleaseDate" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-3">
+                                    <label asp-for="SupportEmail" class="form-label">Support Email</label>
+                                    <input asp-for="SupportEmail" type="email" class="form-control" placeholder="support@example.com" />
+                                    <span asp-validation-for="SupportEmail" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-3">
+                                    <label asp-for="SupportPhone" class="form-label">Support Phone</label>
+                                    <input asp-for="SupportPhone" type="tel" class="form-control" placeholder="+1 (555) 123-4567" />
+                                    <span asp-validation-for="SupportPhone" class="text-danger"></span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -106,10 +132,12 @@
                                     var kvp = Model.Metadata.ElementAt(i);
                                     <div class="row mb-3 metadata-row">
                                         <div class="col-md-5">
-                                            <input type="text" name="Metadata[@i].Key" value="@kvp.Key" class="form-control" placeholder="Key" />
+                                            <input type="text" name="Metadata[@i].Key" value="@kvp.Key" class="form-control"
+                                                   placeholder="Key" />
                                         </div>
                                         <div class="col-md-5">
-                                            <input type="text" name="Metadata[@i].Value" value="@kvp.Value" class="form-control" placeholder="Value" />
+                                            <input type="text" name="Metadata[@i].Value" value="@kvp.Value" class="form-control"
+                                                   placeholder="Value" />
                                         </div>
                                         <div class="col-md-2">
                                             <button type="button" class="btn btn-outline-danger btn-sm remove-metadata">
@@ -239,6 +267,9 @@
                             </div>
                             <div class="mb-2">
                                 <strong>Metadata:</strong> Custom properties for additional product information.
+                            </div>
+                            <div class="mb-2">
+                                <strong>Support Contact:</strong> Provide valid support contact information.
                             </div>
                         </div>
                     </div>

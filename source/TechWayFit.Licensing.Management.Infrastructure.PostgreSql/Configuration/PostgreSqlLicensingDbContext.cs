@@ -513,6 +513,8 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
                 case EntityState.Added:
                     entry.Entity.Id = Guid.NewGuid();// Ensure Id is set for new entities
                     entry.Entity.CreatedOn = currentTime;
+                    if(entry.Entity.CreatedBy == null)
+                        entry.Entity.CreatedBy = "System"; // Default to System if not set
                     break;
                 case EntityState.Modified:
                     entry.Entity.UpdatedOn = currentTime;

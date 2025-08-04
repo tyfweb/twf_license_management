@@ -1,0 +1,4 @@
+/* Combined Product and Version Management Styles */
+/* This file incorporates styles from both product-management.css and version-management.css */
+@import url('product-management.css');
+@import url('version-management.css');

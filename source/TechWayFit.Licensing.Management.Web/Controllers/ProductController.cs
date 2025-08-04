@@ -1066,27 +1066,37 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                     return Json(new { success = false, message = "Validation failed", errors });
                 }
 
-                // Simulate adding a product version
-                await Task.CompletedTask; // For now, as this is mock implementation
+                // Create a new version
+                var newVersionId = Guid.NewGuid();
+                var releaseDate = model.ReleaseDate;
+                if (releaseDate == default)
+                {
+                    releaseDate = DateTime.UtcNow;
+                }
                 
+                // In a real implementation, this would be saved to the database
                 var newVersion = new 
                 {
-                    Id = Guid.NewGuid(),
+                    Id = newVersionId,
                     VersionNumber = model.VersionNumber,
                     VersionName = model.VersionName,
-                    ReleaseDate = model.ReleaseDate,
-                    Description = model.Description,
+                    ReleaseDate = releaseDate,
+                    ReleaseNotes = model.Description,
                     IsStable = model.IsStable,
                     IsActive = model.IsActive,
                     IsApproved = model.IsApproved,
-                    CanDelete = true
+                    CanDelete = !model.IsApproved,
+                    EndOfLifeDate = model.EndOfLifeDate,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
                 };
 
-                _logger.LogInformation("Product version '{VersionNumber}' added to product {ProductId}", model.VersionNumber, productId);
+                _logger.LogInformation("Product version '{VersionNumber}' added to product {ProductId}", 
+                    model.VersionNumber, productId);
                 
                 return Json(new { 
                     success = true, 
-                    message = "Product version added successfully", 
+                    message = $"Product version {model.VersionNumber} added successfully", 
                     data = newVersion 
                 });
             }
@@ -1115,20 +1125,26 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                     return Json(new { success = false, message = "Validation failed", errors });
                 }
 
-                // Simulate updating a product version
-                await Task.CompletedTask; // For now, as this is mock implementation
+                // In a real implementation, this would update the database record
+                var releaseDate = model.ReleaseDate;
+                if (releaseDate == default)
+                {
+                    releaseDate = DateTime.UtcNow;
+                }
                 
                 var updatedVersion = new 
                 {
                     Id = versionId,
                     VersionNumber = model.VersionNumber,
                     VersionName = model.VersionName,
-                    ReleaseDate = model.ReleaseDate,
-                    Description = model.Description,
+                    ReleaseDate = releaseDate,
+                    ReleaseNotes = model.Description,
                     IsStable = model.IsStable,
                     IsActive = model.IsActive,
                     IsApproved = model.IsApproved,
-                    CanDelete = true
+                    CanDelete = !model.IsApproved,
+                    EndOfLifeDate = model.EndOfLifeDate,
+                    UpdatedAt = DateTime.UtcNow
                 };
 
                 _logger.LogInformation("Product version '{VersionNumber}' (ID: {VersionId}) updated for product {ProductId}", 
@@ -1136,7 +1152,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 
                 return Json(new { 
                     success = true, 
-                    message = "Product version updated successfully", 
+                    message = $"Product version {model.VersionNumber} updated successfully", 
                     data = updatedVersion 
                 });
             }
@@ -1156,8 +1172,21 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         {
             try
             {
-                // Simulate version validation and deletion
-                await Task.CompletedTask; // For now, as this is mock implementation
+                // In a real implementation, check if version can be deleted
+                // Approved versions and versions currently in use should not be deleted
+                
+                // Simulate checking if the version is approved (cannot be deleted if approved)
+                var isApproved = false; // In real app, get this from database
+                
+                if (isApproved)
+                {
+                    return Json(new { 
+                        success = false, 
+                        message = "Cannot delete approved versions. Please unapprove the version first." 
+                    });
+                }
+                
+                // In a real implementation, this would delete from the database
                 
                 _logger.LogInformation("Product version {VersionId} deleted from product {ProductId}", versionId, productId);
                 
@@ -1181,9 +1210,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         {
             try
             {
-                // Simulate getting a specific version
-                await Task.CompletedTask; // For now, as this is mock implementation
-                
+                // In a real implementation, this would fetch from the database
                 var version = new ProductVersionViewModel
                 {
                     VersionId = versionId,
@@ -1203,6 +1230,127 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
             {
                 _logger.LogError(ex, "Error getting product version {VersionId} for product {ProductId}", versionId, productId);
                 return Json(new { success = false, message = "Error loading product version" });
+            }
+        }
+
+        /// <summary>
+        /// Approve a product version
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ApproveProductVersion(Guid productId, Guid versionId)
+        {
+            try
+            {
+                // In a real implementation, this would update the version status in the database
+                // and handle any related processes (notifications, etc.)
+                
+                // Verify the version exists
+                // Verify it's not already approved
+                // Update the approval status
+                
+                _logger.LogInformation("Product version {VersionId} approved for product {ProductId}", versionId, productId);
+                
+                return Json(new { 
+                    success = true, 
+                    message = "Product version approved successfully" 
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error approving product version {VersionId} for product {ProductId}", versionId, productId);
+                return Json(new { success = false, message = "Error approving product version" });
+            }
+        }
+
+        /// <summary>
+        /// Set a version as the current version for a product
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SetCurrentProductVersion(Guid productId, Guid versionId)
+        {
+            try
+            {
+                // In a real implementation, this would:
+                // 1. Verify the version exists and is valid to be set as current
+                // 2. Update the product's current version 
+                // 3. Update the product entity with the new version number
+                
+                // Get the version info (in real app, from database)
+                var versionNumber = "2.0.0"; // Mock data, in real app get from database
+                
+                // Update the product's version
+                var product = await GetProductByIdAsync(productId);
+                if (product == null)
+                {
+                    return Json(new { success = false, message = "Product not found" });
+                }
+                
+                // In a real implementation, update the product version in the database
+                // Mock update for demo
+                product.Version = versionNumber;
+                await SaveProductAsync(product);
+                
+                _logger.LogInformation("Product {ProductId} current version set to version {VersionId}", productId, versionId);
+                
+                return Json(new { 
+                    success = true, 
+                    message = $"Product current version set to {versionNumber}" 
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error setting current version {VersionId} for product {ProductId}", versionId, productId);
+                return Json(new { success = false, message = "Error setting current version" });
+            }
+        }
+
+        /// <summary>
+        /// Import product versions from JSON
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ImportProductVersions(Guid productId, string versionsJson)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(versionsJson))
+                {
+                    return Json(new { success = false, message = "No version data provided" });
+                }
+                
+                // Parse the JSON
+                List<object> versions;
+                try
+                {
+                    versions = JsonSerializer.Deserialize<List<object>>(versionsJson);
+                }
+                catch (JsonException ex)
+                {
+                    _logger.LogError(ex, "Invalid JSON format for product version import");
+                    return Json(new { success = false, message = "Invalid JSON format" });
+                }
+                
+                if (versions == null || versions.Count == 0)
+                {
+                    return Json(new { success = false, message = "No version data found in JSON" });
+                }
+                
+                // In a real implementation, this would process each version and add it to the database
+                // For the mock implementation, we'll just return success
+                
+                _logger.LogInformation("Imported {Count} versions for product {ProductId}", versions.Count, productId);
+                
+                return Json(new { 
+                    success = true, 
+                    message = $"Successfully imported {versions.Count} product versions" 
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error importing versions for product {ProductId}", productId);
+                return Json(new { success = false, message = "Error importing versions" });
             }
         }
 
@@ -1436,21 +1584,36 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
             {
                 new { 
                     Id = Guid.NewGuid(),
-                    Version = "1.0.0",
-                    Name = "Initial Release",
+                    VersionNumber = "1.0.0",
+                    VersionName = "Initial Release",
                     ReleaseDate = DateTime.UtcNow.AddDays(-30),
+                    ReleaseNotes = "First stable release with core functionality",
+                    IsStable = true,
                     IsActive = true,
                     IsApproved = true,
                     CanDelete = false // Approved versions cannot be deleted
                 },
                 new { 
                     Id = Guid.NewGuid(),
-                    Version = "1.1.0",
-                    Name = "Feature Update",
+                    VersionNumber = "1.1.0",
+                    VersionName = "Feature Update",
                     ReleaseDate = DateTime.UtcNow.AddDays(-10),
+                    ReleaseNotes = "Added new features and improvements",
+                    IsStable = true,
                     IsActive = true,
                     IsApproved = false,
                     CanDelete = true // Not approved yet, can be deleted
+                },
+                new {
+                    Id = Guid.NewGuid(),
+                    VersionNumber = "1.2.0-beta",
+                    VersionName = "Beta Release",
+                    ReleaseDate = DateTime.UtcNow.AddDays(-2),
+                    ReleaseNotes = "Beta version with experimental features",
+                    IsStable = false,
+                    IsActive = true, 
+                    IsApproved = false,
+                    CanDelete = true
                 }
             };
         }

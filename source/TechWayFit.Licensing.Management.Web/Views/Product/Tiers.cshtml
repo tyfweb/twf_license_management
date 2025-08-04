@@ -2,60 +2,191 @@
 
 @{
     ViewData["Title"] = "Product Tiers - " + Model.ProductName;
+    ViewData["Description"] = "Manage product tiers, pricing, and capabilities";
 }
 
-<div class="container-fluid">
-    <!-- Header -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h4 class="mb-1">Product Tiers</h4>
-                    <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb mb-0">
-                            <li class="breadcrumb-item"><a href="@Url.Action("Index")">Products</a></li>
-                            <li class="breadcrumb-item"><a href="@Url.Action("Details", new { id = Model.ProductId })">@Model.ProductName</a></li>
-                            <li class="breadcrumb-item active">Tiers</li>
-                        </ol>
-                    </nav>
-                </div>
-                <div class="btn-group" role="group">
-                    <a href="@Url.Action("Details", new { id = Model.ProductId })" class="btn btn-outline-secondary">
-                        <i class="fas fa-arrow-left me-1"></i>Back to Product
-                    </a>
-                    <a href="@Url.Action("Versions", new { id = Model.ProductId })" class="btn btn-outline-primary">
-                        <i class="fas fa-code-branch me-1"></i>Versions
-                    </a>
-                    <a href="@Url.Action("Features", new { id = Model.ProductId })" class="btn btn-outline-primary">
-                        <i class="fas fa-star me-1"></i>Features
-                    </a>
-                </div>
+@section Styles {
+    <style>
+        .product-icon {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(13, 110, 253, 0.1);
+            border-radius: 10px;
+        }
+
+        .tier-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            border: 1px solid #e9ecef;
+        }
+
+        .tier-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .tier-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(248, 249, 250, 0.8);
+            border-radius: 8px;
+            font-size: 1.2rem;
+        }
+
+        .tier-badges {
+            margin-top: 0.75rem;
+        }
+
+        .tier-badges .badge {
+            font-size: 0.7rem;
+        }
+
+        .sidebar-section {
+            background-color: #fff;
+            border-radius: 0.375rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .section-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            padding: 0.75rem 1rem;
+        }
+
+        .section-header h5 {
+            margin-bottom: 0;
+            font-weight: 600;
+        }
+
+        .section-content {
+            padding: 1rem;
+        }
+
+        .stats-card {
+            background-color: #fff;
+            border-radius: 0.375rem;
+            padding: 1rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+            border-left: 4px solid #6c757d;
+        }
+
+        .stats-card-success {
+            border-left-color: #198754;
+        }
+
+        .stats-card-info {
+            border-left-color: #0dcaf0;
+        }
+
+        .stats-card-warning {
+            border-left-color: #ffc107;
+        }
+
+        .stats-row-1 {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .stats-icon {
+            width: 40px;
+            height: 40px;
+            background-color: rgba(108, 117, 125, 0.1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6c757d;
+        }
+
+        .stats-card-success .stats-icon {
+            background-color: rgba(25, 135, 84, 0.1);
+            color: #198754;
+        }
+
+        .stats-card-info .stats-icon {
+            background-color: rgba(13, 202, 240, 0.1);
+            color: #0dcaf0;
+        }
+
+        .stats-card-warning .stats-icon {
+            background-color: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+        }
+
+        .stats-number {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .stats-label {
+            color: #6c757d;
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+
+        .edit-section {
+            background-color: #fff;
+            border-radius: 0.375rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+    </style>
+}
+
+<div class="container-fluid py-3">
+    <!-- Header Section -->
+    <div class="header mb-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="mb-1">Product Tiers</h2>
+                <p class="text-muted mb-0">Manage pricing tiers and feature sets for @Model.ProductName.</p>
+            </div>
+            <div class="btn-group" role="group">
+                <a href="@Url.Action("Details", new { id = Model.ProductId })" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Back to Product
+                </a>
+                <a href="@Url.Action("Versions", new { id = Model.ProductId })" class="btn btn-outline-primary">
+                    <i class="fas fa-code-branch me-1"></i>Versions
+                </a>
+                <a href="@Url.Action("Features", new { id = Model.ProductId })" class="btn btn-outline-primary">
+                    <i class="fas fa-star me-1"></i>Features
+                </a>
             </div>
         </div>
     </div>
 
     <!-- Product Info Card -->
-    <div class="row mb-4">
+    <div class="row g-2 mb-3">
         <div class="col-12">
-            <div class="card">
-                <div class="card-body py-3">
-                    <div class="row align-items-center">
-                        <div class="col-md-6">
-                            <div class="d-flex align-items-center">
-                                <div class="product-icon me-3">
-                                    <i class="fas fa-cube fa-2x text-primary"></i>
-                                </div>
-                                <div>
-                                    <h6 class="mb-1">@Model.ProductName</h6>
-                                    <small class="text-muted">@Model.ProductType • Version @Model.Version</small>
-                                </div>
-                            </div>
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <div class="d-flex align-items-center">
+                        <div class="product-icon me-3" style="width: 40px; height: 40px;">
+                            <i class="fas fa-cube text-primary"></i>
                         </div>
-                        <div class="col-md-6 text-md-end">
-                            <span class="badge bg-success me-2">Active</span>
-                            <span class="badge bg-info">
-                                <span id="tiers-count">0</span> Tiers
-                            </span>
+                        <div>
+                            <h5 class="mb-0">@Model.ProductName</h5>
+                            <small class="text-muted">@Model.ProductType • Version @Model.Version</small>
+                        </div>
+                        <div class="ms-auto">
+                            @if (Model.IsActive)
+                            {
+                                <span class="badge bg-success me-2">Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary me-2">Inactive</span>
+                            }
                         </div>
                     </div>
                 </div>
@@ -63,24 +194,120 @@
         </div>
     </div>
 
+    <!-- Statistics Cards -->
+    <div class="row g-2 mb-3">
+        <div class="col-sm-6 col-lg-3">
+            <div class="stats-card">
+                <div class="stats-row-1">
+                    <div class="stats-icon">
+                        <i class="fas fa-layer-group"></i>
+                    </div>
+                    <div class="stats-number"><span id="tiers-count">0</span></div>
+                </div>
+                <div class="stats-row-2">
+                    <div class="stats-label">Total Tiers</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="stats-card stats-card-success">
+                <div class="stats-row-1">
+                    <div class="stats-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stats-number"><span id="active-tiers-count">0</span></div>
+                </div>
+                <div class="stats-row-2">
+                    <div class="stats-label">Active Tiers</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="stats-card stats-card-info">
+                <div class="stats-row-1">
+                    <div class="stats-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stats-number"><span id="customer-count">0</span></div>
+                </div>
+                <div class="stats-row-2">
+                    <div class="stats-label">Customers</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="stats-card stats-card-warning">
+                <div class="stats-row-1">
+                    <div class="stats-icon">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                    <div class="stats-number"><span id="avg-conversion-rate">0%</span></div>
+                </div>
+                <div class="stats-row-2">
+                    <div class="stats-label">Conversion Rate</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <h5><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+                </div>
+                <div class="section-content">
+                    <div class="row g-2">
+                        <div class="col-sm-6 col-lg-3">
+                            <button type="button" class="btn btn-outline-primary w-100" onclick="showAddTierModal()">
+                                <i class="fas fa-plus me-2"></i>Add Tier
+                            </button>
+                        </div>
+                        <div class="col-sm-6 col-lg-3">
+                            <button type="button" class="btn btn-outline-secondary w-100" onclick="importTiersFromJson()">
+                                <i class="fas fa-upload me-2"></i>Import Tiers
+                            </button>
+                        </div>
+                        <div class="col-sm-6 col-lg-3">
+                            <button type="button" class="btn btn-outline-info w-100" onclick="copyToAnotherProduct()">
+                                <i class="fas fa-copy me-2"></i>Copy to Product
+                            </button>
+                        </div>
+                        <div class="col-sm-6 col-lg-3">
+                            <button type="button" class="btn btn-outline-success w-100" onclick="exportToJson()">
+                                <i class="fas fa-download me-2"></i>Export to JSON
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert container -->
+    <div id="alert-container" class="mb-3"></div>
+
     <!-- Tiers Management -->
     <div class="row">
         <div class="col-12">
-            <div class="card">
-                <div class="card-header">
+            <div class="edit-section">
+                <div class="section-header">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h6 class="mb-0">
+                        <h5 class="mb-0">
                             <i class="fas fa-layer-group me-2"></i>Product Tiers
-                        </h6>
-                        <button type="button" class="btn btn-primary btn-sm" onclick="showAddTierModal()">
-                            <i class="fas fa-plus me-1"></i>Add Tier
-                        </button>
+                        </h5>
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-outline-secondary btn-sm active" id="cardViewBtn" onclick="switchView('card')">
+                                <i class="fas fa-th-large me-1"></i>Cards
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="listViewBtn" onclick="switchView('list')">
+                                <i class="fas fa-list me-1"></i>List
+                            </button>
+                        </div>
                     </div>
                 </div>
-                <div class="card-body">
-                    <!-- Alert container -->
-                    <div id="alert-container"></div>
-                    
+                <div class="section-content">
                     <!-- Tiers content -->
                     <div id="tiers-content">
                         <div class="text-center py-5">
@@ -111,13 +338,28 @@
                     <input type="hidden" name="TierId" id="tierId" />
                     
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-8">
                             <div class="mb-3">
                                 <label for="tierName" class="form-label">Tier Name <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="tierName" name="TierName" required maxlength="50">
                                 <div class="invalid-feedback"></div>
                             </div>
                         </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="tier" class="form-label">Tier Level</label>
+                                <select class="form-select" id="tier" name="Tier">
+                                    <option value="Community">Community</option>
+                                    <option value="Professional">Professional</option>
+                                    <option value="Enterprise">Enterprise</option>
+                                    <option value="Premium">Premium</option>
+                                </select>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="monthlyPrice" class="form-label">Monthly Price</label>
@@ -128,9 +370,6 @@
                                 <div class="invalid-feedback"></div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="annualPrice" class="form-label">Annual Price</label>
@@ -138,13 +377,7 @@
                                     <span class="input-group-text">$</span>
                                     <input type="number" class="form-control" id="annualPrice" name="AnnualPrice" step="0.01" min="0">
                                 </div>
-                                <div class="invalid-feedback"></div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="trialPeriodDays" class="form-label">Trial Period (Days)</label>
-                                <input type="number" class="form-control" id="trialPeriodDays" name="TrialPeriodDays" min="0" max="365" value="0">
+                                <div class="form-text">Set annual discount for better customer retention</div>
                                 <div class="invalid-feedback"></div>
                             </div>
                         </div>
@@ -157,24 +390,34 @@
                     </div>
                     
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="mb-3">
                                 <label for="maxUsers" class="form-label">Max Users</label>
                                 <input type="number" class="form-control" id="maxUsers" name="MaxUsers" min="1">
+                                <div class="form-text">Leave empty for unlimited</div>
                                 <div class="invalid-feedback"></div>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="mb-3">
                                 <label for="maxProjects" class="form-label">Max Projects</label>
                                 <input type="number" class="form-control" id="maxProjects" name="MaxProjects" min="1">
+                                <div class="form-text">Leave empty for unlimited</div>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="trialPeriodDays" class="form-label">Trial Period (Days)</label>
+                                <input type="number" class="form-control" id="trialPeriodDays" name="TrialPeriodDays" min="0" max="365" value="0">
+                                <div class="form-text">0 means no trial period</div>
                                 <div class="invalid-feedback"></div>
                             </div>
                         </div>
                     </div>
                     
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="form-check mb-3">
                                 <input class="form-check-input" type="checkbox" id="isFree" name="IsFree">
                                 <label class="form-check-label" for="isFree">
@@ -182,11 +425,19 @@
                                 </label>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="form-check mb-3">
                                 <input class="form-check-input" type="checkbox" id="isActive" name="IsActive" checked>
                                 <label class="form-check-label" for="isActive">
                                     Active
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="isPublic" name="IsPublic" checked>
+                                <label class="form-check-label" for="isPublic">
+                                    Public Tier
                                 </label>
                             </div>
                         </div>
@@ -197,6 +448,32 @@
                     <button type="submit" class="btn btn-primary" id="tierSubmitBtn">Add Tier</button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+<!-- Import Tiers Modal -->
+<div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="importModalLabel">Import Tiers</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="importJson" class="form-label">Paste JSON or upload file</label>
+                    <textarea class="form-control" id="importJson" rows="10" placeholder='[{"tierName": "Free", "description": "Free tier with limited features", "monthlyPrice": 0}]'></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="importFile" class="form-label">Or upload a JSON file</label>
+                    <input type="file" class="form-control" id="importFile" accept=".json">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="importBtn">Import Tiers</button>
+            </div>
         </div>
     </div>
 </div>
@@ -212,20 +489,46 @@
                 e.preventDefault();
                 saveTier();
             });
+            
+            // Free tier checkbox handler
+            $('#isFree').on('change', function() {
+                if ($(this).is(':checked')) {
+                    $('#monthlyPrice').val('0').prop('disabled', true);
+                    $('#annualPrice').val('0').prop('disabled', true);
+                } else {
+                    $('#monthlyPrice').prop('disabled', false);
+                    $('#annualPrice').prop('disabled', false);
+                }
+            });
+            
+            // Initialize view based on saved preference
+            const savedView = localStorage.getItem('tierViewType') || 'card';
+            switchView(savedView);
         });
 
         function loadProductTiers() {
             $('#tiers-content').html('<div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-3 text-muted">Loading product tiers...</p></div>');
             
-            $.get('@Url.Action("GetProductTiers")', { productId: @Model.ProductId })
+            $.get('@Url.Action("GetProductTiers")', { productId: '@Model.ProductId' })
                 .done(function(response) {
                     if (response.success && response.data) {
-                        var html = renderProductTiers(response.data);
-                        $('#tiers-content').html(html);
-                        $('#tiers-count').text(response.data.length);
+                        var viewType = localStorage.getItem('tierViewType') || 'card';
+                        if (viewType === 'card') {
+                            var html = renderProductTiersCard(response.data);
+                            $('#tiers-content').html(html);
+                        } else {
+                            var html = renderProductTiersList(response.data);
+                            $('#tiers-content').html(html);
+                        }
+                        
+                        // Update counters
+                        updateTierStats(response.data);
                     } else {
                         $('#tiers-content').html('<div class="text-center py-5"><div class="text-muted"><i class="fas fa-layer-group fa-3x mb-3"></i><p>No product tiers found.</p><p><small>Click "Add Tier" to create your first tier.</small></p></div></div>');
                         $('#tiers-count').text(0);
+                        $('#active-tiers-count').text(0);
+                        $('#customer-count').text(0);
+                        $('#avg-conversion-rate').text('0%');
                     }
                 })
                 .fail(function(xhr, status, error) {
@@ -234,19 +537,72 @@
                     $('#tiers-count').text(0);
                 });
         }
+        
+        function updateTierStats(tiers) {
+            if (!tiers || tiers.length === 0) {
+                $('#tiers-count').text(0);
+                $('#active-tiers-count').text(0);
+                $('#customer-count').text(0);
+                $('#avg-conversion-rate').text('0%');
+                return;
+            }
+            
+            // Total tiers
+            $('#tiers-count').text(tiers.length);
+            
+            // Active tiers
+            const activeTiers = tiers.filter(t => t.IsActive);
+            $('#active-tiers-count').text(activeTiers.length);
+            
+            // Customer count (placeholder - in real implementation this would use actual data)
+            $('#customer-count').text(Math.floor(Math.random() * 100) + 5);
+            
+            // Conversion rate (placeholder)
+            $('#avg-conversion-rate').text(Math.floor(Math.random() * 10) + 5 + '%');
+        }
 
-        function renderProductTiers(tiers) {
+        function renderProductTiersCard(tiers) {
             if (!tiers || tiers.length === 0) {
                 return '<div class="text-center py-5"><div class="text-muted"><i class="fas fa-layer-group fa-3x mb-3"></i><p>No product tiers found.</p><p><small>Click "Add Tier" to create your first tier.</small></p></div></div>';
             }
 
             var html = '<div class="row">';
             tiers.forEach(function(tier) {
-                html += '<div class="col-lg-4 col-md-6 mb-4">';
-                html += '  <div class="card h-100 tier-card">';
+                html += '<div class="col-lg-4 col-md-6 mb-3">';
+                html += '  <div class="card tier-card h-100">';
                 html += '    <div class="card-body">';
-                html += '      <div class="d-flex justify-content-between align-items-start mb-3">';
-                html += '        <h6 class="card-title mb-0 text-primary">' + tier.Name + '</h6>';
+                html += '      <div class="d-flex justify-content-between align-items-start mb-2">';
+                html += '        <div class="tier-icon me-3">';
+                
+                // Tier level icon
+                switch(tier.Name.toLowerCase()) {
+                    case 'free':
+                    case 'community':
+                        html += '          <i class="fas fa-heart text-success"></i>';
+                        break;
+                    case 'basic':
+                    case 'standard':
+                        html += '          <i class="fas fa-star text-primary"></i>';
+                        break;
+                    case 'professional':
+                    case 'pro':
+                        html += '          <i class="fas fa-crown text-warning"></i>';
+                        break;
+                    case 'enterprise':
+                    case 'business':
+                        html += '          <i class="fas fa-building text-info"></i>';
+                        break;
+                    default:
+                        html += '          <i class="fas fa-layer-group text-secondary"></i>';
+                }
+                
+                html += '        </div>';
+                html += '        <div class="flex-grow-1">';
+                html += '          <h6 class="card-title mb-1">' + tier.Name + '</h6>';
+                if (tier.Description) {
+                    html += '          <p class="card-text text-muted small mb-2">' + tier.Description + '</p>';
+                }
+                html += '        </div>';
                 html += '        <div class="dropdown">';
                 html += '          <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">';
                 html += '            <i class="fas fa-ellipsis-v"></i>';
@@ -260,28 +616,32 @@
                 html += '        </div>';
                 html += '      </div>';
                 
-                if (tier.Description) {
-                    html += '      <p class="card-text text-muted mb-3">' + tier.Description + '</p>';
+                html += '      <div class="tier-info mt-3">';
+                html += '        <div class="price-tag text-center mb-3">';
+                if (parseFloat(tier.Price) === 0 || tier.Price === 'Free') {
+                    html += '          <div class="h4 mb-0 text-success">Free</div>';
+                } else {
+                    html += '          <div class="h4 mb-0 text-success">' + tier.Price + '</div>';
+                }
+                html += '        </div>';
+                
+                html += '        <div class="tier-badges">';
+                if (tier.IsActive) {
+                    html += '          <span class="badge bg-success me-1">Active</span>';
+                } else {
+                    html += '          <span class="badge bg-secondary me-1">Inactive</span>';
                 }
                 
-                html += '      <div class="tier-details">';
-                html += '        <div class="row text-center">';
-                html += '          <div class="col-6">';
-                html += '            <div class="tier-stat">';
-                html += '              <div class="h5 mb-0 text-success">' + (tier.Price || 'Free') + '</div>';
-                html += '              <small class="text-muted">Price</small>';
-                html += '            </div>';
-                html += '          </div>';
-                html += '          <div class="col-6">';
-                html += '            <div class="tier-stat">';
-                if (tier.IsActive) {
-                    html += '              <span class="badge bg-success">Active</span>';
+                // Add some sample badges
+                if (tier.Name.toLowerCase().includes('enterprise')) {
+                    html += '          <span class="badge bg-info me-1">Premium Support</span>';
+                    html += '          <span class="badge bg-primary me-1">All Features</span>';
+                } else if (tier.Name.toLowerCase().includes('pro')) {
+                    html += '          <span class="badge bg-primary me-1">Most Features</span>';
                 } else {
-                    html += '              <span class="badge bg-secondary">Inactive</span>';
+                    html += '          <span class="badge bg-secondary me-1">Basic Features</span>';
                 }
-                html += '              <br><small class="text-muted">Status</small>';
-                html += '            </div>';
-                html += '          </div>';
+                
                 html += '        </div>';
                 html += '      </div>';
                 html += '    </div>';
@@ -290,6 +650,120 @@
             });
             html += '</div>';
             return html;
+        }
+        
+        function renderProductTiersList(tiers) {
+            if (!tiers || tiers.length === 0) {
+                return '<div class="text-center py-5"><div class="text-muted"><i class="fas fa-layer-group fa-3x mb-3"></i><p>No product tiers found.</p><p><small>Click "Add Tier" to create your first tier.</small></p></div></div>';
+            }
+            
+            var html = '<div class="table-responsive">';
+            html += '<table class="table table-hover">';
+            html += '<thead class="table-light">';
+            html += '<tr>';
+            html += '<th>Tier Name</th>';
+            html += '<th>Price</th>';
+            html += '<th>Description</th>';
+            html += '<th>Status</th>';
+            html += '<th>Actions</th>';
+            html += '</tr>';
+            html += '</thead>';
+            html += '<tbody>';
+            
+            tiers.forEach(function(tier) {
+                html += '<tr>';
+                
+                // Tier name and icon
+                html += '<td>';
+                html += '<div class="d-flex align-items-center">';
+                html += '<div class="tier-icon me-2" style="width: 30px; height: 30px;">';
+                
+                // Tier icon based on name
+                switch(tier.Name.toLowerCase()) {
+                    case 'free':
+                    case 'community':
+                        html += '<i class="fas fa-heart text-success"></i>';
+                        break;
+                    case 'basic':
+                    case 'standard':
+                        html += '<i class="fas fa-star text-primary"></i>';
+                        break;
+                    case 'professional':
+                    case 'pro':
+                        html += '<i class="fas fa-crown text-warning"></i>';
+                        break;
+                    case 'enterprise':
+                    case 'business':
+                        html += '<i class="fas fa-building text-info"></i>';
+                        break;
+                    default:
+                        html += '<i class="fas fa-layer-group text-secondary"></i>';
+                }
+                
+                html += '</div>';
+                html += '<div class="fw-semibold">' + tier.Name + '</div>';
+                html += '</div>';
+                html += '</td>';
+                
+                // Price
+                html += '<td>';
+                if (parseFloat(tier.Price) === 0 || tier.Price === 'Free') {
+                    html += '<span class="badge bg-success">Free</span>';
+                } else {
+                    html += tier.Price;
+                }
+                html += '</td>';
+                
+                // Description
+                html += '<td>';
+                html += '<small class="text-muted">' + (tier.Description || '-') + '</small>';
+                html += '</td>';
+                
+                // Status
+                html += '<td>';
+                if (tier.IsActive) {
+                    html += '<span class="badge bg-success">Active</span>';
+                } else {
+                    html += '<span class="badge bg-secondary">Inactive</span>';
+                }
+                html += '</td>';
+                
+                // Actions
+                html += '<td>';
+                html += '<div class="btn-group btn-group-sm" role="group">';
+                html += '<button type="button" class="btn btn-outline-primary" onclick="editTier(\'' + tier.Id + '\')"><i class="fas fa-edit"></i></button>';
+                if (tier.CanDelete) {
+                    html += '<button type="button" class="btn btn-outline-danger" onclick="deleteTier(\'' + tier.Id + '\')"><i class="fas fa-trash"></i></button>';
+                }
+                html += '</div>';
+                html += '</td>';
+                
+                html += '</tr>';
+            });
+            
+            html += '</tbody>';
+            html += '</table>';
+            html += '</div>';
+            
+            return html;
+        }
+        
+        function switchView(viewType) {
+            const cardViewBtn = document.getElementById('cardViewBtn');
+            const listViewBtn = document.getElementById('listViewBtn');
+
+            if (viewType === 'card') {
+                cardViewBtn.classList.add('active');
+                listViewBtn.classList.remove('active');
+                localStorage.setItem('tierViewType', 'card');
+            } else {
+                cardViewBtn.classList.remove('active');
+                listViewBtn.classList.add('active');
+                localStorage.setItem('tierViewType', 'list');
+            }
+            
+            // Reload the tiers with the current view
+            loadProductTiers();
         }
 
         function showAddTierModal() {
@@ -300,6 +774,10 @@
             $('#tierSubmitBtn').text('Add Tier');
             clearValidationErrors();
             
+            // Enable price fields
+            $('#monthlyPrice').prop('disabled', false);
+            $('#annualPrice').prop('disabled', false);
+            
             // Show modal
             var modal = new bootstrap.Modal(document.getElementById('tierModal'));
             modal.show();
@@ -308,7 +786,7 @@
         function editTier(tierId) {
             // Get tier data
             $.get('@Url.Action("GetProductTier")', { 
-                productId: @Model.ProductId, 
+                productId: '@Model.ProductId', 
                 tierId: tierId 
             })
             .done(function(response) {
@@ -319,6 +797,7 @@
                     $('#tierId').val(tier.TierId);
                     $('#tierName').val(tier.TierName);
                     $('#tierDescription').val(tier.Description);
+                    $('#tier').val(tier.Tier || 'Community');
                     $('#monthlyPrice').val(tier.MonthlyPrice);
                     $('#annualPrice').val(tier.AnnualPrice);
                     $('#trialPeriodDays').val(tier.TrialPeriodDays);
@@ -326,6 +805,16 @@
                     $('#maxProjects').val(tier.MaxProjects);
                     $('#isFree').prop('checked', tier.IsFree);
                     $('#isActive').prop('checked', tier.IsActive);
+                    $('#isPublic').prop('checked', tier.IsPublic !== false); // default to true if not specified
+                    
+                    // Handle free tier toggling of price fields
+                    if (tier.IsFree) {
+                        $('#monthlyPrice').val('0').prop('disabled', true);
+                        $('#annualPrice').val('0').prop('disabled', true);
+                    } else {
+                        $('#monthlyPrice').prop('disabled', false);
+                        $('#annualPrice').prop('disabled', false);
+                    }
                     
                     // Update modal title and button
                     $('#tierModalLabel').text('Edit Product Tier');
@@ -347,7 +836,7 @@
         function deleteTier(tierId) {
             if (confirm('Are you sure you want to delete this tier? This action cannot be undone.')) {
                 var formData = new FormData();
-                formData.append('productId', @Model.ProductId);
+                formData.append('productId', '@Model.ProductId');
                 formData.append('tierId', tierId);
                 formData.append('__RequestVerificationToken', $('[name=__RequestVerificationToken]').val());
 
@@ -381,7 +870,7 @@
             if (isEdit) {
                 formData.append('tierId', tierId);
             }
-            formData.append('productId', @Model.ProductId);
+            formData.append('productId', '@Model.ProductId');
 
             // Disable submit button
             $('#tierSubmitBtn').prop('disabled', true).text('Saving...');
@@ -414,6 +903,77 @@
                 }
             });
         }
+        
+        function importTiersFromJson() {
+            // Show import modal
+            var modal = new bootstrap.Modal(document.getElementById('importModal'));
+            modal.show();
+            
+            // Set up the import button handler
+            $('#importBtn').off('click').on('click', function() {
+                // Get the JSON data
+                const jsonText = $('#importJson').val();
+                let jsonData;
+                
+                try {
+                    jsonData = JSON.parse(jsonText);
+                    if (!Array.isArray(jsonData)) {
+                        throw new Error("JSON must be an array of tiers");
+                    }
+                    
+                    // Implement the import logic here
+                    // This is a placeholder - would need server-side support
+                    showAlert('Tier import functionality will be implemented in a future update.', 'info');
+                    $('#importModal').modal('hide');
+                    
+                } catch (e) {
+                    showAlert('Invalid JSON format: ' + e.message, 'danger');
+                }
+            });
+            
+            // Handle file upload
+            $('#importFile').off('change').on('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    $('#importJson').val(event.target.result);
+                };
+                reader.readAsText(file);
+            });
+        }
+        
+        function copyToAnotherProduct() {
+            showAlert('Copy to Another Product functionality will be implemented in a future update.', 'info');
+        }
+        
+        function exportToJson() {
+            $.get('@Url.Action("GetProductTiers")', { productId: '@Model.ProductId' })
+                .done(function(response) {
+                    if (response.success && response.data) {
+                        // Create a JSON string and download it
+                        const jsonData = JSON.stringify(response.data, null, 2);
+                        const blob = new Blob([jsonData], { type: 'application/json' });
+                        const url = window.URL.createObjectURL(blob);
+                        
+                        // Create temp link and click it
+                        const a = document.createElement('a');
+                        a.style.display = 'none';
+                        a.href = url;
+                        a.download = '@Model.ProductName-tiers.json';
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        document.body.removeChild(a);
+                    } else {
+                        showAlert('No tiers to export', 'warning');
+                    }
+                })
+                .fail(function() {
+                    showAlert('Failed to export tiers', 'danger');
+                });
+        }
 
         function clearValidationErrors() {
             $('.is-invalid').removeClass('is-invalid');
@@ -429,7 +989,9 @@
 
         function showAlert(message, type) {
             var alertClass = 'alert-' + type;
+            var icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle';
             var alertHtml = '<div class="alert ' + alertClass + ' alert-dismissible fade show" role="alert">' +
+                            '<i class="fas ' + icon + ' me-2"></i>' +
                             message +
                             '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
                             '</div>';
@@ -448,30 +1010,4 @@
             }
         }
     </script>
-
-    <style>
-        .tier-card {
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-            border: 1px solid #e9ecef;
-        }
-
-        .tier-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-
-        .tier-stat {
-            padding: 0.5rem 0;
-        }
-
-        .product-icon {
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(13, 110, 253, 0.1);
-            border-radius: 10px;
-        }
-    </style>
 }

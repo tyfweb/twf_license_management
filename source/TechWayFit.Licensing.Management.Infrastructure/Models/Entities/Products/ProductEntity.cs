@@ -3,6 +3,8 @@ using TechWayFit.Licensing.Core.Helpers;
 using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Consumer;
 using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.License;
 using TechWayFit.Licensing.Management.Core.Models.Product;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Products;
 
@@ -49,6 +51,11 @@ public class ProductEntity : BaseAuditEntity
     public string Status { get; set; } = "Active";
 
     /// <summary>
+    /// Additional metadata for the product (JSON)
+    /// </summary>
+    public string MetadataJson { get; set; } = "{}";
+
+    /// <summary>
     /// Navigation property to Product Versions
     /// </summary>
     public virtual ICollection<ProductVersionEntity> Versions { get; set; } = new List<ProductVersionEntity>();
@@ -76,7 +83,8 @@ public class ProductEntity : BaseAuditEntity
             SupportEmail = model.SupportEmail,
             SupportPhone = model.SupportPhone,
             DecommissionDate = model.DecommissionDate,
-            Status = model.Status.ToString()
+            Status = model.Status.ToString(),
+            MetadataJson = model.Metadata != null ? JsonSerializer.Serialize(model.Metadata) : "{}"
         };
     }
     public EnterpriseProduct ToModel()
@@ -90,7 +98,10 @@ public class ProductEntity : BaseAuditEntity
             SupportEmail = this.SupportEmail,
             SupportPhone = this.SupportPhone,
             DecommissionDate = this.DecommissionDate,
-            Status = this.Status.ToEnum<ProductStatus>()
+            Status = this.Status.ToEnum<ProductStatus>(),
+            Metadata = !string.IsNullOrEmpty(this.MetadataJson)
+                        ? JsonSerializer.Deserialize<Dictionary<string, string>>(this.MetadataJson)
+                        : new Dictionary<string, string>()
         };
     }
 }

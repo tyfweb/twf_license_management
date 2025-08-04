@@ -51,6 +51,12 @@ public class EnterpriseProduct
     /// Status of the product
     /// </summary>
     public ProductStatus Status { get; set; } = ProductStatus.Active;
+    /// <summary>
+    /// Gets or sets a collection of metadata key-value pairs associated with the object.
+    /// </summary>
+    /// <remarks>Use this property to store additional information about the object in a flexible, extensible
+    /// manner. Keys are case-sensitive and must be unique within the dictionary.</remarks>
+    public Dictionary<string, string> Metadata { get; set; } = new Dictionary<string, string>();
 
 
 }
