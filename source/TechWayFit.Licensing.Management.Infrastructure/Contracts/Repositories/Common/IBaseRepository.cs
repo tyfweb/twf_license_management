@@ -92,4 +92,11 @@ public interface IBaseRepository<TEntity> where TEntity : class
     /// <returns></returns>
     Task<IEnumerable<TEntity>> GetAllWithIncludesAsync(
         params Expression<Func<TEntity, object>>[] includes);
+    /// <summary>
+    /// Checks if an entity exists by its ID.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="includeDeleted"></param>
+    /// <param name="cancellationToken"></param>
+    Task<bool> ExistsAsync(Guid id, bool includeDeleted = false, CancellationToken cancellationToken = default);
 }

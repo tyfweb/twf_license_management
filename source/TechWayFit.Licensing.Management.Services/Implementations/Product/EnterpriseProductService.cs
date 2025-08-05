@@ -6,6 +6,8 @@ using TechWayFit.Licensing.Management.Infrastructure.Models.Search;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Core.Models.Common;
 using TechWayFit.Licensing.Management.Core.Models.Product;
+using TechWayFit.Licensing.Management.Core.Helpers;
+using System.Text.Json;
 
 namespace TechWayFit.Licensing.Management.Services.Implementations.Product;
 
@@ -65,10 +67,61 @@ public class EnterpriseProductService : IEnterpriseProductService
             // Save to repository
             var createdEntity = await _unitOfWork.Products.AddAsync(productEntity);
             await _unitOfWork.SaveChangesAsync();
+
+            // Ensure the product has at least one tier
+            if (!createdEntity.Tiers.Any())
+            {
+                var defaultTier = new ProductTierEntity
+                {
+                    ProductId = createdEntity.Id,
+                    Name = "Default Tier",
+                    Description = "Default tier for new products",
+                    CreatedBy = createdBy,
+                    CreatedOn = DateTime.UtcNow,
+                    SupportSLAJson = JsonSerializer.Serialize(ProductSupportSLA.NoSLA )
+                };
+                createdEntity.Tiers.Add(defaultTier);
+                var defaultTierEntity =await _unitOfWork.ProductTiers.AddAsync(defaultTier);
+                await _unitOfWork.SaveChangesAsync();
+
+                // Ensure the product has at least few features
+            
+                var defaultFeature = new ProductFeatureEntity
+                        {
+                            ProductId = createdEntity.Id,
+                            Name = "Default Feature",
+                            Description = "Default feature for new products",
+                            CreatedBy = createdBy,
+                            CreatedOn = DateTime.UtcNow
+                        };
+                 
+                defaultTierEntity.Features.Add(defaultFeature);
+                await _unitOfWork.ProductFeatures.AddAsync(defaultFeature);
+                await _unitOfWork.SaveChangesAsync();
+            }
+            // Ensure the product has at least one version
+            if (!createdEntity.Versions.Any())
+            {
+                var defaultVersion = new ProductVersionEntity
+                {
+                    ProductId = createdEntity.Id,
+                    Version = SemanticVersion.Default,
+                    ReleaseNotes = "Initial release",
+                    ReleaseDate = DateTime.UtcNow,
+                    IsActive = true,
+                    Name = "Initial Version",
+                    CreatedBy = createdBy,
+                    CreatedOn = DateTime.UtcNow
+                };
+                createdEntity.Versions.Add(defaultVersion);
+                await _unitOfWork.ProductVersions.AddAsync(defaultVersion);
+                await _unitOfWork.SaveChangesAsync();
+            }
+            
             
             // Map back to model
             var result = createdEntity.ToModel();
-            
+
             _logger.LogInformation("Successfully created enterprise product with ID: {ProductId}", result.ProductId);
             return result;
         }
@@ -113,7 +166,7 @@ public class EnterpriseProductService : IEnterpriseProductService
 
             // Update properties
             var updatedData = ProductEntity.FromModel(product);
-            
+
             // Update properties manually to preserve audit fields
             existingEntity.Name = updatedData.Name;
             existingEntity.Description = updatedData.Description;
@@ -122,17 +175,17 @@ public class EnterpriseProductService : IEnterpriseProductService
             existingEntity.SupportPhone = updatedData.SupportPhone;
             existingEntity.DecommissionDate = updatedData.DecommissionDate;
             existingEntity.Status = updatedData.Status;
-            
+
             existingEntity.UpdatedBy = updatedBy;
             existingEntity.UpdatedOn = DateTime.UtcNow;
 
             // Update in repository
             var updatedEntity = await _unitOfWork.Products.UpdateAsync(existingEntity);
             await _unitOfWork.SaveChangesAsync();
-            
+
             // Map back to model
             var result = updatedEntity.ToModel();
-            
+
             _logger.LogInformation("Successfully updated enterprise product: {ProductId}", product.ProductId);
             return result;
         }
@@ -175,7 +228,7 @@ public class EnterpriseProductService : IEnterpriseProductService
         {
             // TODO: Implement GetByNameAsync in repository
             _logger.LogWarning("GetProductByNameAsync using search - GetByNameAsync repository method missing");
-            
+
             var searchRequest = new SearchRequest<ProductEntity>
             {
                 Filters = new List<Expression<Func<ProductEntity, bool>>>
@@ -183,10 +236,10 @@ public class EnterpriseProductService : IEnterpriseProductService
                     p => p.Name.ToUpper() == productName.ToUpper()
                 }
             };
-            
+
             var searchResult = await _unitOfWork.Products.SearchAsync(searchRequest);
             var entity = searchResult.Results.FirstOrDefault();
-            
+
             return entity?.ToModel();
         }
         catch (Exception ex)
@@ -219,7 +272,7 @@ public class EnterpriseProductService : IEnterpriseProductService
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
                 var term = searchTerm.ToLower();
-                searchRequest.Filters.Add(p => 
+                searchRequest.Filters.Add(p =>
                     p.Name.ToLower().Contains(term) ||
                     p.Description.ToLower().Contains(term));
             }
@@ -233,7 +286,17 @@ public class EnterpriseProductService : IEnterpriseProductService
             throw;
         }
     }
+    public async Task<bool> ProductExistsAsync(Guid productId, bool includeDeleted = false)
+    {
+        if (Guid.Empty.Equals(productId))
+            throw new ArgumentException("ProductId cannot be null or empty", nameof(productId));
+        _logger.LogInformation("Checking if product exists: {ProductId}", productId);
 
+        var exists = await _unitOfWork.Products.ExistsAsync(productId, includeDeleted);
+        _logger.LogInformation("Product exists: {ProductId} - {Exists}", productId, exists);
+        return exists;
+    }
+    
     #region TODO: Missing Interface Methods - Require Implementation
 
     public async Task<bool> ActivateProductAsync(Guid productId, string activatedBy)
@@ -260,13 +323,6 @@ public class EnterpriseProductService : IEnterpriseProductService
         return false;
     }
 
-    public async Task<bool> ProductExistsAsync(Guid productId)
-    {
-        // TODO: Implement
-        _logger.LogWarning("ProductExistsAsync not implemented");
-        await Task.CompletedTask;
-        return false;
-    }
 
     public async Task<ValidationResult> ValidateProductAsync(EnterpriseProduct product)
     {
@@ -356,6 +412,98 @@ public class EnterpriseProductService : IEnterpriseProductService
         await Task.CompletedTask;
         return Enumerable.Empty<EnterpriseProduct>();
     }
+    #endregion
+    #region Product Version Management
+    public async Task<ProductVersion> AddProductVersionAsync(Guid productId, ProductVersion version, string createdBy)
+    {
+        Ensure.NotNull(version, nameof(version)).NotDefault(version.ProductId, nameof(version.ProductId));
+        Ensure.NotNull(version.Version, nameof(version.Version));
+        Ensure.NotDefault(version.ReleaseDate, nameof(version.ReleaseDate)).NotInPast();
+        Ensure.NotEmpty(version.ChangeLog, nameof(version.ChangeLog));
+
+        if (!await ProductExistsAsync(productId))
+            throw new InvalidOperationException($"Product with ID {productId} does not exist");
+        _logger.LogInformation("Adding product version {Version} to product {ProductId}", version.Version, productId);
+        var productEntity = await _unitOfWork.ProductVersions.AddAsync(new ProductVersionEntity
+        {
+            ProductId = productId,
+            Name = version.Name,
+            Version = version.Version,
+            ReleaseDate = version.ReleaseDate,
+            ReleaseNotes = version.ChangeLog,
+            CreatedBy = createdBy,
+            CreatedOn = DateTime.UtcNow
+        });
+        await _unitOfWork.SaveChangesAsync(); 
+        return productEntity.ToModel();
+    }
+
+    public async Task<ProductVersion> UpdateProductVersionAsync(Guid productId, ProductVersion version, string updatedBy)
+    {
+        Ensure.NotNull(version, nameof(version)).NotDefault(version.ProductId, nameof(version.ProductId));
+        Ensure.NotNull(version.Version, nameof(version.Version));
+        Ensure.NotDefault(version.ReleaseDate, nameof(version.ReleaseDate)).NotInPast();
+        Ensure.NotEmpty(version.ChangeLog, nameof(version.ChangeLog));
+
+        if (!await ProductExistsAsync(productId))
+            throw new InvalidOperationException($"Product with ID {productId} does not exist");
+        _logger.LogInformation("Updating product version {Version} for product {ProductId}", version.Version, productId);
+
+        var existingEntity = await _unitOfWork.ProductVersions.GetByIdAsync(version.VersionId);
+        if (existingEntity == null || existingEntity.ProductId != productId)
+            throw new InvalidOperationException($"Product version with ID {version.VersionId} does not exist for product {productId}");
+
+        existingEntity.Version = version.Version;
+        existingEntity.Name = version.Name;
+        existingEntity.ReleaseDate = version.ReleaseDate;
+        existingEntity.ReleaseNotes = version.ChangeLog;
+        existingEntity.UpdatedBy = updatedBy;
+        existingEntity.UpdatedOn = DateTime.UtcNow;
+
+        var updatedEntity = await _unitOfWork.ProductVersions.UpdateAsync(existingEntity);
+        await _unitOfWork.SaveChangesAsync();
+
+        return updatedEntity.ToModel();
+    }
+
+    public async Task<bool> DeleteProductVersionAsync(Guid productId, ProductVersion version, string deletedBy)
+    {
+        Ensure.NotNull(version, nameof(version)).NotDefault(version.ProductId, nameof(version.ProductId));
+        Ensure.NotNull(version.Version, nameof(version.Version));
+
+        if (!await ProductExistsAsync(productId))
+            throw new InvalidOperationException($"Product with ID {productId} does not exist");
+        _logger.LogInformation("Deleting product version {Version} for product {ProductId}", version.Version, productId);
+
+        var existingEntity = await _unitOfWork.ProductVersions.GetByIdAsync(version.VersionId);
+        if (existingEntity == null || existingEntity.ProductId != productId)
+            throw new InvalidOperationException($"Product version with ID {version.VersionId} does not exist for product {productId}");
+
+        existingEntity.DeletedBy = deletedBy;
+        existingEntity.DeletedOn = DateTime.UtcNow;
+        existingEntity.IsDeleted = true;
+
+        await _unitOfWork.ProductVersions.UpdateAsync(existingEntity);
+        await _unitOfWork.SaveChangesAsync();
+
+        return true;
+    }
+
+    public async Task<IEnumerable<ProductVersion>> GetProductVersionsAsync(Guid productId)
+    {
+        Ensure.NotDefault(productId, nameof(productId));
+
+        if (!await ProductExistsAsync(productId))
+            throw new InvalidOperationException($"Product with ID {productId} does not exist");
+
+        _logger.LogInformation("Retrieving product versions for product {ProductId}", productId);
+        var productVersions = await _unitOfWork.ProductVersions.GetByProductIdAsync(productId);
+        return productVersions.Select(v => v.ToModel());
+    }
 
     #endregion
+
+   
+    
+    
 }

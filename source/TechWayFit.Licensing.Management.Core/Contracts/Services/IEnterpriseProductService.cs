@@ -90,8 +90,9 @@ public interface IEnterpriseProductService
     /// Checks if a product exists
     /// </summary>
     /// <param name="productId">Product ID</param>
+    /// <param name="includeDeleted">Include soft-deleted products</param>
     /// <returns>True if exists</returns>
-    Task<bool> ProductExistsAsync(Guid productId);
+    Task<bool> ProductExistsAsync(Guid productId, bool includeDeleted = false);
 
     /// <summary>
     /// Gets active products only
@@ -118,4 +119,35 @@ public interface IEnterpriseProductService
     /// <param name="product">Product to validate</param>
     /// <returns>Validation result</returns>
     Task<ValidationResult> ValidateProductAsync(EnterpriseProduct product);
+
+    /// <summary>
+    /// Adds a new product version
+    /// </summary>
+    /// <param name="productId">Product ID</param>
+    /// <param name="version">Version to add</param>
+    /// <param name="createdBy">User creating the version</param>
+    /// <returns>Updated product with new version</returns>
+    Task<ProductVersion> AddProductVersionAsync(Guid productId, ProductVersion version, string createdBy);
+    /// <summary>
+    /// Updates an existing product version
+    /// </summary>
+    /// <param name="productId">Product ID</param>
+    /// <param name="version">Version to update</param>
+    /// <param name="updatedBy">User updating the version</param>
+    /// <returns>Updated product with modified version</returns>
+    Task<ProductVersion> UpdateProductVersionAsync(Guid productId, ProductVersion version, string updatedBy);
+    /// <summary>
+    /// Deletes a product version
+    /// </summary>
+    /// <param name="productId">Product ID</param>
+    /// <param name="version">Version to delete</param>
+    /// <param name="deletedBy">User deleting the version</param>
+    /// <returns>True if deleted successfully</returns>
+    Task<bool> DeleteProductVersionAsync(Guid productId, ProductVersion version, string deletedBy);
+    /// <summary>
+    /// Gets all versions of a product
+    /// </summary>
+    /// <param name="productId">Product ID</param>
+    /// <returns>List of product versions</returns>
+    Task<IEnumerable<ProductVersion>> GetProductVersionsAsync(Guid productId);
 }

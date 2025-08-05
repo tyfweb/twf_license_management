@@ -135,7 +135,7 @@ public partial class PostgreSqlBaseRepository<TEntity> : IBaseRepository<TEntity
         }
 
         var totalCount = await query.CountAsync(cancellationToken);
-        query= SearchIncludesQuery(query);
+        query = SearchIncludesQuery(query);
         var items = await query.Skip((request.Page - 1) * request.PageSize)
                                 .Take(request.PageSize)
                                 .ToListAsync(cancellationToken);
@@ -222,7 +222,7 @@ public partial class PostgreSqlBaseRepository<TEntity> : IBaseRepository<TEntity
     }
 
 
-   
+
     protected IQueryable<TEntity> ApplyIncludes(IQueryable<TEntity> query, params Expression<Func<TEntity, object>>[] includes)
     {
         if (includes != null)
@@ -234,7 +234,7 @@ public partial class PostgreSqlBaseRepository<TEntity> : IBaseRepository<TEntity
         }
         return query;
     }
-    
+
     protected virtual IQueryable<TEntity> SearchQuery(IQueryable<TEntity> query, string searchQuery)
     {
         return query;
@@ -256,5 +256,13 @@ public partial class PostgreSqlBaseRepository<TEntity> : IBaseRepository<TEntity
         _dbSet.Update(entity);
         await _context.SaveChangesAsync(cancellationToken);
         return true;
+    }
+    public async Task<bool> ExistsAsync(Guid id,bool includeDeleted = false, CancellationToken cancellationToken = default)
+    {
+        if (id == Guid.Empty)
+            throw new ArgumentNullException(nameof(id));
+        if (includeDeleted)
+            return await _dbSet.AnyAsync(e => e.Id == id, cancellationToken);
+        return await _dbSet.AnyAsync(e => e.Id == id && !e.IsDeleted && e.IsActive, cancellationToken);
     }
 }

@@ -309,42 +309,7 @@ namespace TechWayFit.Licensing.Management.Web.ViewModels.Product
         public string? DeletedBy { get; set; }
     }
 
-    /// <summary>
-    /// Product Version View Model
-    /// </summary>
-    public class ProductVersionViewModel
-    {
-        public Guid VersionId { get; set; }
-        public Guid ProductId { get; set; }
-        
-        [Required]
-        [StringLength(20)]
-        public string VersionNumber { get; set; } = string.Empty;
-        
-        [Required]
-        [StringLength(100)]
-        public string VersionName { get; set; } = string.Empty;
-        
-        [StringLength(500)]
-        public string Description { get; set; } = string.Empty;
-        
-        public DateTime ReleaseDate { get; set; } = DateTime.UtcNow;
-        public bool IsStable { get; set; } = true;
-        public bool IsBeta { get; set; } = false;
-        public bool IsActive { get; set; } = true;
-        public bool IsDeleted { get; set; } = false;
-        public bool IsApproved { get; set; } = false;
-        
-        public DateTime? ApprovedAt { get; set; }
-        public string? ApprovedBy { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public string CreatedBy { get; set; } = string.Empty;
-        public DateTime? UpdatedAt { get; set; }
-        public string? UpdatedBy { get; set; }
-        public DateTime? DeletedAt { get; set; }
-        public string? DeletedBy { get; set; }
-        public DateTime? EndOfLifeDate { get; internal set; }
-    }
+    
 
     /// <summary>
     /// Product Feature View Model

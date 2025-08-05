@@ -17,7 +17,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
     /// Handles product CRUD operations with comprehensive tier, version, and feature management
     /// </summary>
     [Authorize]
-    public class ProductController : Controller
+    public class ProductController : BaseController
     {
         private readonly ILogger<ProductController> _logger;
         private readonly IEnterpriseProductService _productService;
@@ -1244,28 +1244,25 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 }
                 
                 // In a real implementation, this would be saved to the database
-                var newVersion = new 
+                var newVersion = new ProductVersion
                 {
-                    Id = newVersionId,
-                    VersionNumber = model.VersionNumber,
-                    VersionName = model.VersionName,
+                    VersionId = newVersionId,
+                    ProductId = productId,
+                    Version = model.Version,
+                    Name = model.VersionName,
                     ReleaseDate = releaseDate,
-                    ReleaseNotes = model.Description,
-                    IsStable = model.IsStable,
-                    IsActive = model.IsActive,
-                    IsApproved = model.IsApproved,
-                    CanDelete = !model.IsApproved,
-                    EndOfLifeDate = model.EndOfLifeDate,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
+                    ChangeLog = model.ReleaseNotes,
+                    IsCurrent = model.IsCurrent,
+                    IsActive = model.IsActive, 
+                    EndOfLifeDate = model.EndOfLifeDate
                 };
+                await _productService.AddProductVersionAsync(productId,newVersion,CurrentUserName);
+                _logger.LogInformation("Product version '{Version}' added to product {ProductId}", 
+                    model.Version, productId);
 
-                _logger.LogInformation("Product version '{VersionNumber}' added to product {ProductId}", 
-                    model.VersionNumber, productId);
-                
                 return Json(new { 
                     success = true, 
-                    message = $"Product version {model.VersionNumber} added successfully", 
+                    message = $"Product version {model.Version} added successfully", 
                     data = newVersion 
                 });
             }
@@ -1300,30 +1297,31 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 {
                     releaseDate = DateTime.UtcNow;
                 }
-                
-                var updatedVersion = new 
-                {
-                    Id = versionId,
-                    VersionNumber = model.VersionNumber,
-                    VersionName = model.VersionName,
-                    ReleaseDate = releaseDate,
-                    ReleaseNotes = model.Description,
-                    IsStable = model.IsStable,
-                    IsActive = model.IsActive,
-                    IsApproved = model.IsApproved,
-                    CanDelete = !model.IsApproved,
-                    EndOfLifeDate = model.EndOfLifeDate,
-                    UpdatedAt = DateTime.UtcNow
-                };
 
-                _logger.LogInformation("Product version '{VersionNumber}' (ID: {VersionId}) updated for product {ProductId}", 
-                    model.VersionNumber, versionId, productId);
-                
-                return Json(new { 
-                    success = true, 
-                    message = $"Product version {model.VersionNumber} updated successfully", 
-                    data = updatedVersion 
-                });
+                var updatedVersion = new ProductVersion
+                {
+                    ProductId = productId,
+                    Version = model.Version,
+                    Name = model.VersionName,
+                    ReleaseDate = releaseDate,
+                    ChangeLog = model.ReleaseNotes,
+                    IsCurrent = model.IsCurrent,
+                    IsActive = model.IsActive,
+                    EndOfLifeDate = model.EndOfLifeDate
+                };
+                var status = await _productService.UpdateProductVersionAsync(productId, updatedVersion, CurrentUserName);
+                _logger.LogInformation("Product version '{Version}' (ID: {VersionId}) updated for product {ProductId}",
+                    model.Version, versionId, productId);
+                if (status != null)
+                {
+                    return Json(new
+                    {
+                        success = true,
+                        message = $"Product version {model.Version} updated successfully",
+                        data = updatedVersion
+                    });
+                }
+                return Json(new { success = false, message = "Error updating product version" });
             }
             catch (Exception ex)
             {
@@ -1369,38 +1367,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 _logger.LogError(ex, "Error deleting product version {VersionId} for product {ProductId}", versionId, productId);
                 return Json(new { success = false, message = "Error deleting product version" });
             }
-        }
-
-        /// <summary>
-        /// Get a specific product version for editing
-        /// </summary>
-        [HttpGet]
-        public async Task<IActionResult> GetProductVersion(Guid productId, Guid versionId)
-        {
-            try
-            {
-                // In a real implementation, this would fetch from the database
-                var version = new ProductVersionViewModel
-                {
-                    VersionId = versionId,
-                    ProductId = productId,
-                    VersionNumber = "1.2.0", // Mock data
-                    VersionName = "Feature Update",
-                    ReleaseDate = DateTime.UtcNow.AddDays(-10),
-                    Description = "Added new features and bug fixes",
-                    IsStable = true,
-                    IsActive = true,
-                    IsApproved = true
-                };
-
-                return Json(new { success = true, data = version });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting product version {VersionId} for product {ProductId}", versionId, productId);
-                return Json(new { success = false, message = "Error loading product version" });
-            }
-        }
+        }         
 
         /// <summary>
         /// Approve a product version
@@ -1726,49 +1693,25 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         /// <summary>
         /// Get product versions data - simplified implementation
         /// </summary>
-        private async Task<List<object>> GetProductVersionsDataAsync(Guid productId)
+        private async Task<List<ProductVersionViewModel>> GetProductVersionsDataAsync(Guid productId)
         {
-            // Simplified - return mock data for now
-            await Task.CompletedTask;
-            
-            return new List<object>
-            {
-                new { 
-                    Id = Guid.NewGuid(),
-                    VersionNumber = "1.0.0",
-                    VersionName = "Initial Release",
-                    ReleaseDate = DateTime.UtcNow.AddDays(-30),
-                    ReleaseNotes = "First stable release with core functionality",
-                    IsStable = true,
-                    IsActive = true,
-                    IsApproved = true,
-                    CanDelete = false // Approved versions cannot be deleted
-                },
-                new { 
-                    Id = Guid.NewGuid(),
-                    VersionNumber = "1.1.0",
-                    VersionName = "Feature Update",
-                    ReleaseDate = DateTime.UtcNow.AddDays(-10),
-                    ReleaseNotes = "Added new features and improvements",
-                    IsStable = true,
-                    IsActive = true,
-                    IsApproved = false,
-                    CanDelete = true // Not approved yet, can be deleted
-                },
-                new {
-                    Id = Guid.NewGuid(),
-                    VersionNumber = "1.2.0-beta",
-                    VersionName = "Beta Release",
-                    ReleaseDate = DateTime.UtcNow.AddDays(-2),
-                    ReleaseNotes = "Beta version with experimental features",
-                    IsStable = false,
-                    IsActive = true, 
-                    IsApproved = false,
-                    CanDelete = true
-                }
-            };
-        }
+            var productVersions = await _productService.GetProductVersionsAsync(productId);
 
+            return productVersions.Select(v => new ProductVersionViewModel
+            {
+                Id = v.VersionId,
+                ProductId = productId,
+                Version = v.Version,
+                VersionName = v.Name,
+                ReleaseDate = v.ReleaseDate,
+                EndOfLifeDate = v.EndOfLifeDate,
+                SupportEndDate = v.SupportEndDate?? DateTime.UtcNow.AddYears(99),
+                ReleaseNotes = v.ChangeLog,
+                IsActive = v.IsActive,
+                IsCurrent = v.IsCurrent,
+                CanDelete = true // Simplified, in real app check if version can be deleted
+            }).ToList();
+        }
         /// <summary>
         /// Get product features data - simplified implementation
         /// </summary>

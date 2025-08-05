@@ -14,5 +14,11 @@ public class PostgreSqlProductVersionRepository : PostgreSqlBaseRepository<Produ
     public PostgreSqlProductVersionRepository(PostgreSqlPostgreSqlLicensingDbContext context) : base(context)
     {
     }
- 
+
+    public async Task<IEnumerable<ProductVersionEntity>> GetByProductIdAsync(Guid productId)
+    {
+       return await _dbSet
+            .Where(v => v.ProductId == productId)
+            .ToListAsync();
+    }
 }

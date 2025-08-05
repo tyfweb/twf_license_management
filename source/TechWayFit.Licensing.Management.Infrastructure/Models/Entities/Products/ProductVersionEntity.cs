@@ -77,6 +77,8 @@ public class ProductVersionEntity : BaseAuditEntity
         {
             VersionId = this.Id,
             ProductId = this.ProductId,
+            Name = this.Name,
+            IsActive = this.IsActive,
             Version = this.Version,
             ReleaseDate = this.ReleaseDate,
             EndOfLifeDate = this.EndOfLifeDate,

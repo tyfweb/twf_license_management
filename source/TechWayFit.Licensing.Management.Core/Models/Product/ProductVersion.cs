@@ -9,6 +9,7 @@ public class ProductVersion
     /// Unique identifier for the product version
     /// </summary>
     public Guid VersionId { get; set; } = Guid.NewGuid();
+    public string Name { get; set; } = string.Empty;
     public bool IsCurrent { get; set; } = false;
     /// <summary>
     /// Version number of the product
@@ -32,4 +33,6 @@ public class ProductVersion
     /// Description of the changes in this version
     /// </summary>
     public string ChangeLog { get; set; } = string.Empty;
+
+    public bool IsActive { get; set; } = false;
 }

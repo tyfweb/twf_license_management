@@ -8,5 +8,5 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.
 /// </summary>
 public interface IProductVersionRepository : IBaseRepository<ProductVersionEntity>
 {
-   
+    Task<IEnumerable<ProductVersionEntity>> GetByProductIdAsync(Guid productId);
 }
