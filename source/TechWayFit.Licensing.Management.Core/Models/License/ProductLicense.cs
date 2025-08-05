@@ -19,10 +19,17 @@ public class ProductLicense
     /// </summary>
     public ProductConsumer LicenseConsumer { get; set; } = new();
 
+
     /// <summary>
-    /// Features included in this license
+    /// Minimum product version that this license supports
     /// </summary>
-    public IEnumerable<ProductFeature> Features { get; set; } = new List<ProductFeature>();
+    public string ValidProductVersionFrom { get; set; } = "1.0.0";
+
+    /// <summary>
+    /// Maximum product version that this license supports (optional)
+    /// </summary>
+    public string? ValidProductVersionTo { get; set; }
+
 
     /// <summary>
     /// Date when the license becomes valid
@@ -97,6 +104,8 @@ public class ProductLicense
 
     public TechWayFit.Licensing.Core.Models.License ToLicenseModel()
     {
+        Metadata ??= new Dictionary<string, string>();
+        Metadata.TryAdd("ProductTier", LicenseConsumer?.ProductTier?.Name?? "Not Found");
         return new TechWayFit.Licensing.Core.Models.License
         {
             LicenseId = LicenseId.ToString(),
@@ -110,7 +119,7 @@ public class ProductLicense
             RevokedAt = RevokedAt,
             RevocationReason = RevocationReason,
             Metadata = Metadata,
-            FeaturesIncluded = Features.Select(f => new LicenseFeature
+            FeaturesIncluded = LicenseConsumer.Features.Select(f => new LicenseFeature
             {
                 Id = f.FeatureId.ToString(),
                 Name = f.Name,
@@ -126,9 +135,9 @@ public class ProductLicense
             SecondaryContactEmail = LicenseConsumer.Consumer.SecondaryContact?.Email,
             SecondaryContactPerson = LicenseConsumer.Consumer.SecondaryContact?.Name,
             Version = LicenseConsumer.Product.Version,
-            ProductVersion = SemanticVersion.Parse(LicenseConsumer.Product.Version).ToVersion(),
-            //MaxSupportedVersion = SemanticVersion.Parse(LicenseConsumer.Product.MaxSupportedVersion).ToVersion(),
-           //Tier = LicenseConsumer.Product.Tier,
+            ProductVersion = SemanticVersion.Parse(ValidProductVersionFrom).ToVersion(),
+            MaxSupportedVersion = SemanticVersion.Parse(ValidProductVersionTo).ToVersion(),
+            Tier = LicenseTier.Custom
         };
     }
 }

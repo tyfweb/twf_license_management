@@ -298,7 +298,7 @@
                 </div>
             }
 
-            @if (Model.License.Features.Any())
+            @if (Model.License.LicenseConsumer.Features.Any())
             {
                 <div class="edit-section mb-3">
                     <div class="section-header">
@@ -306,7 +306,7 @@
                     </div>
                     <div class="section-content">
                         <div class="row g-2">
-                            @foreach (var feature in Model.License.Features)
+                            @foreach (var feature in Model.License.LicenseConsumer.Features)
                             {
                                 <div class="col-sm-6 col-lg-4">
                                     <div class="feature-item">

@@ -75,7 +75,7 @@ public class ProductLicenseService : IProductLicenseService
                 PrivateKeyPem = privateKey,
 
                 // Map tier information
-                Tier = MapTierFromRequest(request.TierId),
+                Tier = MapTierFromRequest(request.ProductTier),
                 MaxApiCallsPerMonth = request.MaxUsers, // Map MaxUsers to API calls if applicable
                 MaxConcurrentConnections = request.MaxDevices, // Map MaxDevices to connections if applicable
 
@@ -89,13 +89,14 @@ public class ProductLicenseService : IProductLicenseService
             // Generate cryptographically signed license
             var signedLicense = await _licenseGenerator.GenerateLicenseAsync(generationRequest);
 
-            var licenseId = Guid.NewGuid().ToString();
-
-            // Create license entity for database storage
+            var licenseId = Guid.NewGuid().ToString();            // Create license entity for database storage
             var licenseEntity = new ProductLicenseEntity
             {
                 ProductId = request.ProductId,
                 ConsumerId = request.ConsumerId,
+                ProductTierId = request.TierId,
+                ValidProductVersionFrom = request.ValidProductVersionFrom,
+                ValidProductVersionTo = request.ValidProductVersionTo,
                 LicenseKey = signedLicense.LicenseData, // Store the signed license data
                 ValidFrom = generationRequest.ValidFrom,
                 ValidTo = generationRequest.ValidTo,
@@ -106,10 +107,6 @@ public class ProductLicenseService : IProductLicenseService
                 UpdatedBy = generatedBy,
                 UpdatedOn = DateTime.UtcNow
             };
-
-            // TODO: Set additional properties when available in entity:
-            // - TierId, MaxUsers, MaxDevices, AllowOfflineUsage, AllowVirtualization, Notes, CustomPropertiesJson
-            _logger.LogWarning("Some license properties not set - entity structure incomplete");
 
             // Save to repository
             var createdEntity = await _unitOfWork.Licenses.AddAsync(licenseEntity);
@@ -427,25 +424,6 @@ public class ProductLicenseService : IProductLicenseService
     private static List<LicenseFeature> MapFeaturesFromRequest(LicenseGenerationRequest request)
     {
         var features = new List<LicenseFeature>();
-
-        // Map boolean features from request properties
-        if (request.AllowOfflineUsage)
-        {
-            features.Add(new LicenseFeature
-            {
-                Name = "OfflineUsage",
-                Description = "Allows application to function without internet connectivity"
-            });
-        }
-
-        if (request.AllowVirtualization)
-        {
-            features.Add(new LicenseFeature
-            {
-                Name = "Virtualization",
-                Description = "Allows application to run in virtualized environments"
-            });
-        }
 
         // Map usage limits as features
         if (request.MaxUsers.HasValue && request.MaxUsers.Value > 0)

@@ -4,6 +4,7 @@ using TechWayFit.Licensing.Core.Models;
 using TechWayFit.Licensing.Management.Core.Models.Product;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Web.ViewModels.Product;
+using TechWayFit.Licensing.Management.Web.ViewModels.Shared;
 using TechWayFit.Licensing.Management.Web.Helpers;
 using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Products;
 using System.Text.Json;
@@ -22,17 +23,20 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         private readonly IEnterpriseProductService _productService;
         private readonly IProductLicenseService _licenseService;
         private readonly IConsumerAccountService _consumerService;
+        private readonly IProductTierService _productTierService;
 
         public ProductController(
             ILogger<ProductController> logger,
             IEnterpriseProductService productService,
             IProductLicenseService licenseService,
-            IConsumerAccountService consumerService)
+            IConsumerAccountService consumerService,
+            IProductTierService productTierService)
         {
             _logger = logger;
             _productService = productService ?? throw new ArgumentNullException(nameof(productService));
             _licenseService = licenseService ?? throw new ArgumentNullException(nameof(licenseService));
             _consumerService = consumerService ?? throw new ArgumentNullException(nameof(consumerService));
+            _productTierService = productTierService ?? throw new ArgumentNullException(nameof(productTierService));
         }
 
         /// <summary>
@@ -108,15 +112,16 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 if (product == null)
                 {
                     return NotFound();
-                }
-
-                var viewModel = new ProductDetailViewModel
+                }                var viewModel = new ProductDetailViewModel
                 {
                     Product = product,
                     Consumers = await GetProductConsumersAsync(id),
                     RecentLicenses = await GetRecentLicensesAsync(id),
                     Statistics = await GetProductStatisticsAsync(id)
                 };
+
+                // Populate stats tiles for reusable component
+                viewModel.StatsTiles = CreateProductDetailStatsTiles(product, viewModel.Statistics);
 
                 return View(viewModel);
             }
@@ -470,42 +475,32 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
 
         private async Task<List<ConsumerSummaryViewModel>> GetProductConsumersAsync(Guid productId)
         {
-            // TODO: Implement actual consumer retrieval logic
-            // For now, return sample data
-            return new List<ConsumerSummaryViewModel>
+            var consumers = await _consumerService.GetConsumersByProductAsync(productId);
+            
+            return consumers.Select(c => new ConsumerSummaryViewModel
             {
-                new ConsumerSummaryViewModel
-                {
-                    ConsumerId = Guid.NewGuid().ConvertToString(),
-                    OrganizationName = "Demo Organization",
-                    ContactPerson = "John Doe",
-                    ContactEmail = "john@demo.com",
-                    LicenseCount = 2,
-                    LastLicenseDate = DateTime.UtcNow.AddDays(-30),
-                    IsActive = true
-                }
-            };
+                ConsumerId = c.ConsumerId.ToString(),
+                OrganizationName = c.CompanyName,
+                ContactEmail = c.PrimaryContact.Email, 
+                IsActive = c.IsActive
+            }).ToList();
+            
         }
 
         private async Task<List<LicenseSummaryViewModel>> GetRecentLicensesAsync(Guid productId)
         {
-            // TODO: Implement actual license retrieval logic
-            // For now, return sample data
-            return new List<LicenseSummaryViewModel>
+            var licenses = await _licenseService.GetLicensesByProductAsync(productId);
+            
+            return licenses.Select(l => new LicenseSummaryViewModel
             {
-                new LicenseSummaryViewModel
-                {
-                    LicenseId = Guid.NewGuid().ConvertToString(),
-                    ConsumerName = "Demo Organization",
-                    Tier = LicenseTier.Professional,
-                    Status = LicenseStatus.Active,
-                    CreatedAt = DateTime.UtcNow.AddDays(-15),
-                    ExpiresAt = DateTime.UtcNow.AddDays(345)
-                }
-            };
-        }
-
-        private async Task<ProductStatisticsViewModel> GetProductStatisticsAsync(Guid productId)
+                LicenseId = l.LicenseId.ToString(),
+                ConsumerName = l.LicenseConsumer?.Consumer.CompanyName?? "Unknown",
+                Tier = LicenseTier.Community,//TODO: Map to actual tier
+                Status = l.Status,
+                CreatedAt = l.CreatedAt,
+                ExpiresAt = l.ValidTo
+            }).ToList();
+        }        private async Task<ProductStatisticsViewModel> GetProductStatisticsAsync(Guid productId)
         {
             // TODO: Implement actual statistics calculation
             // For now, return sample data
@@ -529,6 +524,42 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                     { "Rate Limiting", 3 },
                     { "Authentication", 4 },
                     { "Analytics", 2 }
+                }
+            };
+        }
+
+        private List<StatsTileViewModel> CreateProductDetailStatsTiles(ProductConfiguration product, ProductStatisticsViewModel statistics)
+        {
+            var statusCardClass = product.IsActive ? "stats-card-success" : "stats-card-secondary";
+            
+            return new List<StatsTileViewModel>
+            {
+                new StatsTileViewModel
+                {
+                    IconClass = "fas fa-box",
+                    Value = product.ProductName,
+                    Label = "Product Name",
+                    IsSmallText = true
+                },
+                new StatsTileViewModel
+                {
+                    IconClass = "fas fa-circle-check",
+                    Value = product.IsActive ? "Active" : "Inactive",
+                    Label = "Status",
+                    CssClass = statusCardClass
+                },
+                new StatsTileViewModel
+                {
+                    IconClass = "fas fa-certificate",
+                    Value = statistics.TotalLicenses.ToString(),
+                    Label = "Total Licenses"
+                },
+                new StatsTileViewModel
+                {
+                    IconClass = "fas fa-calendar-plus",
+                    Value = product.CreatedAt.ToString("MMM dd, yyyy"),
+                    Label = "Created",
+                    IsSmallText = true
                 }
             };
         }
@@ -742,9 +773,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         public async Task<IActionResult> EditEnhancedFeatures(Guid id)
         {
             return RedirectToAction("Features", new { id });
-        }
-
-        /// <summary>
+        }        /// <summary>
         /// Dedicated Product Tiers management page
         /// </summary>
         [Route("Product/{id:guid}/tiers")]
@@ -760,6 +789,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
 
                 var viewModel = CreateEnhancedEditViewModel(product);
                 viewModel.ActiveSection = "tiers";
+                viewModel.StatsTiles = CreateProductTiersStatsTiles(product);
 
                 return View("Tiers", viewModel);
             }
@@ -769,9 +799,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 TempData["ErrorMessage"] = "Error loading product tiers. Please try again.";
                 return RedirectToAction(nameof(Index));
             }
-        }
-
-        /// <summary>
+        }        /// <summary>
         /// Dedicated Product Versions management page
         /// </summary>
         [Route("Product/{id:guid}/versions")]
@@ -787,6 +815,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
 
                 var viewModel = CreateEnhancedEditViewModel(product);
                 viewModel.ActiveSection = "versions";
+                viewModel.StatsTiles = CreateProductVersionsStatsTiles(product);
 
                 return View("Versions", viewModel);
             }
@@ -796,9 +825,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 TempData["ErrorMessage"] = "Error loading product versions. Please try again.";
                 return RedirectToAction(nameof(Index));
             }
-        }
-
-        /// <summary>
+        }        /// <summary>
         /// Dedicated Product Features management page
         /// </summary>
         [Route("Product/{id:guid}/features")]
@@ -814,6 +841,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
 
                 var viewModel = CreateEnhancedEditViewModel(product);
                 viewModel.ActiveSection = "features";
+                viewModel.StatsTiles = CreateProductFeaturesStatsTiles(product);
 
                 return View("Features", viewModel);
             }
@@ -823,14 +851,12 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 TempData["ErrorMessage"] = "Error loading product features. Please try again.";
                 return RedirectToAction(nameof(Index));
             }
-        }
-
-        /// <summary>
+        }/// <summary>
         /// Helper method to create enhanced edit view model
         /// </summary>
         private ProductEnhancedEditViewModel CreateEnhancedEditViewModel(ProductConfiguration product)
         {
-            return new ProductEnhancedEditViewModel
+            var viewModel = new ProductEnhancedEditViewModel
             {
                 // Basic product info
                 ProductId = Guid.TryParse(product.ProductId, out var productGuid) ? productGuid : Guid.Empty,
@@ -845,6 +871,122 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 HasVersions = true,
                 HasFeatures = true,
                 ActiveSection = "basic" // Default, will be overridden
+            };
+
+            return viewModel;
+        }
+
+        private List<StatsTileViewModel> CreateProductTiersStatsTiles(ProductConfiguration product)
+        {
+            return new List<StatsTileViewModel>
+            {
+                new StatsTileViewModel
+                {
+                    IconClass = "fas fa-layer-group",
+                    Value = "0",
+                    Label = "Total Tiers",
+                    ElementId = "tiers-count"
+                },
+                new StatsTileViewModel
+                {
+                    IconClass = "fas fa-check-circle",
+                    Value = "0",
+                    Label = "Active Tiers",
+                    CssClass = "stats-card-success",
+                    ElementId = "active-tiers-count"
+                },
+                new StatsTileViewModel
+                {
+                    IconClass = "fas fa-users",
+                    Value = "0",
+                    Label = "Customers",
+                    CssClass = "stats-card-info",
+                    ElementId = "customer-count"
+                },
+                new StatsTileViewModel
+                {
+                    IconClass = "fas fa-percentage",
+                    Value = "0%",
+                    Label = "Conversion Rate",
+                    CssClass = "stats-card-warning",
+                    ElementId = "avg-conversion-rate"
+                }
+            };
+        }
+
+        private List<StatsTileViewModel> CreateProductVersionsStatsTiles(ProductConfiguration product)
+        {
+            return new List<StatsTileViewModel>
+            {
+                new StatsTileViewModel
+                {
+                    IconClass = "fas fa-code-branch",
+                    Value = "0",
+                    Label = "Total Versions",
+                    ElementId = "versions-count"
+                },
+                new StatsTileViewModel
+                {
+                    IconClass = "fas fa-check-circle",
+                    Value = "0",
+                    Label = "Stable Releases",
+                    CssClass = "stats-card-success",
+                    ElementId = "stable-versions-count"
+                },
+                new StatsTileViewModel
+                {
+                    IconClass = "fas fa-flask",
+                    Value = "0",
+                    Label = "Beta Versions",
+                    CssClass = "stats-card-info",
+                    ElementId = "beta-versions-count"
+                },
+                new StatsTileViewModel
+                {
+                    IconClass = "fas fa-calendar-alt",
+                    Value = "0",
+                    Label = "Days Since Release",
+                    CssClass = "stats-card-warning",
+                    ElementId = "last-release-days"
+                }
+            };
+        }
+
+        private List<StatsTileViewModel> CreateProductFeaturesStatsTiles(ProductConfiguration product)
+        {
+            return new List<StatsTileViewModel>
+            {
+                new StatsTileViewModel
+                {
+                    IconClass = "fas fa-star",
+                    Value = "0",
+                    Label = "Total Features",
+                    ElementId = "features-count"
+                },
+                new StatsTileViewModel
+                {
+                    IconClass = "fas fa-check-circle",
+                    Value = "0",
+                    Label = "Active Features",
+                    CssClass = "stats-card-success",
+                    ElementId = "active-features-count"
+                },
+                new StatsTileViewModel
+                {
+                    IconClass = "fas fa-tag",
+                    Value = "0",
+                    Label = "Feature Categories",
+                    CssClass = "stats-card-info",
+                    ElementId = "categories-count"
+                },
+                new StatsTileViewModel
+                {
+                    IconClass = "fas fa-layer-group",
+                    Value = "0",
+                    Label = "Tiers with Features",
+                    CssClass = "stats-card-warning",
+                    ElementId = "tiers-with-features-count"
+                }
             };
         }
 
@@ -890,7 +1032,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddProductTier(Guid productId, ProductTierViewModel model)
+        public async Task<IActionResult> AddProductTier(ProductTierViewModel model)
         {
             try
             {
@@ -902,13 +1044,26 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                         .ToList();
                     return Json(new { success = false, message = "Validation failed", errors });
                 }
+                var serviceDto = new Core.Models.Product.ProductTier
+                {
+                    ProductId = model.ProductId,
+                    Name = model.TierName,
+                    Description = model.Description,
+                    Price = new Money
+                    {
+                        Amount = model.MonthlyPrice
+                        ?? 0,
+                        Currency = "USD"
+                    },
+                    IsActive = model.IsActive,
+                    MaxUsers = model.MaxUsers ?? 0
+                };
+               var productTier= await _productTierService.CreateTierAsync(serviceDto, User.Identity?.Name ?? "System");
 
-                // Simulate adding a product tier
-                await Task.CompletedTask; // For now, as this is mock implementation
                 
                 var newTier = new 
                 {
-                    Id = Guid.NewGuid(),
+                    Id = productTier.TierId,
                     Name = model.TierName,
                     Description = model.Description,
                     Price = model.MonthlyPrice.HasValue ? $"USD {model.MonthlyPrice:F2}/month" : "Free",
@@ -916,7 +1071,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                     CanDelete = true
                 };
 
-                _logger.LogInformation("Product tier '{TierName}' added to product {ProductId}", model.TierName, productId);
+                _logger.LogInformation("Product tier '{TierName}' added to product {ProductId}", model.TierName, model.ProductId);
                 
                 return Json(new { 
                     success = true, 
@@ -926,7 +1081,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error adding product tier for product {ProductId}", productId);
+                _logger.LogError(ex, "Error adding product tier for product {ProductId}", model.ProductId);
                 return Json(new { success = false, message = "Error adding product tier" });
             }
         }
@@ -1553,37 +1708,19 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         /// </summary>
         private async Task<List<object>> GetProductTiersDataAsync(Guid productId)
         {
-            // Simplified - return mock data for now
-            // In real implementation, this would query your data layer
-            await Task.CompletedTask;
-            
-            return new List<object>
+
+            var productTiers = await _productTierService.GetTiersByProductAsync(productId);
+
+            var returnObj = productTiers.Select(t => new
             {
-                new { 
-                    Id = Guid.NewGuid(),
-                    Name = "Community",
-                    Description = "Free tier with basic features",
-                    Price = "USD 0.00",
-                    IsActive = true,
-                    CanDelete = true
-                },
-                new { 
-                    Id = Guid.NewGuid(),
-                    Name = "Professional", 
-                    Description = "Professional tier with advanced features",
-                    Price = "USD 29.99/month",
-                    IsActive = true,
-                    CanDelete = true
-                },
-                new { 
-                    Id = Guid.NewGuid(),
-                    Name = "Enterprise", 
-                    Description = "Enterprise tier with all features",
-                    Price = "USD 99.99/month",
-                    IsActive = true,
-                    CanDelete = true
-                }
-            };
+                Id = t.TierId,
+                Name = t.Name,
+                Description = t.Description,
+                Price = t.Price?.Amount > 0 ? $"USD {t.Price.Amount:F2}/month" : "Free",
+                IsActive = t.IsActive,
+                CanDelete = true // Simplified, in real app check if tier can be deleted
+            });
+            return returnObj.Cast<object>().ToList();
         }
 
         /// <summary>

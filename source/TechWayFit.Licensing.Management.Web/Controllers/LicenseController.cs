@@ -185,12 +185,10 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 {
                     ProductId = model.ProductId.ToGuid(),
                     ConsumerId = model.ConsumerId.ToGuid(),
-                    TierId = model.Tier.ToString(),
+                    TierId = model.ProductTierId.ToGuid(),
                     ExpiryDate = model.ValidTo, // Use ValidTo as ExpiryDate
                     MaxUsers = (int?)model.MaxApiCallsPerMonth, // Map API calls to Max Users for now
                     MaxDevices = model.MaxConcurrentConnections,
-                    AllowOfflineUsage = false,
-                    AllowVirtualization = false,
                     Notes = $"Generated via Web UI by {User.Identity?.Name}",
                     CustomProperties = model.Metadata.ToDictionary(kv => kv.Key, kv => (object)kv.Value),
                     Metadata = new Dictionary<string, object>
@@ -512,7 +510,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
             content.AppendLine();
             
             content.AppendLine("=== Features ===");
-            foreach (var feature in license.Features)
+            foreach (var feature in license.LicenseConsumer.Features)
             {
                 content.AppendLine($"- {feature.Name}: {(feature.IsEnabled ? "Enabled" : "Disabled")}");
                 if (!string.IsNullOrEmpty(feature.Description))
@@ -590,7 +588,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                         Phone = license.LicenseConsumer.Consumer.SecondaryContact.Phone
                     } : null
                 },
-                Features = license.Features.Select(f => new
+                Features = license.LicenseConsumer.Features.Select(f => new
                 {
                     FeatureId = f.FeatureId,
                     Name = f.Name,

@@ -137,8 +137,37 @@ public class ProductTierService : IProductTierService
         return Task.FromResult(tier);
     }
 
-    public Task<ValidationResult> ValidateTierAsync(ProductTier tier)
+    public async Task<ValidationResult> ValidateTierAsync(ProductTier tier)
     {
-        throw new NotImplementedException();
+        var product = await _unitOfWork.Products.GetByIdAsync(tier.ProductId);
+        if (product == null)
+        {
+            return new ValidationResult
+            {
+                IsValid = false,
+                Errors = new List<string> { "Product not found" }
+            };
+        }
+
+        var validationErrors = new List<string>();
+        if (string.IsNullOrWhiteSpace(tier.Name))
+        {
+            validationErrors.Add("Tier name cannot be empty");
+        }
+
+        if (validationErrors.Count > 0)
+        {
+            return new ValidationResult
+            {
+                IsValid = false,
+                Errors = validationErrors
+            };
+        }   
+        return new ValidationResult
+        {
+            IsValid = true,
+            Errors = new List<string>()
+        };
+
     }
 }

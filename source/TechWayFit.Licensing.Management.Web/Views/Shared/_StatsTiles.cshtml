@@ -1,0 +1,25 @@
+@model List<TechWayFit.Licensing.Management.Web.ViewModels.Shared.StatsTileViewModel>
+
+@if (Model != null && Model.Any())
+{
+    <div class="row g-2 mb-3">
+        @foreach (var tile in Model)
+        {
+            <div class="col-sm-6 col-lg-3">
+                <div class="stats-card @tile.CssClass">
+                    <div class="stats-row-1">
+                        <div class="stats-icon">
+                            <i class="@tile.IconClass"></i>
+                        </div>
+                        <div class="stats-number @tile.ValueColorClass @(tile.IsSmallText ? "small" : "")" @(string.IsNullOrEmpty(tile.ElementId) ? "" : $"id=\"{tile.ElementId}\"")>
+                            @tile.Value
+                        </div>
+                    </div>
+                    <div class="stats-row-2">
+                        <div class="stats-label">@tile.Label</div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

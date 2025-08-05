@@ -54,6 +54,8 @@ public class SemanticVersion
     /// <exception cref="ArgumentException">Thrown if the version string format is invalid.</exception>
     public static SemanticVersion Parse(string versionString)
     {
+        if (string.IsNullOrWhiteSpace(versionString))
+            return SemanticVersion.Default;
         var parts = versionString.Split('.');
         if (parts.Length < 3) throw new ArgumentException("Invalid version format");
 

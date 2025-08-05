@@ -57,7 +57,7 @@ public static class ModelConverterExtensions
             RevokedAt = license.RevokedAt,
             RevocationReason = license.RevocationReason,
             Metadata = license.Metadata,
-            FeaturesIncluded = license.Features.Select(f => new LicenseFeature
+            FeaturesIncluded = license.LicenseConsumer.Features.Select(f => new LicenseFeature
             {
                 Id = f.FeatureId.ToString(),
                 Name = f.Name,

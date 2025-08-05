@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using TechWayFit.Licensing.Core.Models;
+using TechWayFit.Licensing.Management.Web.ViewModels.Shared;
 
 namespace TechWayFit.Licensing.Management.Web.ViewModels.Product
 {
@@ -44,9 +45,7 @@ namespace TechWayFit.Licensing.Management.Web.ViewModels.Product
         public int FeatureCount { get; set; } = 12; // Default to 12 features
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
-    }
-
-    /// <summary>
+    }    /// <summary>
     /// Product details view model
     /// </summary>
     public class ProductDetailViewModel
@@ -55,6 +54,7 @@ namespace TechWayFit.Licensing.Management.Web.ViewModels.Product
         public List<ConsumerSummaryViewModel> Consumers { get; set; } = new();
         public List<LicenseSummaryViewModel> RecentLicenses { get; set; } = new();
         public ProductStatisticsViewModel Statistics { get; set; } = new();
+        public List<StatsTileViewModel> StatsTiles { get; set; } = new();
     }
 
     /// <summary>
@@ -269,7 +269,8 @@ namespace TechWayFit.Licensing.Management.Web.ViewModels.Product
     /// </summary>
     public class ProductTierViewModel
     {
-        public Guid TierId { get; set; }
+        public Guid? TierId { get; set; }
+        [Required]
         public Guid ProductId { get; set; }
         
         [Required]
@@ -377,9 +378,7 @@ namespace TechWayFit.Licensing.Management.Web.ViewModels.Product
         public string? UpdatedBy { get; set; }
         public DateTime? DeletedAt { get; set; }
         public string? DeletedBy { get; set; }
-    }
-
-    /// <summary>
+    }    /// <summary>
     /// Enhanced Product Edit View Model with tabbed sections
     /// </summary>
     public class ProductEnhancedEditViewModel
@@ -410,5 +409,8 @@ namespace TechWayFit.Licensing.Management.Web.ViewModels.Product
         // Tab state management
         public string ActiveTab { get; set; } = "basic";
         public string ActiveSection { get; set; } = "basic";
+
+        // Stats tiles for reusable components
+        public List<StatsTileViewModel> StatsTiles { get; set; } = new();
     }
 }

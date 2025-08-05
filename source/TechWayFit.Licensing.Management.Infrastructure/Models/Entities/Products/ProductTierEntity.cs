@@ -35,12 +35,15 @@ public class ProductTierEntity : BaseAuditEntity
     /// </summary>
     public virtual ProductEntity? Product { get; set; }
 
-    public string Price { get; set; } = "USD 0.00"; // Assuming price is a string for currency formatting
-
-    /// <summary>
+    public string Price { get; set; } = "USD 0.00"; // Assuming price is a string for currency formatting    /// <summary>
     /// Navigation property to Product Features
     /// </summary>
     public virtual ICollection<ProductFeatureEntity> Features { get; set; } = new List<ProductFeatureEntity>();
+
+    /// <summary>
+    /// Navigation property to Product Licenses using this tier
+    /// </summary>
+    public virtual ICollection<ProductLicenseEntity> Licenses { get; set; } = new List<ProductLicenseEntity>();
 
     public static ProductTierEntity FromModel(ProductTier model)
     {

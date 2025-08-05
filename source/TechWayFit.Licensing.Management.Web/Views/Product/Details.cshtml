@@ -8,92 +8,46 @@
     <link rel="stylesheet" href="~/css/product-management.css" />
 }
 
-<div class="container-fluid py-3">
-    <!-- Header Section -->
+<div class="container-fluid py-3">    <!-- Header Section -->
     <div class="header mb-3">
         <div class="d-flex justify-content-between align-items-center">
             <div>
-                <div class="d-flex align-items-center mb-2">
-                    <a href="@Url.Action("Index", "Product")" class="btn btn-outline-secondary me-3">
-                        <i class="fas fa-arrow-left me-1"></i>Back to Products
-                    </a>
-                    <h2 class="mb-0">Product Details</h2>
-                </div>
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb mb-0">
-                        <li class="breadcrumb-item"><a asp-controller="License" asp-action="Index">Dashboard</a></li>
-                        <li class="breadcrumb-item"><a asp-controller="Product" asp-action="Index">Products</a></li>
-                        <li class="breadcrumb-item active">@Model.Product.ProductName</li>
-                    </ol>
-                </nav>
+                <h2 class="mb-1">Product Details</h2>
+                <p class="text-muted mb-0">Basic information and overview for @Model.Product.ProductName.</p>
             </div>
-            <div class="d-flex gap-1 flex-wrap">
-                <a href="@Url.Action("Edit", new { id = Model.Product.ProductId })" class="btn btn-outline-warning">
-                    <i class="fas fa-edit me-1"></i><span class="d-none d-md-inline">Edit</span>
+            <div class="btn-group" role="group">
+                <a href="@Url.Action("Details", new { id = Model.Product.ProductId })" class="btn btn-primary">
+                    <i class="fas fa-info-circle me-1"></i>Basic Details
                 </a>
-                <a href="@Url.Action("EditEnhanced", new { id = Model.Product.ProductId })" class="btn btn-outline-success">
-                    <i class="fas fa-cogs me-1"></i><span class="d-none d-md-inline">Enhanced Management</span>
+                <a href="@Url.Action("Tiers", new { id = Model.Product.ProductId })" class="btn btn-outline-primary">
+                    <i class="fas fa-layer-group me-1"></i>Tiers
                 </a>
-                <a asp-controller="License" asp-action="Create" asp-route-productId="@Model.Product.ProductId" class="btn btn-success">
-                    <i class="fas fa-plus me-1"></i><span class="d-none d-md-inline">Generate License</span>
+                <a href="@Url.Action("Versions", new { id = Model.Product.ProductId })" class="btn btn-outline-primary">
+                    <i class="fas fa-code-branch me-1"></i>Versions
                 </a>
-                <button type="button" class="btn btn-danger" onclick="showDeleteModal()">
-                    <i class="fas fa-trash me-1"></i><span class="d-none d-md-inline">Delete</span>
-                </button>
-            </div>
-        </div>
+                <a href="@Url.Action("Features", new { id = Model.Product.ProductId })" class="btn btn-outline-primary">
+                    <i class="fas fa-star me-1"></i>Features
+                </a>
+            </div>        </div>
     </div>
 
+    <!-- Action Buttons -->
+    <div class="d-flex gap-1 flex-wrap mb-3">
+        <a href="@Url.Action("Edit", new { id = Model.Product.ProductId })" class="btn btn-outline-warning">
+            <i class="fas fa-edit me-1"></i><span class="d-none d-md-inline">Edit</span>
+        </a>
+        <a href="@Url.Action("EditEnhanced", new { id = Model.Product.ProductId })" class="btn btn-outline-success">
+            <i class="fas fa-cogs me-1"></i><span class="d-none d-md-inline">Enhanced Management</span>
+        </a>
+        <a asp-controller="License" asp-action="Create" asp-route-productId="@Model.Product.ProductId" class="btn btn-success">
+            <i class="fas fa-plus me-1"></i><span class="d-none d-md-inline">Generate License</span>
+        </a>
+        <button type="button" class="btn btn-danger" onclick="showDeleteModal()">
+            <i class="fas fa-trash me-1"></i><span class="d-none d-md-inline">Delete</span>
+        </button>    </div>
+
     <!-- Status Overview Cards -->
-    <div class="row g-2 mb-3">
-        <div class="col-sm-6 col-lg-3">
-            <div class="stats-card">
-                <div class="stats-icon">
-                    <i class="fas fa-box"></i>
-                </div>
-                <div class="stats-content">
-                    <div class="stats-label">Product Name</div>
-                    <div class="stats-number small">@Model.Product.ProductName</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-lg-3">
-            @{
-                var statusCardClass = Model.Product.IsActive ? "stats-card-success" : "stats-card-secondary";
-            }
-            <div class="stats-card @statusCardClass">
-                <div class="stats-icon">
-                    <i class="fas fa-circle-check"></i>
-                </div>
-                <div class="stats-content">
-                    <div class="stats-label">Status</div>
-                    <div class="stats-number">@(Model.Product.IsActive ? "Active" : "Inactive")</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-lg-3">
-            <div class="stats-card">
-                <div class="stats-icon">
-                    <i class="fas fa-certificate"></i>
-                </div>
-                <div class="stats-content">
-                    <div class="stats-label">Total Licenses</div>
-                    <div class="stats-number">@Model.Statistics.TotalLicenses</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-lg-3">
-            <div class="stats-card">
-                <div class="stats-icon">
-                    <i class="fas fa-calendar-plus"></i>
-                </div>
-                <div class="stats-content">
-                    <div class="stats-label">Created</div>
-                    <div class="stats-number small">@Model.Product.CreatedAt.ToString("MMM dd, yyyy")</div>
-                </div>
-            </div>
-        </div>
-    </div>    <div class="row g-2">
+    <partial name="_StatsTiles" model="Model.StatsTiles" /><div class="row g-2">
         <!-- Main Content -->
         <div class="col-lg-8">
             <!-- Product Information -->
@@ -353,49 +307,6 @@
             </div>
         </div>        <!-- Sidebar -->
         <div class="col-lg-4">
-            <!-- License Statistics -->
-            <div class="sidebar-section mb-3">
-                <div class="section-header">
-                    <h6><i class="fas fa-chart-bar me-2"></i>License Statistics</h6>
-                </div>
-                <div class="section-content">
-                    <div class="row g-2">
-                        <div class="col-6">
-                            <div class="stats-card">
-                                <div class="stats-content text-center">
-                                    <div class="stats-number text-primary">@Model.Statistics.TotalLicenses</div>
-                                    <div class="stats-label">Total</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="stats-card stats-card-success">
-                                <div class="stats-content text-center">
-                                    <div class="stats-number text-success">@Model.Statistics.ActiveLicenses</div>
-                                    <div class="stats-label">Active</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="stats-card">
-                                <div class="stats-content text-center">
-                                    <div class="stats-number text-info">@Model.Consumers.Count</div>
-                                    <div class="stats-label">Consumers</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="stats-card">
-                                <div class="stats-content text-center">
-                                    <div class="stats-number text-secondary">@Model.Product.AvailableFeatures.Count</div>
-                                    <div class="stats-label">Features</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Quick Actions -->
             <div class="sidebar-section">
                 <div class="section-header">

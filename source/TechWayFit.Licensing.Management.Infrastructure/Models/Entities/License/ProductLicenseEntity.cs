@@ -29,6 +29,11 @@ public class ProductLicenseEntity : BaseAuditEntity
     /// Foreign key to Consumer
     /// </summary>
     public Guid ConsumerId { get; set; } = Guid.NewGuid();
+
+    /// <summary>
+    /// Foreign key to Product Tier (optional - for tier-based licensing)
+    /// </summary>
+    public Guid? ProductTierId { get; set; }
  
     /// <summary>
     /// Date when the license becomes valid
@@ -39,6 +44,16 @@ public class ProductLicenseEntity : BaseAuditEntity
     /// Date when the license expires
     /// </summary>
     public DateTime ValidTo { get; set; }
+
+    /// <summary>
+    /// Minimum product version that this license supports
+    /// </summary>
+    public string ValidProductVersionFrom { get; set; } = "1.0.0";
+
+    /// <summary>
+    /// Maximum product version that this license supports (optional)
+    /// </summary>
+    public string? ValidProductVersionTo { get; set; }
 
     /// <summary>
     /// Encryption method used for the license
@@ -108,7 +123,12 @@ public class ProductLicenseEntity : BaseAuditEntity
     public virtual ConsumerAccountEntity? Consumer { get; set; }
 
     /// <summary>
-    /// Navigation property to Tier
+    /// Navigation property to Product Tier
+    /// </summary>
+    public virtual ProductTierEntity? ProductTier { get; set; }
+
+    /// <summary>
+    /// Navigation property to Features (kept for backward compatibility but tier-based features are preferred)
     /// </summary>
     public virtual ICollection<ProductFeatureEntity> Features { get; set; } = new List<ProductFeatureEntity>();
 
@@ -122,8 +142,11 @@ public class ProductLicenseEntity : BaseAuditEntity
             LicenseCode = model.LicenseCode,
             ProductId = model.LicenseConsumer.Product.ProductId,
             ConsumerId = model.LicenseConsumer.Consumer.ConsumerId, 
+            ProductTierId = model.LicenseConsumer.ProductTier.TierId,
             ValidFrom = model.ValidFrom,
             ValidTo = model.ValidTo,
+            ValidProductVersionFrom = model.ValidProductVersionFrom,
+            ValidProductVersionTo = model.ValidProductVersionTo,
             Encryption = model.Encryption,
             Signature = model.Signature,
             LicenseKey = model.LicenseKey,
@@ -137,6 +160,7 @@ public class ProductLicenseEntity : BaseAuditEntity
             MetadataJson = ToJson(model.Metadata)
         };
     }
+    
     public ProductLicense ToModel()
     {
         return new ProductLicense
@@ -144,17 +168,25 @@ public class ProductLicenseEntity : BaseAuditEntity
             LicenseId = Id,
             LicenseConsumer = new ProductConsumer
             {
-                Product = Product?.ToModel()?? new EnterpriseProduct(){
+                Product = Product?.ToModel() ?? new EnterpriseProduct()
+                {
                     ProductId = ProductId
                 },
-                Consumer = Consumer?.ToModel()?? new ConsumerAccount()
+                Consumer = Consumer?.ToModel() ?? new ConsumerAccount()
                 {
                     ConsumerId = ConsumerId
-                }
+                },
+                ProductTier = ProductTier?.ToModel() ?? new Core.Models.Product.ProductTier()
+                {
+                    TierId = ProductTierId ?? Guid.Empty
+                },
+                Features=ProductTier?.Features.Select(f => f.ToModel()).ToList() ?? Features.Select(f => f.ToModel()).ToList(),
             },
             ValidFrom = ValidFrom,
             LicenseCode = LicenseCode,
             ValidTo = ValidTo,
+            ValidProductVersionFrom = ValidProductVersionFrom,
+            ValidProductVersionTo = ValidProductVersionTo,
             Encryption = Encryption,
             Signature = Signature,
             LicenseKey = LicenseKey,
@@ -166,10 +198,8 @@ public class ProductLicenseEntity : BaseAuditEntity
             RevokedAt = RevokedAt,
             RevocationReason = RevocationReason,
             Metadata = FromDictJson(MetadataJson),
-            Features = Features.Select(f => f.ToModel()).ToList(),
             CreatedAt = CreatedOn
         };
     }
     #endregion
-
 }

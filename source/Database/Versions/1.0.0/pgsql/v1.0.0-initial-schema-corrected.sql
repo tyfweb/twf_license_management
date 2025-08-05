@@ -173,14 +173,19 @@ CREATE TABLE product_consumers (
 -- LICENSE ENTITIES
 -- =============================================
 
--- ProductLicenseEntity table
+-- ProductLicenseEntity table (Updated for Tier-Based Licensing)
 CREATE TABLE product_licenses (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     license_code VARCHAR(50) NOT NULL,
     product_id UUID NOT NULL,
     consumer_id UUID NOT NULL,
+    -- NEW: Product Tier support for tier-based licensing
+    product_tier_id UUID NULL,
     valid_from TIMESTAMP WITH TIME ZONE NOT NULL,
     valid_to TIMESTAMP WITH TIME ZONE NOT NULL,
+    -- NEW: Version range support
+    valid_product_version_from VARCHAR(20) NOT NULL DEFAULT '1.0.0',
+    valid_product_version_to VARCHAR(20) NULL,
     encryption VARCHAR(50) NOT NULL DEFAULT 'AES256',
     signature VARCHAR(50) NOT NULL DEFAULT 'SHA256',
     license_key VARCHAR(2000) NOT NULL,
@@ -205,7 +210,10 @@ CREATE TABLE product_licenses (
     CONSTRAINT fk_product_licenses_product_id 
         FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE RESTRICT,
     CONSTRAINT fk_product_licenses_consumer_id 
-        FOREIGN KEY (consumer_id) REFERENCES consumer_accounts(id) ON DELETE RESTRICT
+        FOREIGN KEY (consumer_id) REFERENCES consumer_accounts(id) ON DELETE RESTRICT,
+    -- NEW: Foreign key constraint for tier-based licensing
+    CONSTRAINT fk_product_licenses_product_tier_id 
+        FOREIGN KEY (product_tier_id) REFERENCES product_tiers(id) ON DELETE SET NULL
 );
 
 -- Many-to-many relationship table for ProductLicense and ProductFeature
@@ -586,7 +594,7 @@ CREATE INDEX idx_product_consumers_is_active ON product_consumers(is_active);
 CREATE INDEX idx_product_consumers_is_deleted ON product_consumers(is_deleted);
 CREATE INDEX idx_product_consumers_created_on ON product_consumers(created_on);
 
--- Product License indexes
+-- Product License indexes (Enhanced for tier-based licensing)
 CREATE UNIQUE INDEX idx_product_licenses_license_key ON product_licenses(license_key);
 CREATE INDEX idx_product_licenses_license_code ON product_licenses(license_code);
 CREATE INDEX idx_product_licenses_product_id ON product_licenses(product_id);
@@ -596,6 +604,11 @@ CREATE INDEX idx_product_licenses_valid_to ON product_licenses(valid_to);
 CREATE INDEX idx_product_licenses_is_active ON product_licenses(is_active);
 CREATE INDEX idx_product_licenses_is_deleted ON product_licenses(is_deleted);
 CREATE INDEX idx_product_licenses_product_consumer ON product_licenses(product_id, consumer_id);
+-- NEW: Tier-based licensing indexes
+CREATE INDEX idx_product_licenses_tier_id ON product_licenses(product_tier_id) WHERE product_tier_id IS NOT NULL;
+CREATE INDEX idx_product_licenses_product_tier ON product_licenses(product_id, product_tier_id) WHERE product_tier_id IS NOT NULL;
+CREATE INDEX idx_product_licenses_status_tier ON product_licenses(status, product_tier_id) WHERE product_tier_id IS NOT NULL;
+CREATE INDEX idx_product_licenses_version_range ON product_licenses(valid_product_version_from, valid_product_version_to);
 
 -- Audit Entry indexes
 CREATE INDEX idx_audit_entries_entity_type ON audit_entries(entity_type);
@@ -715,7 +728,7 @@ ALTER TABLE settings ADD CONSTRAINT uk_settings_category_key UNIQUE (category, k
 -- VIEWS (Optional - for common queries)
 -- =============================================
 
--- View for active licenses with product and consumer information
+-- View for active licenses with product and consumer information (Enhanced for tier-based licensing)
 CREATE OR REPLACE VIEW active_licenses_view AS
 SELECT 
     pl.id,
@@ -726,10 +739,21 @@ SELECT
     ca.primary_contact_email,
     pl.status,
     pl.valid_from,
-    pl.valid_to
+    pl.valid_to,
+    -- NEW: Tier-based licensing fields
+    pl.product_tier_id,
+    pt.name as tier_name,
+    pl.valid_product_version_from,
+    pl.valid_product_version_to,
+    -- License type classification
+    CASE 
+        WHEN pl.product_tier_id IS NOT NULL THEN 'Tier-Based'
+        ELSE 'Feature-Based'
+    END AS license_type
 FROM product_licenses pl
 INNER JOIN products p ON pl.product_id = p.id
 INNER JOIN consumer_accounts ca ON pl.consumer_id = ca.id
+LEFT JOIN product_tiers pt ON pl.product_tier_id = pt.id
 WHERE pl.status = 'Active' 
   AND pl.valid_to > CURRENT_TIMESTAMP
   AND ca.is_active = true
@@ -808,8 +832,14 @@ COMMENT ON TABLE product_tiers IS 'Product pricing tiers and service levels';
 COMMENT ON TABLE product_features IS 'Individual product features and capabilities';
 COMMENT ON TABLE consumer_accounts IS 'Customer accounts and organization information';
 COMMENT ON TABLE product_consumers IS 'Assignment of products to consumer accounts';
-COMMENT ON TABLE product_licenses IS 'License instances with keys and validity periods';
-COMMENT ON TABLE product_license_features IS 'Many-to-many relationship between licenses and features';
+COMMENT ON TABLE product_licenses IS 'License instances with keys and validity periods - Enhanced for tier-based licensing';
+COMMENT ON TABLE product_license_features IS 'Many-to-many relationship between licenses and features (backward compatibility)';
+
+-- NEW: Comments for tier-based licensing columns
+COMMENT ON COLUMN product_licenses.product_tier_id IS 'Foreign key to product_tiers table for tier-based licensing (NULL for feature-based licenses)';
+COMMENT ON COLUMN product_licenses.valid_product_version_from IS 'Minimum product version that this license supports';
+COMMENT ON COLUMN product_licenses.valid_product_version_to IS 'Maximum product version that this license supports (NULL means no upper limit)';
+
 COMMENT ON TABLE audit_entries IS 'Audit trail for all entity changes';
 COMMENT ON TABLE notification_templates IS 'Templates for system notifications';
 COMMENT ON TABLE notification_history IS 'History of sent notifications and delivery status';
@@ -840,5 +870,8 @@ COMMENT ON TABLE error_log_summaries IS 'Aggregated error logs and exception tra
 -- - Settings management system
 -- - Operations dashboard metrics and monitoring
 -- - All entities aligned with actual C# entity definitions
+-- - ENHANCED: Tier-based licensing support with backward compatibility
+-- - NEW: Version range support for product compatibility
+-- - NEW: Enhanced views and indexes for tier-based licensing
 
 COMMIT;

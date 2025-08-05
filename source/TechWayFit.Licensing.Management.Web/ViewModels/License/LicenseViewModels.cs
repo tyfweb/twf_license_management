@@ -21,6 +21,10 @@ namespace TechWayFit.Licensing.Management.Web.ViewModels.License
         public string ConsumerId { get; set; }
 
         [Required]
+        [Display(Name = "ProductTier")]
+        public string ProductTierId { get; set; }
+
+        [Required]
         [Display(Name = "Licensed To")]
         [StringLength(200)]
         public string LicensedTo { get; set; } = string.Empty;

@@ -157,6 +157,7 @@ static void RegisterServices(WebApplicationBuilder builder)
 {
     // Register real services  
     builder.Services.AddScoped<IEnterpriseProductService, EnterpriseProductService>();
+    builder.Services.AddScoped<IProductTierService, ProductTierService>();
 
     // Step 4: Consumer management services  
     builder.Services.AddScoped<IConsumerAccountService, ConsumerAccountService>();
