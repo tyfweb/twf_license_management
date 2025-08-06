@@ -1,14 +1,26 @@
 using System.ComponentModel.DataAnnotations;
+using TechWayFit.Licensing.Management.Core.Models.Common;
 
 namespace TechWayFit.Licensing.Management.Core.Models.Product;
 
 public class ProductTier
 {
     public Guid ProductId { get; set; } = Guid.NewGuid();
+    
     /// <summary>
     /// Unique identifier for the product tier
     /// </summary>
     public Guid TierId { get; set; } = Guid.NewGuid();
+
+    /// <summary>
+    /// Audit information for the product tier
+    /// </summary>
+    public AuditInfo Audit { get; set; } = new();
+
+    /// <summary>
+    /// Workflow information for the product tier
+    /// </summary>
+    public WorkflowInfo Workflow { get; set; } = new();
 
     /// <summary>
     /// Name of the product tier
@@ -40,7 +52,7 @@ public class ProductTier
         Price = Money.Zero;
         MaxUsers = 1;
         MaxDevices = 1;
-        IsActive = true;
+        Audit.IsActive = true;
     }
 
     static Guid DefaultTierId = Guid.Parse("00000000-0000-0000-0000-000000000001");
@@ -64,10 +76,6 @@ public class ProductTier
     /// Maximum number of devices allowed in this tier
     /// </summary>
     public int MaxDevices { get; set; }
-    /// <summary>
-    /// Indicates if the tier is active
-    /// </summary>
-    public bool IsActive { get; set; }
 }
 public class Money
 {

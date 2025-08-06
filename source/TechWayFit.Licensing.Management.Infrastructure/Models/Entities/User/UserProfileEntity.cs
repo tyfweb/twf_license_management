@@ -1,11 +1,12 @@
 using TechWayFit.Licensing.Management.Core.Models.User;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Common;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.User;
 
 /// <summary>
 /// Entity representing a user profile in the system
 /// </summary>
-public class UserProfileEntity : BaseDbEntity
+public class UserProfileEntity : AuditEntity
 {
 
     /// <summary>
@@ -67,51 +68,4 @@ public class UserProfileEntity : BaseDbEntity
     /// Navigation property for user role mappings
     /// </summary>
     public virtual ICollection<UserRoleMappingEntity> UserRoles { get; set; } = new List<UserRoleMappingEntity>();
-
-    public static UserProfileEntity FromModel(UserProfile model)
-    {
-        return new UserProfileEntity
-        {
-            Id = model.UserId,
-            UserName = model.UserName,
-            FullName = model.FullName,
-            Email = model.Email,
-            Department = model.Department,
-            IsLocked = model.IsLocked,
-            IsDeleted = model.IsDeleted,
-            IsAdmin = model.IsAdmin,
-            LastLoginDate = model.LastLoginDate,
-            FailedLoginAttempts = model.FailedLoginAttempts,
-            LockedDate = model.LockedDate
-        };
-    }
-    public UserProfile ToModel()
-    {
-        return new UserProfile
-        {
-            UserId = Id,
-            UserName = UserName,
-            FullName = FullName,
-            Email = Email,
-            Department = Department,
-            IsLocked = IsLocked,
-            IsDeleted = IsDeleted,
-            IsAdmin = IsAdmin,
-            LastLoginDate = LastLoginDate,
-            FailedLoginAttempts = FailedLoginAttempts,
-            LockedDate = LockedDate,
-            Roles = UserRoles.Select(urm => urm.Role).Select(role => new UserRole
-            {
-                RoleId = role.Id,
-                RoleName = role.RoleName,
-                RoleDescription = role.RoleDescription,
-                IsAdmin = role.IsAdmin,
-                CreatedOn = role.CreatedOn,
-                CreatedBy = role.CreatedBy,
-                UpdatedOn = role.UpdatedOn,
-                UpdatedBy = role.UpdatedBy,
-                IsActive = role.IsActive
-            }).ToList()
-        };
-    }
 }

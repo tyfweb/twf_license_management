@@ -5,12 +5,19 @@ namespace TechWayFit.Licensing.Management.Core.Models.User;
 /// <summary>
 /// Core model for user profile
 /// </summary>
-public class UserProfile : BaseAuditModel
+public class UserProfile
 {
-    public Guid UserId { 
-        get => Id; 
-        set => Id = value; 
-    }
+    public Guid UserId { get; set; } = Guid.NewGuid();
+
+    /// <summary>
+    /// Audit information for the user profile
+    /// </summary>
+    public AuditInfo Audit { get; set; } = new();
+
+    /// <summary>
+    /// Workflow information for the user profile
+    /// </summary>
+    public WorkflowInfo Workflow { get; set; } = new();
     public string UserName { get; set; } = string.Empty;
     public string FullName { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
@@ -23,8 +30,8 @@ public class UserProfile : BaseAuditModel
 
     // Aliases for View compatibility
     public DateTime CreatedDate { 
-        get => CreatedOn; 
-        set => CreatedOn = value; 
+        get => Audit.CreatedOn; 
+        set => Audit.CreatedOn = value; 
     }
     
     public Guid UserProfileId { 

@@ -25,40 +25,4 @@ public class ProductConsumerEntity : BaseDbEntity
     public string AccountManagerPosition { get; set; } = string.Empty;
     public ConsumerAccountEntity Consumer { get; set; } = new();
     public ProductEntity Product { get; set; } = new();
-
-    public static ProductConsumerEntity FromModel(ProductConsumer model)
-    {
-        return new ProductConsumerEntity
-        {
-            Id = model.ProductConsumerId,
-            ProductId = model.Product.ProductId,
-            ConsumerId = model.Consumer.ConsumerId,
-            AccountManagerName = model.AccountManager.Name,
-            AccountManagerEmail = model.AccountManager.Email,
-            AccountManagerPhone = model.AccountManager.Phone,
-            AccountManagerPosition = model.AccountManager.Position,
-            CreatedBy = "system", // Assuming system created this entry
-            CreatedOn = DateTime.UtcNow,
-            UpdatedBy = "system", // Assuming system updated this entry
-            UpdatedOn = DateTime.UtcNow,
-        
-        };
-    }
-    public ProductConsumer ToModel()
-    {
-        return new ProductConsumer
-        {
-            ProductConsumerId = Id,
-            Consumer = Consumer.ToModel(),
-            Product = Product.ToModel(),
-            AccountManager = new ContactPerson
-            {
-                Name = AccountManagerName,
-                Email = AccountManagerEmail,
-                Phone = AccountManagerPhone,
-                Position = AccountManagerPosition
-            }
-        };
-    }
-
 }

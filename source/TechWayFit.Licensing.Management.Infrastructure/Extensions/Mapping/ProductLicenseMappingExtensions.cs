@@ -1,0 +1,149 @@
+using System.Text.Json;
+using TechWayFit.Licensing.Management.Core.Models.License;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.License;
+using TechWayFit.Licensing.Core.Models;
+
+namespace TechWayFit.Licensing.Management.Infrastructure.Extensions.Mapping;
+
+/// <summary>
+/// Extension methods for mapping between ProductLicense core model and ProductLicenseEntity
+/// </summary>
+public static class ProductLicenseMappingExtensions
+{
+    /// <summary>
+    /// Converts ProductLicense core model to ProductLicenseEntity
+    /// </summary>
+    public static ProductLicenseEntity ToEntity(this ProductLicense model)
+    {
+        if (model == null) return null!;
+
+        return new ProductLicenseEntity
+        {
+            Id = model.LicenseId,
+            LicenseCode = model.LicenseCode,
+            ProductId = model.ProductId,
+            ConsumerId = model.ConsumerId,
+            ProductTierId = model.ProductTierId,
+            ValidFrom = model.ValidFrom,
+            ValidTo = model.ValidTo,
+            ValidProductVersionFrom = model.ValidProductVersionFrom,
+            ValidProductVersionTo = model.ValidProductVersionTo,
+            Encryption = model.Encryption,
+            Signature = model.Signature,
+            LicenseKey = model.LicenseKey,
+            PublicKey = model.PublicKey,
+            LicenseSignature = model.LicenseSignature,
+            KeyGeneratedAt = model.KeyGeneratedAt,
+            Status = model.Status.ToString(),
+            IssuedBy = model.IssuedBy,
+            RevokedAt = model.RevokedAt,
+            RevocationReason = model.RevocationReason,
+            MetadataJson = model.Metadata != null ? JsonSerializer.Serialize(model.Metadata) : "{}",
+            IsActive = model.IsActive,
+            IsDeleted = model.IsDeleted,
+            CreatedBy = model.CreatedBy,
+            CreatedOn = model.CreatedOn,
+            UpdatedBy = model.UpdatedBy,
+            UpdatedOn = model.UpdatedOn,
+            DeletedBy = model.DeletedBy,
+            DeletedOn = model.DeletedOn,
+            EntityStatus = (int)model.EntityStatus,
+            SubmittedBy = model.SubmittedBy,
+            SubmittedOn = model.SubmittedOn,
+            ReviewedBy = model.ReviewedBy,
+            ReviewedOn = model.ReviewedOn,
+            ReviewComments = model.ReviewComments,
+            RowVersion = model.RowVersion
+        };
+    }
+
+    /// <summary>
+    /// Converts ProductLicenseEntity to ProductLicense core model
+    /// </summary>
+    public static ProductLicense ToModel(this ProductLicenseEntity entity)
+    {
+        if (entity == null) return null!;
+
+        return new ProductLicense
+        {
+            LicenseId = entity.Id,
+            LicenseCode = entity.LicenseCode,
+            ProductId = entity.ProductId,
+            ConsumerId = entity.ConsumerId,
+            ProductTierId = entity.ProductTierId,
+            ValidFrom = entity.ValidFrom,
+            ValidTo = entity.ValidTo,
+            ValidProductVersionFrom = entity.ValidProductVersionFrom,
+            ValidProductVersionTo = entity.ValidProductVersionTo,
+            Encryption = entity.Encryption,
+            Signature = entity.Signature,
+            LicenseKey = entity.LicenseKey,
+            PublicKey = entity.PublicKey,
+            LicenseSignature = entity.LicenseSignature,
+            KeyGeneratedAt = entity.KeyGeneratedAt,
+            Status = Enum.TryParse<LicenseStatus>(entity.Status, out var status) ? status : LicenseStatus.Active,
+            IssuedBy = entity.IssuedBy,
+            RevokedAt = entity.RevokedAt,
+            RevocationReason = entity.RevocationReason,
+            Metadata = !string.IsNullOrEmpty(entity.MetadataJson)
+                        ? JsonSerializer.Deserialize<Dictionary<string, string>>(entity.MetadataJson) ?? new Dictionary<string, string>()
+                        : new Dictionary<string, string>(),
+            IsActive = entity.IsActive,
+            IsDeleted = entity.IsDeleted,
+            CreatedBy = entity.CreatedBy,
+            CreatedOn = entity.CreatedOn,
+            UpdatedBy = entity.UpdatedBy,
+            UpdatedOn = entity.UpdatedOn,
+            DeletedBy = entity.DeletedBy,
+            DeletedOn = entity.DeletedOn,
+            EntityStatus = (Core.Models.Common.EntityStatus)entity.EntityStatus,
+            SubmittedBy = entity.SubmittedBy,
+            SubmittedOn = entity.SubmittedOn,
+            ReviewedBy = entity.ReviewedBy,
+            ReviewedOn = entity.ReviewedOn,
+            ReviewComments = entity.ReviewComments,
+            RowVersion = entity.RowVersion
+        };
+    }
+
+    /// <summary>
+    /// Updates existing ProductLicenseEntity with values from ProductLicense core model
+    /// </summary>
+    public static void UpdateFromModel(this ProductLicenseEntity entity, ProductLicense model)
+    {
+        if (entity == null || model == null) return;
+
+        entity.LicenseCode = model.LicenseCode;
+        entity.ProductId = model.ProductId;
+        entity.ConsumerId = model.ConsumerId;
+        entity.ProductTierId = model.ProductTierId;
+        entity.ValidFrom = model.ValidFrom;
+        entity.ValidTo = model.ValidTo;
+        entity.ValidProductVersionFrom = model.ValidProductVersionFrom;
+        entity.ValidProductVersionTo = model.ValidProductVersionTo;
+        entity.Encryption = model.Encryption;
+        entity.Signature = model.Signature;
+        entity.LicenseKey = model.LicenseKey;
+        entity.PublicKey = model.PublicKey;
+        entity.LicenseSignature = model.LicenseSignature;
+        entity.KeyGeneratedAt = model.KeyGeneratedAt;
+        entity.Status = model.Status.ToString();
+        entity.IssuedBy = model.IssuedBy;
+        entity.RevokedAt = model.RevokedAt;
+        entity.RevocationReason = model.RevocationReason;
+        entity.MetadataJson = model.Metadata != null ? JsonSerializer.Serialize(model.Metadata) : "{}";
+        entity.IsActive = model.IsActive;
+        entity.IsDeleted = model.IsDeleted;
+        entity.UpdatedBy = model.UpdatedBy;
+        entity.UpdatedOn = model.UpdatedOn;
+        entity.DeletedBy = model.DeletedBy;
+        entity.DeletedOn = model.DeletedOn;
+        entity.EntityStatus = (int)model.EntityStatus;
+        entity.SubmittedBy = model.SubmittedBy;
+        entity.SubmittedOn = model.SubmittedOn;
+        entity.ReviewedBy = model.ReviewedBy;
+        entity.ReviewedOn = model.ReviewedOn;
+        entity.ReviewComments = model.ReviewComments;
+        entity.RowVersion = model.RowVersion;
+    }
+}

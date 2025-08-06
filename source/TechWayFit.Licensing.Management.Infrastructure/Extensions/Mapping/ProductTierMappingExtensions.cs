@@ -1,0 +1,109 @@
+using TechWayFit.Licensing.Management.Core.Models.Product;
+using TechWayFit.Licensing.Management.Core.Models.Common;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Products;
+
+namespace TechWayFit.Licensing.Management.Infrastructure.Extensions.Mapping;
+
+/// <summary>
+/// Extension methods for mapping between ProductTier core model and ProductTierEntity
+/// </summary>
+public static class ProductTierMappingExtensions
+{
+    /// <summary>
+    /// Converts ProductTier core model to ProductTierEntity
+    /// </summary>
+    public static ProductTierEntity ToEntity(this ProductTier model)
+    {
+        if (model == null) return null!;
+
+        return new ProductTierEntity
+        {
+            Id = model.TierId,
+            ProductId = model.ProductId,
+            Name = model.Name,
+            Description = model.Description,
+            DisplayOrder = model.DisplayOrder,
+            IsActive = model.Audit.IsActive,
+            IsDeleted = model.Audit.IsDeleted,
+            CreatedBy = model.Audit.CreatedBy,
+            CreatedOn = model.Audit.CreatedOn,
+            UpdatedBy = model.Audit.UpdatedBy,
+            UpdatedOn = model.Audit.UpdatedOn,
+            DeletedBy = model.Audit.DeletedBy,
+            DeletedOn = model.Audit.DeletedOn,
+            EntityStatus = (int)model.Workflow.Status,
+            SubmittedBy = model.Workflow.SubmittedBy,
+            SubmittedOn = model.Workflow.SubmittedOn,
+            ReviewedBy = model.Workflow.ReviewedBy,
+            ReviewedOn = model.Workflow.ReviewedOn,
+            ReviewComments = model.Workflow.ReviewComments,
+            RowVersion = model.Audit.RowVersion
+        };
+    }
+
+    /// <summary>
+    /// Converts ProductTierEntity to ProductTier core model
+    /// </summary>
+    public static ProductTier ToModel(this ProductTierEntity entity)
+    {
+        if (entity == null) return null!;
+
+        return new ProductTier
+        {
+            TierId = entity.Id,
+            ProductId = entity.ProductId,
+            Name = entity.Name,
+            Description = entity.Description,
+            DisplayOrder = entity.DisplayOrder,
+            Audit = new AuditInfo
+            {
+                IsActive = entity.IsActive,
+                IsDeleted = entity.IsDeleted,
+                CreatedBy = entity.CreatedBy,
+                CreatedOn = entity.CreatedOn,
+                UpdatedBy = entity.UpdatedBy,
+                UpdatedOn = entity.UpdatedOn,
+                DeletedBy = entity.DeletedBy,
+                DeletedOn = entity.DeletedOn,
+                RowVersion = entity.RowVersion
+            },
+            Workflow = new WorkflowInfo
+            {
+                Status = (EntityStatus)entity.EntityStatus,
+                SubmittedBy = entity.SubmittedBy,
+                SubmittedOn = entity.SubmittedOn,
+                ReviewedBy = entity.ReviewedBy,
+                ReviewedOn = entity.ReviewedOn,
+                ReviewComments = entity.ReviewComments
+            }
+        };
+    }
+
+    /// <summary>
+    /// Updates ProductTierEntity from ProductTier core model (preserves Id)
+    /// </summary>
+    public static void UpdateFromModel(this ProductTierEntity entity, ProductTier model)
+    {
+        if (entity == null || model == null) return;
+
+        entity.ProductId = model.ProductId;
+        entity.Name = model.Name;
+        entity.Description = model.Description;
+        entity.DisplayOrder = model.DisplayOrder;
+        entity.IsActive = model.Audit.IsActive;
+        entity.IsDeleted = model.Audit.IsDeleted;
+        entity.CreatedBy = model.Audit.CreatedBy;
+        entity.CreatedOn = model.Audit.CreatedOn;
+        entity.UpdatedBy = model.Audit.UpdatedBy;
+        entity.UpdatedOn = model.Audit.UpdatedOn;
+        entity.DeletedBy = model.Audit.DeletedBy;
+        entity.DeletedOn = model.Audit.DeletedOn;
+        entity.EntityStatus = (int)model.Workflow.Status;
+        entity.SubmittedBy = model.Workflow.SubmittedBy;
+        entity.SubmittedOn = model.Workflow.SubmittedOn;
+        entity.ReviewedBy = model.Workflow.ReviewedBy;
+        entity.ReviewedOn = model.Workflow.ReviewedOn;
+        entity.ReviewComments = model.Workflow.ReviewComments;
+        entity.RowVersion = model.Audit.RowVersion;
+    }
+}

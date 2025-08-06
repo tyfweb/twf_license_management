@@ -1,0 +1,118 @@
+using TechWayFit.Licensing.Management.Core.Models.Product;
+using TechWayFit.Licensing.Management.Core.Models.Common;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Products;
+
+namespace TechWayFit.Licensing.Management.Infrastructure.Extensions.Mapping;
+
+/// <summary>
+/// Extension methods for mapping between ProductVersion core model and ProductVersionEntity
+/// </summary>
+public static class ProductVersionMappingExtensions
+{
+    /// <summary>
+    /// Converts ProductVersion core model to ProductVersionEntity
+    /// </summary>
+    public static ProductVersionEntity ToEntity(this ProductVersion model)
+    {
+        if (model == null) return null!;
+
+        return new ProductVersionEntity
+        {
+            Id = model.VersionId,
+            ProductId = model.ProductId,
+            Name = model.Name,
+            IsCurrent = model.IsCurrent,
+            Version = model.Version.ToString(),
+            ReleaseDate = model.ReleaseDate,
+            EndOfLifeDate = model.EndOfLifeDate,
+            SupportEndDate = model.SupportEndDate,
+            IsActive = model.Audit.IsActive,
+            IsDeleted = model.Audit.IsDeleted,
+            CreatedBy = model.Audit.CreatedBy,
+            CreatedOn = model.Audit.CreatedOn,
+            UpdatedBy = model.Audit.UpdatedBy,
+            UpdatedOn = model.Audit.UpdatedOn,
+            DeletedBy = model.Audit.DeletedBy,
+            DeletedOn = model.Audit.DeletedOn,
+            EntityStatus = (int)model.Workflow.Status,
+            SubmittedBy = model.Workflow.SubmittedBy,
+            SubmittedOn = model.Workflow.SubmittedOn,
+            ReviewedBy = model.Workflow.ReviewedBy,
+            ReviewedOn = model.Workflow.ReviewedOn,
+            ReviewComments = model.Workflow.ReviewComments,
+            RowVersion = model.Audit.RowVersion
+        };
+    }
+
+    /// <summary>
+    /// Converts ProductVersionEntity to ProductVersion core model
+    /// </summary>
+    public static ProductVersion ToModel(this ProductVersionEntity entity)
+    {
+        if (entity == null) return null!;
+
+        return new ProductVersion
+        {
+            VersionId = entity.Id,
+            ProductId = entity.ProductId,
+            Name = entity.Name,
+            IsCurrent = entity.IsCurrent,
+            Version = Core.Models.Common.SemanticVersion.Parse(entity.Version),
+            ReleaseDate = entity.ReleaseDate,
+            EndOfLifeDate = entity.EndOfLifeDate,
+            SupportEndDate = entity.SupportEndDate,
+            Audit = new AuditInfo
+            {
+                IsActive = entity.IsActive,
+                IsDeleted = entity.IsDeleted,
+                CreatedBy = entity.CreatedBy,
+                CreatedOn = entity.CreatedOn,
+                UpdatedBy = entity.UpdatedBy,
+                UpdatedOn = entity.UpdatedOn,
+                DeletedBy = entity.DeletedBy,
+                DeletedOn = entity.DeletedOn,
+                RowVersion = entity.RowVersion
+            },
+            Workflow = new WorkflowInfo
+            {
+                Status = (EntityStatus)entity.EntityStatus,
+                SubmittedBy = entity.SubmittedBy,
+                SubmittedOn = entity.SubmittedOn,
+                ReviewedBy = entity.ReviewedBy,
+                ReviewedOn = entity.ReviewedOn,
+                ReviewComments = entity.ReviewComments
+            }
+        };
+    }
+
+    /// <summary>
+    /// Updates existing ProductVersionEntity with values from ProductVersion core model
+    /// </summary>
+    public static void UpdateFromModel(this ProductVersionEntity entity, ProductVersion model)
+    {
+        if (entity == null || model == null) return;
+
+        entity.ProductId = model.ProductId;
+        entity.Name = model.Name;
+        entity.IsCurrent = model.IsCurrent;
+        entity.Version = model.Version.ToString();
+        entity.ReleaseDate = model.ReleaseDate;
+        entity.EndOfLifeDate = model.EndOfLifeDate;
+        entity.SupportEndDate = model.SupportEndDate;
+        entity.IsActive = model.Audit.IsActive;
+        entity.IsDeleted = model.Audit.IsDeleted;
+        entity.CreatedBy = model.Audit.CreatedBy;
+        entity.CreatedOn = model.Audit.CreatedOn;
+        entity.UpdatedBy = model.Audit.UpdatedBy;
+        entity.UpdatedOn = model.Audit.UpdatedOn;
+        entity.DeletedBy = model.Audit.DeletedBy;
+        entity.DeletedOn = model.Audit.DeletedOn;
+        entity.EntityStatus = (int)model.Workflow.Status;
+        entity.SubmittedBy = model.Workflow.SubmittedBy;
+        entity.SubmittedOn = model.Workflow.SubmittedOn;
+        entity.ReviewedBy = model.Workflow.ReviewedBy;
+        entity.ReviewedOn = model.Workflow.ReviewedOn;
+        entity.ReviewComments = model.Workflow.ReviewComments;
+        entity.RowVersion = model.Audit.RowVersion;
+    }
+}

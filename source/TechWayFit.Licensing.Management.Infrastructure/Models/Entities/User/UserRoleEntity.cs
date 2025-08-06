@@ -1,9 +1,11 @@
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Common;
+
 namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.User;
 
 /// <summary>
 /// Entity representing a user role in the system
 /// </summary>
-public class UserRoleEntity : BaseDbEntity
+public class UserRoleEntity : AuditEntity
 {
 
     /// <summary>

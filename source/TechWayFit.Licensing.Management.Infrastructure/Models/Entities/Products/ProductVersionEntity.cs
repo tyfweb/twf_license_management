@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Common;
 using TechWayFit.Licensing.Management.Core.Models.Product;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Products;
@@ -7,7 +8,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Product
 /// Database entity for ProductVersion
 /// </summary>
 [Table("product_versions")]
-public class ProductVersionEntity : BaseDbEntity
+public class ProductVersionEntity : AuditWorkflowEntity
 {
 
     /// <summary>
@@ -52,39 +53,4 @@ public class ProductVersionEntity : BaseDbEntity
     /// Navigation property to Product
     /// </summary>
     public virtual ProductEntity? Product { get; set; }
-
-    public static ProductVersionEntity FromModel(ProductVersion model)
-    {
-        return new ProductVersionEntity
-        {
-            Id = model.VersionId,
-            ProductId = model.ProductId,
-            Version = model.Version,
-            ReleaseDate = model.ReleaseDate,
-            EndOfLifeDate = model.EndOfLifeDate,
-            SupportEndDate = model.SupportEndDate,
-            ReleaseNotes = model.ChangeLog,
-            IsCurrent = model.IsCurrent,
-            CreatedBy = "system", // Assuming system created
-            UpdatedBy = "system", // Assuming system updated
-            CreatedOn = DateTime.UtcNow,
-            UpdatedOn = DateTime.UtcNow
-        };
-    }
-    public ProductVersion ToModel()
-    {
-        return new ProductVersion
-        {
-            VersionId = this.Id,
-            ProductId = this.ProductId,
-            Name = this.Name,
-            IsActive = this.IsActive,
-            Version = this.Version,
-            ReleaseDate = this.ReleaseDate,
-            EndOfLifeDate = this.EndOfLifeDate,
-            SupportEndDate = this.SupportEndDate,
-            ChangeLog = this.ReleaseNotes,
-            IsCurrent = this.IsCurrent
-        };
-    }
 }

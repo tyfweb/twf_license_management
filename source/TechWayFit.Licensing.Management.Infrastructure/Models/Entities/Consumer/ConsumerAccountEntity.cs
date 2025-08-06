@@ -5,6 +5,7 @@ using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Consumer;
 using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.License;
 using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Products;
 using TechWayFit.Licensing.Management.Core.Models.Consumer;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Common;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.Data.Entities.Consumer;
 
@@ -12,7 +13,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Data.Entities.Consumer;
 /// Database entity for ConsumerAccount
 /// </summary>
 [Table("consumer_accounts")]
-public class ConsumerAccountEntity : BaseDbEntity
+public class ConsumerAccountEntity : AuditEntity
 {
     
     /// <summary>
@@ -88,66 +89,4 @@ public class ConsumerAccountEntity : BaseDbEntity
     
     public ICollection<ProductLicenseEntity> Licenses { get; set; } = new List<ProductLicenseEntity>(); 
     public ICollection<ProductConsumerEntity> ProductConsumers { get; set; } = new List<ProductConsumerEntity>();
-
-
-    public static ConsumerAccountEntity FromModel(ConsumerAccount model)
-    {
-        return new ConsumerAccountEntity
-        {
-            Id = model.ConsumerId,
-            CompanyName = model.CompanyName,
-            PrimaryContactName = model.PrimaryContact.Name,
-            PrimaryContactEmail = model.PrimaryContact.Email,
-            PrimaryContactPhone = model.PrimaryContact.Phone,
-            PrimaryContactPosition = model.PrimaryContact.Position,
-            SecondaryContactName = model.SecondaryContact?.Name,
-            SecondaryContactEmail = model.SecondaryContact?.Email,
-            SecondaryContactPhone = model.SecondaryContact?.Phone,
-            SecondaryContactPosition = model.SecondaryContact?.Position,
-            ActivatedAt = model.ActivatedAt,
-            IsActive = model.IsActive,
-            AddressStreet = model.Address.Street,
-            AddressCity = model.Address.City,
-            AddressState = model.Address.State,
-            AddressPostalCode = model.Address.PostalCode,
-            AddressCountry = model.Address.Country,
-            Notes = model.Notes,
-            Status = ToStringEnum(model.Status)
-        };
-    }
-    public ConsumerAccount ToModel()
-    {
-        return new ConsumerAccount
-        {
-            ConsumerId = this.Id,
-            CompanyName = this.CompanyName,
-            PrimaryContact = new ContactPerson
-            {
-                Name = this.PrimaryContactName,
-                Email = this.PrimaryContactEmail,
-                Phone = this.PrimaryContactPhone,
-                Position = this.PrimaryContactPosition ?? string.Empty
-            },
-            SecondaryContact = new ContactPerson
-            {
-                Name = this.SecondaryContactName ?? string.Empty,
-                Email = this.SecondaryContactEmail ?? string.Empty,
-                Phone = this.SecondaryContactPhone ?? string.Empty,
-                Position = this.SecondaryContactPosition ?? string.Empty
-            },
-            ActivatedAt = this.ActivatedAt,
-            IsActive = this.IsActive,
-            Address = new Address
-            {
-                Street = this.AddressStreet,
-                City = this.AddressCity,
-                State = this.AddressState,
-                PostalCode = this.AddressPostalCode,
-                Country = this.AddressCountry
-            },
-            Notes = this.Notes,
-            Status = ToEnum<ConsumerStatus>(this.Status)
-        };
-    }
-
 }

@@ -1,9 +1,11 @@
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Common;
+
 namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.User;
 
 /// <summary>
 /// Entity representing the mapping between users and roles
 /// </summary>
-public class UserRoleMappingEntity : BaseDbEntity
+public class UserRoleMappingEntity : AuditEntity
 {
 
     /// <summary>

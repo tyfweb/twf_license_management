@@ -1,0 +1,76 @@
+using TechWayFit.Licensing.Management.Core.Models.User;
+using TechWayFit.Licensing.Management.Core.Models.Common;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.User;
+
+namespace TechWayFit.Licensing.Management.Infrastructure.Extensions.Mapping;
+
+/// <summary>
+/// Extension methods for mapping between UserRoleMapping core model and UserRoleMappingEntity
+/// </summary>
+public static class UserRoleMappingMappingExtensions
+{
+    /// <summary>
+    /// Converts UserRoleMapping core model to UserRoleMappingEntity
+    /// </summary>
+    public static UserRoleMappingEntity ToEntity(this UserRoleMapping model)
+    {
+        if (model == null) return null!;
+
+        return new UserRoleMappingEntity
+        {
+            Id = model.MappingId,
+            UserId = model.UserId,
+            RoleId = model.RoleId,
+            AssignedDate = model.AssignedDate,
+            ExpiryDate = model.ExpiryDate,
+            IsActive = model.Audit.IsActive,
+            CreatedBy = model.Audit.CreatedBy,
+            CreatedOn = model.Audit.CreatedOn,
+            UpdatedBy = model.Audit.UpdatedBy,
+            UpdatedOn = model.Audit.UpdatedOn
+        };
+    }
+
+    /// <summary>
+    /// Converts UserRoleMappingEntity to UserRoleMapping core model
+    /// </summary>
+    public static UserRoleMapping ToModel(this UserRoleMappingEntity entity)
+    {
+        if (entity == null) return null!;
+
+        return new UserRoleMapping
+        {
+            MappingId = entity.Id,
+            UserId = entity.UserId,
+            RoleId = entity.RoleId,
+            AssignedDate = entity.AssignedDate,
+            ExpiryDate = entity.ExpiryDate,
+            Audit = new AuditInfo
+            {
+                IsActive = entity.IsActive,
+                CreatedBy = entity.CreatedBy,
+                CreatedOn = entity.CreatedOn,
+                UpdatedBy = entity.UpdatedBy,
+                UpdatedOn = entity.UpdatedOn
+            },
+            User = entity.User?.ToModel(),
+            Role = entity.Role?.ToModel()
+        };
+    }
+
+    /// <summary>
+    /// Updates existing UserRoleMappingEntity with values from UserRoleMapping core model
+    /// </summary>
+    public static void UpdateFromModel(this UserRoleMappingEntity entity, UserRoleMapping model)
+    {
+        if (entity == null || model == null) return;
+
+        entity.UserId = model.UserId;
+        entity.RoleId = model.RoleId;
+        entity.AssignedDate = model.AssignedDate;
+        entity.ExpiryDate = model.ExpiryDate;
+        entity.IsActive = model.Audit.IsActive;
+        entity.UpdatedBy = model.Audit.UpdatedBy;
+        entity.UpdatedOn = model.Audit.UpdatedOn;
+    }
+}

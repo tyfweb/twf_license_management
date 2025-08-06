@@ -1,10 +1,12 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using TechWayFit.Licensing.Management.Core.Models.Common;
 
 namespace TechWayFit.Licensing.Management.Core.Models.Settings
 {
     /// <summary>
-    /// Entity model for system settings that can be configured through the web interface
+    /// Core model for system settings that can be configured through the web interface
+    /// Uses composition over inheritance for better readability and flexibility
     /// </summary>
     public class Setting
     {
@@ -12,6 +14,11 @@ namespace TechWayFit.Licensing.Management.Core.Models.Settings
         /// Unique identifier for the setting
         /// </summary>
         public Guid SettingId { get; set; } = Guid.NewGuid();
+
+        /// <summary>
+        /// Audit information - composition over inheritance
+        /// </summary>
+        public AuditInfo Audit { get; set; } = new AuditInfo();
 
         /// <summary>
         /// Category group for organizing settings (e.g., Branding, License, Security)
@@ -67,28 +74,6 @@ namespace TechWayFit.Licensing.Management.Core.Models.Settings
         /// Sort order for displaying settings within a category
         /// </summary>
         public int SortOrder { get; set; } = 0;
-
-        /// <summary>
-        /// Timestamp when the setting was created
-        /// </summary>
-        [Required]
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-        /// <summary>
-        /// Timestamp when the setting was last updated
-        /// </summary>
-        [Required]
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-
-        /// <summary>
-        /// User who created the setting
-        /// </summary>
-        public string CreatedBy { get; set; } = "System";
-
-        /// <summary>
-        /// User who last updated the setting
-        /// </summary>
-        public string UpdatedBy { get; set; } = "System";
 
         /// <summary>
         /// Get the typed value of the setting based on its DataType

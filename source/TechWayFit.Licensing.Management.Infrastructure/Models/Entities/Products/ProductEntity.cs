@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using TechWayFit.Licensing.Core.Helpers;
 using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Consumer;
 using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.License;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Common;
 using TechWayFit.Licensing.Management.Core.Models.Product;
 using System.Text.Json.Serialization;
 using System.Text.Json;
@@ -12,7 +13,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Product
 /// Database entity for EnterpriseProduct
 /// </summary>
 [Table("products")]
-public class ProductEntity : BaseDbEntity
+public class ProductEntity : AuditWorkflowEntity
 {
 
     /// <summary>
@@ -71,37 +72,4 @@ public class ProductEntity : BaseDbEntity
     public virtual ICollection<ProductLicenseEntity> Licenses { get; set; } = new List<ProductLicenseEntity>();
 
     public virtual ICollection<ProductConsumerEntity> ProductConsumers { get; set; } = new List<ProductConsumerEntity>();
-
-    public static ProductEntity FromModel(EnterpriseProduct model)
-    {
-        return new ProductEntity
-        {
-            Id = model.ProductId,
-            Name = model.Name,
-            Description = model.Description,
-            ReleaseDate = model.ReleaseDate,
-            SupportEmail = model.SupportEmail,
-            SupportPhone = model.SupportPhone,
-            DecommissionDate = model.DecommissionDate,
-            Status = model.Status.ToString(),
-            MetadataJson = model.Metadata != null ? JsonSerializer.Serialize(model.Metadata) : "{}"
-        };
-    }
-    public EnterpriseProduct ToModel()
-    {
-        return new EnterpriseProduct
-        {
-            ProductId = this.Id,
-            Name = this.Name,
-            Description = this.Description,
-            ReleaseDate = this.ReleaseDate,
-            SupportEmail = this.SupportEmail,
-            SupportPhone = this.SupportPhone,
-            DecommissionDate = this.DecommissionDate,
-            Status = this.Status.ToEnum<ProductStatus>(),
-            Metadata = !string.IsNullOrEmpty(this.MetadataJson)
-                        ? JsonSerializer.Deserialize<Dictionary<string, string>>(this.MetadataJson)
-                        : new Dictionary<string, string>()
-        };
-    }
 }

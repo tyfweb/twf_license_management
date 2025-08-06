@@ -5,10 +5,21 @@ namespace TechWayFit.Licensing.Management.Core.Models.Product;
 public class ProductVersion
 {
     public Guid ProductId { get; set; } = Guid.NewGuid();
+    
     /// <summary>
     /// Unique identifier for the product version
     /// </summary>
     public Guid VersionId { get; set; } = Guid.NewGuid();
+
+    /// <summary>
+    /// Audit information for the product version
+    /// </summary>
+    public AuditInfo Audit { get; set; } = new();
+
+    /// <summary>
+    /// Workflow information for the product version
+    /// </summary>
+    public WorkflowInfo Workflow { get; set; } = new();
     public string Name { get; set; } = string.Empty;
     public bool IsCurrent { get; set; } = false;
     /// <summary>
@@ -34,5 +45,5 @@ public class ProductVersion
     /// </summary>
     public string ChangeLog { get; set; } = string.Empty;
 
-    public bool IsActive { get; set; } = false;
+    // IsActive property is inherited from BaseAuditModel
 }

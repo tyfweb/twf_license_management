@@ -1,0 +1,101 @@
+using TechWayFit.Licensing.Management.Core.Models.User;
+using TechWayFit.Licensing.Management.Core.Models.Common;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.User;
+
+namespace TechWayFit.Licensing.Management.Infrastructure.Extensions.Mapping;
+
+/// <summary>
+/// Extension methods for mapping between UserProfile core model and UserProfileEntity
+/// </summary>
+public static class UserProfileMappingExtensions
+{
+    /// <summary>
+    /// Converts UserProfile core model to UserProfileEntity
+    /// </summary>
+    public static UserProfileEntity ToEntity(this UserProfile model)
+    {
+        if (model == null) return null!;
+
+        return new UserProfileEntity
+        {
+            Id = model.UserId,
+            UserName = model.UserName,
+            FullName = model.FullName,
+            Email = model.Email,
+            Department = model.Department,
+            IsLocked = model.IsLocked,
+            IsAdmin = model.IsAdmin,
+            LastLoginDate = model.LastLoginDate,
+            FailedLoginAttempts = model.FailedLoginAttempts,
+            LockedDate = model.LockedDate,
+            IsActive = model.Audit.IsActive,
+            IsDeleted = model.Audit.IsDeleted,
+            CreatedBy = model.Audit.CreatedBy,
+            CreatedOn = model.Audit.CreatedOn,
+            UpdatedBy = model.Audit.UpdatedBy,
+            UpdatedOn = model.Audit.UpdatedOn,
+            DeletedBy = model.Audit.DeletedBy,
+            DeletedOn = model.Audit.DeletedOn,
+            RowVersion = model.Audit.RowVersion
+        };
+    }
+
+    /// <summary>
+    /// Converts UserProfileEntity to UserProfile core model
+    /// </summary>
+    public static UserProfile ToModel(this UserProfileEntity entity)
+    {
+        if (entity == null) return null!;
+
+        return new UserProfile
+        {
+            UserId = entity.Id,
+            UserName = entity.UserName,
+            FullName = entity.FullName,
+            Email = entity.Email,
+            Department = entity.Department,
+            IsLocked = entity.IsLocked,
+            IsAdmin = entity.IsAdmin,
+            LastLoginDate = entity.LastLoginDate,
+            FailedLoginAttempts = entity.FailedLoginAttempts,
+            LockedDate = entity.LockedDate,
+            Audit = new AuditInfo
+            {
+                IsActive = entity.IsActive,
+                IsDeleted = entity.IsDeleted,
+                CreatedBy = entity.CreatedBy,
+                CreatedOn = entity.CreatedOn,
+                UpdatedBy = entity.UpdatedBy,
+                UpdatedOn = entity.UpdatedOn,
+                DeletedBy = entity.DeletedBy,
+                DeletedOn = entity.DeletedOn,
+                RowVersion = entity.RowVersion
+            }
+        };
+    }
+
+    /// <summary>
+    /// Updates existing UserProfileEntity with values from UserProfile core model
+    /// </summary>
+    public static void UpdateFromModel(this UserProfileEntity entity, UserProfile model)
+    {
+        if (entity == null || model == null) return;
+
+        entity.UserName = model.UserName;
+        entity.FullName = model.FullName;
+        entity.Email = model.Email;
+        entity.Department = model.Department;
+        entity.IsLocked = model.IsLocked;
+        entity.IsAdmin = model.IsAdmin;
+        entity.LastLoginDate = model.LastLoginDate;
+        entity.FailedLoginAttempts = model.FailedLoginAttempts;
+        entity.LockedDate = model.LockedDate;
+        entity.IsActive = model.Audit.IsActive;
+        entity.IsDeleted = model.Audit.IsDeleted;
+        entity.UpdatedBy = model.Audit.UpdatedBy;
+        entity.UpdatedOn = model.Audit.UpdatedOn;
+        entity.DeletedBy = model.Audit.DeletedBy;
+        entity.DeletedOn = model.Audit.DeletedOn;
+        entity.RowVersion = model.Audit.RowVersion;
+    }
+}

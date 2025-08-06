@@ -15,7 +15,26 @@ public class ProductLicense : BaseAuditModel
         get => Id; 
         set => Id = value; 
     }
+    /// <summary>
+    /// License code used for validation and activation
+    /// </summary>
     public string LicenseCode { get; set; } = string.Empty;
+    
+    /// <summary>
+    /// Foreign key to Product
+    /// </summary>
+    public Guid ProductId { get; set; } = Guid.NewGuid();
+
+    /// <summary>
+    /// Foreign key to Consumer
+    /// </summary>
+    public Guid ConsumerId { get; set; } = Guid.NewGuid();
+
+    /// <summary>
+    /// Foreign key to Product Tier (optional - for tier-based licensing)
+    /// </summary>
+    public Guid? ProductTierId { get; set; }
+    
     /// <summary>
     /// Product and Consumer relationship
     /// This contains the product and consumer information for the license

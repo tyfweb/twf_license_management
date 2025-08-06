@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.License;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Common;
 using TechWayFit.Licensing.Management.Core.Models.Product;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Products;
@@ -8,7 +9,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Product
 /// Database entity for ProductTier
 /// </summary>
 [Table("product_tiers")]
-public class ProductTierEntity : BaseDbEntity
+public class ProductTierEntity : AuditWorkflowEntity
 {
 
     public int DisplayOrder { get; set; } = 0;
@@ -44,40 +45,4 @@ public class ProductTierEntity : BaseDbEntity
     /// Navigation property to Product Licenses using this tier
     /// </summary>
     public virtual ICollection<ProductLicenseEntity> Licenses { get; set; } = new List<ProductLicenseEntity>();
-
-    public static ProductTierEntity FromModel(ProductTier model)
-    {
-        return new ProductTierEntity
-        {
-            Id = model.TierId,
-            Name = model.Name,
-            DisplayOrder = model.DisplayOrder,
-            Description = model.Description,
-            SupportSLAJson = ToJson(model.SupportSLA),
-            ProductId = model.ProductId,
-            IsActive = model.IsActive,
-            CreatedBy = "system", // Assuming system created, adjust as needed
-            CreatedOn = DateTime.UtcNow,
-            UpdatedBy = "system", // Assuming system updated, adjust as needed
-            UpdatedOn = DateTime.UtcNow,
-            Price = model.Price,
-            Features = model.Features.Select(ProductFeatureEntity.FromModel).ToList()
-        };
-    }
-    public ProductTier ToModel()
-    {
-        return new ProductTier
-        {
-            TierId = Id,
-            ProductId = ProductId,
-            Name = Name,
-            Description = Description,
-            SupportSLA = FromJson<ProductSupportSLA>(SupportSLAJson),
-            IsActive = IsActive,
-            Price = Price,
-            DisplayOrder = DisplayOrder,
-            Features = Features.Select(f => f.ToModel()).ToList()
-        };
-    }    
-
 }

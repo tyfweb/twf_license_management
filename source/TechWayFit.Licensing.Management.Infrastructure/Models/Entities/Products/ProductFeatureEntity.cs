@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.License;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Common;
 using TechWayFit.Licensing.Management.Core.Models.License;
 using TechWayFit.Licensing.Management.Core.Models.Product;
 
@@ -9,7 +10,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Product
 /// Database entity for ProductFeature
 /// </summary>
 [Table("product_features")]
-public class ProductFeatureEntity : BaseDbEntity
+public class ProductFeatureEntity : AuditWorkflowEntity
 {
     public Guid ProductId { get; set; } = Guid.NewGuid();
 
@@ -57,43 +58,4 @@ public class ProductFeatureEntity : BaseDbEntity
     /// Navigation property to License Features
     /// </summary>
     public virtual ICollection<ProductLicenseEntity> ProductLicenses { get; set; } = new List<ProductLicenseEntity>();
-
-    public static ProductFeatureEntity FromModel(ProductFeature model)
-    {
-        return new ProductFeatureEntity
-        {
-            Id = model.FeatureId,
-            ProductId = model.ProductId,
-            TierId = model.TierId,
-            Name = model.Name,
-            Description = model.Description,
-            Code = model.Code,
-            IsEnabled = model.IsEnabled,
-            DisplayOrder = model.DisplayOrder,
-            SupportFromVersion = model.SupportFromVersion,
-            SupportToVersion = model.SupportToVersion,
-            FeatureUsageJson = ToJson(model.Usage), // Assuming Usage is serialized to JSON
-            CreatedBy = "system", // Assuming system created, adjust as needed
-            CreatedOn = DateTime.UtcNow,
-            UpdatedBy = "system", // Assuming system updated, adjust as needed
-            UpdatedOn = DateTime.UtcNow
-        };
-    }
-    public ProductFeature ToModel()
-    {
-        return new ProductFeature
-        {
-            FeatureId = Id,
-            TierId = TierId,
-            Name = Name,
-            Description = Description,
-            Code = Code,
-            IsEnabled = IsEnabled,
-            DisplayOrder = DisplayOrder,
-            SupportFromVersion = SupportFromVersion,
-            SupportToVersion = SupportToVersion,
-            Usage = FromJson<ProductFeatureUsage>(FeatureUsageJson), // Assuming Usage is deserialized
-            ProductId = Tier?.ProductId ?? Guid.Empty
-        };
-    }
 }

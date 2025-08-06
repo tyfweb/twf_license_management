@@ -5,11 +5,20 @@ namespace TechWayFit.Licensing.Management.Core.Models.Product;
 
 public class ProductFeature
 {
-    
     /// <summary>
     /// Unique identifier for the product feature
     /// </summary>
-    public Guid FeatureId { get; set; } = Guid.Empty;
+    public Guid FeatureId { get; set; } = Guid.NewGuid();
+
+    /// <summary>
+    /// Audit information for the product feature
+    /// </summary>
+    public AuditInfo Audit { get; set; } = new();
+
+    /// <summary>
+    /// Workflow information for the product feature
+    /// </summary>
+    public WorkflowInfo Workflow { get; set; } = new();
     /// <summary>
     /// Unique identifier for the product feature
     /// </summary>

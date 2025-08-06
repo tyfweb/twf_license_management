@@ -1,11 +1,12 @@
 using System.ComponentModel.DataAnnotations;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Common;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Settings;
 
 /// <summary>
 /// Entity model for system settings storage
 /// </summary>
-public class SettingEntity : BaseDbEntity
+public class SettingEntity : AuditEntity
 {
 
     /// <summary>
@@ -97,63 +98,4 @@ public class SettingEntity : BaseDbEntity
     /// </summary>
     [MaxLength(201)] // Category(100) + "." + Key(100) + 1
     public string FullKey => $"{Category}.{Key}";
-
-    /// <summary>
-    /// Convert from Core model to Entity
-    /// </summary>
-    /// <param name="model">Core Setting model</param>
-    /// <returns>SettingEntity</returns>
-    public static SettingEntity FromModel(TechWayFit.Licensing.Management.Core.Models.Settings.Setting model)
-    {
-        return new SettingEntity
-        {
-            Id = model.SettingId,
-            Category = model.Category,
-            Key = model.Key,
-            Value = model.Value,
-            DefaultValue = model.DefaultValue,
-            DataType = model.DataType,
-            DisplayName = model.DisplayName,
-            Description = model.Description,
-            GroupName = string.Empty, // Map this appropriately if needed
-            DisplayOrder = model.SortOrder,
-            IsEditable = !model.IsReadOnly,
-            IsRequired = model.IsRequired,
-            IsSensitive = false, // Set based on your business logic
-            ValidationRules = model.ValidationPattern,
-            PossibleValues = null, // Set if you have this data
-            IsActive = true,
-            CreatedBy = model.CreatedBy,
-            CreatedOn = model.CreatedAt,
-            UpdatedBy = model.UpdatedBy,
-            UpdatedOn = model.UpdatedAt
-        };
-    }
-
-    /// <summary>
-    /// Convert Entity to Core model
-    /// </summary>
-    /// <returns>Core Setting model</returns>
-    public TechWayFit.Licensing.Management.Core.Models.Settings.Setting ToModel()
-    {
-        return new TechWayFit.Licensing.Management.Core.Models.Settings.Setting
-        {
-            SettingId = Id,
-            Category = Category,
-            Key = Key,
-            Value = Value,
-            DefaultValue = DefaultValue,
-            DataType = DataType,
-            DisplayName = DisplayName,
-            Description = Description,
-            IsRequired = IsRequired,
-            IsReadOnly = !IsEditable,
-            ValidationPattern = ValidationRules,
-            SortOrder = DisplayOrder,
-            CreatedAt = CreatedOn,
-            UpdatedAt = UpdatedOn ?? CreatedOn,
-            CreatedBy = CreatedBy,
-            UpdatedBy = UpdatedBy ?? CreatedBy
-        };
-    }
 }

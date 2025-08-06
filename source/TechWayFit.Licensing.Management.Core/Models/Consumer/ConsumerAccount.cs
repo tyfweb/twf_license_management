@@ -2,27 +2,40 @@ using TechWayFit.Licensing.Management.Core.Models.Common;
 
 namespace TechWayFit.Licensing.Management.Core.Models.Consumer;
 
-public class ConsumerAccount : BaseAuditModel
+public class ConsumerAccount
 {
     public ConsumerAccount()
     {
         PrimaryContact = new ContactPerson();
         SecondaryContact = new ContactPerson();
         Address = new Address();
+        Audit.IsActive = true;
     }
     
     /// <summary>
     /// Unique identifier for the consumer
     /// </summary>
-    public Guid ConsumerId { 
-        get => Id; 
-        set => Id = value; 
-    }
+    public Guid ConsumerId { get; set; } = Guid.NewGuid();
+
+    /// <summary>
+    /// Audit information for the consumer account
+    /// </summary>
+    public AuditInfo Audit { get; set; } = new();
+
+    /// <summary>
+    /// Workflow information for the consumer account
+    /// </summary>
+    public WorkflowInfo Workflow { get; set; } = new();
     
     /// <summary>
     ///  Company or organization name
     /// </summary>
     public string CompanyName { get; set; } = string.Empty;
+    
+    /// <summary>
+    /// Account code for the consumer
+    /// </summary>
+    public string? AccountCode { get; set; }
     
     /// <summary>
     /// Primary contact information for the consumer
@@ -38,14 +51,19 @@ public class ConsumerAccount : BaseAuditModel
     /// Date when the consumer was created
     /// </summary>
     public DateTime CreatedAt { 
-        get => CreatedOn; 
-        set => CreatedOn = value; 
+        get => Audit.CreatedOn; 
+        set => Audit.CreatedOn = value; 
     }
     
     /// <summary>
     /// Date when the consumer was activated
     /// </summary>
     public DateTime ActivatedAt { get; set; } = DateTime.UtcNow;
+    
+    /// <summary>
+    /// Subscription end date
+    /// </summary>
+    public DateTime? SubscriptionEnd { get; set; }
     
     /// <summary>
     /// Address of the consumer
