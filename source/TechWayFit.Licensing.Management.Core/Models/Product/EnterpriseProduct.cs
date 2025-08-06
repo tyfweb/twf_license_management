@@ -2,12 +2,21 @@ using TechWayFit.Licensing.Management.Core.Models.Common;
 
 namespace TechWayFit.Licensing.Management.Core.Models.Product;
 
-public class EnterpriseProduct
+public class EnterpriseProduct : IWorkflowCapable
 {
     /// <summary>
     /// Unique identifier for the product
     /// </summary>
     public Guid ProductId { get; set; } = Guid.NewGuid();
+
+    /// <summary>
+    /// Implementation of IWorkflowCapable.Id - maps to ProductId
+    /// </summary>
+    public Guid Id 
+    { 
+        get => ProductId; 
+        set => ProductId = value; 
+    }
 
     /// <summary>
     /// Audit information for the product

@@ -8,8 +8,8 @@ namespace TechWayFit.Licensing.Management.Core.Contracts.Services.Workflow;
 /// <summary>
 /// Generic interface for managing entity workflow operations
 /// </summary>
-/// <typeparam name="T">The model type that implements BaseAuditModel</typeparam>
-public interface IWorkflowService<T> where T : BaseAuditModel
+/// <typeparam name="T">The model type that implements IWorkflowCapable</typeparam>
+public interface IWorkflowService<T> where T : IWorkflowCapable
 {
     /// <summary>
     /// Submit an entity for approval

@@ -2,7 +2,7 @@ using TechWayFit.Licensing.Management.Core.Models.Common;
 
 namespace TechWayFit.Licensing.Management.Core.Models.Consumer;
 
-public class ConsumerAccount
+public class ConsumerAccount : IWorkflowCapable
 {
     public ConsumerAccount()
     {
@@ -16,6 +16,15 @@ public class ConsumerAccount
     /// Unique identifier for the consumer
     /// </summary>
     public Guid ConsumerId { get; set; } = Guid.NewGuid();
+
+    /// <summary>
+    /// Implementation of IWorkflowCapable.Id - maps to ConsumerId
+    /// </summary>
+    public Guid Id 
+    { 
+        get => ConsumerId; 
+        set => ConsumerId = value; 
+    }
 
     /// <summary>
     /// Audit information for the consumer account

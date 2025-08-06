@@ -8,10 +8,10 @@ namespace TechWayFit.Licensing.Management.Services.Implementations.Workflow;
 /// <summary>
 /// Generic workflow service implementation for managing entity approval workflows
 /// </summary>
-/// <typeparam name="TModel">Core model type that inherits from BaseAuditModel</typeparam>
+/// <typeparam name="TModel">Core model type that implements IWorkflowCapable</typeparam>
 /// <typeparam name="TEntity">Database entity type</typeparam>
 public class WorkflowService<TModel, TEntity> : IWorkflowService<TModel> 
-    where TModel : BaseAuditModel 
+    where TModel : IWorkflowCapable 
     where TEntity : class
 {
     private readonly IApprovalRepository<TEntity> _repository;
@@ -160,11 +160,11 @@ public class WorkflowService<TModel, TEntity> : IWorkflowService<TModel>
         }
     }
 
-    public async Task<bool> CanUserApproveAsync(string userId, CancellationToken cancellationToken = default)
+    public Task<bool> CanUserApproveAsync(string userId, CancellationToken cancellationToken = default)
     {
         // Simple implementation - in production, this would check user roles/permissions
         // For now, assume all non-empty users can approve
-        return !string.IsNullOrWhiteSpace(userId) && userId != "Anonymous";
+        return Task.FromResult(!string.IsNullOrWhiteSpace(userId) && userId != "Anonymous");
     }
 
     public async Task<TModel> MoveToNextStatusAsync(Guid entityId, string actionBy, string? comments = null, CancellationToken cancellationToken = default)
@@ -177,12 +177,12 @@ public class WorkflowService<TModel, TEntity> : IWorkflowService<TModel>
                 throw new InvalidOperationException($"Entity with ID {entityId} not found");
 
             var currentModel = _toModel(entity);
-            var nextStatus = GetNextStatus(currentModel.EntityStatus);
+            var nextStatus = GetNextStatus(currentModel.Workflow.Status);
 
             var updatedEntity = await _repository.UpdateStatusAsync(entityId, nextStatus, actionBy, 
                 comments ?? $"Moved to {nextStatus}", cancellationToken);
 
-            await RecordWorkflowActionAsync(entityId, currentModel.EntityStatus, nextStatus, 
+            await RecordWorkflowActionAsync(entityId, currentModel.Workflow.Status, nextStatus, 
                 actionBy, comments ?? $"Moved to {nextStatus}", cancellationToken);
 
             return _toModel(updatedEntity);
@@ -204,12 +204,12 @@ public class WorkflowService<TModel, TEntity> : IWorkflowService<TModel>
                 throw new InvalidOperationException($"Entity with ID {entityId} not found");
 
             var currentModel = _toModel(entity);
-            var previousStatus = GetPreviousStatus(currentModel.EntityStatus);
+            var previousStatus = GetPreviousStatus(currentModel.Workflow.Status);
 
             var updatedEntity = await _repository.UpdateStatusAsync(entityId, previousStatus, actionBy, 
                 comments ?? $"Moved back to {previousStatus}", cancellationToken);
 
-            await RecordWorkflowActionAsync(entityId, currentModel.EntityStatus, previousStatus, 
+            await RecordWorkflowActionAsync(entityId, currentModel.Workflow.Status, previousStatus, 
                 actionBy, comments ?? $"Moved back to {previousStatus}", cancellationToken);
 
             return _toModel(updatedEntity);

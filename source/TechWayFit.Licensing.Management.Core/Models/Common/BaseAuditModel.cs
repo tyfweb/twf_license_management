@@ -5,7 +5,7 @@ namespace TechWayFit.Licensing.Management.Core.Models.Common;
 /// <summary>
 /// Base model class that provides audit fields for all core business models
 /// </summary>
-public abstract class BaseAuditModel
+public abstract class BaseAuditModel : IWorkflowCapable
 {
     /// <summary>
     /// Unique identifier for the model (Primary Key)
@@ -87,6 +87,68 @@ public abstract class BaseAuditModel
     /// </summary>
     [Timestamp]
     public byte[]? RowVersion { get; set; }
+
+    /// <summary>
+    /// Audit information composition object - implementation of IWorkflowCapable
+    /// </summary>
+    public AuditInfo Audit 
+    { 
+        get => new()
+        {
+            IsActive = IsActive,
+            IsDeleted = IsDeleted,
+            CreatedBy = CreatedBy,
+            CreatedOn = CreatedOn,
+            UpdatedBy = UpdatedBy,
+            UpdatedOn = UpdatedOn,
+            DeletedBy = DeletedBy,
+            DeletedOn = DeletedOn,
+            RowVersion = RowVersion
+        };
+        set
+        {
+            if (value != null)
+            {
+                IsActive = value.IsActive;
+                IsDeleted = value.IsDeleted;
+                CreatedBy = value.CreatedBy;
+                CreatedOn = value.CreatedOn;
+                UpdatedBy = value.UpdatedBy;
+                UpdatedOn = value.UpdatedOn;
+                DeletedBy = value.DeletedBy;
+                DeletedOn = value.DeletedOn;
+                RowVersion = value.RowVersion;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Workflow information composition object - implementation of IWorkflowCapable
+    /// </summary>
+    public WorkflowInfo Workflow 
+    { 
+        get => new()
+        {
+            Status = EntityStatus,
+            SubmittedBy = SubmittedBy,
+            SubmittedOn = SubmittedOn,
+            ReviewedBy = ReviewedBy,
+            ReviewedOn = ReviewedOn,
+            ReviewComments = ReviewComments
+        };
+        set
+        {
+            if (value != null)
+            {
+                EntityStatus = value.Status;
+                SubmittedBy = value.SubmittedBy;
+                SubmittedOn = value.SubmittedOn;
+                ReviewedBy = value.ReviewedBy;
+                ReviewedOn = value.ReviewedOn;
+                ReviewComments = value.ReviewComments;
+            }
+        }
+    }
 }
 
 /// <summary>
