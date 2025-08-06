@@ -1,11 +1,16 @@
+using TechWayFit.Licensing.Management.Core.Models.Common;
+
 namespace TechWayFit.Licensing.Management.Core.Models.Product;
 
-public class EnterpriseProduct
+public class EnterpriseProduct : BaseAuditModel
 {
     /// <summary>
     /// Unique identifier for the product
     /// </summary>
-    public Guid ProductId { get; set; } = Guid.NewGuid();
+    public Guid ProductId { 
+        get => Id; 
+        set => Id = value; 
+    }
 
     /// <summary>
     /// Name of the product

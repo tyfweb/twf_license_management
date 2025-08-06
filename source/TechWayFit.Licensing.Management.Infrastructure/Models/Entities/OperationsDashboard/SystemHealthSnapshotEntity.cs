@@ -6,7 +6,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Operati
 /// <summary>
 /// Entity for storing system health snapshots
 /// </summary>
-public class SystemHealthSnapshotEntity : BaseAuditEntity
+public class SystemHealthSnapshotEntity : BaseDbEntity
 {
     /// <summary>
     /// Unique identifier for the snapshot

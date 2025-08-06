@@ -12,7 +12,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.License
 /// Database entity for ProductLicense
 /// </summary>
 [Table("product_licenses")]
-public class ProductLicenseEntity : BaseAuditEntity
+public class ProductLicenseEntity : BaseDbEntity
 {
     #region BaseEntityProperties 
     /// <summary>

@@ -503,7 +503,7 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
     /// </summary>
     private void UpdateAuditFields()
     {
-        var entries = ChangeTracker.Entries<BaseAuditEntity>();
+        var entries = ChangeTracker.Entries<BaseDbEntity>();
         var currentTime = DateTime.UtcNow;
 
         foreach (var entry in entries)
@@ -530,7 +530,7 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
     /// </summary>
     private void CreateAuditEntries()
     {
-        var entries = ChangeTracker.Entries<BaseAuditEntity>()
+        var entries = ChangeTracker.Entries<BaseDbEntity>()
             .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified)
             .ToList();
 
@@ -551,7 +551,7 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
     /// <summary>
     /// Create an individual audit entry for an entity change
     /// </summary>
-    private AuditEntryEntity? CreateAuditEntry(Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry<BaseAuditEntity> entry)
+    private AuditEntryEntity? CreateAuditEntry(Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry<BaseDbEntity> entry)
     {
         var entityType = entry.Entity.GetType().Name;
         var entityId = entry.Entity.Id.ToString(); // Convert Guid to string for generic audit table
@@ -637,14 +637,14 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
     {
         var auditFields = new[]
         {
-            nameof(BaseAuditEntity.CreatedBy),
-            nameof(BaseAuditEntity.CreatedOn),
-            nameof(BaseAuditEntity.UpdatedBy),
-            nameof(BaseAuditEntity.UpdatedOn),
-            nameof(BaseAuditEntity.DeletedBy),
-            nameof(BaseAuditEntity.DeletedOn),
-            nameof(BaseAuditEntity.IsActive),
-            nameof(BaseAuditEntity.IsDeleted)
+            nameof(BaseDbEntity.CreatedBy),
+            nameof(BaseDbEntity.CreatedOn),
+            nameof(BaseDbEntity.UpdatedBy),
+            nameof(BaseDbEntity.UpdatedOn),
+            nameof(BaseDbEntity.DeletedBy),
+            nameof(BaseDbEntity.DeletedOn),
+            nameof(BaseDbEntity.IsActive),
+            nameof(BaseDbEntity.IsDeleted)
         };
 
         return auditFields.Contains(propertyName, StringComparer.OrdinalIgnoreCase);

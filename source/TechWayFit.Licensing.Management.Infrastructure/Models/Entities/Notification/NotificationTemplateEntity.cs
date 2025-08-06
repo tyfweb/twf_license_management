@@ -8,14 +8,13 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Notific
 /// Database entity for Notification Templates
 /// </summary>
 [Table("notification_templates")]
-public class NotificationTemplateEntity : BaseAuditEntity
+public class NotificationTemplateEntity : BaseDbEntity
 {
     public string TemplateName { get; set; } = string.Empty;
     public string NotificationType { get; set; } = string.Empty;
     public string NotificationMode { get; set; } = string.Empty; 
     public string Subject { get; set; } = string.Empty;
-    public string MessageTemplate { get; set; } = string.Empty;
-    public bool IsActive { get; set; }
+    public string MessageTemplate { get; set; } = string.Empty; 
     public string TemplateVariableJson { get; set; } = "{}";
 
 

@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using TechWayFit.Licensing.Management.Core.Models.Consumer;
+using TechWayFit.Licensing.Management.Core.Models.Common;
 
 namespace TechWayFit.Licensing.Management.Web.ViewModels.Consumer
 {
@@ -48,6 +49,25 @@ namespace TechWayFit.Licensing.Management.Web.ViewModels.Consumer
         
         [Display(Name = "Updated On")]
         public DateTime? UpdatedOn { get; set; }
+        
+        // Workflow fields
+        [Display(Name = "Status")]
+        public EntityStatus EntityStatus { get; set; }
+        
+        [Display(Name = "Submitted By")]
+        public string? SubmittedBy { get; set; }
+        
+        [Display(Name = "Submitted On")]
+        public DateTime? SubmittedOn { get; set; }
+        
+        [Display(Name = "Reviewed By")]
+        public string? ReviewedBy { get; set; }
+        
+        [Display(Name = "Reviewed On")]
+        public DateTime? ReviewedOn { get; set; }
+        
+        [Display(Name = "Review Comments")]
+        public string? ReviewComments { get; set; }
         
         // Summary properties for list view
         public int TotalLicenses { get; set; }

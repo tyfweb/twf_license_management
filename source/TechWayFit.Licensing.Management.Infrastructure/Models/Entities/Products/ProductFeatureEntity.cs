@@ -9,7 +9,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Product
 /// Database entity for ProductFeature
 /// </summary>
 [Table("product_features")]
-public class ProductFeatureEntity : BaseAuditEntity
+public class ProductFeatureEntity : BaseDbEntity
 {
     public Guid ProductId { get; set; } = Guid.NewGuid();
 

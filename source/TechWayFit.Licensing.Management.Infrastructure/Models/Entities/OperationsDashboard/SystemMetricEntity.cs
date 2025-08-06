@@ -5,7 +5,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Operati
 /// <summary>
 /// Entity for storing aggregated system metrics
 /// </summary>
-public class SystemMetricEntity : BaseAuditEntity
+public class SystemMetricEntity : BaseDbEntity
 {
     /// <summary>
     /// Unique identifier for the metric

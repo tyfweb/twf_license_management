@@ -17,6 +17,8 @@ using TechWayFit.Licensing.Management.Infrastructure.Contracts.Data;
 using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Extensions;
 using TechWayFit.Licensing.Management.Services.Implementations.User;
 using TechWayFit.Licensing.Management.Services.Implementations.Account;
+using TechWayFit.Licensing.Management.Services.Implementations.Workflow;
+using TechWayFit.Licensing.Management.Core.Contracts.Services.Workflow;
 using Serilog;
 using Serilog.Events;
 // OPERATIONS DASHBOARD - DISABLED FOR CORE FOCUS
@@ -190,4 +192,12 @@ static void RegisterServices(WebApplicationBuilder builder)
 
     // Register authentication service
     builder.Services.AddScoped<IAuthenticationService, AccountService>();
+    
+    // Register generic workflow services for approval system
+    builder.Services.AddScoped(typeof(IWorkflowService<>), typeof(WorkflowService<,>));
+    
+    // Register specific workflow services for approval system
+    builder.Services.AddScoped<IConsumerAccountWorkflowService, ConsumerAccountWorkflowService>();
+    builder.Services.AddScoped<IEnterpriseProductWorkflowService, EnterpriseProductWorkflowService>();
+    builder.Services.AddScoped<IProductLicenseWorkflowService, ProductLicenseWorkflowService>();
 }

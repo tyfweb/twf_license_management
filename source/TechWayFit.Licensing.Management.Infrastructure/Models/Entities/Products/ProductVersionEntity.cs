@@ -7,7 +7,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Product
 /// Database entity for ProductVersion
 /// </summary>
 [Table("product_versions")]
-public class ProductVersionEntity : BaseAuditEntity
+public class ProductVersionEntity : BaseDbEntity
 {
 
     /// <summary>

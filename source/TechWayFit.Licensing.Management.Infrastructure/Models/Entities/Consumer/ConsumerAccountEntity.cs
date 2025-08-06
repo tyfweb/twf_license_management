@@ -12,7 +12,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Data.Entities.Consumer;
 /// Database entity for ConsumerAccount
 /// </summary>
 [Table("consumer_accounts")]
-public class ConsumerAccountEntity : BaseAuditEntity
+public class ConsumerAccountEntity : BaseDbEntity
 {
     
     /// <summary>

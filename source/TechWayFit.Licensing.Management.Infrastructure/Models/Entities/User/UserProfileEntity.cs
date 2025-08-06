@@ -5,7 +5,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.User;
 /// <summary>
 /// Entity representing a user profile in the system
 /// </summary>
-public class UserProfileEntity : BaseAuditEntity
+public class UserProfileEntity : BaseDbEntity
 {
 
     /// <summary>
@@ -42,11 +42,6 @@ public class UserProfileEntity : BaseAuditEntity
     /// Indicates if the user account is locked (suspended)
     /// </summary>
     public bool IsLocked { get; set; } = false;
-
-    /// <summary>
-    /// Indicates if the user has been soft deleted
-    /// </summary>
-    public bool IsDeleted { get; set; } = false;
 
     /// <summary>
     /// Indicates if the user has administrative privileges

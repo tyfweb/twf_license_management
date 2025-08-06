@@ -6,7 +6,7 @@ using TechWayFit.Licensing.Management.Infrastructure.Models.Entities;
 namespace TechWayFit.Licensing.Management.Infrastructure.Implementations.Repositories.OperationsDashboard;
 
 public class OperationsBaseRepository<TEntity> :
-        IOperationsDashboardBaseRepository<TEntity> where TEntity : BaseAuditEntity
+        IOperationsDashboardBaseRepository<TEntity> where TEntity : BaseDbEntity
 {
     protected readonly DbSet<TEntity> _dbSet;
     protected readonly LicensingDbContext _context;

@@ -5,7 +5,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Setting
 /// <summary>
 /// Entity model for system settings storage
 /// </summary>
-public class SettingEntity : BaseAuditEntity
+public class SettingEntity : BaseDbEntity
 {
 
     /// <summary>

@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using TechWayFit.Licensing.Core.Models;
 using TechWayFit.Licensing.Management.Web.ViewModels.Shared;
+using TechWayFit.Licensing.Management.Core.Models.Common;
 
 namespace TechWayFit.Licensing.Management.Web.ViewModels.Product
 {
@@ -45,6 +46,14 @@ namespace TechWayFit.Licensing.Management.Web.ViewModels.Product
         public int FeatureCount { get; set; } = 12; // Default to 12 features
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
+        
+        // Workflow fields
+        public EntityStatus EntityStatus { get; set; }
+        public string? SubmittedBy { get; set; }
+        public DateTime? SubmittedOn { get; set; }
+        public string? ReviewedBy { get; set; }
+        public DateTime? ReviewedOn { get; set; }
+        public string? ReviewComments { get; set; }
     }    /// <summary>
     /// Product details view model
     /// </summary>

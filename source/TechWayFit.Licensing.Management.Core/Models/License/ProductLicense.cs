@@ -6,12 +6,15 @@ using TechWayFit.Licensing.Management.Core.Models.Product;
 
 namespace TechWayFit.Licensing.Management.Core.Models.License;
 
-public class ProductLicense
+public class ProductLicense : BaseAuditModel
 {
     /// <summary>
     /// Unique identifier for the product license
     /// </summary>
-    public Guid LicenseId { get; set; } = Guid.NewGuid();
+    public Guid LicenseId { 
+        get => Id; 
+        set => Id = value; 
+    }
     public string LicenseCode { get; set; } = string.Empty;
     /// <summary>
     /// Product and Consumer relationship
@@ -41,7 +44,10 @@ public class ProductLicense
     /// </summary>
     public DateTime ValidTo { get; set; }
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { 
+        get => CreatedOn; 
+        set => CreatedOn = value; 
+    }
     /// <summary>
     /// Encryption method used for the license
     /// </summary>

@@ -8,7 +8,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Product
 /// Database entity for ProductTier
 /// </summary>
 [Table("product_tiers")]
-public class ProductTierEntity : BaseAuditEntity
+public class ProductTierEntity : BaseDbEntity
 {
 
     public int DisplayOrder { get; set; } = 0;

@@ -1,11 +1,12 @@
 using System.ComponentModel.DataAnnotations;
+using TechWayFit.Licensing.Management.Core.Models.Common;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities;
 
 /// <summary>
 /// Base entity class that provides audit fields for all database entities
 /// </summary>
-public abstract class BaseAuditEntity
+public abstract class BaseDbEntity
 {
     /// <summary>
     /// Unique identifier for the entity (Primary Key)
@@ -53,6 +54,42 @@ public abstract class BaseAuditEntity
     /// </summary>
     public DateTime? DeletedOn { get; set; }
 
+    /// <summary>
+    /// Workflow status of the entity
+    /// </summary>
+    public int EntityStatus { get; set; } = 0; // Default to Draft
+
+    /// <summary>
+    /// User who submitted the entity for approval
+    /// </summary>
+    public string? SubmittedBy { get; set; }
+
+    /// <summary>
+    /// Date and time when the entity was submitted for approval
+    /// </summary>
+    public DateTime? SubmittedOn { get; set; }
+
+    /// <summary>
+    /// User who approved/rejected the entity
+    /// </summary>
+    public string? ReviewedBy { get; set; }
+
+    /// <summary>
+    /// Date and time when the entity was reviewed
+    /// </summary>
+    public DateTime? ReviewedOn { get; set; }
+
+    /// <summary>
+    /// Approval comments or rejection reason
+    /// </summary>
+    public string? ReviewComments { get; set; }
+
+    /// <summary>
+    /// Version number for optimistic concurrency control
+    /// </summary>
+    [Timestamp]
+    public byte[]? RowVersion { get; set; }
+
     protected static string ToJson(object obj)
     {
         if (obj == null)
@@ -77,24 +114,25 @@ public abstract class BaseAuditEntity
             PropertyNameCaseInsensitive = true
         };
         return System.Text.Json.JsonSerializer.Deserialize<T>(json, options) ?? throw new InvalidOperationException("Deserialization failed");
-    }    protected static Dictionary<string, string> FromDictJson(string? json)
+    }
+    protected static Dictionary<string, string> FromDictJson(string? json)
     {
         json ??= "{}"; // Default to empty JSON if null
         if (string.IsNullOrWhiteSpace(json))
             return new Dictionary<string, string>(); // Return empty dictionary for empty/null json
-        
+
         var options = new System.Text.Json.JsonSerializerOptions
         {
             PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
             PropertyNameCaseInsensitive = true
         };
-        
+
         try
         {
             var dictOfObj = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(json, options);
             if (dictOfObj == null)
                 return new Dictionary<string, string>(); // Return empty dictionary if deserialization fails
-            
+
             return dictOfObj.ToDictionary(kvp => kvp.Key, kvp => kvp.Value?.ToString() ?? string.Empty);
         }
         catch (System.Text.Json.JsonException)

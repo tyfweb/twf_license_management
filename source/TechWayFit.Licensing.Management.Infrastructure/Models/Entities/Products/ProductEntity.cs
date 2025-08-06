@@ -12,7 +12,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Product
 /// Database entity for EnterpriseProduct
 /// </summary>
 [Table("products")]
-public class ProductEntity : BaseAuditEntity
+public class ProductEntity : BaseDbEntity
 {
 
     /// <summary>

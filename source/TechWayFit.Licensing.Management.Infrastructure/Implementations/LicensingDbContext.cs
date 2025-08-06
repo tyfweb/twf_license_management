@@ -81,7 +81,7 @@ public class LicensingDbContext : DbContext
     /// </summary>
     private void UpdateAuditFields()
     {
-        var entries = ChangeTracker.Entries<BaseAuditEntity>();
+        var entries = ChangeTracker.Entries<BaseDbEntity>();
         var currentTime = DateTime.UtcNow;
 
         foreach (var entry in entries)
