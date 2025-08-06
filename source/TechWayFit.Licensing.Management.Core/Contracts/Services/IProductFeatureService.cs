@@ -31,6 +31,8 @@ public interface IProductFeatureService
     /// <returns>Feature or null if not found</returns>
     Task<ProductFeature?> GetFeatureByIdAsync(Guid featureId);
 
+    Task<IEnumerable<ProductFeature>> GetFeaturesByproductIdAsync(Guid tiproductId);
+
     /// <summary>
     /// Gets features for a specific tier
     /// </summary>

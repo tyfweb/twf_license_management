@@ -1,0 +1,424 @@
+@using TechWayFit.Licensing.Core.Models
+@model TechWayFit.Licensing.Management.Web.ViewModels.License.LicenseGenerationViewModel
+@{
+    ViewData["Title"] = "Create License";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/product-management.css" />
+    <style>
+        .form-section {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+        }
+        .form-section h5 {
+            color: #495057;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 0.5rem;
+        }
+        .feature-selection {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 1rem;
+            background-color: #f8f9fa;
+        }
+        .feature-item {
+            margin-bottom: 0.5rem;
+        }
+        .metadata-row {
+            margin-bottom: 0.5rem;
+        }
+        .btn-add-metadata {
+            font-size: 0.875rem;
+        }
+    </style>
+}
+
+<div class="container-fluid py-3">
+    <!-- Header Section -->
+    <div class="header mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <div class="d-flex align-items-center mb-2">
+                    <a href="@Url.Action("Index", "License")" class="btn btn-outline-secondary me-3">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Licenses
+                    </a>
+                    <h2 class="mb-0">Create New License</h2>
+                </div>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a asp-controller="License" asp-action="Index">Licenses</a></li>
+                        <li class="breadcrumb-item active">Create</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <form asp-action="Create" method="post" class="needs-validation" novalidate>
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Basic Information Section -->
+                <div class="form-section">
+                    <h5><i class="fas fa-info-circle me-2"></i>Basic Information</h5>
+                    <div class="row g-3">                        <div class="col-md-6">
+                            <label asp-for="ProductId" class="form-label">Product</label>
+                            <select asp-for="ProductId" class="form-select" required asp-items="ViewBag.AvailableProducts">
+                                <option value="">Select a Product</option>
+                            </select>
+                            <span asp-validation-for="ProductId" class="invalid-feedback"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="ConsumerId" class="form-label">Consumer</label>
+                            <select asp-for="ConsumerId" class="form-select" required asp-items="ViewBag.AvailableConsumers">
+                                <option value="">Select a Consumer</option>
+                            </select>
+                            <span asp-validation-for="ConsumerId" class="invalid-feedback"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="ProductTierId" class="form-label">Product Tier</label>
+                            <select asp-for="ProductTierId" class="form-select" required id="productTierSelect">
+                                <option value="">Select a Tier</option>
+                                <!-- Will be populated dynamically -->
+                            </select>
+                            <span asp-validation-for="ProductTierId" class="invalid-feedback"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Tier" class="form-label">License Tier</label>
+                            <select asp-for="Tier" class="form-select" required>
+                                @foreach (LicenseTier tier in Enum.GetValues<LicenseTier>())
+                                {
+                                    <option value="@tier">@tier</option>
+                                }
+                            </select>
+                            <span asp-validation-for="Tier" class="invalid-feedback"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Information Section -->
+                <div class="form-section">
+                    <h5><i class="fas fa-user me-2"></i>Contact Information</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="LicensedTo" class="form-label">Licensed To</label>
+                            <input asp-for="LicensedTo" class="form-control" placeholder="Organization or individual name" required />
+                            <span asp-validation-for="LicensedTo" class="invalid-feedback"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="ContactPerson" class="form-label">Contact Person</label>
+                            <input asp-for="ContactPerson" class="form-control" placeholder="Primary contact name" required />
+                            <span asp-validation-for="ContactPerson" class="invalid-feedback"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="ContactEmail" class="form-label">Contact Email</label>
+                            <input asp-for="ContactEmail" type="email" class="form-control" placeholder="contact@example.com" required />
+                            <span asp-validation-for="ContactEmail" class="invalid-feedback"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="SecondaryContactPerson" class="form-label">Secondary Contact (Optional)</label>
+                            <input asp-for="SecondaryContactPerson" class="form-control" placeholder="Secondary contact name" />
+                            <span asp-validation-for="SecondaryContactPerson" class="invalid-feedback"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="SecondaryContactEmail" class="form-label">Secondary Email (Optional)</label>
+                            <input asp-for="SecondaryContactEmail" type="email" class="form-control" placeholder="secondary@example.com" />
+                            <span asp-validation-for="SecondaryContactEmail" class="invalid-feedback"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- License Configuration Section -->
+                <div class="form-section">
+                    <h5><i class="fas fa-cog me-2"></i>License Configuration</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="ValidFrom" class="form-label">Valid From</label>
+                            <input asp-for="ValidFrom" type="datetime-local" class="form-control" required />
+                            <span asp-validation-for="ValidFrom" class="invalid-feedback"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="ValidTo" class="form-label">Valid To</label>
+                            <input asp-for="ValidTo" type="datetime-local" class="form-control" required />
+                            <span asp-validation-for="ValidTo" class="invalid-feedback"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="MaxApiCallsPerMonth" class="form-label">Max API Calls Per Month</label>
+                            <input asp-for="MaxApiCallsPerMonth" type="number" class="form-control" min="0" placeholder="Unlimited if empty" />
+                            <span asp-validation-for="MaxApiCallsPerMonth" class="invalid-feedback"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="MaxConcurrentConnections" class="form-label">Max Concurrent Connections</label>
+                            <input asp-for="MaxConcurrentConnections" type="number" class="form-control" min="0" placeholder="Unlimited if empty" />
+                            <span asp-validation-for="MaxConcurrentConnections" class="invalid-feedback"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Features Section -->
+                <div class="form-section">
+                    <h5><i class="fas fa-puzzle-piece me-2"></i>Features</h5>
+                    <div class="feature-selection" id="featuresContainer">
+                        @if (Model.AvailableFeatures?.Any() == true)
+                        {
+                            @foreach (var feature in Model.AvailableFeatures)
+                            {
+                                <div class="feature-item">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" 
+                                               name="SelectedFeatures" value="@feature.FeatureId" 
+                                               id="feature_@feature.FeatureId"
+                                               @(Model.SelectedFeatures.Contains(feature.FeatureId) ? "checked" : "") />
+                                        <label class="form-check-label" for="feature_@feature.FeatureId">
+                                            <strong>@feature.Name</strong>
+                                            @if (feature.MinimumTier != LicenseTier.Community)
+                                            {
+                                                <span class="badge bg-secondary ms-1">@feature.MinimumTier+</span>
+                                            }
+                                            @if (!string.IsNullOrEmpty(feature.Description))
+                                            {
+                                                <br><small class="text-muted">@feature.Description</small>
+                                            }
+                                        </label>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <p class="text-muted mb-0">No features available. Please select a product first.</p>
+                        }
+                    </div>
+                </div>
+
+                <!-- Metadata Section -->
+                <div class="form-section">
+                    <h5><i class="fas fa-tags me-2"></i>Additional Metadata</h5>
+                    <div id="metadataContainer">
+                        @if (Model.Metadata?.Any() == true)
+                        {
+                            @foreach (var metadata in Model.Metadata)
+                            {
+                                <div class="metadata-row row g-2">
+                                    <div class="col-md-5">
+                                        <input type="text" class="form-control" name="Metadata.Keys" value="@metadata.Key" placeholder="Key" />
+                                    </div>
+                                    <div class="col-md-5">
+                                        <input type="text" class="form-control" name="Metadata.Values" value="@metadata.Value" placeholder="Value" />
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="removeMetadataRow(this)">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                    <button type="button" class="btn btn-outline-primary btn-sm btn-add-metadata" onclick="addMetadataRow()">
+                        <i class="fas fa-plus me-1"></i>Add Metadata
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <div class="form-section">
+                    <h5><i class="fas fa-info me-2"></i>Information</h5>
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-lightbulb me-1"></i>Tips</h6>
+                        <ul class="mb-0 small">
+                            <li>Select a product first to load available tiers and features</li>
+                            <li>Consumer must be registered before creating a license</li>
+                            <li>Valid To date must be after Valid From date</li>
+                            <li>Features are filtered based on the selected tier</li>
+                        </ul>
+                    </div>
+                    
+                    @if (!string.IsNullOrEmpty(Model.CreatedBy))
+                    {
+                        <div class="mb-3">
+                            <strong>Created By:</strong> @Model.CreatedBy
+                        </div>
+                    }
+                </div>
+
+                <!-- Actions -->
+                <div class="form-section">
+                    <h5><i class="fas fa-tasks me-2"></i>Actions</h5>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-plus me-1"></i>Create License
+                        </button>
+                        <a href="@Url.Action("Index", "License")" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-1"></i>Cancel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hidden fields for validation -->
+        <input asp-for="CreatedBy" type="hidden" />
+    </form>
+</div>
+
+@section Scripts {
+    <script src="~/js/product-features.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load product tiers when product is selected
+            const productSelect = document.getElementById('ProductId');
+            const tierSelect = document.getElementById('productTierSelect');
+            
+            if (productSelect) {
+                productSelect.addEventListener('change', function() {
+                    const productId = this.value;
+                    if (productId) {
+                        loadProductTiers(productId);
+                        loadProductFeatures(productId);
+                    } else {
+                        tierSelect.innerHTML = '<option value="">Select a Tier</option>';
+                        clearFeatures();
+                    }
+                });
+            }
+
+            // Load tiers for initially selected product
+            if (productSelect && productSelect.value) {
+                loadProductTiers(productSelect.value);
+                loadProductFeatures(productSelect.value);
+            }
+
+            // Form validation
+            const form = document.querySelector('.needs-validation');
+            if (form) {
+                form.addEventListener('submit', function(event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                });
+            }
+
+            // Date validation
+            const validFromInput = document.querySelector('input[name="ValidFrom"]');
+            const validToInput = document.querySelector('input[name="ValidTo"]');
+            
+            if (validFromInput && validToInput) {
+                function validateDates() {
+                    const validFrom = new Date(validFromInput.value);
+                    const validTo = new Date(validToInput.value);
+                    
+                    if (validTo <= validFrom) {
+                        validToInput.setCustomValidity('Valid To must be after Valid From');
+                    } else {
+                        validToInput.setCustomValidity('');
+                    }
+                }
+                
+                validFromInput.addEventListener('change', validateDates);
+                validToInput.addEventListener('change', validateDates);
+            }
+        });
+
+        function loadProductTiers(productId) {
+            const tierSelect = document.getElementById('productTierSelect');
+            
+            // Show loading state
+            tierSelect.innerHTML = '<option value="">Loading...</option>';
+            tierSelect.disabled = true;
+            
+            fetch(`/api/Product/${productId}/tiers`)
+                .then(response => response.json())
+                .then(tiers => {
+                    tierSelect.innerHTML = '<option value="">Select a Tier</option>';
+                    tiers.forEach(tier => {
+                        const option = document.createElement('option');
+                        option.value = tier.tierId || tier.TierId;
+                        option.textContent = `${tier.name || tier.Name} - $${tier.monthlyPrice || tier.MonthlyPrice || 0}/month`;
+                        tierSelect.appendChild(option);
+                    });
+                    tierSelect.disabled = false;
+                })
+                .catch(error => {
+                    console.error('Error loading tiers:', error);
+                    tierSelect.innerHTML = '<option value="">Error loading tiers</option>';
+                    tierSelect.disabled = false;
+                });
+        }
+
+        function loadProductFeatures(productId) {
+            const featuresContainer = document.getElementById('featuresContainer');
+            
+            fetch(`/api/Product/${productId}/features`)
+                .then(response => response.json())
+                .then(features => {
+                    if (features && features.length > 0) {
+                        featuresContainer.innerHTML = '';
+                        features.forEach(feature => {
+                            const featureDiv = document.createElement('div');
+                            featureDiv.className = 'feature-item';
+                            featureDiv.innerHTML = `
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" 
+                                           name="SelectedFeatures" value="${feature.featureId}" 
+                                           id="feature_${feature.featureId}" />
+                                    <label class="form-check-label" for="feature_${feature.featureId}">
+                                        <strong>${feature.name}</strong>
+                                        ${feature.minimumTier !== 'Community' ? `<span class="badge bg-secondary ms-1">${feature.minimumTier}+</span>` : ''}
+                                        ${feature.description ? `<br><small class="text-muted">${feature.description}</small>` : ''}
+                                    </label>
+                                </div>
+                            `;
+                            featuresContainer.appendChild(featureDiv);
+                        });
+                    } else {
+                        featuresContainer.innerHTML = '<p class="text-muted mb-0">No features available for this product.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading features:', error);
+                    featuresContainer.innerHTML = '<p class="text-danger mb-0">Error loading features.</p>';
+                });
+        }
+
+        function clearFeatures() {
+            const featuresContainer = document.getElementById('featuresContainer');
+            featuresContainer.innerHTML = '<p class="text-muted mb-0">No features available. Please select a product first.</p>';
+        }
+
+        function addMetadataRow() {
+            const container = document.getElementById('metadataContainer');
+            const row = document.createElement('div');
+            row.className = 'metadata-row row g-2';
+            row.innerHTML = `
+                <div class="col-md-5">
+                    <input type="text" class="form-control" name="Metadata.Keys" placeholder="Key" />
+                </div>
+                <div class="col-md-5">
+                    <input type="text" class="form-control" name="Metadata.Values" placeholder="Value" />
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="removeMetadataRow(this)">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            container.appendChild(row);
+        }
+
+        function removeMetadataRow(button) {
+            const row = button.closest('.metadata-row');
+            row.remove();
+        }
+    </script>
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

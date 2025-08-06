@@ -574,4 +574,10 @@ public class ProductFeatureService : IProductFeatureService
             throw;
         }
     }
+
+    public async Task<IEnumerable<ProductFeature>> GetFeaturesByproductIdAsync(Guid productId)
+    {
+        var data = await _unitOfWork.ProductFeatures.GetByProductIdAsync(productId);
+        return data.Select(f => f.ToModel());
+    }
 }

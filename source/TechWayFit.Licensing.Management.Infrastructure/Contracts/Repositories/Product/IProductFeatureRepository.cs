@@ -14,5 +14,5 @@ public interface IProductFeatureRepository : IBaseRepository<ProductFeatureEntit
     Task<IEnumerable<ProductFeatureEntity>> GetFeaturesByProductVersionAsync(Guid productId, string productVersion);
     Task<ProductFeatureEntity?> GetFeatureByCodeAsync(Guid productId, string featureCode);
     Task<bool> IsFeatureCodeUniqueAsync(Guid productId, string featureCode, Guid? excludeFeatureId = null);
-    
+    Task<IEnumerable<ProductFeatureEntity>> GetByProductIdAsync(Guid productId);
 }

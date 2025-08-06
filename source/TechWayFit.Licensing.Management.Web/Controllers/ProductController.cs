@@ -25,11 +25,14 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         private readonly IConsumerAccountService _consumerService;
         private readonly IProductTierService _productTierService;
 
+        private readonly IProductFeatureService _productFeatureService;
+
         public ProductController(
             ILogger<ProductController> logger,
             IEnterpriseProductService productService,
             IProductLicenseService licenseService,
             IConsumerAccountService consumerService,
+            IProductFeatureService productFeatureService,
             IProductTierService productTierService)
         {
             _logger = logger;
@@ -37,6 +40,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
             _licenseService = licenseService ?? throw new ArgumentNullException(nameof(licenseService));
             _consumerService = consumerService ?? throw new ArgumentNullException(nameof(consumerService));
             _productTierService = productTierService ?? throw new ArgumentNullException(nameof(productTierService));
+            _productFeatureService = productFeatureService ?? throw new ArgumentNullException(nameof(productFeatureService));
         }
 
         /// <summary>
@@ -1715,41 +1719,28 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         /// <summary>
         /// Get product features data - simplified implementation
         /// </summary>
-        private async Task<List<object>> GetProductFeaturesDataAsync(Guid productId)
+        private async Task<List<ProductFeatureViewModel>> GetProductFeaturesDataAsync(Guid productId)
         {
-            // Simplified - return mock data for now
-            await Task.CompletedTask;
-            
-            return new List<object>
+
+            var features= await _productFeatureService.GetFeaturesByproductIdAsync(productId);
+            if (features == null || !features.Any())
             {
-                new { 
-                    Id = Guid.NewGuid(),
-                    Name = "Basic Functionality",
-                    Description = "Core product functionality",
-                    Category = "Core",
-                    IsEnabled = true,
-                    IsActive = true,
-                    CanDelete = true
-                },
-                new { 
-                    Id = Guid.NewGuid(),
-                    Name = "Advanced Analytics",
-                    Description = "Advanced analytics and reporting",
-                    Category = "BusinessIntelligence",
-                    IsEnabled = true,
-                    IsActive = true,
-                    CanDelete = true
-                },
-                new { 
-                    Id = Guid.NewGuid(),
-                    Name = "Priority Support",
-                    Description = "24/7 priority customer support",
-                    Category = "Core",
-                    IsEnabled = true,
-                    IsActive = true,
-                    CanDelete = true
-                }
-            };
+                return new List<ProductFeatureViewModel>();
+            }
+
+            return features.Select(f => new ProductFeatureViewModel
+            {
+                FeatureId = f.FeatureId,
+                ProductId = productId,
+                Name = f.Name,
+                Description = f.Description,
+                IsEnabled = f.IsEnabled,
+                MaxUsage = f.Usage.MaxConcurrentUsage,
+                MinimumTier = LicenseTier.Community,// Simplified, in real app get from feature
+                IsActive = f.IsEnabled,
+                CanDelete = true // Simplified, in real app check if feature can be deleted
+            }).ToList();
+
         }
 
         #endregion

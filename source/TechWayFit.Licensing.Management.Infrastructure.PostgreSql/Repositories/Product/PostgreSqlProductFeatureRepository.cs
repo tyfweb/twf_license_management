@@ -66,4 +66,11 @@ public class PostgreSqlProductFeatureRepository : PostgreSqlBaseRepository<Produ
 
         return query.AnyAsync();
     }
+
+    public async Task<IEnumerable<ProductFeatureEntity>> GetByProductIdAsync(Guid productId)
+    {
+        var query = _dbSet.Where(f => f.ProductId == productId && f.IsActive)
+                         .OrderBy(f => f.DisplayOrder);
+        return await query.ToListAsync();
+    }
 }
