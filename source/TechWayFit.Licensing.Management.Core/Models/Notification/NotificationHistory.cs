@@ -13,11 +13,12 @@ public class NotificationHistory
     public NotificationType NotificationType { get; set; }
     public NotificationPreferences Recipients { get; set; } = new NotificationPreferences();
     public DateTime SentDate { get; set; }
-    public DeliveryStatus DeliveryStatus { get; set; }
+    public DeliveryStatus Status { get; set; }
     public string? DeliveryError { get; set; }
 }
 public enum DeliveryStatus
 {
+    Unknown,
     Pending,
     Sent,
     Failed

@@ -130,13 +130,10 @@ public class ProductLicense : BaseAuditModel
     public TechWayFit.Licensing.Core.Models.License ToLicenseModel()
     {
         Metadata ??= new Dictionary<string, string>();
-        Metadata.TryAdd("ProductTier", LicenseConsumer?.ProductTier?.Name?? "Not Found");
-        return new TechWayFit.Licensing.Core.Models.License
+        Metadata.TryAdd("ProductTier", LicenseConsumer?.ProductTier?.Name ?? "Not Found");
+        var licenseModel = new TechWayFit.Licensing.Core.Models.License
         {
-            LicenseId = LicenseId.ToString(),
-            ProductId = LicenseConsumer.Product.ProductId.ToString(),
-            // Update this line to use the correct property from LicenseConsumer, e.g. LicenseConsumer.Consumer.ConsumerId if Consumer is a property of ProductConsumer
-            ConsumerId = LicenseConsumer.Consumer.ConsumerId.ToString(),
+            LicenseId = LicenseId.ToString(),    
             ValidFrom = ValidFrom,
             ValidTo = ValidTo,
             CreatedAt = CreatedAt,
@@ -144,25 +141,41 @@ public class ProductLicense : BaseAuditModel
             RevokedAt = RevokedAt,
             RevocationReason = RevocationReason,
             Metadata = Metadata,
-            FeaturesIncluded = LicenseConsumer.Features.Select(f => new LicenseFeature
+            FeaturesIncluded = [],
+            CreatedBy = IssuedBy,
+            IssuedAt = KeyGeneratedAt,
+            Issuer = IssuedBy,
+            ProductVersion = SemanticVersion.Parse(ValidProductVersionFrom).ToVersion(),
+            MaxSupportedVersion = SemanticVersion.Parse(ValidProductVersionTo).ToVersion(),
+            Tier = LicenseTier.Custom
+        };
+        if (LicenseConsumer != null)
+        {
+            licenseModel.ProductId = LicenseConsumer.Product.ProductId.ToString();
+            licenseModel.ConsumerId = LicenseConsumer.Consumer.ConsumerId.ToString();
+            licenseModel.LicensedTo = LicenseConsumer.Consumer.CompanyName;
+            licenseModel.ContactEmail = LicenseConsumer.Consumer.PrimaryContact.Email;
+            licenseModel.ContactPerson = LicenseConsumer.Consumer.PrimaryContact.Name;
+            licenseModel.SecondaryContactEmail = LicenseConsumer.Consumer.SecondaryContact?.Email;
+            licenseModel.SecondaryContactPerson = LicenseConsumer.Consumer.SecondaryContact?.Name;
+            licenseModel.Version = LicenseConsumer.Product.Version;
+            licenseModel.Tier = LicenseConsumer.ProductTier?.Name switch
+            {
+                "Enterprise" => LicenseTier.Enterprise,
+                "Professional" => LicenseTier.Professional,
+                "Community" => LicenseTier.Community,
+                _ => LicenseTier.Custom
+            };
+            licenseModel.FeaturesIncluded = LicenseConsumer.Features.Select(f => new LicenseFeature
             {
                 Id = f.FeatureId.ToString(),
                 Name = f.Name,
                 Description = f.Description,
                 IsCurrentlyValid = f.IsEnabled
-            }).ToList(),
-            LicensedTo = LicenseConsumer.Consumer.CompanyName,
-            ContactEmail = LicenseConsumer.Consumer.PrimaryContact.Email,
-            ContactPerson = LicenseConsumer.Consumer.PrimaryContact.Name,
-            CreatedBy = IssuedBy,
-            IssuedAt = KeyGeneratedAt,
-            Issuer = IssuedBy,
-            SecondaryContactEmail = LicenseConsumer.Consumer.SecondaryContact?.Email,
-            SecondaryContactPerson = LicenseConsumer.Consumer.SecondaryContact?.Name,
-            Version = LicenseConsumer.Product.Version,
-            ProductVersion = SemanticVersion.Parse(ValidProductVersionFrom).ToVersion(),
-            MaxSupportedVersion = SemanticVersion.Parse(ValidProductVersionTo).ToVersion(),
-            Tier = LicenseTier.Custom
-        };
+            }).ToList();
+        }
+
+
+        return licenseModel;
     }
 }

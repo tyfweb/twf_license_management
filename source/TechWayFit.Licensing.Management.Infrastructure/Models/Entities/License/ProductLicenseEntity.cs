@@ -6,6 +6,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Products;
 using TechWayFit.Licensing.Core.Models;
 using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Common;
+using System.Text.Json;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.License;
 
@@ -13,8 +14,9 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.License
 /// Database entity for ProductLicense
 /// </summary>
 [Table("product_licenses")]
-public class ProductLicenseEntity : AuditWorkflowEntity
+public class ProductLicenseEntity : AuditWorkflowEntity, IEntityMapper<ProductLicense, ProductLicenseEntity>
 {
+
     #region BaseEntityProperties 
     /// <summary>
     /// License code used for validation and activation
@@ -35,7 +37,7 @@ public class ProductLicenseEntity : AuditWorkflowEntity
     /// Foreign key to Product Tier (optional - for tier-based licensing)
     /// </summary>
     public Guid? ProductTierId { get; set; }
- 
+
     /// <summary>
     /// Date when the license becomes valid
     /// </summary>
@@ -134,4 +136,96 @@ public class ProductLicenseEntity : AuditWorkflowEntity
     public virtual ICollection<ProductFeatureEntity> Features { get; set; } = new List<ProductFeatureEntity>();
 
     #endregion
+
+    #region IEntityMapper Implementation
+    public ProductLicenseEntity Map(ProductLicense model)
+    {
+        if (model == null) return null!;
+
+        return new ProductLicenseEntity
+        {
+            Id = model.LicenseId,
+            LicenseCode = model.LicenseCode,
+            ProductId = model.ProductId,
+            ConsumerId = model.ConsumerId,
+            ProductTierId = model.ProductTierId,
+            ValidFrom = model.ValidFrom,
+            ValidTo = model.ValidTo,
+            ValidProductVersionFrom = model.ValidProductVersionFrom,
+            ValidProductVersionTo = model.ValidProductVersionTo,
+            Encryption = model.Encryption,
+            Signature = model.Signature,
+            LicenseKey = model.LicenseKey,
+            PublicKey = model.PublicKey,
+            LicenseSignature = model.LicenseSignature,
+            KeyGeneratedAt = model.KeyGeneratedAt,
+            Status = model.Status.ToString(),
+            IssuedBy = model.IssuedBy,
+            RevokedAt = model.RevokedAt,
+            RevocationReason = model.RevocationReason,
+            MetadataJson = model.Metadata != null ? JsonSerializer.Serialize(model.Metadata) : "{}",
+            IsActive = model.IsActive,
+            IsDeleted = model.IsDeleted,
+            CreatedBy = model.CreatedBy,
+            CreatedOn = model.CreatedOn,
+            UpdatedBy = model.UpdatedBy,
+            UpdatedOn = model.UpdatedOn,
+            DeletedBy = model.DeletedBy,
+            DeletedOn = model.DeletedOn,
+            EntityStatus = (int)model.EntityStatus,
+            SubmittedBy = model.SubmittedBy,
+            SubmittedOn = model.SubmittedOn,
+            ReviewedBy = model.ReviewedBy,
+            ReviewedOn = model.ReviewedOn,
+            ReviewComments = model.ReviewComments,
+            RowVersion = model.RowVersion
+        };
+    }
+
+    public ProductLicense Map()
+    { 
+
+        return new ProductLicense
+        {
+            LicenseId = this.Id,
+            LicenseCode = this.LicenseCode,
+            ProductId = this.ProductId,
+            ConsumerId = this.ConsumerId,
+            ProductTierId = this.ProductTierId,
+            ValidFrom = this.ValidFrom,
+            ValidTo = this.ValidTo,
+            ValidProductVersionFrom = this.ValidProductVersionFrom,
+            ValidProductVersionTo = this.ValidProductVersionTo,
+            Encryption = this.Encryption,
+            Signature = this.Signature,
+            LicenseKey = this.LicenseKey,
+            PublicKey = this.PublicKey,
+            LicenseSignature = this.LicenseSignature,
+            KeyGeneratedAt = this.KeyGeneratedAt,
+            Status = Enum.TryParse<LicenseStatus>(this.Status, out var status) ? status : LicenseStatus.Active,
+            IssuedBy = this.IssuedBy,
+            RevokedAt = this.RevokedAt,
+            RevocationReason = this.RevocationReason,
+            Metadata = !string.IsNullOrEmpty(this.MetadataJson)
+                        ? JsonSerializer.Deserialize<Dictionary<string, string>>(this.MetadataJson) ?? new Dictionary<string, string>()
+                        : new Dictionary<string, string>(),
+            IsActive = this.IsActive,
+            IsDeleted = this.IsDeleted,
+            CreatedBy = this.CreatedBy,
+            CreatedOn = this.CreatedOn,
+            UpdatedBy = this.UpdatedBy,
+            UpdatedOn = this.UpdatedOn,
+            DeletedBy = this.DeletedBy,
+            DeletedOn = this.DeletedOn,
+            EntityStatus = (Core.Models.Common.EntityStatus)this.EntityStatus,
+            SubmittedBy = this.SubmittedBy,
+            SubmittedOn = this.SubmittedOn,
+            ReviewedBy = this.ReviewedBy,
+            ReviewedOn = this.ReviewedOn,
+            ReviewComments = this.ReviewComments,
+            RowVersion = this.RowVersion
+        };
+    }
+    #endregion
+
 }

@@ -52,7 +52,7 @@ public class SemanticVersion
     /// <param name="versionString">The version string to parse.</param>
     /// <returns>A <see cref="SemanticVersion"/> object.</returns>
     /// <exception cref="ArgumentException">Thrown if the version string format is invalid.</exception>
-    public static SemanticVersion Parse(string versionString)
+    public static SemanticVersion Parse(string? versionString)
     {
         if (string.IsNullOrWhiteSpace(versionString))
             return SemanticVersion.Default;

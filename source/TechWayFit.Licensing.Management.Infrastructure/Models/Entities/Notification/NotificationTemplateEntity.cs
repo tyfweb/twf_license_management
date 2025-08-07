@@ -10,7 +10,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Notific
 /// Database entity for Notification Templates
 /// </summary>
 [Table("notification_templates")]
-public class NotificationTemplateEntity : AuditEntity
+public class NotificationTemplateEntity : AuditEntity,IEntityMapper<NotificationTemplate, NotificationTemplateEntity>
 {
     public string TemplateName { get; set; } = string.Empty;
     public string NotificationType { get; set; } = string.Empty;
@@ -25,14 +25,15 @@ public class NotificationTemplateEntity : AuditEntity
     /// </summary>
     public virtual ICollection<NotificationHistoryEntity> NotificationHistory { get; set; } = new List<NotificationHistoryEntity>();
 
-    public static NotificationTemplateEntity FromModel(NotificationTemplate model)
+#region IEntityMapper Implementation
+    public NotificationTemplateEntity Map(NotificationTemplate model)
     {
         return new NotificationTemplateEntity
         {
             Id = model.TemplateId,
             TemplateName = model.TemplateName,
             NotificationType = model.NotificationType.ToString(),
-            NotificationMode = model.Preferences.Mode.ToString(), 
+            NotificationMode = model.Preferences.Mode.ToString(),
             Subject = model.Subject,
             MessageTemplate = model.MessageTemplate,
             IsActive = model.IsActive,
@@ -43,7 +44,7 @@ public class NotificationTemplateEntity : AuditEntity
             UpdatedOn = DateTime.UtcNow, // Assuming UpdatedOn is set to current time on creation
         };
     }
-    public NotificationTemplate ToModel()
+    public NotificationTemplate Map()
     {
         return new NotificationTemplate
         {
@@ -59,8 +60,8 @@ public class NotificationTemplateEntity : AuditEntity
             IsActive = IsActive,
             CreatedBy = CreatedBy,
             CreatedDate = CreatedOn,
-            TemplateVariables = JsonHelper.FromJson<Dictionary<string, object>>(TemplateVariableJson)
+            TemplateVariables = JsonHelper.FromJson<Dictionary<string, object>>(TemplateVariableJson)?? new Dictionary<string, object>()
         };
     }   
-
+#endregion
 }

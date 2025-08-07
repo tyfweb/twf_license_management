@@ -10,7 +10,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Notific
 /// Database entity for Notification History
 /// </summary>
 [Table("notification_history")]
-public class NotificationHistoryEntity : AuditEntity
+public class NotificationHistoryEntity : AuditEntity, IEntityMapper<NotificationHistory, NotificationHistoryEntity>
 {
     public Guid EntityId { get; set; } = Guid.Empty;
     public string EntityType { get; set; } = string.Empty;
@@ -19,7 +19,7 @@ public class NotificationHistoryEntity : AuditEntity
     public string NotificationType { get; set; } = string.Empty;
     public string RecipientsJson { get; set; } = "{}";
     public DateTime SentDate { get; set; }
-    public string DeliveryStatus { get; set; }
+    public string? Status { get; set; }
     public string? DeliveryError { get; set; }
 
     /// <summary>
@@ -27,7 +27,10 @@ public class NotificationHistoryEntity : AuditEntity
     /// </summary>
     public virtual NotificationTemplateEntity? Template { get; set; }
 
-    public static NotificationHistoryEntity FromModel(NotificationHistory model)
+    #region IEntityMapper Implementation
+
+
+    public NotificationHistoryEntity Map(NotificationHistory model)
     {
         return new NotificationHistoryEntity
         {
@@ -39,7 +42,7 @@ public class NotificationHistoryEntity : AuditEntity
             NotificationType = model.NotificationType.ToString(),
             RecipientsJson = JsonHelper.ToJson(model.Recipients),
             SentDate = model.SentDate,
-            DeliveryStatus = model.DeliveryStatus.ToString(),
+            Status = model.Status.ToString(),
             DeliveryError = model.DeliveryError,
             CreatedBy = "system", // Assuming system user for creation
             CreatedOn = DateTime.UtcNow,
@@ -47,20 +50,21 @@ public class NotificationHistoryEntity : AuditEntity
             UpdatedOn = DateTime.UtcNow // Assuming UpdatedOn is set to current time on creation
         };
     }
-    public NotificationHistory ToModel()
+    public NotificationHistory Map()
     {
         return new NotificationHistory
         {
             NotificationId = Id,
             EntityId = EntityId,
             EntityType = EntityType,
-            NotificationMode =  NotificationMode.ToEnum<NotificationMode>(),
+            NotificationMode = NotificationMode.ToEnum<NotificationMode>(),
             NotificationTemplateId = NotificationTemplateId,
             NotificationType = NotificationType.ToEnum<NotificationType>(),
-            Recipients = JsonHelper.FromJson<NotificationPreferences>(RecipientsJson),
+            Recipients = JsonHelper.FromJson<NotificationPreferences>(RecipientsJson) ?? new NotificationPreferences(),
             SentDate = SentDate,
-            DeliveryStatus = DeliveryStatus.ToEnum<DeliveryStatus>(),
+            Status = Status?.ToEnum<DeliveryStatus>() ?? DeliveryStatus.Unknown,
             DeliveryError = DeliveryError
         };
     }
+    #endregion
 }
