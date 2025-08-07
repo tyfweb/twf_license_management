@@ -103,20 +103,30 @@ public class ConsumerAccountWorkflowService : WorkflowService<ConsumerAccount, C
                 Position = entity.SecondaryContactPosition ?? string.Empty
             },
             
-            // Base audit properties  
-            EntityStatus = (Core.Models.Common.EntityStatus)entity.EntityStatus,
-            SubmittedBy = entity.SubmittedBy,
-            SubmittedOn = entity.SubmittedOn,
-            ReviewedBy = entity.ReviewedBy,
-            ReviewedOn = entity.ReviewedOn,
-            ReviewComments = entity.ReviewComments,
+            // Use composition objects for audit properties
+            Audit = new Core.Models.Common.AuditInfo
+            {
+                IsActive = entity.IsActive,
+                IsDeleted = entity.IsDeleted,
+                CreatedBy = entity.CreatedBy,
+                CreatedOn = entity.CreatedOn,
+                UpdatedBy = entity.UpdatedBy,
+                UpdatedOn = entity.UpdatedOn,
+                DeletedBy = entity.DeletedBy,
+                DeletedOn = entity.DeletedOn,
+                RowVersion = entity.RowVersion
+            },
             
-            CreatedBy = entity.CreatedBy,
-            CreatedOn = entity.CreatedOn,
-            UpdatedBy = entity.UpdatedBy,
-            UpdatedOn = entity.UpdatedOn,
-            IsActive = entity.IsActive,
-            RowVersion = entity.RowVersion
+            // Use composition object for workflow properties (default values since entity doesn't have workflow)
+            Workflow = new Core.Models.Common.WorkflowInfo
+            {
+                Status = Core.Models.Common.EntityStatus.Draft,
+                SubmittedBy = null,
+                SubmittedOn = null,
+                ReviewedBy = null,
+                ReviewedOn = null,
+                ReviewComments = null
+            }
         };
     }
 
@@ -135,20 +145,19 @@ public class ConsumerAccountWorkflowService : WorkflowService<ConsumerAccount, C
             SecondaryContactPhone = model.SecondaryContact?.Phone ?? string.Empty,
             SecondaryContactPosition = model.SecondaryContact?.Position ?? string.Empty,
             
-            // Base audit properties
-            EntityStatus = (int)model.EntityStatus,
-            SubmittedBy = model.SubmittedBy,
-            SubmittedOn = model.SubmittedOn,
-            ReviewedBy = model.ReviewedBy,
-            ReviewedOn = model.ReviewedOn,
-            ReviewComments = model.ReviewComments,
+            // Map audit properties from composition object
+            IsActive = model.Audit.IsActive,
+            IsDeleted = model.Audit.IsDeleted,
+            CreatedBy = model.Audit.CreatedBy,
+            CreatedOn = model.Audit.CreatedOn,
+            UpdatedBy = model.Audit.UpdatedBy,
+            UpdatedOn = model.Audit.UpdatedOn,
+            DeletedBy = model.Audit.DeletedBy,
+            DeletedOn = model.Audit.DeletedOn,
+            RowVersion = model.Audit.RowVersion
             
-            CreatedBy = model.CreatedBy,
-            CreatedOn = model.CreatedOn,
-            UpdatedBy = model.UpdatedBy,
-            UpdatedOn = model.UpdatedOn,
-            IsActive = model.IsActive,
-            RowVersion = model.RowVersion
+            // Note: ConsumerAccountEntity only inherits from AuditEntity, not AuditWorkflowEntity
+            // So it doesn't have EntityStatus, SubmittedBy, etc. properties
         };
     }
 }
@@ -180,20 +189,30 @@ public class EnterpriseProductWorkflowService : WorkflowService<EnterpriseProduc
             Status = JsonHelper.ToEnum<ProductStatus>(entity.Status),
             Metadata = JsonHelper.FromDictJson(entity.MetadataJson),
             
-            // Base audit properties
-            EntityStatus = (Core.Models.Common.EntityStatus)entity.EntityStatus,
-            SubmittedBy = entity.SubmittedBy,
-            SubmittedOn = entity.SubmittedOn,
-            ReviewedBy = entity.ReviewedBy,
-            ReviewedOn = entity.ReviewedOn,
-            ReviewComments = entity.ReviewComments,
+            // Use composition objects for audit properties
+            Audit = new Core.Models.Common.AuditInfo
+            {
+                IsActive = entity.IsActive,
+                IsDeleted = entity.IsDeleted,
+                CreatedBy = entity.CreatedBy,
+                CreatedOn = entity.CreatedOn,
+                UpdatedBy = entity.UpdatedBy,
+                UpdatedOn = entity.UpdatedOn,
+                DeletedBy = entity.DeletedBy,
+                DeletedOn = entity.DeletedOn,
+                RowVersion = entity.RowVersion
+            },
             
-            CreatedBy = entity.CreatedBy,
-            CreatedOn = entity.CreatedOn,
-            UpdatedBy = entity.UpdatedBy,
-            UpdatedOn = entity.UpdatedOn,
-            IsActive = entity.IsActive,
-            RowVersion = entity.RowVersion
+            // Use composition object for workflow properties (ProductEntity has workflow fields)
+            Workflow = new Core.Models.Common.WorkflowInfo
+            {
+                Status = (Core.Models.Common.EntityStatus)entity.EntityStatus,
+                SubmittedBy = entity.SubmittedBy,
+                SubmittedOn = entity.SubmittedOn,
+                ReviewedBy = entity.ReviewedBy,
+                ReviewedOn = entity.ReviewedOn,
+                ReviewComments = entity.ReviewComments
+            }
         };
     }
 
@@ -211,20 +230,24 @@ public class EnterpriseProductWorkflowService : WorkflowService<EnterpriseProduc
             Status = model.Status.ToString(),
             MetadataJson = JsonHelper.ToJson(model.Metadata),
             
-            // Base audit properties
-            EntityStatus = (int)model.EntityStatus,
-            SubmittedBy = model.SubmittedBy,
-            SubmittedOn = model.SubmittedOn,
-            ReviewedBy = model.ReviewedBy,
-            ReviewedOn = model.ReviewedOn,
-            ReviewComments = model.ReviewComments,
+            // Map audit properties from composition object
+            IsActive = model.Audit.IsActive,
+            IsDeleted = model.Audit.IsDeleted,
+            CreatedBy = model.Audit.CreatedBy,
+            CreatedOn = model.Audit.CreatedOn,
+            UpdatedBy = model.Audit.UpdatedBy,
+            UpdatedOn = model.Audit.UpdatedOn,
+            DeletedBy = model.Audit.DeletedBy,
+            DeletedOn = model.Audit.DeletedOn,
+            RowVersion = model.Audit.RowVersion,
             
-            CreatedBy = model.CreatedBy,
-            CreatedOn = model.CreatedOn,
-            UpdatedBy = model.UpdatedBy,
-            UpdatedOn = model.UpdatedOn,
-            IsActive = model.IsActive,
-            RowVersion = model.RowVersion
+            // Map workflow properties from composition object (ProductEntity has workflow fields)
+            EntityStatus = (int)model.Workflow.Status,
+            SubmittedBy = model.Workflow.SubmittedBy,
+            SubmittedOn = model.Workflow.SubmittedOn,
+            ReviewedBy = model.Workflow.ReviewedBy,
+            ReviewedOn = model.Workflow.ReviewedOn,
+            ReviewComments = model.Workflow.ReviewComments
         };
     }
 }

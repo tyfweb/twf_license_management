@@ -8,7 +8,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Notific
 /// Database entity for Notification History
 /// </summary>
 [Table("notification_history")]
-public class NotificationHistoryEntity : BaseDbEntity
+public class NotificationHistoryEntity : AuditEntity
 {
     public Guid EntityId { get; set; } = Guid.Empty;
     public string EntityType { get; set; } = string.Empty;

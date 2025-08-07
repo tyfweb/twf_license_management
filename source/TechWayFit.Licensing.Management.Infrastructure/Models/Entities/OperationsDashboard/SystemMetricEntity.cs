@@ -1,11 +1,12 @@
 using TechWayFit.Licensing.Management.Infrastructure.Models.Entities;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Common;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.OperationsDashboard;
 
 /// <summary>
 /// Entity for storing aggregated system metrics
 /// </summary>
-public class SystemMetricEntity : BaseDbEntity
+public class SystemMetricEntity : AuditEntity
 {
     /// <summary>
     /// Unique identifier for the metric

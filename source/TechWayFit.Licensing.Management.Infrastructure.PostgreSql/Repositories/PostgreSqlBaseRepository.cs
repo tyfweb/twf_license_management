@@ -11,7 +11,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Repositories
 /// PostgreSQL implementation of base repository
 /// </summary>
 public partial class PostgreSqlBaseRepository<TEntity> : IBaseRepository<TEntity>
-    where TEntity : BaseDbEntity
+    where TEntity : AuditEntity
 {
     protected readonly PostgreSqlPostgreSqlLicensingDbContext _context;
     protected readonly DbSet<TEntity> _dbSet;

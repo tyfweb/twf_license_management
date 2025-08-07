@@ -7,7 +7,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Audit;
 /// Database entity for Audit Entries
 /// </summary>
 [Table("audit_entries")]
-public class AuditEntryEntity : BaseDbEntity
+public class AuditEntryEntity : AuditEntity
 {
     public string EntityType { get; set; } = string.Empty;
     public string EntityId { get; set; } = string.Empty;

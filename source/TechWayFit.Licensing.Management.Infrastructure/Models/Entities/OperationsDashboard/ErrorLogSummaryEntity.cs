@@ -5,7 +5,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Operati
 /// <summary>
 /// Entity for storing aggregated error log summaries
 /// </summary>
-public class ErrorLogSummaryEntity : BaseDbEntity
+public class ErrorLogSummaryEntity : AuditEntity
 {
     /// <summary>
     /// Unique identifier for the error summary

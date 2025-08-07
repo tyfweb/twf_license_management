@@ -6,7 +6,7 @@ using TechWayFit.Licensing.Management.Core.Models.Consumer;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Consumer;
 [Table("product_consumers")]
-public class ProductConsumerEntity : BaseDbEntity
+public class ProductConsumerEntity : AuditEntity
 {
 
     /// <summary>

@@ -8,7 +8,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Workflo
 /// Database entity for workflow history tracking
 /// </summary>
 [Table("workflow_history")]
-public class WorkflowHistoryEntity : BaseDbEntity
+public class WorkflowHistoryEntity : AuditEntity
 {
     /// <summary>
     /// ID of the entity this history entry relates to

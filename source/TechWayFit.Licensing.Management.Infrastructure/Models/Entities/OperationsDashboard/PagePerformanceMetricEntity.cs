@@ -6,7 +6,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Operati
 /// <summary>
 /// Entity for storing aggregated page performance metrics
 /// </summary>
-public class PagePerformanceMetricEntity : BaseDbEntity
+public class PagePerformanceMetricEntity : AuditEntity
 {
     /// <summary>
     /// Unique identifier for the performance metric

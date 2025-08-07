@@ -6,7 +6,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Operati
 /// <summary>
 /// Entity for storing aggregated query performance metrics
 /// </summary>
-public class QueryPerformanceMetricEntity : BaseDbEntity
+public class QueryPerformanceMetricEntity : AuditEntity
 {
     /// <summary>
     /// Unique identifier for the query metric
