@@ -58,9 +58,14 @@ namespace TechWayFit.Licensing.Management.Web.Services
         {
             var claims = new List<Claim>
             {
-                new(ClaimTypes.Name, user.Name),
-                new("Username", user.Username)
+                new (ClaimTypes.Name, user.Name),
+                new ("Username", user.Username),
+                new ("tenant_id", user.TenantId.ToString()),
+                new ("sub", user.UserId.ToString()),
+                new (ClaimTypes.NameIdentifier, user.UserId.ToString()),
+                new (ClaimTypes.Email, user.Email)
             };
+
             foreach (var role in user.Roles)
             {
                 claims.Add(new Claim(ClaimTypes.Role, role));

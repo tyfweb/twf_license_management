@@ -10,7 +10,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entit
 /// Database entity for Notification History
 /// </summary>
 [Table("notification_history")]
-public class NotificationHistoryEntity : AuditEntity, IEntityMapper<NotificationHistory, NotificationHistoryEntity>
+public class NotificationHistoryEntity : BaseEntity, IEntityMapper<NotificationHistory, NotificationHistoryEntity>
 {
     public Guid EntityId { get; set; } = Guid.Empty;
     public string EntityType { get; set; } = string.Empty;
@@ -35,6 +35,7 @@ public class NotificationHistoryEntity : AuditEntity, IEntityMapper<Notification
         return new NotificationHistoryEntity
         {
             Id = model.NotificationId,
+            TenantId = model.TenantId,
             EntityId = model.EntityId,
             EntityType = model.EntityType,
             NotificationMode = model.NotificationMode.ToString(),
@@ -55,6 +56,7 @@ public class NotificationHistoryEntity : AuditEntity, IEntityMapper<Notification
         return new NotificationHistory
         {
             NotificationId = Id,
+            TenantId = this.TenantId,
             EntityId = EntityId,
             EntityType = EntityType,
             NotificationMode = NotificationMode.ToEnum<NotificationMode>(),

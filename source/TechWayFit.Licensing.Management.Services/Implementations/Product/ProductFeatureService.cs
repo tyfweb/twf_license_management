@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Data;
-using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.Products;
 using TechWayFit.Licensing.Management.Infrastructure.Models.Search;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Core.Models.Common;
@@ -48,28 +47,12 @@ public class ProductFeatureService : IProductFeatureService
 
         try
         {
-            // Generate ID if not provided
-            if (Guid.Empty.Equals(feature.FeatureId))
-            {
-                feature.FeatureId = Guid.NewGuid();
-            }
-
-            // Map to entity
-            var entity = ProductFeatureEntity.FromModel(feature);
-            entity.CreatedBy = createdBy;
-            entity.CreatedOn = DateTime.UtcNow;
-            entity.UpdatedBy = createdBy;
-            entity.UpdatedOn = DateTime.UtcNow;
-
+            
             // Save to repository
-            var createdEntity = await _unitOfWork.ProductFeatures.AddAsync(entity);
-            await _unitOfWork.SaveChangesAsync();
+            var createdEntity = await _unitOfWork.ProductFeatures.AddAsync(feature);             
             
-            // Map back to model
-            var result = createdEntity.ToModel();
-            
-            _logger.LogInformation("Successfully created product feature with ID: {FeatureId}", result.FeatureId);
-            return result;
+            _logger.LogInformation("Successfully created product feature with ID: {FeatureId}", createdEntity.FeatureId);
+            return createdEntity;
         }
         catch (Exception ex)
         {
@@ -110,33 +93,24 @@ public class ProductFeatureService : IProductFeatureService
 
         try
         {
-            // Map updates to existing entity
-            var updatedData = ProductFeatureEntity.FromModel(feature);
+            // Map updates to existing entity 
             
             // Update properties manually to preserve audit fields
-            existingEntity.Name = updatedData.Name;
-            existingEntity.Description = updatedData.Description;
-            existingEntity.Code = updatedData.Code;
-            existingEntity.IsEnabled = updatedData.IsEnabled;
-            existingEntity.ProductId = updatedData.ProductId;
-            existingEntity.TierId = updatedData.TierId;
-            existingEntity.DisplayOrder = updatedData.DisplayOrder;
-            existingEntity.SupportFromVersion = updatedData.SupportFromVersion;
-            existingEntity.SupportToVersion = updatedData.SupportToVersion;
-            existingEntity.FeatureUsageJson = updatedData.FeatureUsageJson;
-            
-            existingEntity.UpdatedBy = updatedBy;
-            existingEntity.UpdatedOn = DateTime.UtcNow;
+            existingEntity.Name = feature.Name;
+            existingEntity.Description = feature.Description;
+            existingEntity.Code = feature.Code;
+            existingEntity.IsEnabled = feature.IsEnabled;
+            existingEntity.ProductId = feature.ProductId;
+            existingEntity.TierId = feature.TierId;
+            existingEntity.DisplayOrder = feature.DisplayOrder;
+            existingEntity.SupportFromVersion = feature.SupportFromVersion;
+            existingEntity.SupportToVersion = feature.SupportToVersion;  
 
             // Update in repository
-            var updatedEntity = await _unitOfWork.ProductFeatures.UpdateAsync(existingEntity);
-            await _unitOfWork.SaveChangesAsync();
-            
-            // Map back to model
-            var result = updatedEntity.ToModel();
-            
-            _logger.LogInformation("Successfully updated product feature: {FeatureId}", result.FeatureId);
-            return result;
+            var updatedEntity = await _unitOfWork.ProductFeatures.UpdateAsync(existingEntity.FeatureId, existingEntity);
+
+            _logger.LogInformation("Successfully updated product feature: {FeatureId}", updatedEntity.FeatureId);
+            return updatedEntity;
         }
         catch (Exception ex)
         {
@@ -156,7 +130,7 @@ public class ProductFeatureService : IProductFeatureService
         try
         {
             var entity = await _unitOfWork.ProductFeatures.GetByIdAsync(featureId);
-            return entity?.ToModel();
+            return entity;
         }
         catch (Exception ex)
         {
@@ -178,16 +152,15 @@ public class ProductFeatureService : IProductFeatureService
             // TODO: Implement GetByTierIdAsync in repository
             _logger.LogWarning("GetFeaturesByTierAsync not fully implemented - repository method GetByTierIdAsync missing");
             
-            var searchRequest = new SearchRequest<ProductFeatureEntity>
+            var searchRequest = new SearchRequest<ProductFeature>
             {
-                Filters = new List<Expression<Func<ProductFeatureEntity, bool>>>
-                {
-                    f => f.TierId == tierId && f.IsEnabled
-                }
+                Filters = {
+                    { "TierId", tierId},
+                    { "IsEnabled", true} }
             };
             
             var searchResult = await _unitOfWork.ProductFeatures.SearchAsync(searchRequest);
-            return searchResult.Results.Select(e => e.ToModel());
+            return searchResult.Results ;
         }
         catch (Exception ex)
         {
@@ -211,17 +184,17 @@ public class ProductFeatureService : IProductFeatureService
             // TODO: Implement GetByCodeAsync in repository
             _logger.LogWarning("GetFeatureByCodeAsync not fully implemented - repository method GetByCodeAsync missing");
             
-            var searchRequest = new SearchRequest<ProductFeatureEntity>
+            var searchRequest = new SearchRequest<ProductFeature>
             {
-                Filters = new List<Expression<Func<ProductFeatureEntity, bool>>>
-                {
-                    f => f.TierId == tierId && f.Code == featureCode
+                Filters = {
+                    { "TierId", tierId},
+                    { "Code", featureCode}
                 }
             };
             
-            var searchResult = await _unitOfWork.ProductFeatures.SearchAsync(searchRequest);
-            var entity = searchResult.Results.FirstOrDefault();
-            return entity?.ToModel();
+            var searchResult = await _unitOfWork.ProductFeatures.FindOneAsync(searchRequest);
+            var entity = searchResult;
+            return entity;
         }
         catch (Exception ex)
         {
@@ -298,18 +271,16 @@ public class ProductFeatureService : IProductFeatureService
             // TODO: Implement IsCodeUniqueAsync in repository
             _logger.LogWarning("FeatureCodeExistsAsync not fully implemented - repository method IsCodeUniqueAsync missing");
             
-            var searchRequest = new SearchRequest<ProductFeatureEntity>
+            var searchRequest = new SearchRequest<ProductFeature>
             {
-                Filters = new List<Expression<Func<ProductFeatureEntity, bool>>>
-                {
-                    f => f.TierId == tierId && f.Code == featureCode
-                }
+                Filters = { {"TierId", tierId}, {"Code", featureCode} }
             };
 
-            if (excludeFeatureId.HasValue)
+           /* if (excludeFeatureId.HasValue)
             {
-                searchRequest.Filters.Add(f => f.Id != excludeFeatureId.Value);
+                searchRequest.Filters.Add("Id", excludeFeatureId.Value);
             }
+            */
             
             var searchResult = await _unitOfWork.ProductFeatures.SearchAsync(searchRequest);
             return searchResult.Results.Any();
@@ -383,30 +354,22 @@ public class ProductFeatureService : IProductFeatureService
     {
         try
         {
-            var searchRequest = new SearchRequest<ProductFeatureEntity>
+            var searchRequest = new SearchRequest<ProductFeature>
             {
-                Filters = new List<Expression<Func<ProductFeatureEntity, bool>>>(),
+                Query=searchTerm,
                 Page = pageNumber,
-                PageSize = pageSize
+                PageSize = pageSize,
+                Filters = new Dictionary<string, object>()
             };
             
-            // Apply search term filter
-            if (!string.IsNullOrWhiteSpace(searchTerm))
-            {
-                searchRequest.Filters.Add(f => 
-                    f.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
-                    f.Description.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
-                    f.Code.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
-            }
-
             // TODO: Apply feature type filter when available in entity
             if (!string.IsNullOrWhiteSpace(featureType))
             {
                 _logger.LogWarning("Feature type filtering not implemented - FeatureType property missing in entity");
             }
-            
+
             var searchResult = await _unitOfWork.ProductFeatures.SearchAsync(searchRequest);
-            return searchResult.Results.Select(e => e.ToModel());
+            return searchResult.Results;
         }
         catch (Exception ex)
         {
@@ -422,26 +385,11 @@ public class ProductFeatureService : IProductFeatureService
     {
         try
         {
-            var searchRequest = new SearchRequest<ProductFeatureEntity>
+            var searchRequest = new SearchRequest<ProductFeature>
             {
-                Filters = new List<Expression<Func<ProductFeatureEntity, bool>>>()
+                Query = searchTerm,
+                Filters = new Dictionary<string, object>()             
             };
-            
-            // Apply search term filter
-            if (!string.IsNullOrWhiteSpace(searchTerm))
-            {
-                searchRequest.Filters.Add(f => 
-                    f.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
-                    f.Description.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
-                    f.Code.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
-            }
-
-            // TODO: Apply feature type filter when available in entity
-            if (!string.IsNullOrWhiteSpace(featureType))
-            {
-                _logger.LogWarning("Feature type filtering not implemented - FeatureType property missing in entity");
-            }
-            
             var searchResult = await _unitOfWork.ProductFeatures.SearchAsync(searchRequest);
             return searchResult.TotalCount;
         }
@@ -548,9 +496,9 @@ public class ProductFeatureService : IProductFeatureService
             // TODO: Implement when proper statistics queries are available
             _logger.LogWarning("GetFeatureUsageStatisticsAsync not fully implemented - requires complex statistics queries");
             
-            var searchRequest = new SearchRequest<ProductFeatureEntity>
+            var searchRequest = new SearchRequest<ProductFeature>
             {
-                Filters = new List<Expression<Func<ProductFeatureEntity, bool>>>()
+                Filters = new Dictionary<string, object>()
             };
             
             var searchResult = await _unitOfWork.ProductFeatures.SearchAsync(searchRequest);
@@ -578,6 +526,6 @@ public class ProductFeatureService : IProductFeatureService
     public async Task<IEnumerable<ProductFeature>> GetFeaturesByproductIdAsync(Guid productId)
     {
         var data = await _unitOfWork.ProductFeatures.GetByProductIdAsync(productId);
-        return data.Select(f => f.ToModel());
+        return data.Select(f => f);
     }
 }

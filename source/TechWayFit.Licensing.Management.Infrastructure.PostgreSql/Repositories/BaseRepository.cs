@@ -12,7 +12,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Repositories
 /// <summary>
 /// PostgreSQL implementation of base repository
 /// </summary>
-public partial class BaseRepository<TModel, TEntity> : IDataRepository<TModel> where TEntity : AuditEntity, IEntityMapper<TModel, TEntity>, new()
+public partial class BaseRepository<TModel, TEntity> : IDataRepository<TModel> where TEntity : BaseEntity, IEntityMapper<TModel, TEntity>, new()
     where TModel : class, new()
 
 {

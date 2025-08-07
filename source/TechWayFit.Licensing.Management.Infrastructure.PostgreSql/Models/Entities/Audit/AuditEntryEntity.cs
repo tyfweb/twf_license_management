@@ -10,7 +10,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entit
 /// Database entity for Audit Entries
 /// </summary>
 [Table("audit_entries")]
-public class AuditEntryEntity : AuditEntity, IEntityMapper<AuditEntry, AuditEntryEntity>
+public class AuditEntryEntity : BaseEntity, IEntityMapper<AuditEntry, AuditEntryEntity>
 {
     public string EntityType { get; set; } = string.Empty;
     public string EntityId { get; set; } = string.Empty;
@@ -30,6 +30,7 @@ public class AuditEntryEntity : AuditEntity, IEntityMapper<AuditEntry, AuditEntr
         return new AuditEntryEntity
         {
             Id = model.EntryId,
+            TenantId = model.TenantId,
             EntityType = model.EntityType,
             EntityId = model.EntityId,
             ActionType = model.ActionType,
@@ -67,6 +68,7 @@ public class AuditEntryEntity : AuditEntity, IEntityMapper<AuditEntry, AuditEntr
         return new AuditEntry
         {
             EntryId = this.Id,
+            TenantId = this.TenantId,
             EntityType = this.EntityType,
             EntityId = this.EntityId,
             ActionType = this.ActionType,

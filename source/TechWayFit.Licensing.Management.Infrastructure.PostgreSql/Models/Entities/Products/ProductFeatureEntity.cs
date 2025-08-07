@@ -73,6 +73,7 @@ public class ProductFeatureEntity : AuditWorkflowEntity, IEntityMapper<ProductFe
         return new ProductFeatureEntity
         {
             Id = model.FeatureId,
+            TenantId = model.TenantId,
             ProductId = model.ProductId,
             TierId = model.TierId,
             Code = model.Code,
@@ -107,6 +108,7 @@ public class ProductFeatureEntity : AuditWorkflowEntity, IEntityMapper<ProductFe
         return new ProductFeature
         {
             FeatureId = this.Id,
+            TenantId = this.TenantId,
             ProductId = this.ProductId,
             TierId = this.TierId,
             Code = this.Code,

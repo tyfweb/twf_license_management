@@ -8,7 +8,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entit
 /// <summary>
 /// Entity model for system settings storage
 /// </summary>
-public class SettingEntity : AuditEntity, IEntityMapper<Setting, SettingEntity>
+public class SettingEntity : BaseEntity, IEntityMapper<Setting, SettingEntity>
 {
 
     /// <summary>
@@ -109,6 +109,7 @@ public class SettingEntity : AuditEntity, IEntityMapper<Setting, SettingEntity>
         return new SettingEntity
         {
             Id = model.SettingId,
+            TenantId = model.TenantId,
             Category = model.Category,
             Key = model.Key,
             Value = model.Value,
@@ -140,6 +141,7 @@ public class SettingEntity : AuditEntity, IEntityMapper<Setting, SettingEntity>
         return new Setting
         {
             SettingId = this.Id,
+            TenantId = this.TenantId,
             Category = this.Category,
             Key = this.Key,
             Value = this.Value,

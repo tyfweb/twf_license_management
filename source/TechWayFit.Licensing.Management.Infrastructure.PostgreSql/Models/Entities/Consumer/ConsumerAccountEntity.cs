@@ -13,7 +13,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Data.Entities.Consumer;
 /// Database entity for ConsumerAccount
 /// </summary>
 [Table("consumer_accounts")]
-public class ConsumerAccountEntity : AuditEntity, IEntityMapper<ConsumerAccount, ConsumerAccountEntity>
+public class ConsumerAccountEntity : BaseEntity, IEntityMapper<ConsumerAccount, ConsumerAccountEntity>
 {
 
     /// <summary>
@@ -98,6 +98,7 @@ public class ConsumerAccountEntity : AuditEntity, IEntityMapper<ConsumerAccount,
         return new ConsumerAccountEntity
         {
             Id = model.ConsumerId,
+            TenantId = model.TenantId,
             CompanyName = model.CompanyName,
             AccountCode = model.AccountCode,
             PrimaryContactName = model.PrimaryContact.Name,
@@ -138,6 +139,7 @@ public class ConsumerAccountEntity : AuditEntity, IEntityMapper<ConsumerAccount,
         return new ConsumerAccount
         {
             ConsumerId = this.Id,
+            TenantId = this.TenantId,
             CompanyName = this.CompanyName,
             AccountCode = this.AccountCode,
             PrimaryContact = new ContactPerson

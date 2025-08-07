@@ -10,7 +10,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entit
 /// Database entity for Notification Templates
 /// </summary>
 [Table("notification_templates")]
-public class NotificationTemplateEntity : AuditEntity,IEntityMapper<NotificationTemplate, NotificationTemplateEntity>
+public class NotificationTemplateEntity : BaseEntity,IEntityMapper<NotificationTemplate, NotificationTemplateEntity>
 {
     public string TemplateName { get; set; } = string.Empty;
     public string NotificationType { get; set; } = string.Empty;
@@ -31,6 +31,7 @@ public class NotificationTemplateEntity : AuditEntity,IEntityMapper<Notification
         return new NotificationTemplateEntity
         {
             Id = model.TemplateId,
+            TenantId = model.TenantId,
             TemplateName = model.TemplateName,
             NotificationType = model.NotificationType.ToString(),
             NotificationMode = model.Preferences.Mode.ToString(),
@@ -49,6 +50,7 @@ public class NotificationTemplateEntity : AuditEntity,IEntityMapper<Notification
         return new NotificationTemplate
         {
             TemplateId = Id,
+            TenantId = this.TenantId,
             TemplateName = TemplateName,
             NotificationType = NotificationType.ToEnum<NotificationType>(),
             Preferences = new NotificationPreferences

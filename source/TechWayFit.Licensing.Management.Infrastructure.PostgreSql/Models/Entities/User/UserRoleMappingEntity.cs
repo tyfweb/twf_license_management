@@ -7,7 +7,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entit
 /// <summary>
 /// Entity representing the mapping between users and roles
 /// </summary>
-public class UserRoleMappingEntity : AuditEntity, IEntityMapper<UserRoleMapping, UserRoleMappingEntity>
+public class UserRoleMappingEntity : BaseEntity, IEntityMapper<UserRoleMapping, UserRoleMappingEntity>
 {
     /// <summary>
     /// Foreign key to UserProfile
@@ -47,6 +47,7 @@ public class UserRoleMappingEntity : AuditEntity, IEntityMapper<UserRoleMapping,
         return new UserRoleMappingEntity
         {
             Id = model.MappingId,
+            TenantId = model.TenantId,
             UserId = model.UserId,
             RoleId = model.RoleId,
             AssignedDate = model.AssignedDate,
@@ -68,6 +69,7 @@ public class UserRoleMappingEntity : AuditEntity, IEntityMapper<UserRoleMapping,
         return new UserRoleMapping
         {
             MappingId = this.Id,
+            TenantId = this.TenantId,
             UserId = this.UserId,
             RoleId = this.RoleId,
             AssignedDate = this.AssignedDate,

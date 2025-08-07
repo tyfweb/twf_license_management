@@ -294,5 +294,6 @@ public class PostgreSqlUserProfileRepository :  BaseRepository<UserProfile,UserP
         user.UpdatedBy = _userContext.UserId ?? "Anonymous";
         _dbSet.Update(user);
         await _context.SaveChangesAsync(cancellationToken);
+        return true;
     }
 }

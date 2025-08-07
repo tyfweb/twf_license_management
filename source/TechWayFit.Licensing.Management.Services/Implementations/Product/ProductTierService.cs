@@ -3,8 +3,7 @@ using Microsoft.Extensions.Logging;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Core.Models.Common;
 using TechWayFit.Licensing.Management.Core.Models.Product;
-using TechWayFit.Licensing.Management.Infrastructure.Contracts.Data;
-using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.Products;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Data; 
 
 public class ProductTierService : IProductTierService
 {
@@ -28,18 +27,8 @@ public class ProductTierService : IProductTierService
             throw new InvalidOperationException("Tier validation failed");
         }
 
-        // Map to entity and save
-        var tierEntity = new ProductTierEntity
-        {
-            Name = tier.Name,
-            Description = tier.Description,
-            ProductId = tier.ProductId,
-            CreatedBy = createdBy,
-            CreatedOn = DateTime.UtcNow
-        };
 
-        await _unitOfWork.ProductTiers.AddAsync(tierEntity);
-        await _unitOfWork.SaveChangesAsync();
+        await _unitOfWork.ProductTiers.AddAsync(tier);
 
         return tier;
     }
@@ -57,9 +46,9 @@ public class ProductTierService : IProductTierService
         }
 
         // Soft delete the tier
-        return _unitOfWork.ProductTiers.SoftDeleteAsync(tierId, deletedBy);
+        return _unitOfWork.ProductTiers.DeleteAsync(tierId);
     }
-     
+
 
     public async Task<ProductTier?> GetTierByIdAsync(Guid tierId)
     {
@@ -73,7 +62,7 @@ public class ProductTierService : IProductTierService
             return null;
         }
 
-        return tierEntity.ToModel();
+        return tierEntity;
     }
 
     public Task<ProductTier?> GetTierByNameAsync(Guid productId, string tierName)
@@ -88,7 +77,7 @@ public class ProductTierService : IProductTierService
 
         // Fetch tiers by product ID
         var tiers = _unitOfWork.ProductTiers.GetByProductIdAsync(productId);
-        return tiers.ContinueWith(t => t.Result.Select(e => e.ToModel()));
+        return tiers;
     }
 
     public Task<bool> TierExistsAsync(Guid tierId)
@@ -123,15 +112,13 @@ public class ProductTierService : IProductTierService
         }
 
         // Map to entity and update
-        var tierEntity = ProductTierEntity.FromModel(existingTier);
-        tierEntity.ProductId = tier.ProductId; // Ensure product ID is set
-        tierEntity.Id = tier.TierId; // Ensure tier ID is set
-        tierEntity.Name = tier.Name;
-        tierEntity.Description = tier.Description;
-        tierEntity.UpdatedBy = updatedBy;
-        tierEntity.UpdatedOn = DateTime.UtcNow;
+       
+        existingTier.ProductId = tier.ProductId; // Ensure product ID is set
+        existingTier.TierId = tier.TierId; // Ensure tier ID is set
+        existingTier.Name = tier.Name;
+        existingTier.Description = tier.Description; 
 
-        _unitOfWork.ProductTiers.UpdateAsync(tierEntity);
+        _unitOfWork.ProductTiers.UpdateAsync(existingTier.TierId, existingTier);
         _unitOfWork.SaveChangesAsync();
 
         return Task.FromResult(tier);

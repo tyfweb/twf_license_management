@@ -8,7 +8,7 @@ namespace TechWayFit.Licensing.Management.Core.Models.User;
 public class UserProfile
 {
     public Guid UserId { get; set; } = Guid.NewGuid();
-
+    public Guid TenantId { get; set; } = Guid.Empty;
     /// <summary>
     /// Audit information for the user profile
     /// </summary>

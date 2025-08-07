@@ -82,6 +82,7 @@ public class ProductEntity : AuditWorkflowEntity, IEntityMapper<EnterpriseProduc
         return new ProductEntity
         {
             Id = model.ProductId,
+            TenantId = model.TenantId,
             Name = model.Name,
             Description = model.Description,
             ReleaseDate = model.ReleaseDate,
@@ -117,6 +118,7 @@ public class ProductEntity : AuditWorkflowEntity, IEntityMapper<EnterpriseProduc
         return new EnterpriseProduct
         {
             ProductId = this.Id,
+            TenantId = this.TenantId,
             Name = this.Name,
             Description = this.Description,
             ReleaseDate = this.ReleaseDate,

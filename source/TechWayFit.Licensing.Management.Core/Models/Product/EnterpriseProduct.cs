@@ -19,6 +19,11 @@ public class EnterpriseProduct : IWorkflowCapable
     }
 
     /// <summary>
+    /// Tenant identifier for multi-tenant isolation
+    /// </summary>
+    public Guid TenantId { get; set; } = Guid.Empty;
+
+    /// <summary>
     /// Audit information for the product
     /// </summary>
     public AuditInfo Audit { get; set; } = new();

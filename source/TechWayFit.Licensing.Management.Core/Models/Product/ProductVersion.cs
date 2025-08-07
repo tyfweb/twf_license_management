@@ -12,6 +12,11 @@ public class ProductVersion
     public Guid VersionId { get; set; } = Guid.NewGuid();
 
     /// <summary>
+    /// Tenant identifier for multi-tenant isolation
+    /// </summary>
+    public Guid TenantId { get; set; } = Guid.Empty;
+
+    /// <summary>
     /// Audit information for the product version
     /// </summary>
     public AuditInfo Audit { get; set; } = new();

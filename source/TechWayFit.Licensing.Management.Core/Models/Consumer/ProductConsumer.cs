@@ -8,6 +8,12 @@ public class ProductConsumer
     /// Unique identifier for the product consumer relationship
     /// </summary>
     public Guid ProductConsumerId { get; set; } = Guid.NewGuid();
+    
+    /// <summary>
+    /// Tenant identifier for multi-tenant isolation
+    /// </summary>
+    public Guid TenantId { get; set; } = Guid.Empty;
+    
     /// <summary>
     /// Consumer account associated with this product
     /// </summary>

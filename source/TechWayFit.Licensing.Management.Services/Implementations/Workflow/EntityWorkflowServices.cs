@@ -1,13 +1,9 @@
 using TechWayFit.Licensing.Management.Core.Contracts.Services.Workflow; 
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Workflow;
-using TechWayFit.Licensing.Management.Infrastructure.Models.Entities;
 using Microsoft.Extensions.Logging;
 using TechWayFit.Licensing.Management.Core.Models.Product;
 using TechWayFit.Licensing.Management.Core.Models.Consumer;
-using TechWayFit.Licensing.Management.Infrastructure.Data.Entities.Consumer;
-using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.Products;
 using TechWayFit.Licensing.Management.Core.Models.License;
-using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.License;
 using System.Text.Json;
 
 namespace TechWayFit.Licensing.Management.Services.Implementations.Workflow;
@@ -82,84 +78,7 @@ public class ConsumerAccountWorkflowService : WorkflowService<ConsumerAccount, C
     {
     }
 
-    private static ConsumerAccount ToModel(ConsumerAccountEntity entity)
-    {
-        return new ConsumerAccount
-        {
-            Id = entity.Id,
-            CompanyName = entity.CompanyName,
-            PrimaryContact = new Core.Models.Consumer.ContactPerson
-            {
-                Name = entity.PrimaryContactName,
-                Email = entity.PrimaryContactEmail,
-                Phone = entity.PrimaryContactPhone,
-                Position = entity.PrimaryContactPosition
-            },
-            SecondaryContact = new Core.Models.Consumer.ContactPerson
-            {
-                Name = entity.SecondaryContactName ?? string.Empty,
-                Email = entity.SecondaryContactEmail ?? string.Empty,
-                Phone = entity.SecondaryContactPhone ?? string.Empty,
-                Position = entity.SecondaryContactPosition ?? string.Empty
-            },
-            
-            // Use composition objects for audit properties
-            Audit = new Core.Models.Common.AuditInfo
-            {
-                IsActive = entity.IsActive,
-                IsDeleted = entity.IsDeleted,
-                CreatedBy = entity.CreatedBy,
-                CreatedOn = entity.CreatedOn,
-                UpdatedBy = entity.UpdatedBy,
-                UpdatedOn = entity.UpdatedOn,
-                DeletedBy = entity.DeletedBy,
-                DeletedOn = entity.DeletedOn,
-                RowVersion = entity.RowVersion
-            },
-            
-            // Use composition object for workflow properties (default values since entity doesn't have workflow)
-            Workflow = new Core.Models.Common.WorkflowInfo
-            {
-                Status = Core.Models.Common.EntityStatus.Draft,
-                SubmittedBy = null,
-                SubmittedOn = null,
-                ReviewedBy = null,
-                ReviewedOn = null,
-                ReviewComments = null
-            }
-        };
-    }
 
-    private static ConsumerAccountEntity ToEntity(ConsumerAccount model)
-    {
-        return new ConsumerAccountEntity
-        {
-            Id = model.Id,
-            CompanyName = model.CompanyName,
-            PrimaryContactName = model.PrimaryContact.Name,
-            PrimaryContactEmail = model.PrimaryContact.Email,
-            PrimaryContactPhone = model.PrimaryContact.Phone,
-            PrimaryContactPosition = model.PrimaryContact.Position,
-            SecondaryContactName = model.SecondaryContact?.Name ?? string.Empty,
-            SecondaryContactEmail = model.SecondaryContact?.Email ?? string.Empty,
-            SecondaryContactPhone = model.SecondaryContact?.Phone ?? string.Empty,
-            SecondaryContactPosition = model.SecondaryContact?.Position ?? string.Empty,
-            
-            // Map audit properties from composition object
-            IsActive = model.Audit.IsActive,
-            IsDeleted = model.Audit.IsDeleted,
-            CreatedBy = model.Audit.CreatedBy,
-            CreatedOn = model.Audit.CreatedOn,
-            UpdatedBy = model.Audit.UpdatedBy,
-            UpdatedOn = model.Audit.UpdatedOn,
-            DeletedBy = model.Audit.DeletedBy,
-            DeletedOn = model.Audit.DeletedOn,
-            RowVersion = model.Audit.RowVersion
-            
-            // Note: ConsumerAccountEntity only inherits from AuditEntity, not AuditWorkflowEntity
-            // So it doesn't have EntityStatus, SubmittedBy, etc. properties
-        };
-    }
 }
 
 /// <summary>

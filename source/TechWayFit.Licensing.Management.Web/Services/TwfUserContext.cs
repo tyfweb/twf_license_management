@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using TechWayFit.Licensing.Management.Core.Contracts;
+using TechWayFit.Licensing.Management.Core.Constants;
 
 public class TwfUserContext : IUserContext
 {
@@ -13,6 +14,8 @@ public class TwfUserContext : IUserContext
     private ClaimsPrincipal? CurrentUser => _httpContextAccessor.HttpContext?.User;
 
     public string? UserId => GetClaimValue(ClaimTypes.NameIdentifier) ?? GetClaimValue("sub");
+
+    public string? TenantId => GetClaimValue(TenantClaims.TenantId) ?? GetClaimValue(TenantClaims.TenantIdAlternative);
 
     public string? UserEmail => GetClaimValue(ClaimTypes.Email);
 

@@ -12,7 +12,7 @@ public class LicenseSearchRequest:SearchRequest<License>
         ProductId = productId;
         ConsumerId = consumerId;
         Status = status;
-        Filters = new Dictionary<string, string>();
+        Filters = new Dictionary<string, object>();
 
         if (!string.IsNullOrEmpty(productId) && Guid.TryParse(productId, out var productGuid))
             Filters.Add(nameof(ProductId), productGuid.ToString());

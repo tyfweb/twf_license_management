@@ -11,16 +11,46 @@ using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.
 using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.User;
 using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.Common;
 using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.Audit;
+using TechWayFit.Licensing.Management.Core.Contracts;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Configuration;
 
 /// <summary>
 /// PostgreSQL-specific Entity Framework DbContext for the licensing management system
+/// 
+/// MULTI-TENANT IMPLEMENTATION:
+/// This DbContext implements multi-tenancy through the following mechanisms:
+/// 
+/// 1. TENANT ID FILTERING:
+///    - All entities inherit from BaseEntity which includes TenantId property
+///    - Global query filters automatically filter all queries by current user's TenantId
+///    - Prevents cross-tenant data access without explicit bypass
+/// 
+/// 2. AUTOMATIC TENANT ID ASSIGNMENT:
+///    - New entities automatically get TenantId set from current user context
+///    - TenantId cannot be modified after entity creation (prevented in UpdateAuditFields)
+/// 
+/// 3. PERFORMANCE OPTIMIZATION:
+///    - TenantId indexes on all entities for optimal query performance
+///    - Composite indexes combining TenantId with frequently queried fields
+/// 
+/// 4. ADMINISTRATIVE BYPASS:
+///    - WithoutTenantFilter methods for system-level operations
+///    - Use with extreme caution for cross-tenant administrative tasks
+/// 
+/// SECURITY CONSIDERATIONS:
+/// - All queries are automatically filtered by TenantId
+/// - No raw SQL should bypass tenant filtering
+/// - Admin operations must explicitly use bypass methods
+/// - TenantId must be properly set in user context (claims)
 /// </summary>
-public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
+public partial class PostgreSqlPostgreSqlLicensingDbContext : DbContext
 {
-    public PostgreSqlPostgreSqlLicensingDbContext(DbContextOptions<PostgreSqlPostgreSqlLicensingDbContext> options) : base(options)
+    private readonly IUserContext _userContext;
+    public PostgreSqlPostgreSqlLicensingDbContext(
+        DbContextOptions<PostgreSqlPostgreSqlLicensingDbContext> options, IUserContext userContext) : base(options)
     {
+        _userContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
     }
 
     #region DbSets
@@ -59,7 +89,6 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-
         ConfigureAuditEntities(modelBuilder);
         ConfigureConsumerEntities(modelBuilder);
 
@@ -73,6 +102,9 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
 
         // Configure indexes
         ConfigureIndexes(modelBuilder);
+
+        // Configure global query filters for multi-tenancy
+        ConfigureGlobalQueryFilters(modelBuilder);
     }
 
 
@@ -189,6 +221,7 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Id).IsRequired();
+            entity.Property(e => e.TenantId).IsRequired(); // Multi-tenant support
             entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
             entity.Property(e => e.Description).HasMaxLength(1000);
             entity.Property(e => e.SupportEmail).HasMaxLength(255);
@@ -418,6 +451,49 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
     {
         // Additional performance indexes can be added here
         // These are indexes that span multiple entities or are for specific query patterns
+        
+        // Add TenantId indexes for all entities to improve multi-tenant query performance
+        ConfigureTenantIndexes(modelBuilder);
+    }
+
+    /// <summary>
+    /// Configure TenantId indexes for all entities for optimal multi-tenant performance
+    /// </summary>
+    private static void ConfigureTenantIndexes(ModelBuilder modelBuilder)
+    {
+        // Product related entities
+        modelBuilder.Entity<ProductEntity>().HasIndex(e => e.TenantId);
+        modelBuilder.Entity<ProductVersionEntity>().HasIndex(e => e.TenantId);
+        modelBuilder.Entity<ProductTierEntity>().HasIndex(e => e.TenantId);
+        modelBuilder.Entity<ProductFeatureEntity>().HasIndex(e => e.TenantId);
+        modelBuilder.Entity<ProductConsumerEntity>().HasIndex(e => e.TenantId);
+
+        // License related entities
+        modelBuilder.Entity<ProductLicenseEntity>().HasIndex(e => e.TenantId);
+
+        // Consumer related entities
+        modelBuilder.Entity<ConsumerAccountEntity>().HasIndex(e => e.TenantId);
+
+        // Audit related entities
+        modelBuilder.Entity<AuditEntryEntity>().HasIndex(e => e.TenantId);
+
+        // Notification related entities
+        modelBuilder.Entity<NotificationTemplateEntity>().HasIndex(e => e.TenantId);
+        modelBuilder.Entity<NotificationHistoryEntity>().HasIndex(e => e.TenantId);
+
+        // Settings related entities
+        modelBuilder.Entity<SettingEntity>().HasIndex(e => e.TenantId);
+
+        // User related entities
+        modelBuilder.Entity<UserProfileEntity>().HasIndex(e => e.TenantId);
+        modelBuilder.Entity<UserRoleEntity>().HasIndex(e => e.TenantId);
+        modelBuilder.Entity<UserRoleMappingEntity>().HasIndex(e => e.TenantId);
+
+        // Composite indexes for frequently queried combinations
+        modelBuilder.Entity<ProductEntity>().HasIndex(e => new { e.TenantId, e.IsActive });
+        modelBuilder.Entity<ConsumerAccountEntity>().HasIndex(e => new { e.TenantId, e.IsActive });
+        modelBuilder.Entity<ProductLicenseEntity>().HasIndex(e => new { e.TenantId, e.Status });
+        modelBuilder.Entity<UserProfileEntity>().HasIndex(e => new { e.TenantId, e.IsActive, e.IsLocked });
     }
 
     /// <summary>
@@ -493,8 +569,9 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
     /// </summary>
     private void UpdateAuditFields()
     {
-        var entries = ChangeTracker.Entries<AuditEntity>();
+        var entries = ChangeTracker.Entries<BaseEntity>();
         var currentTime = DateTime.UtcNow;
+        var currentTenantId = GetCurrentTenantId();
 
         foreach (var entry in entries)
         {
@@ -503,16 +580,71 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
                 case EntityState.Added:
                     entry.Entity.Id = Guid.NewGuid();// Ensure Id is set for new entities
                     entry.Entity.CreatedOn = currentTime;
+                    entry.Entity.TenantId = currentTenantId; // Set tenant ID for new entities
                     if(entry.Entity.CreatedBy == null)
-                        entry.Entity.CreatedBy = "System"; // Default to System if not set
+                        entry.Entity.CreatedBy = _userContext.UserId ?? "Anonymous"; // Default to Anonymous if not set
                     break;
                 case EntityState.Modified:
                     entry.Entity.UpdatedOn = currentTime;
+                    if (entry.Entity.UpdatedBy == null)
+                        entry.Entity.UpdatedBy = _userContext.UserId ?? "Anonymous"; // Default to Anonymous if not set
                     entry.Property(x => x.CreatedBy).IsModified = false;
                     entry.Property(x => x.CreatedOn).IsModified = false;
+                    entry.Property(x => x.TenantId).IsModified = false; // Prevent tenant ID changes on updates
                     break;
             }
         }
+    }
+
+    /// <summary>
+    /// Get the current tenant ID from the user context
+    /// </summary>
+    private Guid GetCurrentTenantId()
+    {
+        var tenantIdString = _userContext.TenantId;
+        if (Guid.TryParse(tenantIdString, out var tenantId))
+        {
+            return tenantId;
+        }
+        
+        // Return empty Guid if no tenant ID is available (should not happen in production)
+        // Consider throwing an exception in production environments
+        return Guid.Empty;
+    }
+
+    /// <summary>
+    /// Bypasses the global query filters for administrative operations
+    /// Use with caution - only for system-level operations that need cross-tenant access
+    /// </summary>
+    /// <returns>DbContext with global filters ignored</returns>
+    public DbContext IgnoreQueryFilters()
+    {
+        return this.IgnoreQueryFilters();
+    }
+
+    /// <summary>
+    /// Execute a query with tenant filtering temporarily disabled
+    /// Use for administrative operations that need cross-tenant access
+    /// </summary>
+    /// <typeparam name="T">Return type</typeparam>
+    /// <param name="operation">Operation to execute</param>
+    /// <returns>Result of the operation</returns>
+    public T WithoutTenantFilter<T>(Func<T> operation)
+    {
+        using var scope = new TenantFilterScope();
+        return operation();
+    }
+
+    /// <summary>
+    /// Execute an async query with tenant filtering temporarily disabled
+    /// </summary>
+    /// <typeparam name="T">Return type</typeparam>
+    /// <param name="operation">Async operation to execute</param>
+    /// <returns>Result of the operation</returns>
+    public async Task<T> WithoutTenantFilterAsync<T>(Func<Task<T>> operation)
+    {
+        using var scope = new TenantFilterScope();
+        return await operation();
     }
 
     /// <summary>
@@ -520,7 +652,7 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
     /// </summary>
     private void CreateAuditEntries()
     {
-        var entries = ChangeTracker.Entries<AuditEntity>()
+        var entries = ChangeTracker.Entries<BaseEntity>()
             .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified)
             .ToList();
 
@@ -541,7 +673,7 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
     /// <summary>
     /// Create an individual audit entry for an entity change
     /// </summary>
-    private AuditEntryEntity? CreateAuditEntry(Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry<AuditEntity> entry)
+    private AuditEntryEntity? CreateAuditEntry(Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry<BaseEntity> entry)
     {
         var entityType = entry.Entity.GetType().Name;
         var entityId = entry.Entity.Id.ToString(); // Convert Guid to string for generic audit table
@@ -627,14 +759,14 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
     {
         var auditFields = new[]
         {
-            nameof(AuditEntity.CreatedBy),
-            nameof(AuditEntity.CreatedOn),
-            nameof(AuditEntity.UpdatedBy),
-            nameof(AuditEntity.UpdatedOn),
-            nameof(AuditEntity.DeletedBy),
-            nameof(AuditEntity.DeletedOn),
-            nameof(AuditEntity.IsActive),
-            nameof(AuditEntity.IsDeleted)
+            nameof(BaseEntity.CreatedBy),
+            nameof(BaseEntity.CreatedOn),
+            nameof(BaseEntity.UpdatedBy),
+            nameof(BaseEntity.UpdatedOn),
+            nameof(BaseEntity.DeletedBy),
+            nameof(BaseEntity.DeletedOn),
+            nameof(BaseEntity.IsActive),
+            nameof(BaseEntity.IsDeleted)
         };
 
         return auditFields.Contains(propertyName, StringComparer.OrdinalIgnoreCase);
@@ -770,6 +902,44 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
             entity.HasIndex(e => e.AssignedDate);
             entity.HasIndex(e => e.ExpiryDate);
         });
+    }
+
+    /// <summary>
+    /// Configure global query filters for multi-tenancy
+    /// </summary>
+    private void ConfigureGlobalQueryFilters(ModelBuilder modelBuilder)
+    {
+        // Apply global query filter to all entities that inherit from BaseEntity
+        // This ensures all queries automatically filter by TenantId
+        // Note: The TenantId is evaluated at query execution time, not at model creation time
+        
+        // Product related entities
+        modelBuilder.Entity<ProductEntity>().HasQueryFilter(e => e.TenantId == GetCurrentTenantId());
+        modelBuilder.Entity<ProductVersionEntity>().HasQueryFilter(e => e.TenantId == GetCurrentTenantId());
+        modelBuilder.Entity<ProductTierEntity>().HasQueryFilter(e => e.TenantId == GetCurrentTenantId());
+        modelBuilder.Entity<ProductFeatureEntity>().HasQueryFilter(e => e.TenantId == GetCurrentTenantId());
+        modelBuilder.Entity<ProductConsumerEntity>().HasQueryFilter(e => e.TenantId == GetCurrentTenantId());
+
+        // License related entities
+        modelBuilder.Entity<ProductLicenseEntity>().HasQueryFilter(e => e.TenantId == GetCurrentTenantId());
+
+        // Consumer related entities
+        modelBuilder.Entity<ConsumerAccountEntity>().HasQueryFilter(e => e.TenantId == GetCurrentTenantId());
+
+        // Audit related entities
+        modelBuilder.Entity<AuditEntryEntity>().HasQueryFilter(e => e.TenantId == GetCurrentTenantId());
+
+        // Notification related entities
+        modelBuilder.Entity<NotificationTemplateEntity>().HasQueryFilter(e => e.TenantId == GetCurrentTenantId());
+        modelBuilder.Entity<NotificationHistoryEntity>().HasQueryFilter(e => e.TenantId == GetCurrentTenantId());
+
+        // Settings related entities
+        modelBuilder.Entity<SettingEntity>().HasQueryFilter(e => e.TenantId == GetCurrentTenantId());
+
+        // User related entities
+        modelBuilder.Entity<UserProfileEntity>().HasQueryFilter(e => e.TenantId == GetCurrentTenantId());
+        modelBuilder.Entity<UserRoleEntity>().HasQueryFilter(e => e.TenantId == GetCurrentTenantId());
+        modelBuilder.Entity<UserRoleMappingEntity>().HasQueryFilter(e => e.TenantId == GetCurrentTenantId());
     }
 
    

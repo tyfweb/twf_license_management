@@ -10,6 +10,11 @@ public class UserRoleMapping
     public Guid MappingId { get; set; } = Guid.NewGuid();
 
     /// <summary>
+    /// Tenant identifier for multi-tenant isolation
+    /// </summary>
+    public Guid TenantId { get; set; } = Guid.Empty;
+
+    /// <summary>
     /// Audit information for the user role mapping
     /// </summary>
     public AuditInfo Audit { get; set; } = new();

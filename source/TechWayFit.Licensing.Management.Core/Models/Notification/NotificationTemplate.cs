@@ -6,6 +6,12 @@ namespace TechWayFit.Licensing.Management.Core.Models.Notification;
 public class NotificationTemplate
 {
     public Guid TemplateId { get; set; } = Guid.NewGuid();
+    
+    /// <summary>
+    /// Tenant identifier for multi-tenant isolation
+    /// </summary>
+    public Guid TenantId { get; set; } = Guid.Empty;
+    
     public string TemplateName { get; set; } = string.Empty;
     public NotificationType NotificationType { get; set; }
     public NotificationPreferences Preferences { get; set; } = new NotificationPreferences();

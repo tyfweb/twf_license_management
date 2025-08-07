@@ -11,5 +11,6 @@ public class SearchRequest<TEntity> where TEntity : class
     public bool SortDescending { get; set; } = false;
     public DateTime? FromDate { get; set; }
     public DateTime? ToDate { get; set; }
-    public Dictionary<string,string> Filters { get; set; } =new Dictionary<string, string>();
+    public Dictionary<string, object> Filters { get; set; } = new Dictionary<string, object>();
+    public bool FilterAnd { get; set; } = true; // Use AND logic for multiple filters    
 }

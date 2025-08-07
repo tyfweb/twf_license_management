@@ -10,7 +10,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entit
 /// Database entity for workflow history tracking
 /// </summary>
 [Table("workflow_history")]
-public class WorkflowHistoryEntity : AuditEntity
+public class WorkflowHistoryEntity : BaseEntity
 {
     /// <summary>
     /// ID of the entity this history entry relates to

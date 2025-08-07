@@ -13,6 +13,11 @@ public abstract class BaseAuditModel : IWorkflowCapable
     public Guid Id { get; set; } = Guid.NewGuid();
 
     /// <summary>
+    /// Tenant identifier for multi-tenant isolation
+    /// </summary>
+    public Guid TenantId { get; set; } = Guid.Empty;
+
+    /// <summary>
     /// Is the model active? This is used for soft deletes
     /// </summary>
     public bool IsActive { get; set; } = true;

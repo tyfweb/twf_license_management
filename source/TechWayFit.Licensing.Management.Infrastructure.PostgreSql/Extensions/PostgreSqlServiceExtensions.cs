@@ -32,7 +32,9 @@ public static class PostgreSqlServiceExtensions
             throw new InvalidOperationException("PostgreSQL connection string is not configured.");
         }
 
-        // Add DbContext
+        // TODO: Add connection string security validation
+
+        // Add DbContext with performance optimizations
         services.AddDbContext<PostgreSqlPostgreSqlLicensingDbContext>((serviceProvider, options) =>
         {
             options.UseNpgsql(connectionString, npgsqlOptions =>
@@ -47,21 +49,30 @@ public static class PostgreSqlServiceExtensions
                 {
                     npgsqlOptions.CommandTimeout(databaseConfig.Options.CommandTimeout);
                 }
+
+                // Enable retry on failure for resilience
+                npgsqlOptions.EnableRetryOnFailure(
+                    maxRetryCount: 3,
+                    maxRetryDelay: TimeSpan.FromSeconds(30),
+                    errorCodesToAdd: null);
             })
             // Use snake_case naming convention for PostgreSQL
-            .UseSnakeCaseNamingConvention();
+            .UseSnakeCaseNamingConvention()
+            // Enable performance optimizations
+            .EnableServiceProviderCaching()
+            .EnableSensitiveDataLogging(databaseConfig.Options.EnableSensitiveDataLogging);
 
             // Development-specific configurations
-            if (databaseConfig.Options.EnableSensitiveDataLogging)
-            {
-                options.EnableSensitiveDataLogging();
-            }
-
             if (databaseConfig.Options.EnableLogging)
             {
                 options.EnableDetailedErrors();
+                // TODO: Configure logging properly via Microsoft.Extensions.Logging
+                options.LogTo(Console.WriteLine);
             }
         });
+
+        // TODO: Add health checks, resilience policies, and query caching
+        // These require additional packages and configuration
 
         // Register Unit of Work
         services.AddScoped<IUnitOfWork, PostgreSqlUnitOfWork>();

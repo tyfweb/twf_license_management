@@ -18,6 +18,11 @@ public class ConsumerAccount : IWorkflowCapable
     public Guid ConsumerId { get; set; } = Guid.NewGuid();
 
     /// <summary>
+    /// Tenant identifier for multi-tenant isolation
+    /// </summary>
+    public Guid TenantId { get; set; } = Guid.Empty;
+
+    /// <summary>
     /// Implementation of IWorkflowCapable.Id - maps to ConsumerId
     /// </summary>
     public Guid Id 

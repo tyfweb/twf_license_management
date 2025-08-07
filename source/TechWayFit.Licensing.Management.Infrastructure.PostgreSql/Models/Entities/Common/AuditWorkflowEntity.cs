@@ -5,7 +5,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entit
 /// <summary>
 /// Base entity for entities that require workflow capabilities - inherits audit fields and adds workflow fields
 /// </summary>
-public abstract class AuditWorkflowEntity : AuditEntity
+public abstract class AuditWorkflowEntity : BaseEntity
 {
     /// <summary>
     /// Current status in the workflow (Draft, PendingApproval, Approved, Rejected, Withdrawn, Archived)

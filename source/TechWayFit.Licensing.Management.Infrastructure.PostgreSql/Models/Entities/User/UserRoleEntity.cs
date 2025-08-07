@@ -7,7 +7,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entit
 /// <summary>
 /// Entity representing a user role in the system
 /// </summary>
-public class UserRoleEntity : AuditEntity, IEntityMapper<UserRole, UserRoleEntity>
+public class UserRoleEntity : BaseEntity, IEntityMapper<UserRole, UserRoleEntity>
 {
 
     /// <summary>
@@ -38,6 +38,7 @@ public class UserRoleEntity : AuditEntity, IEntityMapper<UserRole, UserRoleEntit
         return new UserRoleEntity
         {
             Id = model.RoleId,
+            TenantId = model.TenantId,
             RoleName = model.RoleName,
             RoleDescription = model.RoleDescription,
             IsAdmin = model.IsAdmin,
@@ -58,6 +59,7 @@ public class UserRoleEntity : AuditEntity, IEntityMapper<UserRole, UserRoleEntit
         return new UserRole
         {
             RoleId = this.Id,
+            TenantId = this.TenantId,
             RoleName = this.RoleName,
             RoleDescription = this.RoleDescription,
             IsAdmin = this.IsAdmin,

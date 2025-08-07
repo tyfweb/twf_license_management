@@ -8,7 +8,7 @@ using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.
 namespace TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.Consumer;
 
 [Table("product_consumers")]
-public class ProductConsumerEntity : AuditEntity, IEntityMapper<ProductConsumer, ProductConsumerEntity>
+public class ProductConsumerEntity : BaseEntity, IEntityMapper<ProductConsumer, ProductConsumerEntity>
 {
 
     /// <summary>
@@ -36,6 +36,7 @@ public class ProductConsumerEntity : AuditEntity, IEntityMapper<ProductConsumer,
         return new ProductConsumerEntity
         {
             Id = model.ProductConsumerId,
+            TenantId = model.TenantId,
             ProductId = model.Product?.ProductId ?? Guid.Empty,
             ConsumerId = model.Consumer?.ConsumerId ?? Guid.Empty,
             AccountManagerName = model.AccountManager?.Name ?? string.Empty,
@@ -56,6 +57,7 @@ public class ProductConsumerEntity : AuditEntity, IEntityMapper<ProductConsumer,
         return new ProductConsumer
         {
             ProductConsumerId = this.Id,
+            TenantId = this.TenantId,
             Consumer = this.Consumer?.Map() ?? new ConsumerAccount(),
             Product = this.Product?.Map() ?? new Core.Models.Product.EnterpriseProduct(),
             AccountManager = new ContactPerson

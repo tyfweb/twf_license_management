@@ -6,6 +6,12 @@ namespace TechWayFit.Licensing.Management.Core.Models.Audit;
 public class AuditEntry
 {
     public Guid EntryId { get; set; } = Guid.NewGuid();
+    
+    /// <summary>
+    /// Tenant identifier for multi-tenant isolation
+    /// </summary>
+    public Guid TenantId { get; set; } = Guid.Empty;
+    
     public string EntityType { get; set; } = string.Empty;
     public string EntityId { get; set; } = string.Empty;
     public string ActionType { get; set; } = string.Empty;

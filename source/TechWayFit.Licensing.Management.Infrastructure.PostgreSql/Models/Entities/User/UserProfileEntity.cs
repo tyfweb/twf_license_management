@@ -7,7 +7,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entit
 /// <summary>
 /// Entity representing a user profile in the system
 /// </summary>
-public class UserProfileEntity : AuditEntity, IEntityMapper<UserProfile, UserProfileEntity>
+public class UserProfileEntity : BaseEntity, IEntityMapper<UserProfile, UserProfileEntity>
 {
 
     /// <summary>
@@ -71,13 +71,14 @@ public class UserProfileEntity : AuditEntity, IEntityMapper<UserProfile, UserPro
     public virtual ICollection<UserRoleMappingEntity> UserRoles { get; set; } = new List<UserRoleMappingEntity>();
 
     #region IEntityMapper Implementation
-       public UserProfileEntity Map(UserProfile model)
+    public UserProfileEntity Map(UserProfile model)
     {
         if (model == null) return null!;
 
-        return new UserProfileEntity
+        var entity = new UserProfileEntity
         {
             Id = model.UserId,
+            TenantId = model.TenantId,
             UserName = model.UserName,
             FullName = model.FullName,
             Email = model.Email,
@@ -86,27 +87,21 @@ public class UserProfileEntity : AuditEntity, IEntityMapper<UserProfile, UserPro
             IsAdmin = model.IsAdmin,
             LastLoginDate = model.LastLoginDate,
             FailedLoginAttempts = model.FailedLoginAttempts,
-            LockedDate = model.LockedDate,
-            IsActive = model.Audit.IsActive,
-            IsDeleted = model.Audit.IsDeleted,
-            CreatedBy = model.Audit.CreatedBy,
-            CreatedOn = model.Audit.CreatedOn,
-            UpdatedBy = model.Audit.UpdatedBy,
-            UpdatedOn = model.Audit.UpdatedOn,
-            DeletedBy = model.Audit.DeletedBy,
-            DeletedOn = model.Audit.DeletedOn,
-            RowVersion = model.Audit.RowVersion
+            LockedDate = model.LockedDate
         };
+        UpdateAuditInfo(model.Audit);
+        return entity;
     }
 
     /// <summary>
     /// Converts UserProfileEntity to UserProfile core model
     /// </summary>
-    public  UserProfile Map()
+    public UserProfile Map()
     {
 
         return new UserProfile
         {
+            TenantId = this.TenantId,
             UserId = this.Id,
             UserName = this.UserName,
             FullName = this.FullName,
@@ -117,18 +112,7 @@ public class UserProfileEntity : AuditEntity, IEntityMapper<UserProfile, UserPro
             LastLoginDate = this.LastLoginDate,
             FailedLoginAttempts = this.FailedLoginAttempts,
             LockedDate = this.LockedDate,
-            Audit = new AuditInfo
-            {
-                IsActive = this.IsActive,
-                IsDeleted = this.IsDeleted,
-                CreatedBy = this.CreatedBy,
-                CreatedOn = this.CreatedOn,
-                UpdatedBy = this.UpdatedBy,
-                UpdatedOn = this.UpdatedOn,
-                DeletedBy = this.DeletedBy,
-                DeletedOn = this.DeletedOn,
-                RowVersion = this.RowVersion
-            }
+            Audit = MapAuditInfo(),
         };
     }
     #endregion

@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Assembly Information -->
+    <AssemblyTitle>TechWayFit Licensing Management Infrastructure - SQL Server</AssemblyTitle>
+    <AssemblyDescription>SQL Server database provider implementation for TechWayFit licensing management system using Entity Framework Core</AssemblyDescription>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Entity Framework Core SQL Server Provider -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.7" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.7" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.7" />
+    
+    <!-- Additional SQL Server specific packages -->
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
+    
+    <!-- Logging and Configuration -->
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.7" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.7" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.7" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Project References -->
+    <ProjectReference Include="../TechWayFit.Licensing.Management.Infrastructure.EntityFramework/TechWayFit.Licensing.Management.Infrastructure.EntityFramework.csproj" />
+    <ProjectReference Include="../TechWayFit.Licensing.Management.Infrastructure/TechWayFit.Licensing.Management.Infrastructure.csproj" />
+    <ProjectReference Include="../TechWayFit.Licensing.Management.Core/TechWayFit.Licensing.Management.Core.csproj" />
+  </ItemGroup>
+
+</Project>

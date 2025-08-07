@@ -145,6 +145,7 @@ public class ProductLicenseEntity : AuditWorkflowEntity, IEntityMapper<ProductLi
         return new ProductLicenseEntity
         {
             Id = model.LicenseId,
+            TenantId = model.TenantId,
             LicenseCode = model.LicenseCode,
             ProductId = model.ProductId,
             ConsumerId = model.ConsumerId,
@@ -188,6 +189,7 @@ public class ProductLicenseEntity : AuditWorkflowEntity, IEntityMapper<ProductLi
         return new ProductLicense
         {
             LicenseId = this.Id,
+            TenantId = this.TenantId,
             LicenseCode = this.LicenseCode,
             ProductId = this.ProductId,
             ConsumerId = this.ConsumerId,

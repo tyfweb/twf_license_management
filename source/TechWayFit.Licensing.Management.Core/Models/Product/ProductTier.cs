@@ -13,6 +13,11 @@ public class ProductTier
     public Guid TierId { get; set; } = Guid.NewGuid();
 
     /// <summary>
+    /// Tenant identifier for multi-tenant isolation
+    /// </summary>
+    public Guid TenantId { get; set; } = Guid.Empty;
+
+    /// <summary>
     /// Audit information for the product tier
     /// </summary>
     public AuditInfo Audit { get; set; } = new();

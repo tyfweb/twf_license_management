@@ -1,10 +1,10 @@
 using Microsoft.Extensions.Logging;
 using TechWayFit.Licensing.Core.Models;
-using TechWayFit.Licensing.Management.Infrastructure.Contracts.Data;
-using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.Audit;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Data; 
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Core.Models.Audit;
 using TechWayFit.Licensing.Management.Core.Models.License;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Search;
 
 namespace TechWayFit.Licensing.Management.Services.Implementations.Audit;
 
@@ -41,23 +41,12 @@ public class AuditService : IAuditService
 
         try
         {
-            // Set audit entry ID if not provided
-            if (string.IsNullOrEmpty(entry.EntityId))
-                entry.EntityId = Guid.NewGuid().ToString();
-
-            // Set timestamp if not provided
-            if (entry.Timestamp == default)
-                entry.Timestamp = DateTime.UtcNow;
-
-            // Map to entity
-            var auditEntity = AuditEntryEntity.FromModel(entry);
-
             // Save to repository
-            var createdEntity = await _unitOfWork.AuditEntries.AddAsync(auditEntity);
+            var createdEntity = await _unitOfWork.AuditEntries.AddAsync(entry);
             await _unitOfWork.SaveChangesAsync();
 
-            _logger.LogInformation("Successfully logged audit entry with ID: {AuditId}", createdEntity.Id);
-            return createdEntity.Id.ToString();
+            _logger.LogInformation("Successfully logged audit entry with ID: {AuditId}", createdEntity.EntityId);
+            return createdEntity.EntryId.ToString();
         }
         catch (Exception ex)
         {
@@ -81,21 +70,23 @@ public class AuditService : IAuditService
 
         try
         {
+            SearchRequest<AuditEntry> searchRequest = new()
+            {
+                Page = pageNumber,
+                PageSize = pageSize,
+                Filters = new Dictionary<string, string>
+                {
+                    { "EntityType", "License" },
+                    { "EntityId", licenseId.ToString() }
+                },
+                FromDate = fromDate,
+                ToDate = toDate         
+            };
             // Use repository method if available
-            var entities = await _unitOfWork.AuditEntries.GetByEntityAsync("License", licenseId);
+            var entities = await _unitOfWork.AuditEntries.SearchAsync(searchRequest);
+ 
 
-            // Apply date filters
-            if (fromDate.HasValue)
-                entities = entities.Where(a => a.CreatedOn >= fromDate.Value);
-
-            if (toDate.HasValue)
-                entities = entities.Where(a => a.CreatedOn <= toDate.Value);
-
-            return entities
-                .OrderByDescending(a => a.CreatedOn)
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .Select(e => e.ToModel());
+            return entities.Results;
         }
         catch (Exception ex)
         {
@@ -119,21 +110,22 @@ public class AuditService : IAuditService
 
         try
         {
+           
+            SearchRequest<AuditEntry> searchRequest = new()
+            {
+                Page = pageNumber,
+                PageSize = pageSize,
+                Filters = new Dictionary<string, string>
+                {
+                    { "EntityType", "EntityType" },
+                    { "EntityId", consumerId.ToString() }
+                },
+                FromDate = fromDate,
+                ToDate = toDate         
+            };
             // Use repository method if available
-            var entities = await _unitOfWork.AuditEntries.GetByEntityAsync("Consumer", consumerId);
-
-            // Apply date filters
-            if (fromDate.HasValue)
-                entities = entities.Where(a => a.CreatedOn >= fromDate.Value);
-
-            if (toDate.HasValue)
-                entities = entities.Where(a => a.CreatedOn <= toDate.Value);
-
-            return entities
-                .OrderByDescending(a => a.CreatedOn)
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .Select(e => e.ToModel());
+            var entities = await _unitOfWork.AuditEntries.SearchAsync(searchRequest);
+           return entities.Results;
         }
         catch (Exception ex)
         {
@@ -177,23 +169,20 @@ public class AuditService : IAuditService
     {
         try
         {
-            var entities = await _unitOfWork.AuditEntries.GetRecentEntriesAsync(1000);
-
-            // Filter by action type
-            entities = entities.Where(e => e.ActionType.Equals(action, StringComparison.OrdinalIgnoreCase));
-
-            // Apply date filters
-            if (fromDate.HasValue)
-                entities = entities.Where(a => a.CreatedOn >= fromDate.Value);
-
-            if (toDate.HasValue)
-                entities = entities.Where(a => a.CreatedOn <= toDate.Value);
-
-            return entities
-                .OrderByDescending(a => a.CreatedOn)
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .Select(e => e.ToModel());
+            SearchRequest<AuditEntry> searchRequest = new()
+            {
+                Page = pageNumber,
+                PageSize = pageSize,
+                Filters = new Dictionary<string, string>
+                {
+                    { "ActionType", action }
+                },
+                FromDate = fromDate,
+                ToDate = toDate         
+            };
+            // Use repository method if available
+            var entities = await _unitOfWork.AuditEntries.SearchAsync(searchRequest);
+           return entities.Results;            
         }
         catch (Exception ex)
         {
@@ -273,24 +262,25 @@ public class AuditService : IAuditService
     {
         try
         {
-            var entities = await _unitOfWork.AuditEntries.GetRecentEntriesAsync(1000);
-
-            // Filter by security-related actions
-            var securityActions = new[] { "LOGIN", "LOGOUT", "ACCESS_DENIED", "PERMISSION_CHANGE", "DELETE", "ADMIN_ACCESS" };
-            var filtered = entities.Where(e => securityActions.Any(action => e.ActionType.ToUpperInvariant().Contains(action)));
-
-            // Apply date filters
-            if (fromDate.HasValue)
-                filtered = filtered.Where(a => a.CreatedOn >= fromDate.Value);
-
-            if (toDate.HasValue)
-                filtered = filtered.Where(a => a.CreatedOn <= toDate.Value);
-
-            return filtered
-                .OrderByDescending(a => a.CreatedOn)
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .Select(e => e.ToModel());
+            SearchRequest<AuditEntry> searchRequest = new()
+            {
+                Page = pageNumber,
+                PageSize = pageSize,
+                Filters = new Dictionary<string, string>
+                {
+                    { "ActionType", "LOGIN" },
+                    { "ActionType", "LOGOUT" },
+                    { "ActionType", "ACCESS_DENIED" },
+                    { "ActionType", "PERMISSION_CHANGE" },
+                    { "ActionType", "DELETE" },
+                    { "ActionType", "ADMIN_ACCESS" }
+                },
+                FromDate = fromDate,
+                ToDate = toDate         
+            };
+            // Use repository method if available
+            var entities = await _unitOfWork.AuditEntries.SearchAsync(searchRequest);
+            return entities.Results;
         }
         catch (Exception ex)
         {
@@ -340,34 +330,27 @@ public class AuditService : IAuditService
     {
         try
         {
-            var entities = await _unitOfWork.AuditEntries.GetRecentEntriesAsync(1000);
-
-            // Apply filters
+            SearchRequest<AuditEntry> searchRequest = new()
+            {
+                Page = pageNumber,
+                PageSize = pageSize,
+                Filters = new Dictionary<string, string>(),
+                FromDate = fromDate,
+                ToDate = toDate         
+            };
             if (!string.IsNullOrEmpty(entityType))
-                entities = entities.Where(e => e.EntityType.Equals(entityType, StringComparison.OrdinalIgnoreCase));
-            Guid entityGuid;
-            if (!string.IsNullOrEmpty(entityId) && Guid.TryParse(entityId, out entityGuid))
-                entities = entities.Where(e => e.Id == entityGuid);
-            
+                searchRequest.Filters["EntityType"] = entityType;
+            if (!string.IsNullOrEmpty(entityId))
+                searchRequest.Filters["EntityId"] = entityId;
             if (!string.IsNullOrEmpty(actionType))
-                entities = entities.Where(e => e.ActionType.Equals(actionType, StringComparison.OrdinalIgnoreCase));
-
+                searchRequest.Filters["ActionType"] = actionType;
             if (!string.IsNullOrEmpty(userName))
-                entities = entities.Where(e => e.CreatedBy.Equals(userName, StringComparison.OrdinalIgnoreCase));
-
-            // Apply date filters
-            if (fromDate.HasValue)
-                entities = entities.Where(a => a.CreatedOn >= fromDate.Value);
-
-            if (toDate.HasValue)
-                entities = entities.Where(a => a.CreatedOn <= toDate.Value);
-
-            return entities
-                .OrderByDescending(a => a.CreatedOn)
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .Select(e => e.ToModel());
-        }        catch (Exception ex)
+                searchRequest.Filters["UserName"] = userName;
+            // Use repository method if available
+            var entities = await _unitOfWork.AuditEntries.SearchAsync(searchRequest);
+            return entities.Results;
+        }
+        catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting audit entries");
             return Enumerable.Empty<AuditEntry>();
@@ -384,29 +367,24 @@ public class AuditService : IAuditService
     {
         try
         {
-            var entities = await _unitOfWork.AuditEntries.GetRecentEntriesAsync(1000);
-
-            // Apply filters
+           SearchRequest<AuditEntry> searchRequest = new()
+            {
+                Filters = new Dictionary<string, string>(),
+                FromDate = fromDate,
+                ToDate = toDate         
+            };
             if (!string.IsNullOrEmpty(entityType))
-                entities = entities.Where(e => e.EntityType.Equals(entityType, StringComparison.OrdinalIgnoreCase));
-
-            if (!string.IsNullOrEmpty(entityId) && Guid.TryParse(entityId, out var entityGuid))
-                entities = entities.Where(e => e.Id == entityGuid);
-
+                searchRequest.Filters["EntityType"] = entityType;
+            if (!string.IsNullOrEmpty(entityId))
+                searchRequest.Filters["EntityId"] = entityId;
             if (!string.IsNullOrEmpty(actionType))
-                entities = entities.Where(e => e.ActionType.Equals(actionType, StringComparison.OrdinalIgnoreCase));
-
+                searchRequest.Filters["ActionType"] = actionType;
             if (!string.IsNullOrEmpty(userName))
-                entities = entities.Where(e => e.CreatedBy.Equals(userName, StringComparison.OrdinalIgnoreCase));
-
-            // Apply date filters
-            if (fromDate.HasValue)
-                entities = entities.Where(a => a.CreatedOn >= fromDate.Value);
-
-            if (toDate.HasValue)
-                entities = entities.Where(a => a.CreatedOn <= toDate.Value);
-
-            return entities.Count();
+                searchRequest.Filters["UserName"] = userName;
+            // Use repository method if available
+            var entities = await _unitOfWork.AuditEntries.SearchAsync(searchRequest);
+            //TODO: Implement CountAsync method in repository
+            return entities.TotalCount;
         }
         catch (Exception ex)
         {
@@ -458,26 +436,24 @@ public class AuditService : IAuditService
     {
         try
         {
-            var entities = await _unitOfWork.AuditEntries.GetRecentEntriesAsync(1000);
-
-            // Apply date filters
-            if (fromDate.HasValue)
-                entities = entities.Where(a => a.CreatedOn >= fromDate.Value);
-
-            if (toDate.HasValue)
-                entities = entities.Where(a => a.CreatedOn <= toDate.Value);
-
-            var entitiesList = entities.ToList();
-
+            SearchRequest<AuditEntry> searchRequest = new()
+            {
+                Filters = new Dictionary<string, string>(),
+                FromDate = fromDate,
+                ToDate = toDate         
+            }; 
+            // Use repository method if available
+            var entities = await _unitOfWork.AuditEntries.SearchAsync(searchRequest);
+             
             return new AuditStatistics
             {
-                TotalEntries = entitiesList.Count,
-                EntriesByAction = entitiesList.GroupBy(e => e.ActionType).ToDictionary(g => g.Key, g => g.Count()),
-                EntriesByEntity = entitiesList.GroupBy(e => e.EntityType).ToDictionary(g => g.Key, g => g.Count()),
-                EntriesByUser = entitiesList.GroupBy(e => e.CreatedBy).ToDictionary(g => g.Key, g => g.Count()),
-                EntriesByDate = entitiesList.GroupBy(e => e.CreatedOn.Date).ToDictionary(g => g.Key, g => g.Count()),
-                UniqueUsers = entitiesList.Select(e => e.CreatedBy).Distinct().Count(),
-                UniqueEntities = entitiesList.Select(e => $"{e.EntityType}:{e.EntityId}").Distinct().Count()
+                TotalEntries = entities.TotalCount,
+                EntriesByAction = entities.Results.GroupBy(e => e.ActionType).ToDictionary(g => g.Key, g => g.Count()),
+                EntriesByEntity = entities.Results.GroupBy(e => e.EntityType).ToDictionary(g => g.Key, g => g.Count()),
+                EntriesByUser = entities.Results.GroupBy(e => e.UserName).ToDictionary(g => g.Key, g => g.Count()),
+                EntriesByDate = entities.Results.GroupBy(e => e.Timestamp).ToDictionary(g => g.Key, g => g.Count()),
+                UniqueUsers = entities.Results.Select(e => e.UserName).Distinct().Count(),
+                UniqueEntities = entities.Results.Select(e => $"{e.EntityType}:{e.EntityId}").Distinct().Count()
             };
         }
         catch (Exception ex)

@@ -3,7 +3,7 @@ using TechWayFit.Licensing.Management.Infrastructure.Contracts.Data;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Core.Models.License;
 using TechWayFit.Licensing.Management.Core.Models.Notification;
-using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.Notification;
+using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Models.Entities.Notification;
 using TechWayFit.Licensing.Management.Core.Helpers;
 
 namespace TechWayFit.Licensing.Management.Services.Implementations;

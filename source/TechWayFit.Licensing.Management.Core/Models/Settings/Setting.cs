@@ -16,6 +16,11 @@ namespace TechWayFit.Licensing.Management.Core.Models.Settings
         public Guid SettingId { get; set; } = Guid.NewGuid();
 
         /// <summary>
+        /// Tenant identifier for multi-tenant isolation
+        /// </summary>
+        public Guid TenantId { get; set; } = Guid.Empty;
+
+        /// <summary>
         /// Audit information - composition over inheritance
         /// </summary>
         public AuditInfo Audit { get; set; } = new AuditInfo();

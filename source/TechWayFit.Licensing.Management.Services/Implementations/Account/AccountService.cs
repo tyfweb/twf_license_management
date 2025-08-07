@@ -26,7 +26,7 @@ public class AccountService : IAuthenticationService
             _logger.LogWarning("User not found: {Username}", username);
             return null;
         }
-        return user.ToModel();
+        return user;
     }
 
     public async Task SignInAsync(UserProfile user, bool rememberMe)

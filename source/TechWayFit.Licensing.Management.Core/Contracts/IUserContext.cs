@@ -10,6 +10,8 @@ public interface IUserContext
     /// </summary>
     string? UserId { get; }
 
+    string? TenantId { get; }
+
     /// <summary>
     /// Gets the current user's email
     /// </summary>

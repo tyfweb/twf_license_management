@@ -1,8 +1,7 @@
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using TechWayFit.Licensing.Management.Infrastructure.Contracts.Data;
-using TechWayFit.Licensing.Management.Infrastructure.Data.Entities.Consumer;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Data; 
 using TechWayFit.Licensing.Management.Infrastructure.Models.Search;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Core.Models.Common;
@@ -49,19 +48,11 @@ public class ConsumerAccountService : IConsumerAccountService
 
         try
         {
-            // Map to entity
-            var entity = ConsumerAccountEntity.FromModel(consumerAccount);
-            entity.CreatedBy = createdBy;
-            entity.CreatedOn = DateTime.UtcNow;
-            entity.UpdatedBy = createdBy;
-            entity.UpdatedOn = DateTime.UtcNow;
-
             // Save to repository using Unit of Work
-            var createdEntity = await _unitOfWork.Consumers.AddAsync(entity);
-            await _unitOfWork.SaveChangesAsync();
+            var createdEntity = await _unitOfWork.Consumers.AddAsync(consumerAccount); 
             
             // Map back to model
-            var result = createdEntity.ToModel();
+            var result = createdEntity;
             
             _logger.LogInformation("Successfully created consumer account with ID: {ConsumerId}", result.ConsumerId);
             return result;
@@ -105,38 +96,28 @@ public class ConsumerAccountService : IConsumerAccountService
 
         try
         {
-            // Map updates to existing entity
-            var updatedData = ConsumerAccountEntity.FromModel(consumerAccount);
-            
-            // Update properties manually to preserve audit fields
-            existingEntity.CompanyName = updatedData.CompanyName;
-            existingEntity.PrimaryContactName = updatedData.PrimaryContactName;
-            existingEntity.PrimaryContactEmail = updatedData.PrimaryContactEmail;
-            existingEntity.PrimaryContactPhone = updatedData.PrimaryContactPhone;
-            existingEntity.SecondaryContactName = updatedData.SecondaryContactName;
-            existingEntity.SecondaryContactEmail = updatedData.SecondaryContactEmail;
-            existingEntity.SecondaryContactPhone = updatedData.SecondaryContactPhone;
-            existingEntity.AddressStreet = updatedData.AddressStreet;
-            existingEntity.AddressCity = updatedData.AddressCity;
-            existingEntity.AddressState = updatedData.AddressState;
-            existingEntity.AddressPostalCode = updatedData.AddressPostalCode;
-            existingEntity.AddressCountry = updatedData.AddressCountry;
-            existingEntity.Notes = updatedData.Notes;
-            existingEntity.Status = updatedData.Status;
-            existingEntity.IsActive = updatedData.IsActive;
-            
-            existingEntity.UpdatedBy = updatedBy;
-            existingEntity.UpdatedOn = DateTime.UtcNow;
+            existingEntity.CompanyName = consumerAccount.CompanyName;
+            existingEntity.PrimaryContact.Name = consumerAccount.PrimaryContact.Name;
+            existingEntity.PrimaryContact.Email = consumerAccount.PrimaryContact.Email;
+            existingEntity.PrimaryContact.Phone = consumerAccount.PrimaryContact.Phone;
+            existingEntity.SecondaryContact.Name = consumerAccount.SecondaryContact.Name;
+            existingEntity.SecondaryContact.Email = consumerAccount.SecondaryContact.Email;
+            existingEntity.SecondaryContact.Phone = consumerAccount.SecondaryContact.Phone;
+            existingEntity.Address.Street = consumerAccount.Address.Street;
+            existingEntity.Address.City = consumerAccount.Address.City;
+            existingEntity.Address.State = consumerAccount.Address.State;
+            existingEntity.Address.PostalCode = consumerAccount.Address.PostalCode;
+            existingEntity.Address.Country = consumerAccount.Address.Country;
+            existingEntity.Notes = consumerAccount.Notes;
+            existingEntity.Status = consumerAccount.Status;
+            existingEntity.Audit.IsActive = consumerAccount.Audit.IsActive; 
 
             // Update in repository using Unit of Work
-            var updatedEntity = await _unitOfWork.Consumers.UpdateAsync(existingEntity);
-            await _unitOfWork.SaveChangesAsync();
+            var updatedEntity = await _unitOfWork.Consumers.UpdateAsync(existingEntity.Id, existingEntity);
             
-            // Map back to model
-            var result = updatedEntity.ToModel();
             
-            _logger.LogInformation("Successfully updated consumer account: {ConsumerId}", result.ConsumerId);
-            return result;
+            _logger.LogInformation("Successfully updated consumer account: {ConsumerId}", updatedEntity.ConsumerId);
+            return updatedEntity;
         }
         catch (Exception ex)
         {
@@ -156,7 +137,7 @@ public class ConsumerAccountService : IConsumerAccountService
         try
         {
             var entity = await _unitOfWork.Consumers.GetByIdAsync(consumerId);
-            return entity?.ToModel();
+            return entity;
         }
         catch (Exception ex)
         {
@@ -179,19 +160,19 @@ public class ConsumerAccountService : IConsumerAccountService
             _logger.LogWarning("GetConsumerAccountByEmailAsync not fully implemented - repository method GetByEmailAsync missing");
             
             // For now, use search functionality to filter by email
-            var searchRequest = new SearchRequest<ConsumerAccountEntity>
+            var searchRequest = new SearchRequest<ConsumerAccount>
             {
-                Filters = new List<Expression<Func<ConsumerAccountEntity, bool>>>
+                Filters = new Dictionary<string, object>
                 {
-                    c => c.PrimaryContactEmail.Equals(email, StringComparison.OrdinalIgnoreCase) ||
-                         (c.SecondaryContactEmail != null && c.SecondaryContactEmail.Equals(email, StringComparison.OrdinalIgnoreCase))
+                    { "PrimaryContactEmail", email },
+                    { "SecondaryContactEmail", email }
                 }
             };
             
-            var searchResult = await _unitOfWork.Consumers.SearchAsync(searchRequest);
-            var entity = searchResult.Results.FirstOrDefault();
-            
-            return entity?.ToModel();
+            var searchResult = await _unitOfWork.Consumers.FindOneAsync(searchRequest);
+            var entity = searchResult;
+
+            return entity;
         }
         catch (Exception ex)
         {
@@ -215,27 +196,29 @@ public class ConsumerAccountService : IConsumerAccountService
             // TODO: Implement advanced filtering in repository
             _logger.LogWarning("GetConsumerAccountsAsync using basic search - advanced repository methods missing");
             
-            var searchRequest = new SearchRequest<ConsumerAccountEntity>
+            var searchRequest = new SearchRequest<ConsumerAccount>
             {
-                Filters = new List<Expression<Func<ConsumerAccountEntity, bool>>>()
+                Filters = new Dictionary<string, object>()
             };
-            
+            // Apply status filter
+            if (status.HasValue)
+                searchRequest.Filters.Add("Status", status.Value);
+
             // Apply basic filtering through search
             if (isActive.HasValue)
-                searchRequest.Filters.Add(e => e.IsActive == isActive.Value);
-            
+                searchRequest.Filters.Add("IsActive", isActive.Value);
+
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
-               
-                searchRequest.Filters.Add(e => 
-                    EF.Functions.Like(e.CompanyName, $"%{searchTerm}%"));
+                searchRequest.Filters.Add("CompanyName", $"%{searchTerm}%");
             }
+            
 
             searchRequest.Page = pageNumber;
             searchRequest.PageSize = pageSize;
             
             var searchResult = await _unitOfWork.Consumers.SearchAsync(searchRequest);
-            return searchResult.Results.Select(e => e.ToModel());
+            return searchResult.Results;
         }
         catch (Exception ex)
         {
