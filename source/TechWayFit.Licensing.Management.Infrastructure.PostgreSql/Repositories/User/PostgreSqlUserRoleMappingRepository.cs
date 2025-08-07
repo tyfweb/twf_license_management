@@ -3,53 +3,59 @@ using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.User
 using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Configuration;
 using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Repositories;
 
-using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.User;
+using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.User;
+using TechWayFit.Licensing.Management.Core.Models.User;
+using TechWayFit.Licensing.Management.Core.Contracts;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Repositories.User;
 
 /// <summary>
 /// User role mapping repository implementation
 /// </summary>
-public class PostgreSqlUserRoleMappingRepository : PostgreSqlBaseRepository<UserRoleMappingEntity>, IUserRoleMappingRepository
+public class PostgreSqlUserRoleMappingRepository : BaseRepository<UserRoleMapping,UserRoleMappingEntity>, IUserRoleMappingRepository
 {
-    public PostgreSqlUserRoleMappingRepository(PostgreSqlPostgreSqlLicensingDbContext context) : base(context)
+    public PostgreSqlUserRoleMappingRepository(PostgreSqlPostgreSqlLicensingDbContext context,IUserContext userContext) : base(context,userContext)
     {
     }
 
-    public async Task<IEnumerable<UserRoleMappingEntity>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<UserRoleMapping>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        return await _dbSet
+        var result = await _dbSet
             .Include(urm => urm.Role)
             .Include(urm => urm.User)
             .Where(urm => urm.UserId == userId && urm.IsActive)
             .ToListAsync(cancellationToken);
+        return result.Select(urm => urm.Map());
     }
 
-    public async Task<IEnumerable<UserRoleMappingEntity>> GetByRoleIdAsync(Guid roleId, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<UserRoleMapping>> GetByRoleIdAsync(Guid roleId, CancellationToken cancellationToken = default)
     {
-        return await _dbSet
+        var result = await _dbSet
             .Include(urm => urm.Role)
             .Include(urm => urm.User)
             .Where(urm => urm.RoleId == roleId && urm.IsActive)
             .ToListAsync(cancellationToken);
+        return result.Select(urm => urm.Map());
     }
 
-    public async Task<UserRoleMappingEntity?> GetByUserAndRoleAsync(Guid userId, Guid roleId, CancellationToken cancellationToken = default)
+    public async Task<UserRoleMapping?> GetByUserAndRoleAsync(Guid userId, Guid roleId, CancellationToken cancellationToken = default)
     {
-        return await _dbSet
+        var result = await _dbSet
             .Include(urm => urm.Role)
             .Include(urm => urm.User)
             .FirstOrDefaultAsync(urm => urm.UserId == userId && urm.RoleId == roleId && urm.IsActive, cancellationToken);
+        return result?.Map();
     }
 
     public async Task<bool> UserHasRoleAsync(Guid userId, string roleName, CancellationToken cancellationToken = default)
     {
-        return await _dbSet
+        var result = await _dbSet
             .Include(urm => urm.Role)
-            .AnyAsync(urm => urm.UserId == userId && 
-                           urm.Role.RoleName == roleName && 
-                           urm.IsActive && 
+            .AnyAsync(urm => urm.UserId == userId &&
+                           urm.Role.RoleName == roleName &&
+                           urm.IsActive &&
                            urm.Role.IsActive, cancellationToken);
+        return result;
     }
 
     public async Task RemoveAllUserRolesAsync(Guid userId, CancellationToken cancellationToken = default)
@@ -80,7 +86,7 @@ public class PostgreSqlUserRoleMappingRepository : PostgreSqlBaseRepository<User
         }
     }
 
-    public async Task<UserRoleMappingEntity> AssignRoleToUserAsync(Guid userId, Guid roleId, string assignedBy, CancellationToken cancellationToken = default)
+    public async Task<UserRoleMapping> AssignRoleToUserAsync(Guid userId, Guid roleId, string assignedBy, CancellationToken cancellationToken = default)
     {
         // Check if mapping already exists
         var existingMapping = await _dbSet
@@ -96,7 +102,7 @@ public class PostgreSqlUserRoleMappingRepository : PostgreSqlBaseRepository<User
                 existingMapping.UpdatedBy = assignedBy;
                 await _context.SaveChangesAsync(cancellationToken);
             }
-            return existingMapping;
+            return existingMapping.Map();
         }
 
         // Create new mapping
@@ -111,7 +117,7 @@ public class PostgreSqlUserRoleMappingRepository : PostgreSqlBaseRepository<User
 
         _dbSet.Add(newMapping);
         await _context.SaveChangesAsync(cancellationToken);
-        return newMapping;
+        return newMapping.Map();
     }
 
     protected override IQueryable<UserRoleMappingEntity> SearchQuery(IQueryable<UserRoleMappingEntity> query, string searchQuery)

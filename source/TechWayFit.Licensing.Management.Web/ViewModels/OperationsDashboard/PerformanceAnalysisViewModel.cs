@@ -1,4 +1,4 @@
-using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.OperationsDashboard;
+using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.OperationsDashboard;
 using TechWayFit.Licensing.Management.Infrastructure.Models.OperationsDashboard;
 
 namespace TechWayFit.Licensing.Management.Web.ViewModels.OperationsDashboard;

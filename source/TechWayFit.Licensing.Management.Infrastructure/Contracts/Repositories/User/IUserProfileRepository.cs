@@ -1,37 +1,37 @@
+using TechWayFit.Licensing.Management.Core.Models.User;
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Common;
-using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.User;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.User;
 
 /// <summary>
 /// Repository interface for UserProfile entities
 /// </summary>
-public interface IUserProfileRepository : IBaseRepository<UserProfileEntity>
+public interface IUserProfileRepository : IDataRepository<UserProfile>
 {
     /// <summary>
     /// Gets a user by username
     /// </summary>
-    Task<UserProfileEntity?> GetByUsernameAsync(string username, CancellationToken cancellationToken = default);
+    Task<UserProfile?> GetByUsernameAsync(string username, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets a user by email
     /// </summary>
-    Task<UserProfileEntity?> GetByEmailAsync(string email, CancellationToken cancellationToken = default);
+    Task<UserProfile?> GetByEmailAsync(string email, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets users with their roles
     /// </summary>
-    Task<IEnumerable<UserProfileEntity>> GetUsersWithRolesAsync(CancellationToken cancellationToken = default);
+    Task<IEnumerable<UserProfile>> GetUsersWithRolesAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets users by role
     /// </summary>
-    Task<IEnumerable<UserProfileEntity>> GetUsersByRoleAsync(string roleName, CancellationToken cancellationToken = default);
+    Task<IEnumerable<UserProfile>> GetUsersByRoleAsync(string roleName, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Searches users with pagination and filters
     /// </summary>
-    Task<(IEnumerable<UserProfileEntity> Users, int TotalCount)> SearchUsersAsync(
+    Task<(IEnumerable<UserProfile> Users, int TotalCount)> SearchUsersAsync(
         string? searchTerm = null,
         string? departmentFilter = null,
         string? roleFilter = null,
@@ -87,7 +87,7 @@ public interface IUserProfileRepository : IBaseRepository<UserProfileEntity>
     /// </summary>
     /// <param name="userId"></param>
     /// <returns></returns>
-    Task<UserProfileEntity?> GetByIdAsync(Guid userId);
+    Task<UserProfile?> GetByIdAsync(Guid userId);
     /// <summary>
     /// Gets all available departments from user profiles
     /// </summary>

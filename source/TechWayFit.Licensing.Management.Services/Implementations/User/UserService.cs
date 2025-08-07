@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using TechWayFit.Licensing.Management.Infrastructure.Data.Context;
-using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.User;
+using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.User;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Core.Models.User;
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Data;

@@ -1,12 +1,12 @@
+using TechWayFit.Licensing.Management.Core.Models.Notification;
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Common;
-using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Notification;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Notification;
 
 /// <summary>
 /// Repository interface for NotificationHistory entities
 /// </summary>
-public interface INotificationHistoryRepository : IBaseRepository<NotificationHistoryEntity>
+public interface INotificationHistoryRepository : IDataRepository<NotificationHistory>
 {   
     /// <summary>
     /// Get notification statistics

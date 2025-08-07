@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 using TechWayFit.Licensing.Core.Models;
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Data;
-using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Audit;
+using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.Audit;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Core.Models.Audit;
 using TechWayFit.Licensing.Management.Core.Models.License;

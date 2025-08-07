@@ -2,15 +2,17 @@ using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Cons
 using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Configuration;
 using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Repositories;
 using TechWayFit.Licensing.Management.Infrastructure.Data.Entities.Consumer;
+using TechWayFit.Licensing.Management.Core.Models.Consumer;
+using TechWayFit.Licensing.Management.Core.Contracts;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Repositories.Consumer;
 
 /// <summary>
 /// PostgreSQL implementation of Consumer Account repository
 /// </summary>
-public class PostgreSqlConsumerAccountRepository : PostgreSqlBaseRepository<ConsumerAccountEntity>, IConsumerAccountRepository
+public class PostgreSqlConsumerAccountRepository : BaseRepository<ConsumerAccount,ConsumerAccountEntity>, IConsumerAccountRepository
 {
-    public PostgreSqlConsumerAccountRepository(PostgreSqlPostgreSqlLicensingDbContext context) : base(context)
+    public PostgreSqlConsumerAccountRepository(PostgreSqlPostgreSqlLicensingDbContext context,IUserContext userContext) : base(context,userContext)
     {
     }
     protected override IQueryable<ConsumerAccountEntity> SearchQuery(IQueryable<ConsumerAccountEntity> query, string searchQuery)

@@ -1,6 +1,6 @@
 using TechWayFit.Licensing.Management.Core.Models.User;
 using TechWayFit.Licensing.Management.Core.Models.Common;
-using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.User;
+using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.User;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.Extensions.Mapping;
 

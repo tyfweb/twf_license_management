@@ -1,7 +1,7 @@
 using System.Text.Json;
 using TechWayFit.Licensing.Management.Core.Models.Product;
 using TechWayFit.Licensing.Management.Core.Models.Common;
-using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Products;
+using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.Products;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.Extensions.Mapping;
 

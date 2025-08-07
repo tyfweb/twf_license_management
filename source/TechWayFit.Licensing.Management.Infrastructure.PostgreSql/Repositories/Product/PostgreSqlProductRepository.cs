@@ -1,30 +1,33 @@
 using Microsoft.EntityFrameworkCore;
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Product;
 using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Configuration;
-using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Products;
+using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.Products;
 using TechWayFit.Licensing.Management.Core.Models.Product;
+using TechWayFit.Licensing.Management.Core.Contracts;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Repositories.Product;
 
 /// <summary>
 /// PostgreSQL implementation of Product repository
 /// </summary>
-public class PostgreSqlProductRepository : PostgreSqlBaseRepository<ProductEntity>, IProductRepository
+public class PostgreSqlProductRepository : BaseRepository<EnterpriseProduct,ProductEntity>, IProductRepository
 {
-    public PostgreSqlProductRepository(PostgreSqlPostgreSqlLicensingDbContext context) : base(context)
+    public PostgreSqlProductRepository(PostgreSqlPostgreSqlLicensingDbContext context,IUserContext userContext) : base(context,userContext)
     {
     }
-    public async Task<ProductEntity?> GetWithDetailsAsync(Guid productId)
+    public async Task<EnterpriseProduct?> GetWithDetailsAsync(Guid productId)
     {
-        return await _dbSet.Include(p => p.Versions)
+        var result = await _dbSet.Include(p => p.Versions)
                          .Include(p => p.Tiers)
                          .FirstOrDefaultAsync(p => p.Id == productId);
+        return result?.Map();
     }
-    public async Task<IEnumerable<ProductEntity>> GetActiveProductsAsync()
+    public async Task<IEnumerable<EnterpriseProduct>> GetActiveProductsAsync()
     {
-        return await _dbSet.Where(p => p.Status == ProductStatus.Active.ToString())
+        var result = await _dbSet.Where(p => p.Status == ProductStatus.Active.ToString())
                          .OrderBy(p => p.Name)
                          .ToListAsync();
+        return result.Select(p => p.Map());
     }
     public async Task<bool> IsNameUniqueAsync(string name, Guid? excludeId = null)
     {

@@ -2,29 +2,33 @@ using Microsoft.EntityFrameworkCore;
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Product;
 using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Configuration;
 using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Repositories;
-using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Products;
+using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.Products;
+using TechWayFit.Licensing.Management.Core.Models.Product;
+using TechWayFit.Licensing.Management.Core.Contracts;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Repositories.Product;
 
 /// <summary>
 /// Product tier repository implementation
 /// </summary>
-public class PostgreSqlProductTierRepository : PostgreSqlBaseRepository<ProductTierEntity>, IProductTierRepository
+public class PostgreSqlProductTierRepository :  BaseRepository<ProductTier,ProductTierEntity>, IProductTierRepository
 {
-    public PostgreSqlProductTierRepository(PostgreSqlPostgreSqlLicensingDbContext context) : base(context)
+    public PostgreSqlProductTierRepository(PostgreSqlPostgreSqlLicensingDbContext context,IUserContext userContext) : base(context,userContext)
     {
     }
 
-    public async Task<IEnumerable<ProductTierEntity>> GetByProductIdAsync(Guid productId)
+    public async Task<IEnumerable<ProductTier>> GetByProductIdAsync(Guid productId)
     {
-        return await _dbSet.Where(t => t.ProductId == productId && t.IsActive)
+        var result = await _dbSet.Where(t => t.ProductId == productId && t.IsActive)
                      .OrderBy(t => t.DisplayOrder)
                      .ToListAsync();
+        return result.Select(t => t.Map());
     }
 
-    public Task<ProductTierEntity?> GetWithFeaturesAsync(Guid tierId)
+    public Task<ProductTier?> GetWithFeaturesAsync(Guid tierId)
     {
-        return _dbSet.Include(t => t.Features)
+        var result = _dbSet.Include(t => t.Features)
                      .FirstOrDefaultAsync(t => t.Id == tierId && t.IsActive);
+        return result.ContinueWith(t => t.Result?.Map());
     }
 }

@@ -1,6 +1,6 @@
 using System.Text.Json;
 using TechWayFit.Licensing.Management.Core.Models.Audit;
-using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Audit;
+using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.Audit;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.Extensions.Mapping;
 

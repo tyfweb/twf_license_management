@@ -28,6 +28,7 @@ using Serilog.Events;
 // using TechWayFit.Licensing.Management.Services.Implementations.OperationsDashboard;
 using TechWayFit.Licensing.Management.Web.Extensions;
 using TechWayFit.Licensing.Management.Web.Middleware;
+using TechWayFit.Licensing.Management.Core.Contracts;
 // OPERATIONS DASHBOARD MIDDLEWARE - DISABLED FOR CORE FOCUS
 // using TechWayFit.Licensing.Management.Web.Middleware;
 
@@ -89,7 +90,10 @@ try
     // This will register the PostgreSQL DbContext and configure it with the connection string
     // and other options from the configuration
     builder.Services.AddPostgreSqlInfrastructure(builder.Configuration);
+    builder.Services.AddHttpContextAccessor();
 
+    // Register User Context
+    builder.Services.AddScoped<IUserContext, TwfUserContext>();
     RegisterServices(builder);    
     builder.Services.AddScoped<AuthenticationManager>();
     

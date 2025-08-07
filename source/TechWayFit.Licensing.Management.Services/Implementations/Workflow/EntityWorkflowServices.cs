@@ -5,9 +5,9 @@ using Microsoft.Extensions.Logging;
 using TechWayFit.Licensing.Management.Core.Models.Product;
 using TechWayFit.Licensing.Management.Core.Models.Consumer;
 using TechWayFit.Licensing.Management.Infrastructure.Data.Entities.Consumer;
-using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Products;
+using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.Products;
 using TechWayFit.Licensing.Management.Core.Models.License;
-using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.License;
+using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.License;
 using System.Text.Json;
 
 namespace TechWayFit.Licensing.Management.Services.Implementations.Workflow;

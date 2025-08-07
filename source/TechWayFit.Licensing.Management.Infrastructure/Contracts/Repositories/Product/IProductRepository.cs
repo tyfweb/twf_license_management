@@ -1,25 +1,25 @@
-using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Common;
-using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Products;
+using TechWayFit.Licensing.Management.Core.Models.Product;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Common; 
 
 namespace TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Product;
 
 /// <summary>
 /// Repository interface for Product entities
 /// </summary>
-public interface IProductRepository : IBaseRepository<ProductEntity>
+public interface IProductRepository : IDataRepository<EnterpriseProduct>
 {
     /// <summary>
     /// Get product by its unique identifier
     /// </summary>
     /// <param name="productId"></param>
     /// <returns></returns>
-    Task<ProductEntity?> GetWithDetailsAsync(Guid productId);
+    Task<EnterpriseProduct?> GetWithDetailsAsync(Guid productId);
 
     /// <summary>
     /// Get all active products
     /// </summary>
     /// <returns></returns>
-    Task<IEnumerable<ProductEntity>> GetActiveProductsAsync();
+    Task<IEnumerable<EnterpriseProduct>> GetActiveProductsAsync();
 
     /// <summary>
     /// Check if a product name is unique

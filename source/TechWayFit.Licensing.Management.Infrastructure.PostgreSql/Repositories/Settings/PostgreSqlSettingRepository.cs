@@ -4,44 +4,48 @@ using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Sett
 using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Configuration;
 using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Repositories;
 
-using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Settings;
+using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.Settings;
+using TechWayFit.Licensing.Management.Core.Models.Settings;
+using TechWayFit.Licensing.Management.Core.Contracts;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Repositories.Settings;
 
 /// <summary>
 /// Repository implementation for managing system settings
 /// </summary>
-public class PostgreSqlSettingRepository : PostgreSqlBaseRepository<SettingEntity>, ISettingRepository
+public class PostgreSqlSettingRepository : BaseRepository<Setting,SettingEntity>, ISettingRepository
 {
-    public PostgreSqlSettingRepository(PostgreSqlPostgreSqlLicensingDbContext context) : base(context)
+    public PostgreSqlSettingRepository(PostgreSqlPostgreSqlLicensingDbContext context,IUserContext userContext) : base(context,userContext)
     {
     }
 
     /// <summary>
     /// Get a setting by category and key
     /// </summary>
-    public async Task<SettingEntity?> GetByKeyAsync(string category, string key)
+    public async Task<Setting?> GetByKeyAsync(string category, string key)
     {
-        return await _dbSet
-            .FirstOrDefaultAsync(s => s.Category == category && s.Key == key && s.IsActive);
+        var result = await _dbSet
+                .FirstOrDefaultAsync(s => s.Category == category && s.Key == key && s.IsActive);
+        return result?.Map();
     }
 
     /// <summary>
     /// Get all settings in a specific category
     /// </summary>
-    public async Task<IEnumerable<SettingEntity>> GetByCategoryAsync(string category)
+    public async Task<IEnumerable<Setting>> GetByCategoryAsync(string category)
     {
-        return await _dbSet
+        var result = await _dbSet
             .Where(s => s.Category == category && s.IsActive)
             .OrderBy(s => s.DisplayOrder)
             .ThenBy(s => s.DisplayName)
             .ToListAsync();
+        return result.Select(s => s.Map());
     }
 
     /// <summary>
     /// Get all settings grouped by category
     /// </summary>
-    public async Task<Dictionary<string, IEnumerable<SettingEntity>>> GetAllGroupedByCategoryAsync()
+    public async Task<Dictionary<string, IEnumerable<Setting>>> GetAllGroupedByCategoryAsync()
     {
         var settings = await _dbSet
             .Where(s => s.IsActive)
@@ -50,8 +54,9 @@ public class PostgreSqlSettingRepository : PostgreSqlBaseRepository<SettingEntit
             .ThenBy(s => s.DisplayName)
             .ToListAsync();
 
-        return settings.GroupBy(s => s.Category)
+        var result = settings.GroupBy(s => s.Category)
                       .ToDictionary(g => g.Key, g => g.AsEnumerable());
+        return result.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Select(s => s.Map()));
     }
 
     /// <summary>
@@ -87,46 +92,43 @@ public class PostgreSqlSettingRepository : PostgreSqlBaseRepository<SettingEntit
     /// <summary>
     /// Set the value of a setting, creating it if it doesn't exist
     /// </summary>
-    public async Task<SettingEntity> SetValueAsync(string category, string key, object? value, string updatedBy)
+    public async Task<Setting> SetValueAsync(string category, string key, object? value, string updatedBy)
     {
         var setting = await GetByKeyAsync(category, key);
         var stringValue = ConvertValueToString(value);
 
         if (setting == null)
         {
-            // Create new setting
-            setting = new SettingEntity
+            await AddAsync(new Setting
             {
                 Category = category,
                 Key = key,
                 Value = stringValue,
                 DataType = DetermineDataType(value),
-                DisplayName = $"{category}.{key}",
-                CreatedBy = updatedBy,
-                CreatedOn = DateTime.UtcNow,
-                UpdatedOn = DateTime.UtcNow
-            };
-            await _dbSet.AddAsync(setting);
+                DisplayName = $"{category}.{key}"
+            }); 
         }
         else
         {
             // Update existing setting
-            setting.Value = stringValue;
-            setting.UpdatedBy = updatedBy;
-            setting.UpdatedOn = DateTime.UtcNow;
-            _dbSet.Update(setting);
+            await UpdateAsync(setting.SettingId,setting);
         }
 
         await _context.SaveChangesAsync();
-        return setting;
+        return setting?? new Setting
+        {
+            Category = category,
+            Key = key,
+            Value = stringValue,
+            DataType = DetermineDataType(value),
+            DisplayName = $"{category}.{key}", 
+        };
     }
 
     /// <summary>
-    /// Update multiple settings in a single transaction
-    /// </summary>
-    public async Task<IEnumerable<SettingEntity>> UpdateMultipleAsync(Dictionary<string, object?> settings, string updatedBy)
+    public async Task<IEnumerable<Setting>> UpdateMultipleAsync(Dictionary<string, object?> settings, string updatedBy)
     {
-        var updatedSettings = new List<SettingEntity>();
+        var updatedSettings = new List<Setting>();
 
         using var transaction = await _context.Database.BeginTransactionAsync();
         try
@@ -155,7 +157,7 @@ public class PostgreSqlSettingRepository : PostgreSqlBaseRepository<SettingEntit
     /// <summary>
     /// Reset a setting to its default value
     /// </summary>
-    public async Task<SettingEntity?> ResetToDefaultAsync(Guid settingId, string updatedBy)
+    public async Task<Setting?> ResetToDefaultAsync(Guid settingId, string updatedBy)
     {
         var setting = await _dbSet.FirstOrDefaultAsync(s => s.Id == settingId && s.IsActive);
         if (setting == null) return null;
@@ -166,13 +168,13 @@ public class PostgreSqlSettingRepository : PostgreSqlBaseRepository<SettingEntit
 
         _dbSet.Update(setting);
         await _context.SaveChangesAsync();
-        return setting;
+        return setting.Map();
     }
 
     /// <summary>
     /// Reset all settings in a category to their default values
     /// </summary>
-    public async Task<IEnumerable<SettingEntity>> ResetCategoryToDefaultAsync(string category, string updatedBy)
+    public async Task<IEnumerable<Setting>> ResetCategoryToDefaultAsync(string category, string updatedBy)
     {
         var settings = await _dbSet
             .Where(s => s.Category == category && s.IsActive)
@@ -187,21 +189,22 @@ public class PostgreSqlSettingRepository : PostgreSqlBaseRepository<SettingEntit
 
         _dbSet.UpdateRange(settings);
         await _context.SaveChangesAsync();
-        return settings;
+        return settings.Select(s => s.Map());
     }
 
     /// <summary>
     /// Search settings by display name or description
     /// </summary>
-    public async Task<IEnumerable<SettingEntity>> SearchAsync(string searchTerm)
+    public async Task<IEnumerable<Setting>> SearchAsync(string searchTerm)
     {
-        return await _dbSet
-            .Where(s => s.IsActive && 
-                       (s.DisplayName.Contains(searchTerm) || 
+        var result = await _dbSet
+            .Where(s => s.IsActive &&
+                       (s.DisplayName.Contains(searchTerm) ||
                         s.Description != null && s.Description.Contains(searchTerm)))
             .OrderBy(s => s.Category)
             .ThenBy(s => s.DisplayOrder)
             .ToListAsync();
+        return result.Select(s => s.Map());
     }
 
     /// <summary>
@@ -209,12 +212,13 @@ public class PostgreSqlSettingRepository : PostgreSqlBaseRepository<SettingEntit
     /// </summary>
     public async Task<IEnumerable<string>> GetCategoriesAsync()
     {
-        return await _dbSet
+        var result = await _dbSet
             .Where(s => s.IsActive)
             .Select(s => s.Category)
             .Distinct()
             .OrderBy(c => c)
             .ToListAsync();
+        return result;
     }
 
     /// <summary>
@@ -222,12 +226,13 @@ public class PostgreSqlSettingRepository : PostgreSqlBaseRepository<SettingEntit
     /// </summary>
     public async Task<bool> ExistsAsync(string category, string key)
     {
-        return await _dbSet
+        var result = await _dbSet
             .AnyAsync(s => s.Category == category && s.Key == key && s.IsActive);
+        return result;
     }
 
     /// <summary>
-    /// Validate all settings and return any validation errors
+    /// Validate all settings and var result =any validation errors
     /// </summary>
     public async Task<Dictionary<string, string>> ValidateAllAsync()
     {
@@ -265,45 +270,49 @@ public class PostgreSqlSettingRepository : PostgreSqlBaseRepository<SettingEntit
     /// <summary>
     /// Get settings by environment
     /// </summary>
-    public async Task<IEnumerable<SettingEntity>> GetByEnvironmentAsync(string environment)
+    public async Task<IEnumerable<Setting>> GetByEnvironmentAsync(string environment)
     {
         // Environment property no longer exists in SettingEntity
-        // Return all active settings as environment filtering is not supported
-        return await _dbSet
+        // var result =all active settings as environment filtering is not supported
+        var result = await _dbSet
             .Where(s => s.IsActive)
             .OrderBy(s => s.Category)
             .ThenBy(s => s.DisplayOrder)
             .ToListAsync();
+        return result.Select(s => s.Map());
     }
 
     /// <summary>
     /// Get settings that require restart
     /// </summary>
-    public async Task<IEnumerable<SettingEntity>> GetRequiringRestartAsync()
+    public async Task<IEnumerable<Setting>> GetRequiringRestartAsync()
     {
         // RequiresRestart property no longer exists in SettingEntity
         // Return empty list as restart requirements are not tracked
-        return await Task.FromResult(new List<SettingEntity>());
+        var result = await Task.FromResult(new List<SettingEntity>());
+        return result.Select(s => s.Map());
     }
 
     /// <summary>
     /// Get deprecated settings
     /// </summary>
-    public async Task<IEnumerable<SettingEntity>> GetDeprecatedAsync()
+    public async Task<IEnumerable<Setting>> GetDeprecatedAsync()
     {
         // IsDeprecated property no longer exists in SettingEntity
         // Return empty list as deprecation status is not tracked
-        return await Task.FromResult(new List<SettingEntity>());
+        var result = await Task.FromResult(new List<SettingEntity>());
+        return result.Select(s => s.Map());
     }
 
     /// <summary>
     /// Get settings by tags
     /// </summary>
-    public async Task<IEnumerable<SettingEntity>> GetByTagsAsync(params string[] tags)
+    public async Task<IEnumerable<Setting>> GetByTagsAsync(params string[] tags)
     {
         // Tags property no longer exists in SettingEntity
         // Return empty list as tag-based filtering is not supported
-        return await Task.FromResult(new List<SettingEntity>());
+        var result = await Task.FromResult(new List<SettingEntity>());
+        return result.Select(s => s.Map());
     }
 
     #region Private Helper Methods

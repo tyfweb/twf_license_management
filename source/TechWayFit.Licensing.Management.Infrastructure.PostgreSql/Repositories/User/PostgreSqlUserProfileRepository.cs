@@ -4,57 +4,63 @@ using Microsoft.EntityFrameworkCore;
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.User;
 using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Configuration;
 using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Repositories;
-using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.User;
+using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.User;
+using TechWayFit.Licensing.Management.Core.Models.User;
+using TechWayFit.Licensing.Management.Core.Contracts;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Repositories.User;
 
 /// <summary>
 /// PostgreSQL implementation of User Profile repository
 /// </summary>
-public class PostgreSqlUserProfileRepository : PostgreSqlBaseRepository<UserProfileEntity>, IUserProfileRepository
+public class PostgreSqlUserProfileRepository :  BaseRepository<UserProfile,UserProfileEntity>, IUserProfileRepository
 {
-    public PostgreSqlUserProfileRepository(PostgreSqlPostgreSqlLicensingDbContext context) : base(context)
+    public PostgreSqlUserProfileRepository(PostgreSqlPostgreSqlLicensingDbContext context,IUserContext userContext) : base(context,userContext)
     {
     }
 
-    public async Task<UserProfileEntity?> GetByUsernameAsync(string username, CancellationToken cancellationToken = default)
+    public async Task<UserProfile?> GetByUsernameAsync(string username, CancellationToken cancellationToken = default)
     {
-        return await _dbSet
+        var result = await _dbSet
             .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role)
             .FirstOrDefaultAsync(u => u.UserName == username && u.IsActive && !u.IsDeleted, cancellationToken);
+        return result?.Map();
     }
 
-    public async Task<UserProfileEntity?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
+    public async Task<UserProfile?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
     {
-        return await _dbSet
+        var result = await _dbSet
             .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role)
             .FirstOrDefaultAsync(u => u.Email == email && u.IsActive && !u.IsDeleted, cancellationToken);
+        return result?.Map();
     }
 
-    public async Task<IEnumerable<UserProfileEntity>> GetUsersWithRolesAsync(CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<UserProfile>> GetUsersWithRolesAsync(CancellationToken cancellationToken = default)
     {
-        return await _dbSet
+        var result = await _dbSet
             .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role)
             .Where(u => u.IsActive && !u.IsDeleted)
             .OrderBy(u => u.FullName)
             .ToListAsync(cancellationToken);
+        return result.Select(u => u.Map());
     }
 
-    public async Task<IEnumerable<UserProfileEntity>> GetUsersByRoleAsync(string roleName, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<UserProfile>> GetUsersByRoleAsync(string roleName, CancellationToken cancellationToken = default)
     {
-        return await _dbSet
+        var result = await _dbSet
             .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role)
             .Where(u => u.IsActive && !u.IsDeleted &&
                        u.UserRoles.Any(ur => ur.Role.RoleName == roleName && ur.IsActive))
             .OrderBy(u => u.FullName)
             .ToListAsync(cancellationToken);
+        return result.Select(u => u.Map());
     }
 
-    public async Task<(IEnumerable<UserProfileEntity> Users, int TotalCount)> SearchUsersAsync(
+    public async Task<(IEnumerable<UserProfile> Users, int TotalCount)> SearchUsersAsync(
         string? searchTerm = null,
         string? departmentFilter = null,
         string? roleFilter = null,
@@ -107,7 +113,7 @@ public class PostgreSqlUserProfileRepository : PostgreSqlBaseRepository<UserProf
             .Take(pageSize)
             .ToListAsync(cancellationToken);
 
-        return (users, totalCount);
+        return (users.Select(x=>x.Map()), totalCount);
     }
 
     public async Task<(int TotalUsers, int ActiveUsers, int LockedUsers, int AdminUsers)> GetUserStatisticsAsync(CancellationToken cancellationToken = default)
@@ -131,7 +137,8 @@ public class PostgreSqlUserProfileRepository : PostgreSqlBaseRepository<UserProf
             query = query.Where(u => u.Id != excludeUserId.Value);
         }
 
-        return await query.AnyAsync(cancellationToken);
+        var result = await query.AnyAsync(cancellationToken);
+        return result;
     }
 
     public async Task<bool> EmailExistsAsync(string email, Guid? excludeUserId = null, CancellationToken cancellationToken = default)
@@ -143,7 +150,8 @@ public class PostgreSqlUserProfileRepository : PostgreSqlBaseRepository<UserProf
             query = query.Where(u => u.Id != excludeUserId.Value);
         }
 
-        return await query.AnyAsync(cancellationToken);
+        var result = await query.AnyAsync(cancellationToken);
+        return result;
     }
 
     public async Task UpdateLastLoginAsync(Guid userId, CancellationToken cancellationToken = default)
@@ -233,20 +241,22 @@ public class PostgreSqlUserProfileRepository : PostgreSqlBaseRepository<UserProf
         return Convert.ToBase64String(hashBytes);
     }
 
-    public async Task<UserProfileEntity?> GetByIdAsync(Guid userId)
+    public async Task<UserProfile?> GetByIdAsync(Guid userId)
     {
-        return await _dbSet
+        var result = await _dbSet
             .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role)
             .FirstOrDefaultAsync(u => u.Id == userId && u.IsActive && !u.IsDeleted);
+        return result?.Map();
     }
 
     public async Task<IEnumerable<string>> GetAvailableDepartmentsAsync()
     {
-        return await _dbSet
+        var result = await _dbSet
             .Where(u => u.IsActive && !u.IsDeleted && u.Department != null)
             .Select(u => u.Department!)
             .Distinct()
             .ToListAsync();
+        return result;
     }
 }

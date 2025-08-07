@@ -1,13 +1,13 @@
-using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Common;
-using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Audit;
+using TechWayFit.Licensing.Management.Core.Models.Audit;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Common; 
 
 namespace TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Audit;
 
 /// <summary>
 /// Repository interface for AuditEntry entities
 /// </summary>
-public interface IAuditEntryRepository : IBaseRepository<AuditEntryEntity>
+public interface IAuditEntryRepository : IDataRepository<AuditEntry>
 {
-     Task<IEnumerable<AuditEntryEntity>> GetByEntityAsync(string entityType, Guid entityId);
-     Task<IEnumerable<AuditEntryEntity>> GetRecentEntriesAsync(int count = 100);
+     Task<IEnumerable<AuditEntry>> GetByEntityAsync(string entityType, Guid entityId);
+     Task<IEnumerable<AuditEntry>> GetRecentEntriesAsync(int count = 100);
 }

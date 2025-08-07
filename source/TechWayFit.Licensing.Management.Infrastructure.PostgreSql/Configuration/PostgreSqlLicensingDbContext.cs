@@ -3,16 +3,14 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System.ComponentModel.DataAnnotations.Schema;
 using TechWayFit.Licensing.Management.Infrastructure.Data.Entities.Consumer;
-using TechWayFit.Licensing.Management.Infrastructure.Data.Context;
-using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Audit;
-using TechWayFit.Licensing.Management.Infrastructure.Models.Entities;
-using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Notification;
-using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Products;
-using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.License;
-using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Consumer;
-using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Settings;
-using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.User;
-using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.OperationsDashboard;
+using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.Notification;
+using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.Products;
+using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.License;
+using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.Consumer;
+using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.Settings;
+using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.User;
+using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.Common;
+using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.Audit;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Configuration;
 
@@ -55,13 +53,6 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
     public DbSet<UserRoleEntity> UserRoles { get; set; }
     public DbSet<UserRoleMappingEntity> UserRoleMappings { get; set; }
 
-    // Operations Dashboard related entities
-    public DbSet<SystemMetricEntity> SystemMetrics { get; set; }
-    public DbSet<ErrorLogSummaryEntity> ErrorLogSummaries { get; set; }
-    public DbSet<PagePerformanceMetricEntity> PagePerformanceMetrics { get; set; }
-    public DbSet<QueryPerformanceMetricEntity> QueryPerformanceMetrics { get; set; }
-    public DbSet<SystemHealthSnapshotEntity> SystemHealthSnapshots { get; set; }
-
     #endregion
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -78,8 +69,7 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
 
         ConfigureNotificationEntities(modelBuilder);
         ConfigureSettingsEntities(modelBuilder);
-        ConfigureUserEntities(modelBuilder);
-        ConfigureOperationsDashboardEntities(modelBuilder);
+        ConfigureUserEntities(modelBuilder); 
 
         // Configure indexes
         ConfigureIndexes(modelBuilder);
@@ -397,7 +387,7 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
             entity.Property(e => e.NotificationTemplateId).HasMaxLength(50);
             entity.Property(e => e.NotificationType).HasMaxLength(20);
             entity.Property(e => e.SentDate).IsRequired();
-            entity.Property(e => e.DeliveryStatus).HasConversion<string>();
+            entity.Property(e => e.Status).HasConversion<string>();
             entity.Property(e => e.DeliveryError).HasMaxLength(2000);
 
             // Audit fields
@@ -414,7 +404,7 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
 
             // Indexes
             entity.HasIndex(e => e.NotificationTemplateId);
-            entity.HasIndex(e => e.DeliveryStatus);
+            entity.HasIndex(e => e.Status);
             entity.HasIndex(e => e.NotificationType);
             entity.HasIndex(e => e.SentDate);
             entity.HasIndex(e => new { e.EntityType, e.EntityId });
@@ -503,7 +493,7 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
     /// </summary>
     private void UpdateAuditFields()
     {
-        var entries = ChangeTracker.Entries<BaseDbEntity>();
+        var entries = ChangeTracker.Entries<AuditEntity>();
         var currentTime = DateTime.UtcNow;
 
         foreach (var entry in entries)
@@ -530,7 +520,7 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
     /// </summary>
     private void CreateAuditEntries()
     {
-        var entries = ChangeTracker.Entries<BaseDbEntity>()
+        var entries = ChangeTracker.Entries<AuditEntity>()
             .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified)
             .ToList();
 
@@ -551,7 +541,7 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
     /// <summary>
     /// Create an individual audit entry for an entity change
     /// </summary>
-    private AuditEntryEntity? CreateAuditEntry(Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry<BaseDbEntity> entry)
+    private AuditEntryEntity? CreateAuditEntry(Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry<AuditEntity> entry)
     {
         var entityType = entry.Entity.GetType().Name;
         var entityId = entry.Entity.Id.ToString(); // Convert Guid to string for generic audit table
@@ -637,14 +627,14 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
     {
         var auditFields = new[]
         {
-            nameof(BaseDbEntity.CreatedBy),
-            nameof(BaseDbEntity.CreatedOn),
-            nameof(BaseDbEntity.UpdatedBy),
-            nameof(BaseDbEntity.UpdatedOn),
-            nameof(BaseDbEntity.DeletedBy),
-            nameof(BaseDbEntity.DeletedOn),
-            nameof(BaseDbEntity.IsActive),
-            nameof(BaseDbEntity.IsDeleted)
+            nameof(AuditEntity.CreatedBy),
+            nameof(AuditEntity.CreatedOn),
+            nameof(AuditEntity.UpdatedBy),
+            nameof(AuditEntity.UpdatedOn),
+            nameof(AuditEntity.DeletedBy),
+            nameof(AuditEntity.DeletedOn),
+            nameof(AuditEntity.IsActive),
+            nameof(AuditEntity.IsDeleted)
         };
 
         return auditFields.Contains(propertyName, StringComparer.OrdinalIgnoreCase);
@@ -782,101 +772,5 @@ public class PostgreSqlPostgreSqlLicensingDbContext : DbContext
         });
     }
 
-    /// <summary>  
-    /// Configure Operations Dashboard related entities
-    /// </summary>
-    private static void ConfigureOperationsDashboardEntities(ModelBuilder modelBuilder)
-    {
-        // SystemMetricEntity configuration
-        modelBuilder.Entity<SystemMetricEntity>(entity =>
-        {
-            entity.HasKey(e => e.MetricId);
-            entity.Property(e => e.MetricId).IsRequired();
-            entity.Property(e => e.MetricType).HasMaxLength(50).IsRequired();
-            entity.Property(e => e.Controller).HasMaxLength(100);
-            entity.Property(e => e.Action).HasMaxLength(100);
-            entity.Property(e => e.HttpMethod).HasMaxLength(10);
-            entity.Property(e => e.CreatedBy).HasMaxLength(100).IsRequired();
-            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
-
-            // Indexes
-            entity.HasIndex(e => new { e.TimestampHour, e.MetricType });
-            entity.HasIndex(e => e.MetricType);
-            entity.HasIndex(e => e.TimestampHour);
-            entity.HasIndex(e => new { e.Controller, e.Action });
-        });
-
-        // ErrorLogSummaryEntity configuration
-        modelBuilder.Entity<ErrorLogSummaryEntity>(entity =>
-        {
-            entity.HasKey(e => e.ErrorSummaryId);
-            entity.Property(e => e.ErrorSummaryId).IsRequired();
-            entity.Property(e => e.ErrorType).HasMaxLength(100).IsRequired();
-            entity.Property(e => e.ErrorSource).HasMaxLength(500);
-            entity.Property(e => e.ErrorMessageHash).HasMaxLength(64).IsRequired();
-            entity.Property(e => e.ErrorMessageSample).HasMaxLength(2000);
-            entity.Property(e => e.CreatedBy).HasMaxLength(100).IsRequired();
-            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
-
-            // Indexes
-            entity.HasIndex(e => new { e.TimestampHour, e.ErrorType });
-            entity.HasIndex(e => e.ErrorType);
-            entity.HasIndex(e => e.TimestampHour);
-            entity.HasIndex(e => e.ErrorMessageHash);
-            entity.HasIndex(e => e.ErrorSource);
-        });
-
-        // PagePerformanceMetricEntity configuration
-        modelBuilder.Entity<PagePerformanceMetricEntity>(entity =>
-        {
-            entity.HasKey(e => e.PerformanceId);
-            entity.Property(e => e.PerformanceId).IsRequired();
-            entity.Property(e => e.Controller).HasMaxLength(100).IsRequired();
-            entity.Property(e => e.Action).HasMaxLength(100).IsRequired();
-            entity.Property(e => e.RouteTemplate).HasMaxLength(500);
-            entity.Property(e => e.CreatedBy).HasMaxLength(100).IsRequired();
-            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
-
-            // Indexes
-            entity.HasIndex(e => new { e.TimestampHour, e.Controller, e.Action });
-            entity.HasIndex(e => new { e.Controller, e.Action });
-            entity.HasIndex(e => e.TimestampHour);
-        });
-
-        // QueryPerformanceMetricEntity configuration
-        modelBuilder.Entity<QueryPerformanceMetricEntity>(entity =>
-        {
-            entity.HasKey(e => e.QueryMetricId);
-            entity.Property(e => e.QueryMetricId).IsRequired();
-            entity.Property(e => e.QueryHash).HasMaxLength(64).IsRequired();
-            entity.Property(e => e.QueryType).HasMaxLength(100).IsRequired();
-            entity.Property(e => e.TableNames).HasMaxLength(500);
-            entity.Property(e => e.OperationContext).HasMaxLength(500);
-            entity.Property(e => e.CreatedBy).HasMaxLength(100).IsRequired();
-            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
-
-            // Indexes
-            entity.HasIndex(e => new { e.TimestampHour, e.QueryType });
-            entity.HasIndex(e => e.QueryType);
-            entity.HasIndex(e => e.QueryHash);
-            entity.HasIndex(e => e.TimestampHour);
-            entity.HasIndex(e => e.TableNames);
-        });
-
-        // SystemHealthSnapshotEntity configuration
-        modelBuilder.Entity<SystemHealthSnapshotEntity>(entity =>
-        {
-            entity.HasKey(e => e.SnapshotId);
-            entity.Property(e => e.SnapshotId).IsRequired();
-            entity.Property(e => e.OverallHealthStatus).HasMaxLength(50).IsRequired();
-            entity.Property(e => e.HealthIssuesJson).HasMaxLength(4000);
-            entity.Property(e => e.CreatedBy).HasMaxLength(100).IsRequired();
-            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
-
-            // Indexes
-            entity.HasIndex(e => e.SnapshotTimestamp);
-            entity.HasIndex(e => e.OverallHealthStatus);
-            entity.HasIndex(e => e.ErrorRatePercent);
-        });
-    }
+   
 }

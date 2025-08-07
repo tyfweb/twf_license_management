@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Data;
-using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Products;
+using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.Products;
 using TechWayFit.Licensing.Management.Infrastructure.Models.Search;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Core.Models.Common;

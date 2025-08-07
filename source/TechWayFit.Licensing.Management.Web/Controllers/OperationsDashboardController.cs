@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TechWayFit.Licensing.Management.Core.Contracts.Services.OperationsDashboard;
 using TechWayFit.Licensing.Management.Web.ViewModels.OperationsDashboard;
-using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.OperationsDashboard;
+using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.OperationsDashboard;
 using TechWayFit.Licensing.Management.Infrastructure.Models.OperationsDashboard;
 
 namespace TechWayFit.Licensing.Management.Web.Controllers;

@@ -6,7 +6,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.
 /// <summary>
 /// Repository interface for ProductLicense core models
 /// </summary>
-public interface IProductLicenseRepository : IBaseRepository<ProductLicense>
+public interface IProductLicenseRepository : IDataRepository<ProductLicense>
 {
 
     /// <summary>

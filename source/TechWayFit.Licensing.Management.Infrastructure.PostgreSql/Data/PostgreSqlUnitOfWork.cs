@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using TechWayFit.Licensing.Management.Core.Contracts;
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Data;
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Audit;
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Consumer;
@@ -44,56 +45,57 @@ public class PostgreSqlUnitOfWork : IUnitOfWork
     private ISettingRepository? _settings;
     private IUserRoleRepository? _userRoles;
     private IUserRoleMappingRepository? _userRoleMappings;
-
-    public PostgreSqlUnitOfWork(PostgreSqlPostgreSqlLicensingDbContext context)
+    private IUserContext    _userContext;
+    public PostgreSqlUnitOfWork(PostgreSqlPostgreSqlLicensingDbContext context, IUserContext userContext)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
+        _userContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
     }
 
     #region Core Repositories
 
     public IProductRepository Products => 
-        _products ??= new PostgreSqlProductRepository(_context);
+        _products ??= new PostgreSqlProductRepository(_context,_userContext);
 
     public IProductLicenseRepository Licenses => 
-        _licenses ??= new PostgreSqlProductLicenseRepository(_context);
+        _licenses ??= new PostgreSqlProductLicenseRepository(_context,_userContext);
 
     public IConsumerAccountRepository Consumers => 
-        _consumers ??= new PostgreSqlConsumerAccountRepository(_context);
+        _consumers ??= new PostgreSqlConsumerAccountRepository(_context,_userContext);
 
     public IUserProfileRepository Users => 
-        _users ??= new PostgreSqlUserProfileRepository(_context);
+        _users ??= new PostgreSqlUserProfileRepository(_context,_userContext);
 
     #endregion
 
     #region Supporting Repositories
 
     public IProductFeatureRepository ProductFeatures => 
-        _productFeatures ??= new PostgreSqlProductFeatureRepository(_context);
+        _productFeatures ??= new PostgreSqlProductFeatureRepository(_context,_userContext);
 
     public IProductTierRepository ProductTiers => 
-        _productTiers ??= new PostgreSqlProductTierRepository(_context);
+        _productTiers ??= new PostgreSqlProductTierRepository(_context,_userContext);
 
     public IProductVersionRepository ProductVersions => 
-        _productVersions ??= new PostgreSqlProductVersionRepository(_context);
+        _productVersions ??= new PostgreSqlProductVersionRepository(_context,_userContext);
 
     public IAuditEntryRepository AuditEntries => 
-        _auditEntries ??= new PostgreSqlAuditEntryRepository(_context);
+        _auditEntries ??= new PostgreSqlAuditEntryRepository(_context,_userContext);
 
     public INotificationTemplateRepository NotificationTemplates => 
-        _notificationTemplates ??= new PostgreSqlNotificationTemplateRepository(_context);
+        _notificationTemplates ??= new PostgreSqlNotificationTemplateRepository(_context,_userContext);
 
     public INotificationHistoryRepository NotificationHistory => 
-        _notificationHistory ??= new PostgreSqlNotificationHistoryRepository(_context);
+        _notificationHistory ??= new PostgreSqlNotificationHistoryRepository(_context,_userContext);
 
     public ISettingRepository Settings => 
-        _settings ??= new PostgreSqlSettingRepository(_context);
+        _settings ??= new PostgreSqlSettingRepository(_context,_userContext);
 
     public IUserRoleRepository UserRoles => 
-        _userRoles ??= new PostgreSqlUserRoleRepository(_context);
+        _userRoles ??= new PostgreSqlUserRoleRepository(_context,_userContext);
 
     public IUserRoleMappingRepository UserRoleMappings => 
-        _userRoleMappings ??= new PostgreSqlUserRoleMappingRepository(_context);
+        _userRoleMappings ??= new PostgreSqlUserRoleMappingRepository(_context,_userContext);
 
     #endregion
 

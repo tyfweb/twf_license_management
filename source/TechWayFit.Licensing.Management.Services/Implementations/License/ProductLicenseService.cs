@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 using TechWayFit.Licensing.Generator.Models;
 using TechWayFit.Licensing.Generator.Services;
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Data;
-using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.License;
+using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.License;
 using TechWayFit.Licensing.Management.Infrastructure.Models.Search;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Core.Models.Common;

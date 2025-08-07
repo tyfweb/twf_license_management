@@ -4,18 +4,19 @@ using TechWayFit.Licensing.Core.Models;
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.License;
 using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Configuration;
 using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Repositories;
-using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.License;
+using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.License;
 using TechWayFit.Licensing.Management.Core.Models.License;
+using TechWayFit.Licensing.Management.Core.Contracts;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Repositories.License;
 
 /// <summary>
 /// PostgreSQL implementation of Product License repository
 /// </summary>
-public class PostgreSqlProductLicenseRepository : PostgreSqlBaseRepository<ProductLicenseEntity>, IProductLicenseRepository
-{ 
-    public PostgreSqlProductLicenseRepository(PostgreSqlPostgreSqlLicensingDbContext context) : base(context)
-    { 
+public class PostgreSqlProductLicenseRepository : BaseRepository<ProductLicense, ProductLicenseEntity>, IProductLicenseRepository
+{  
+    public PostgreSqlProductLicenseRepository(PostgreSqlPostgreSqlLicensingDbContext context,IUserContext userContext) : base(context, userContext)
+    {         
     }
      /// <summary>
      /// Get expiring licenses in the next specified number of days (default is 30 days)
@@ -23,22 +24,24 @@ public class PostgreSqlProductLicenseRepository : PostgreSqlBaseRepository<Produ
      /// <param name="daysFromNow"></param>
      /// <param name="cancellationToken"></param>
      /// <returns></returns>
-    public async Task<IEnumerable<ProductLicenseEntity>> GetExpiringLicensesAsync(int daysFromNow = 30, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<ProductLicense>> GetExpiringLicensesAsync(int daysFromNow = 30, CancellationToken cancellationToken = default)
     {
-        return await _dbSet
+        var result = await _dbSet
             .Where(license => license.ValidTo <= DateTime.UtcNow.AddDays(daysFromNow))
             .ToListAsync(cancellationToken);
+        return result.Select(license => license.Map());
     }
     /// <summary>
     /// Get license by its unique key
     /// </summary>
     /// <param name="licenseCode"></param>
     /// <returns></returns>
-    public async Task<ProductLicenseEntity?> GetByLicenseKeyAsync(string licenseCode)
+    public async Task<ProductLicense?> GetByLicenseKeyAsync(string licenseCode)
     {
-        return await _dbSet.Include(l => l.Product)
+        var result = await _dbSet.Include(l => l.Product)
                          .Include(l => l.Consumer)
                          .FirstOrDefaultAsync(l => l.LicenseCode == licenseCode);
+        return result?.Map();
     }
 
     /// <summary>
@@ -46,12 +49,13 @@ public class PostgreSqlProductLicenseRepository : PostgreSqlBaseRepository<Produ
     /// </summary>
     /// <param name="consumerId"></param>
     /// <returns></returns>
-    public async Task<IEnumerable<ProductLicenseEntity>> GetByConsumerIdAsync(Guid consumerId)
+    public async Task<IEnumerable<ProductLicense>> GetByConsumerIdAsync(Guid consumerId)
     {
-        return await _dbSet.Where(l => l.ConsumerId == consumerId)
+        var result = await _dbSet.Where(l => l.ConsumerId == consumerId)
                          .Include(l => l.Product)
                          .OrderByDescending(l => l.CreatedOn)
                          .ToListAsync();
+        return result.Select(license => license.Map());
     }
 
     /// <summary>
@@ -61,17 +65,17 @@ public class PostgreSqlProductLicenseRepository : PostgreSqlBaseRepository<Produ
     /// <param name="customerId"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public async Task<IEnumerable<ProductLicenseEntity>> GetExpiringLicensesForCustomerAsync(int daysAhead = 30, Guid customerId = default, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<ProductLicense>> GetExpiringLicensesForCustomerAsync(int daysAhead = 30, Guid customerId = default, CancellationToken cancellationToken = default)
     {
         if (customerId == default)
         {
             return await GetExpiringLicensesAsync(daysAhead);
         }
 
-        return await _dbSet.Where(l => l.ConsumerId == customerId && l.ValidTo <= DateTime.UtcNow.AddDays(daysAhead))
+        var result= await _dbSet.Where(l => l.ConsumerId == customerId && l.ValidTo <= DateTime.UtcNow.AddDays(daysAhead))
                          .Include(l => l.Product)
                          .ToListAsync();
-
+        return result.Select(license => license.Map());
     }
 
     /// <summary>
@@ -141,10 +145,11 @@ public class PostgreSqlProductLicenseRepository : PostgreSqlBaseRepository<Produ
     /// <param name="id"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public Task<ProductLicenseEntity?> GetByIdWithAllIncludesAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<ProductLicense?> GetByIdWithAllIncludesAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return _dbSet.Include(l => l.Product).Include(l => l.Consumer)
+        var result = await _dbSet.Include(l => l.Product).Include(l => l.Consumer)
                       .FirstOrDefaultAsync(l => l.Id == id, cancellationToken);
+        return result?.Map();
     }
 
     protected override IQueryable<ProductLicenseEntity> SearchIncludesQuery(IQueryable<ProductLicenseEntity> query)
@@ -153,4 +158,6 @@ public class PostgreSqlProductLicenseRepository : PostgreSqlBaseRepository<Produ
                      .Include(l => l.Consumer);
         return base.SearchIncludesQuery(query);
     }
+
+    
 }

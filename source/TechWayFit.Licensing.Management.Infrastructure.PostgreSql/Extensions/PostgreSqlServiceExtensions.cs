@@ -2,10 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Data;
-using TechWayFit.Licensing.Management.Infrastructure.Data.Context;
-using TechWayFit.Licensing.Management.Infrastructure.Models.Configuration;
 using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Configuration;
 using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Data;
+using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Configuration;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Extensions;
 

@@ -11,5 +11,5 @@ public class SearchRequest<TEntity> where TEntity : class
     public bool SortDescending { get; set; } = false;
     public DateTime? FromDate { get; set; }
     public DateTime? ToDate { get; set; }
-    public IList<Expression<Func<TEntity, bool>>> Filters { get; set; } = new List<Expression<Func<TEntity, bool>>>();
+    public Dictionary<string,string> Filters { get; set; } =new Dictionary<string, string>();
 }
