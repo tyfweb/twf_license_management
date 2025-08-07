@@ -5,6 +5,7 @@ using TechWayFit.Licensing.Management.Core.Models.Consumer;
 using System.ComponentModel.DataAnnotations.Schema;
 using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Products;
 using TechWayFit.Licensing.Core.Models;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Common;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.License;
 
@@ -12,7 +13,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.License
 /// Database entity for ProductLicense
 /// </summary>
 [Table("product_licenses")]
-public class ProductLicenseEntity : AuditEntity
+public class ProductLicenseEntity : AuditWorkflowEntity
 {
     #region BaseEntityProperties 
     /// <summary>

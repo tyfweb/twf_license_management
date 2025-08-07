@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using TechWayFit.Licensing.Management.Core.Models.Audit;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Common;
+using TechWayFit.Licensing.Management.Infrastructure.Helpers;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Audit;
 
@@ -32,7 +34,7 @@ public class AuditEntryEntity : AuditEntity
             IpAddress = model.IpAddress,
             UserAgent = model.UserAgent,
             Reason = model.Reason,
-            Metadata = ToJson(model.Metadata),
+            Metadata = JsonHelper.ToJson(model.Metadata),
             CreatedBy = model.UserName,
             CreatedOn = model.Timestamp
         };
@@ -49,7 +51,7 @@ public class AuditEntryEntity : AuditEntity
             IpAddress = IpAddress,
             UserAgent = UserAgent,
             Reason = Reason,
-            Metadata = FromDictJson(Metadata),
+            Metadata = JsonHelper.FromDictJson(Metadata),
             UserName = CreatedBy,
             Timestamp = CreatedOn
         };

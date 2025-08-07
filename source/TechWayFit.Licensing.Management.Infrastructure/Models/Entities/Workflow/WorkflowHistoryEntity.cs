@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using TechWayFit.Licensing.Management.Core.Contracts.Services.Workflow;
 using TechWayFit.Licensing.Management.Core.Models.Common;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Common;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Workflow;
 

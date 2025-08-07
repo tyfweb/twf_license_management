@@ -1,6 +1,8 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using TechWayFit.Licensing.Core.Helpers;
 using TechWayFit.Licensing.Management.Core.Models.Notification;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Common;
+using TechWayFit.Licensing.Management.Infrastructure.Helpers;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Notification;
 
@@ -34,7 +36,7 @@ public class NotificationTemplateEntity : AuditEntity
             Subject = model.Subject,
             MessageTemplate = model.MessageTemplate,
             IsActive = model.IsActive,
-            TemplateVariableJson = ToJson(model.TemplateVariables),
+            TemplateVariableJson = JsonHelper.ToJson(model.TemplateVariables),
             CreatedBy = model.CreatedBy,
             CreatedOn = model.CreatedDate,
             UpdatedBy = "system", // Assuming system user for creation
@@ -57,7 +59,7 @@ public class NotificationTemplateEntity : AuditEntity
             IsActive = IsActive,
             CreatedBy = CreatedBy,
             CreatedDate = CreatedOn,
-            TemplateVariables = FromJson<Dictionary<string, object>>(TemplateVariableJson)
+            TemplateVariables = JsonHelper.FromJson<Dictionary<string, object>>(TemplateVariableJson)
         };
     }   
 

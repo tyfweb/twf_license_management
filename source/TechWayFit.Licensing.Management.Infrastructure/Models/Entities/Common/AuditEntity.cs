@@ -74,4 +74,8 @@ public abstract class AuditEntity
     /// </summary>
     [Timestamp]
     public byte[]? RowVersion { get; set; }
+
+
+
+    
 }

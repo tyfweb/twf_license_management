@@ -4,6 +4,7 @@ using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Comm
 using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Configuration;
 using TechWayFit.Licensing.Management.Infrastructure.Models.Entities;
 using TechWayFit.Licensing.Management.Infrastructure.Models.Search;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Common;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Repositories;
 

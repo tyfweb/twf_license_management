@@ -1,6 +1,8 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using TechWayFit.Licensing.Core.Helpers;
 using TechWayFit.Licensing.Management.Core.Models.Notification;
+using TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Common;
+using TechWayFit.Licensing.Management.Infrastructure.Helpers;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.Models.Entities.Notification;
 
@@ -35,7 +37,7 @@ public class NotificationHistoryEntity : AuditEntity
             NotificationMode = model.NotificationMode.ToString(),
             NotificationTemplateId = model.NotificationTemplateId,
             NotificationType = model.NotificationType.ToString(),
-            RecipientsJson = ToJson(model.Recipients),
+            RecipientsJson = JsonHelper.ToJson(model.Recipients),
             SentDate = model.SentDate,
             DeliveryStatus = model.DeliveryStatus.ToString(),
             DeliveryError = model.DeliveryError,
@@ -55,7 +57,7 @@ public class NotificationHistoryEntity : AuditEntity
             NotificationMode =  NotificationMode.ToEnum<NotificationMode>(),
             NotificationTemplateId = NotificationTemplateId,
             NotificationType = NotificationType.ToEnum<NotificationType>(),
-            Recipients = FromJson<NotificationPreferences>(RecipientsJson),
+            Recipients = JsonHelper.FromJson<NotificationPreferences>(RecipientsJson),
             SentDate = SentDate,
             DeliveryStatus = DeliveryStatus.ToEnum<DeliveryStatus>(),
             DeliveryError = DeliveryError
