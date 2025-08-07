@@ -7,6 +7,7 @@ using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Repositories;
 using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.User;
 using TechWayFit.Licensing.Management.Core.Models.User;
 using TechWayFit.Licensing.Management.Core.Contracts;
+using TechWayFit.Licensing.Management.Core.Helpers;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Repositories.User;
 
@@ -17,6 +18,25 @@ public class PostgreSqlUserProfileRepository :  BaseRepository<UserProfile,UserP
 {
     public PostgreSqlUserProfileRepository(PostgreSqlPostgreSqlLicensingDbContext context,IUserContext userContext) : base(context,userContext)
     {
+    }
+
+    public async override Task<UserProfile> AddAsync(UserProfile model, CancellationToken cancellationToken = default)
+    {
+         var (hash, salt) = SecurityHelper.HashPassword(model.Password);
+        var entity = new UserProfileEntity();
+        entity.Map(model);
+        entity.PasswordHash = hash;
+        entity.PasswordSalt = salt;
+        entity.Id = Guid.NewGuid();
+        entity.IsDeleted = false;
+        entity.IsActive = true;
+        entity.CreatedOn = DateTime.UtcNow;
+        entity.CreatedBy = _userContext.UserId ?? "Anonymous";
+        entity.UpdatedBy = _userContext.UserId ?? "Anonymous";
+        entity.UpdatedOn = DateTime.UtcNow;
+        _dbSet.Add(entity);
+        await _context.SaveChangesAsync(cancellationToken);
+        return entity.Map();
     }
 
     public async Task<UserProfile?> GetByUsernameAsync(string username, CancellationToken cancellationToken = default)
@@ -258,5 +278,21 @@ public class PostgreSqlUserProfileRepository :  BaseRepository<UserProfile,UserP
             .Distinct()
             .ToListAsync();
         return result;
+    }
+
+    public async Task<bool> UpdatePasswordAsync(Guid userId, string newPassword, CancellationToken cancellationToken = default)
+    {
+        var user = _dbSet.Find(userId);
+        if (user == null || user.IsDeleted)
+        {
+            return false; // User not found or deleted
+        }
+        var (hash, salt) = SecurityHelper.HashPassword(newPassword);
+        user.PasswordHash = hash;
+        user.PasswordSalt = salt;
+        user.UpdatedOn = DateTime.UtcNow;
+        user.UpdatedBy = _userContext.UserId ?? "Anonymous";
+        _dbSet.Update(user);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 }

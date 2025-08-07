@@ -5,6 +5,7 @@ using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Configuration;
 using TechWayFit.Licensing.Management.Infrastructure.Models.Search;
 using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.Common;
 using TechWayFit.Licensing.Management.Core.Contracts;
+using System.Runtime.InteropServices.Marshalling;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Repositories;
 
@@ -29,7 +30,7 @@ public partial class BaseRepository<TModel, TEntity> : IDataRepository<TModel> w
         _dbSet = _context.Set<TEntity>();
     }
 
-    public async Task<TModel> AddAsync(TModel model, CancellationToken cancellationToken = default)
+    public async virtual Task<TModel> AddAsync(TModel model, CancellationToken cancellationToken = default)
     {
         var entity = new TEntity();
         entity.Map(model);
@@ -45,7 +46,7 @@ public partial class BaseRepository<TModel, TEntity> : IDataRepository<TModel> w
         return entity.Map();
     }
 
-    public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+    public async virtual  Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var entity = _dbSet.Find(id);
         if (entity == null) return false;
@@ -65,7 +66,7 @@ public partial class BaseRepository<TModel, TEntity> : IDataRepository<TModel> w
     /// <param name="includeDeleted"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public async Task<bool> ExistsAsync(Guid id, bool includeDeleted = false, CancellationToken cancellationToken = default)
+    public async virtual  Task<bool> ExistsAsync(Guid id, bool includeDeleted = false, CancellationToken cancellationToken = default)
     {
         var query = _dbSet.AsQueryable();
         if (!includeDeleted)
@@ -82,7 +83,7 @@ public partial class BaseRepository<TModel, TEntity> : IDataRepository<TModel> w
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     /// <exception cref="ArgumentNullException"></exception>
-    public async Task<TModel?> FindOneAsync(SearchRequest<TModel> request, CancellationToken cancellationToken = default)
+    public async virtual  Task<TModel?> FindOneAsync(SearchRequest<TModel> request, CancellationToken cancellationToken = default)
     {
         if (request == null) throw new ArgumentNullException(nameof(request));
 
@@ -108,7 +109,7 @@ public partial class BaseRepository<TModel, TEntity> : IDataRepository<TModel> w
     /// </summary>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public async Task<IEnumerable<TModel>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async virtual  Task<IEnumerable<TModel>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         return (await _dbSet.AsNoTracking()
             .ToListAsync(cancellationToken))
@@ -143,7 +144,7 @@ public partial class BaseRepository<TModel, TEntity> : IDataRepository<TModel> w
     /// Retrieves all entities with optional includes.
     /// </summary>
     /// <returns></returns>
-    public async Task<IEnumerable<TModel>> GetAllWithIncludesAsync()
+    public async virtual  Task<IEnumerable<TModel>> GetAllWithIncludesAsync()
     {
         var query = _dbSet.AsNoTracking().AsQueryable();
         query = ApplyIncludes(query);
@@ -156,7 +157,7 @@ public partial class BaseRepository<TModel, TEntity> : IDataRepository<TModel> w
     /// <param name="id"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public async Task<TModel?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async virtual  Task<TModel?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var entity = await _dbSet.AsNoTracking()
             .FirstOrDefaultAsync(e => e.Id == id && !e.IsDeleted, cancellationToken);
@@ -168,9 +169,9 @@ public partial class BaseRepository<TModel, TEntity> : IDataRepository<TModel> w
     /// <param name="id"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public Task<bool> IsActiveAsync(Guid id, CancellationToken cancellationToken = default)
+    public async virtual Task<bool> IsActiveAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return _dbSet.AsNoTracking()
+        return await _dbSet.AsNoTracking()
             .AnyAsync(e => e.Id == id && e.IsActive && !e.IsDeleted, cancellationToken);
     }
     /// <summary>
@@ -179,15 +180,15 @@ public partial class BaseRepository<TModel, TEntity> : IDataRepository<TModel> w
     /// <param name="id"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public Task<bool> MarkAsInactiveAsync(Guid id, CancellationToken cancellationToken = default)
+    public async virtual  Task<bool> MarkAsInactiveAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var entity = _dbSet.Find(id);
-        if (entity == null) return Task.FromResult(false);
+        if (entity == null) return false;
 
         entity.IsActive = false;
         entity.UpdatedOn = DateTime.UtcNow;
         entity.UpdatedBy = _userContext.UserId ?? "Anonymous";
-        return _context.SaveChangesAsync(cancellationToken).ContinueWith(t => t.Result > 0);
+        return await _context.SaveChangesAsync(cancellationToken).ContinueWith(t => t.Result > 0);
     }
     /// <summary>
     /// Searches for entities based on the provided search request.
@@ -195,7 +196,7 @@ public partial class BaseRepository<TModel, TEntity> : IDataRepository<TModel> w
     /// <param name="request"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public async Task<SearchResponse<TModel>> SearchAsync(SearchRequest<TModel> request, CancellationToken cancellationToken = default)
+    public async virtual  Task<SearchResponse<TModel>> SearchAsync(SearchRequest<TModel> request, CancellationToken cancellationToken = default)
     {
         var query = _dbSet.AsQueryable();
 
@@ -227,7 +228,7 @@ public partial class BaseRepository<TModel, TEntity> : IDataRepository<TModel> w
     /// <returns></returns>
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="KeyNotFoundException"></exception>
-    public async Task<TModel> UpdateAsync(Guid id, TModel model, CancellationToken cancellationToken = default)
+    public async virtual  Task<TModel> UpdateAsync(Guid id, TModel model, CancellationToken cancellationToken = default)
     {
         if (model == null) throw new ArgumentNullException(nameof(model));
 

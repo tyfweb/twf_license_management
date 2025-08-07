@@ -83,6 +83,14 @@ public interface IUserProfileRepository : IDataRepository<UserProfile>
     /// <returns></returns>
     Task<bool> ValidatePasswordAsync(string username, string password);
     /// <summary>
+    /// Updates the user's password
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="newPassword"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    Task<bool> UpdatePasswordAsync(Guid userId, string newPassword, CancellationToken cancellationToken = default);
+    /// <summary>
     /// Gets a user profile by ID
     /// </summary>
     /// <param name="userId"></param>

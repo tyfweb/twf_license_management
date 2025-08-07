@@ -3,8 +3,6 @@ using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using TechWayFit.Licensing.Management.Infrastructure.Data.Context;
-using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.User;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Core.Models.User;
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Data;
@@ -51,23 +49,7 @@ public class UserService : IUserService
                 page,
                 pageSize
             );
-            return [.. users.Users.Select(u => new UserProfile
-            {
-                UserId = u.Id,
-                UserName = u.UserName,
-                FullName = u.FullName,
-                Email = u.Email,
-                Department = u.Department,
-                IsAdmin = u.IsAdmin,
-                IsLocked = u.IsLocked,
-                CreatedOn = u.CreatedOn,
-                UpdatedOn = u.UpdatedOn,
-                Roles = [.. u.UserRoles.Select(ur => new UserRole
-                {
-                    RoleId = ur.RoleId,
-                    RoleName = ur.Role.RoleName
-                })]
-            })];
+            return users.Users ;
         }
         catch (Exception ex)
         {
@@ -107,7 +89,7 @@ public class UserService : IUserService
         try
         {
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
-            return user != null ? MapToUserProfile(user) : null;
+            return user ;
         }
         catch (Exception ex)
         {
@@ -121,7 +103,7 @@ public class UserService : IUserService
         try
         {
             var user = await _unitOfWork.Users.GetByUsernameAsync(username);
-            return user != null ? MapToUserProfile(user) : null;
+            return user;
         }
         catch (Exception ex)
         {
@@ -135,7 +117,7 @@ public class UserService : IUserService
         try
         {
             var user = await _unitOfWork.Users.GetByEmailAsync(email);
-            return user != null ? MapToUserProfile(user) : null;
+            return user;
         }
         catch (Exception ex)
         {
@@ -182,32 +164,26 @@ public class UserService : IUserService
                 return (false, "One or more selected roles do not exist", null);
             }
 
-            // Create password hash and salt
-            var (hash, salt) = SecurityHelper.HashPassword(password);
-
             // Create user entity
-            var userEntity = new UserProfileEntity
+            var userEntity = new UserProfile
             {
-                Id = Guid.NewGuid(),
-                UserName = username.Trim(),
-                PasswordHash = hash,
-                PasswordSalt = salt,
+                UserId = Guid.NewGuid(),
+                UserName = username.Trim(), 
                 FullName = fullName.Trim(),
                 Email = email.Trim().ToLower(),
                 Department = department?.Trim(),
-                IsAdmin = isAdmin,
-                CreatedBy = createdBy,
-                CreatedOn = DateTime.UtcNow
+                Password= password,
+                IsAdmin = isAdmin
             };
 
-            await _unitOfWork.Users.AddAsync(userEntity);
+           var userProfile= await _unitOfWork.Users.AddAsync(userEntity);
 
             // Create role mappings
             foreach (var roleId in roleIds)
             {
-                var roleMapping = new UserRoleMappingEntity
+                var roleMapping = new UserRoleMapping
                 {
-                    UserId = userEntity.Id,
+                    UserId = userProfile.UserId,
                     RoleId = roleId,
                     AssignedDate = DateTime.UtcNow,
                     CreatedBy = createdBy,
@@ -243,7 +219,7 @@ public class UserService : IUserService
         try
         {
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
-            if (user == null || user.IsDeleted)
+            if (user == null || user.Audit.IsDeleted)
             {
                 return (false, "User not found");
             }
@@ -281,9 +257,7 @@ public class UserService : IUserService
             user.FullName = fullName.Trim();
             user.Email = email.Trim().ToLower();
             user.Department = department?.Trim();
-            user.IsAdmin = isAdmin;
-            user.UpdatedBy = updatedBy;
-            user.UpdatedOn = DateTime.UtcNow;
+            user.IsAdmin = isAdmin; 
 
             // Update role mappings
             await UpdateUserRolesAsync(userId, roleIds, updatedBy);
@@ -305,28 +279,22 @@ public class UserService : IUserService
         try
         {
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
-            if (user == null || user.IsDeleted)
+            if (user == null || user.Audit.IsDeleted)
             {
                 return (false, "User not found");
             }
 
-            // Soft delete
-            user.IsDeleted = true;
-            user.IsActive = false;
-            user.UpdatedBy = deletedBy;
-            user.UpdatedOn = DateTime.UtcNow;
+            
 
             // Deactivate role mappings
             var roleMappings = await _unitOfWork.UserRoleMappings.GetByUserIdAsync(userId);
 
             foreach (var mapping in roleMappings)
             {
-                mapping.IsActive = false;
-                mapping.UpdatedBy = deletedBy;
-                mapping.UpdatedOn = DateTime.UtcNow;
+                await _unitOfWork.UserRoleMappings.DeleteAsync(mapping.MappingId);
             }
-
-            await _unitOfWork.SaveChangesAsync();
+            // Soft delete
+            await _unitOfWork.Users.DeleteAsync(user.UserId); 
 
             _logger.LogInformation("User deleted successfully: {UserId} by {DeletedBy}", userId, deletedBy);
             return (true, "User deleted successfully");
@@ -343,23 +311,20 @@ public class UserService : IUserService
         try
         {
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
-            if (user == null || user.IsDeleted)
+            if (user == null || user.Audit.IsDeleted)
             {
                 return (false, "User not found");
             }
 
             user.IsLocked = isLocked;
-            user.LockedDate = isLocked ? DateTime.UtcNow : null;
-            user.UpdatedBy = updatedBy;
-            user.UpdatedOn = DateTime.UtcNow;
+            user.LockedDate = isLocked ? DateTime.UtcNow : null; 
 
             // Reset failed login attempts when unlocking
             if (!isLocked)
             {
                 user.FailedLoginAttempts = 0;
             }
-
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.Users.UpdateAsync(user.UserId,user); 
 
             var action = isLocked ? "locked" : "unlocked";
             _logger.LogInformation("User {Action}: {UserId} by {UpdatedBy}", action, userId, updatedBy);
@@ -377,33 +342,23 @@ public class UserService : IUserService
         try
         {
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
-            if (user == null || user.IsDeleted)
+            if (user == null || user.Audit.IsDeleted)
             {
                 return (false, "User not found");
             }
-
-            // Verify current password
-            if (!SecurityHelper.VerifyPassword(currentPassword, user.PasswordHash, user.PasswordSalt))
+            if (await _unitOfWork.Users.ValidatePasswordAsync(user.UserName, currentPassword))
             {
-                return (false, "Current password is incorrect");
+                    return (false, "Current password is incorrect");                
             }
 
             // Validate new password
-            var passwordValidation = ValidatePassword(newPassword);
+                var passwordValidation = ValidatePassword(newPassword);
             if (!passwordValidation.IsValid)
             {
                 return (false, passwordValidation.Message);
             }
 
-            // Hash new password
-            var (hash, salt) = SecurityHelper.HashPassword(newPassword);
-
-            user.PasswordHash = hash;
-            user.PasswordSalt = salt;
-            user.UpdatedBy = updatedBy;
-            user.UpdatedOn = DateTime.UtcNow;
-
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.Users.UpdatePasswordAsync(userId, newPassword);
 
             _logger.LogInformation("Password changed for user: {UserId} by {UpdatedBy}", userId, updatedBy);
             return (true, "Password changed successfully");
@@ -420,24 +375,15 @@ public class UserService : IUserService
         try
         {
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
-            if (user == null || user.IsDeleted)
+            if (user == null || user.Audit.IsDeleted)
             {
                 return (false, "User not found", null);
             }
 
             // Generate temporary password
             var tempPassword = SecurityHelper.GenerateTemporaryPassword();
-            var (hash, salt) = SecurityHelper.HashPassword(tempPassword);
-
-            user.PasswordHash = hash;
-            user.PasswordSalt = salt;
-            user.UpdatedBy = resetBy;
-            user.UpdatedOn = DateTime.UtcNow;
-            user.FailedLoginAttempts = 0;
-            user.IsLocked = false;
-            user.LockedDate = null;
-
-            await _unitOfWork.SaveChangesAsync();
+            
+            await _unitOfWork.Users.UpdatePasswordAsync(userId, tempPassword);
 
             _logger.LogInformation("Password reset for user: {UserId} by {ResetBy}", userId, resetBy);
             return (true, "Password reset successfully", tempPassword);
@@ -463,8 +409,8 @@ public class UserService : IUserService
             {
                 return (false, null, "Account is locked. Please contact administrator.");
             }
-
-            if (!SecurityHelper.VerifyPassword(password, user.PasswordHash, user.PasswordSalt))
+            var passworValid = await _unitOfWork.Users.ValidatePasswordAsync(username, password);
+            if (!passworValid)
             {
                 // Increment failed login attempts
                 user.FailedLoginAttempts++;
@@ -476,16 +422,15 @@ public class UserService : IUserService
                     user.LockedDate = DateTime.UtcNow;
                 }
 
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.Users.UpdateAsync(user.UserId, user);
                 return (false, null, "Invalid username or password");
             }
 
             // Successful login - reset failed attempts and update last login
             user.FailedLoginAttempts = 0;
             user.LastLoginDate = DateTime.UtcNow;
-            await _unitOfWork.SaveChangesAsync();
-
-            var userProfile = MapToUserProfile(user);
+            var userProfile  = await _unitOfWork.Users.UpdateAsync(user.UserId, user);
+ 
             return (true, userProfile, "Authentication successful");
         }
         catch (Exception ex)
@@ -505,7 +450,7 @@ public class UserService : IUserService
         {
             var roles = await _unitOfWork.UserRoles.GetActiveRolesAsync();
 
-            return roles.Select(MapToUserRole);
+            return roles;
         }
         catch (Exception ex)
         {
@@ -520,7 +465,7 @@ public class UserService : IUserService
         {
             var role = await _unitOfWork.UserRoles.GetByIdAsync(roleId);
 
-            return role != null ? MapToUserRole(role) : null;
+            return role;
         }
         catch (Exception ex)
         {
@@ -534,7 +479,7 @@ public class UserService : IUserService
         try
         {
             var role = await _unitOfWork.UserRoles.GetByNameAsync(roleName);
-            return role != null ? MapToUserRole(role) : null;
+            return role;
         }
         catch (Exception ex)
         {
@@ -558,22 +503,17 @@ public class UserService : IUserService
                 return (false, "Role name already exists", null);
             }
 
-            var roleEntity = new UserRoleEntity
+            var roleEntity = new UserRole
             {
-                Id = Guid.NewGuid(),
                 RoleName = roleName.Trim(),
                 RoleDescription = roleDescription?.Trim(),
-                IsAdmin = isAdmin,
-                CreatedBy = createdBy,
-                CreatedOn = DateTime.UtcNow
+                IsAdmin = isAdmin
             };
 
-            await _unitOfWork.UserRoles.AddAsync(roleEntity);
-            await _unitOfWork.SaveChangesAsync();
+            var createdRole = await _unitOfWork.UserRoles.AddAsync(roleEntity); 
 
             _logger.LogInformation("Role created successfully: {RoleName} by {CreatedBy}", roleName, createdBy);
 
-            var createdRole = MapToUserRole(roleEntity);
             return (true, "Role created successfully", createdRole);
         }
         catch (Exception ex)
@@ -600,7 +540,7 @@ public class UserService : IUserService
 
             // Check if role name already exists (excluding current role)
             var existingRole = await _unitOfWork.UserRoles.GetByNameAsync(roleName);
-            if (existingRole != null && existingRole.Id != roleId)
+            if (existingRole != null && existingRole.RoleId != roleId)
             {
                 return (false, "Role name already exists");
             }
@@ -691,7 +631,7 @@ public class UserService : IUserService
         {
             var userRoles = await _unitOfWork.UserRoleMappings.GetByUserIdAsync(userId);
 
-            return userRoles.Select(x => MapToUserRole(x.Role));
+            return userRoles?.Select(x => x.Role).Where(role => role != null)!;
         }
         catch (Exception ex)
         {
@@ -710,7 +650,7 @@ public class UserService : IUserService
         {
             // Check if user exists
             var userExists = await _unitOfWork.Users.GetByIdAsync(userId);
-            if (!userExists?.IsActive ?? false)
+            if (!userExists?.Audit.IsActive ?? false)
             {
                 return (false, "User not found");
             }
@@ -743,7 +683,7 @@ public class UserService : IUserService
             else
             {
                 // Create new mapping
-                var roleMapping = new UserRoleMappingEntity
+                var roleMapping = new UserRoleMapping
                 {
                     UserId = userId,
                     RoleId = roleId,
@@ -754,8 +694,7 @@ public class UserService : IUserService
                 };
                 await _unitOfWork.UserRoleMappings.AddAsync(roleMapping);
             }
-
-            await _unitOfWork.SaveChangesAsync();
+ 
 
             _logger.LogInformation("Role assigned to user: {UserId} -> {RoleId} by {AssignedBy}", userId, roleId, assignedBy);
             return (true, "Role assigned successfully");
@@ -783,7 +722,7 @@ public class UserService : IUserService
             roleMapping.UpdatedBy = removedBy;
             roleMapping.UpdatedOn = DateTime.UtcNow;
 
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.UserRoleMappings.UpdateAsync(roleMapping.MappingId, roleMapping);
 
             _logger.LogInformation("Role removed from user: {UserId} -> {RoleId} by {RemovedBy}", userId, roleId, removedBy);
             return (true, "Role removed successfully");
@@ -865,7 +804,7 @@ public class UserService : IUserService
         {
             var user = await _unitOfWork.Users.GetByUsernameAsync(username);
 
-            if (excludeUserId.HasValue && user?.Id == excludeUserId.Value)
+            if (excludeUserId.HasValue && user?.UserId == excludeUserId.Value)
             {
                 return true;
             }
@@ -890,7 +829,7 @@ public class UserService : IUserService
                 return true;
             }
 
-            if (excludeUserId.HasValue && user.Id == excludeUserId.Value)
+            if (excludeUserId.HasValue && user.UserId == excludeUserId.Value)
             {
                 return true;
             }
@@ -953,47 +892,7 @@ public class UserService : IUserService
 
     #region Private Helper Methods
 
-    private static UserProfile MapToUserProfile(UserProfileEntity entity)
-    {
-        return new UserProfile
-        {
-            UserId = entity.Id,
-            UserName = entity.UserName,
-            FullName = entity.FullName,
-            Email = entity.Email,
-            Department = entity.Department,
-            IsLocked = entity.IsLocked,
-            IsDeleted = entity.IsDeleted,
-            IsAdmin = entity.IsAdmin,
-            LastLoginDate = entity.LastLoginDate,
-            FailedLoginAttempts = entity.FailedLoginAttempts,
-            LockedDate = entity.LockedDate,
-            CreatedOn = entity.CreatedOn,
-            CreatedBy = entity.CreatedBy,
-            UpdatedOn = entity.UpdatedOn,
-            UpdatedBy = entity.UpdatedBy,
-            IsActive = entity.IsActive,
-            Roles = entity.UserRoles?.Where(ur => ur.IsActive && ur.Role.IsActive)
-                   .Select(ur => MapToUserRole(ur.Role))
-                   .ToList() ?? new List<UserRole>()
-        };
-    }
-
-    private static UserRole MapToUserRole(UserRoleEntity entity)
-    {
-        return new UserRole
-        {
-            RoleId = entity.Id,
-            RoleName = entity.RoleName,
-            RoleDescription = entity.RoleDescription,
-            IsAdmin = entity.IsAdmin,
-            CreatedOn = entity.CreatedOn,
-            CreatedBy = entity.CreatedBy,
-            UpdatedOn = entity.UpdatedOn,
-            UpdatedBy = entity.UpdatedBy,
-            IsActive = entity.IsActive
-        };
-    }
+    
 
     private (bool IsValid, string Message) ValidateUserInput(string username, string email, string? password = null)
     {

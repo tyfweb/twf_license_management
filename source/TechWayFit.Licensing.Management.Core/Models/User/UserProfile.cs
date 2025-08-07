@@ -28,16 +28,7 @@ public class UserProfile
     public DateTime? LockedDate { get; set; }
     public bool IsAdmin { get; set; }
 
-    // Aliases for View compatibility
-    public DateTime CreatedDate { 
-        get => Audit.CreatedOn; 
-        set => Audit.CreatedOn = value; 
-    }
-    
-    public Guid UserProfileId { 
-        get => UserId; 
-        set => UserId = value; 
-    }
+    public string Password{ get; set; } = string.Empty;
 
     // Navigation
     public List<UserRole> Roles { get; set; } = new();
