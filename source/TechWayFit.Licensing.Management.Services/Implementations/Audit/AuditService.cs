@@ -74,7 +74,7 @@ public class AuditService : IAuditService
             {
                 Page = pageNumber,
                 PageSize = pageSize,
-                Filters = new Dictionary<string, string>
+                Filters = new Dictionary<string, object>
                 {
                     { "EntityType", "License" },
                     { "EntityId", licenseId.ToString() }
@@ -115,7 +115,7 @@ public class AuditService : IAuditService
             {
                 Page = pageNumber,
                 PageSize = pageSize,
-                Filters = new Dictionary<string, string>
+                Filters = new Dictionary<string, object>
                 {
                     { "EntityType", "EntityType" },
                     { "EntityId", consumerId.ToString() }
@@ -173,7 +173,7 @@ public class AuditService : IAuditService
             {
                 Page = pageNumber,
                 PageSize = pageSize,
-                Filters = new Dictionary<string, string>
+                Filters = new Dictionary<string, object>
                 {
                     { "ActionType", action }
                 },
@@ -266,7 +266,7 @@ public class AuditService : IAuditService
             {
                 Page = pageNumber,
                 PageSize = pageSize,
-                Filters = new Dictionary<string, string>
+                Filters = new Dictionary<string, object>
                 {
                     { "ActionType", "LOGIN" },
                     { "ActionType", "LOGOUT" },
@@ -334,7 +334,7 @@ public class AuditService : IAuditService
             {
                 Page = pageNumber,
                 PageSize = pageSize,
-                Filters = new Dictionary<string, string>(),
+                Filters = new Dictionary<string, object>(),
                 FromDate = fromDate,
                 ToDate = toDate         
             };
@@ -369,7 +369,7 @@ public class AuditService : IAuditService
         {
            SearchRequest<AuditEntry> searchRequest = new()
             {
-                Filters = new Dictionary<string, string>(),
+                Filters = new Dictionary<string, object>(),
                 FromDate = fromDate,
                 ToDate = toDate         
             };
@@ -438,7 +438,7 @@ public class AuditService : IAuditService
         {
             SearchRequest<AuditEntry> searchRequest = new()
             {
-                Filters = new Dictionary<string, string>(),
+                Filters = new Dictionary<string, object>(),
                 FromDate = fromDate,
                 ToDate = toDate         
             }; 

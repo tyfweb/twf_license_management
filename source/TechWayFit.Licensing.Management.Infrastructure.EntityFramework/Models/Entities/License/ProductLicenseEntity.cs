@@ -209,8 +209,8 @@ public class ProductLicenseEntity : AuditWorkflowEntity, IEntityMapper<ProductLi
             RevokedAt = this.RevokedAt,
             RevocationReason = this.RevocationReason,
             Metadata = !string.IsNullOrEmpty(this.MetadataJson)
-                        ? JsonSerializer.Deserialize<Dictionary<string, string>>(this.MetadataJson) ?? new Dictionary<string, string>()
-                        : new Dictionary<string, string>(),
+                        ? JsonSerializer.Deserialize<Dictionary<string, string>>(this.MetadataJson)?.ToDictionary(kvp => kvp.Key, kvp => (object)kvp.Value) ?? new Dictionary<string, object>()
+                        : new Dictionary<string, object>(),
             IsActive = this.IsActive,
             IsDeleted = this.IsDeleted,
             CreatedBy = this.CreatedBy,

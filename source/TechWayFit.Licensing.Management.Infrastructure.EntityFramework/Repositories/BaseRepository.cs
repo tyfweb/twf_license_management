@@ -245,7 +245,17 @@ public partial class BaseRepository<TModel, TEntity> : IDataRepository<TModel> w
         return Task.FromResult(entity.Map());
     }
 
+    public Task<bool> ActivateAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var entity = _dbSet.Find(id);
+        if (entity == null) return Task.FromResult(false);
 
+        entity.IsActive = true;
+        entity.UpdatedOn = DateTime.UtcNow;
+        entity.UpdatedBy = _userContext.UserName ?? "Anonymous";
+
+        return Task.FromResult(true);
+    }
 
     protected virtual IQueryable<TEntity> ApplyIncludes(IQueryable<TEntity> query)
     {
@@ -260,4 +270,6 @@ public partial class BaseRepository<TModel, TEntity> : IDataRepository<TModel> w
     {
         return query;
     }
+
+   
 }

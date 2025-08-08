@@ -196,7 +196,7 @@ public class UserService : IUserService
 
             _logger.LogInformation("User created successfully: {Username} by {CreatedBy}", username, createdBy);
 
-            var createdUser = await GetUserByIdAsync(userEntity.Id);
+            var createdUser = await GetUserByIdAsync(userEntity.UserId);
             return (true, "User created successfully", createdUser);
         }
         catch (Exception ex)

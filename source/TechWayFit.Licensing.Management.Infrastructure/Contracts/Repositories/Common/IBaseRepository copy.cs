@@ -80,6 +80,14 @@ public interface IDataRepository<TModel> where TModel : class
     /// <returns></returns>
     Task<bool> MarkAsInactiveAsync(Guid id, CancellationToken cancellationToken = default);
 
+      /// <summary>
+    /// Activates an entity by its ID.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    Task<bool> ActivateAsync(Guid id, CancellationToken cancellationToken = default);
+
     /// <summary>
     /// Searches for entities based on the provided search request.
     /// </summary>

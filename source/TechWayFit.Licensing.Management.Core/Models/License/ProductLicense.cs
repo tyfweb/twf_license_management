@@ -110,7 +110,7 @@ public class ProductLicense : BaseAuditModel
     /// <summary>
     /// Additional metadata for the license
     /// </summary>
-    public Dictionary<string, string> Metadata { get; set; } = new();
+    public Dictionary<string, object> Metadata { get; set; } = new();
     /// <summary>
     /// Is the license valid?
     /// </summary>
@@ -129,7 +129,7 @@ public class ProductLicense : BaseAuditModel
 
     public TechWayFit.Licensing.Core.Models.License ToLicenseModel()
     {
-        Metadata ??= new Dictionary<string, string>();
+        Metadata ??= new Dictionary<string, object>();
         Metadata.TryAdd("ProductTier", LicenseConsumer?.ProductTier?.Name ?? "Not Found");
         var licenseModel = new TechWayFit.Licensing.Core.Models.License
         {
@@ -140,7 +140,7 @@ public class ProductLicense : BaseAuditModel
             Status = Status,
             RevokedAt = RevokedAt,
             RevocationReason = RevocationReason,
-            Metadata = Metadata,
+            Metadata = Metadata?.ToDictionary(kvp => kvp.Key, kvp => kvp.Value?.ToString() ?? string.Empty) ?? new Dictionary<string, string>(),
             FeaturesIncluded = [],
             CreatedBy = IssuedBy,
             IssuedAt = KeyGeneratedAt,

@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Data;
+using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Configuration;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.SqlServer.Helpers;
 
@@ -25,7 +25,7 @@ public static class SqlServerDatabaseHelper
         try
         {
             using var scope = serviceProvider.CreateScope();
-            var context = scope.ServiceProvider.GetRequiredService<LicensingDbContext>();
+            var context = scope.ServiceProvider.GetRequiredService<EfCoreLicensingDbContext>();
 
             logger?.LogInformation("Ensuring SQL Server database is created...");
 
@@ -64,7 +64,7 @@ public static class SqlServerDatabaseHelper
         try
         {
             using var scope = serviceProvider.CreateScope();
-            var context = scope.ServiceProvider.GetRequiredService<LicensingDbContext>();
+            var context = scope.ServiceProvider.GetRequiredService<EfCoreLicensingDbContext>();
 
             logger?.LogInformation("Checking for pending SQL Server migrations...");
 
@@ -109,7 +109,7 @@ public static class SqlServerDatabaseHelper
         try
         {
             using var scope = serviceProvider.CreateScope();
-            var context = scope.ServiceProvider.GetRequiredService<LicensingDbContext>();
+            var context = scope.ServiceProvider.GetRequiredService<EfCoreLicensingDbContext>();
 
             var appliedMigrations = await context.Database.GetAppliedMigrationsAsync(cancellationToken);
             var pendingMigrations = await context.Database.GetPendingMigrationsAsync(cancellationToken);
@@ -148,7 +148,7 @@ public static class SqlServerDatabaseHelper
         try
         {
             using var scope = serviceProvider.CreateScope();
-            var context = scope.ServiceProvider.GetRequiredService<LicensingDbContext>();
+            var context = scope.ServiceProvider.GetRequiredService<EfCoreLicensingDbContext>();
 
             logger?.LogInformation("Starting SQL Server database seeding...");
 

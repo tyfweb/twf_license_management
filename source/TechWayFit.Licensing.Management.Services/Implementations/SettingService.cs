@@ -51,7 +51,7 @@ namespace TechWayFit.Licensing.Management.Services.Implementations
                 var entities = await _unitOfWork.Settings.GetAllGroupedByCategoryAsync();
                 var settings = entities.ToDictionary(
                     kvp => kvp.Key,
-                    kvp => kvp.Value.Select(e => e.ToModel())
+                    kvp => kvp.Value
                 );
 
                 // Cache the result
@@ -72,7 +72,7 @@ namespace TechWayFit.Licensing.Management.Services.Implementations
             try
             {
                 var entities = await _unitOfWork.Settings.GetByCategoryAsync(category);
-                return entities.Select(e => e.ToModel()).ToList();
+                return entities;
             }
             catch (Exception ex)
             {
@@ -86,7 +86,7 @@ namespace TechWayFit.Licensing.Management.Services.Implementations
             try
             {
                 var entity = await _unitOfWork.Settings.GetByKeyAsync(category, key);
-                return entity?.ToModel();
+                return entity;
             }
             catch (Exception ex)
             {
@@ -124,7 +124,7 @@ namespace TechWayFit.Licensing.Management.Services.Implementations
                 // Invalidate cache
                 InvalidateCache();
                 
-                return updatedEntity.ToModel();
+                return updatedEntity;
             }
             catch (Exception ex)
             {
@@ -142,8 +142,8 @@ namespace TechWayFit.Licensing.Management.Services.Implementations
                 
                 // Invalidate cache
                 InvalidateCache();
-                
-                return entities.Select(e => e.ToModel()).ToList();
+
+                return entities;
             }
             catch (Exception ex)
             {
@@ -164,7 +164,7 @@ namespace TechWayFit.Licensing.Management.Services.Implementations
                     InvalidateCache();
                 }
                 
-                return entity?.ToModel();
+                return entity;
             }
             catch (Exception ex)
             {
@@ -181,8 +181,8 @@ namespace TechWayFit.Licensing.Management.Services.Implementations
                 
                 // Invalidate cache
                 InvalidateCache();
-                
-                return entities.Select(e => e.ToModel()).ToList();
+
+                return entities;
             }
             catch (Exception ex)
             {
@@ -196,7 +196,7 @@ namespace TechWayFit.Licensing.Management.Services.Implementations
             try
             {
                 var entities = await _unitOfWork.Settings.SearchAsync(searchTerm);
-                return entities.Select(e => e.ToModel()).ToList();
+                return entities;
             }
             catch (Exception ex)
             {
@@ -290,7 +290,7 @@ namespace TechWayFit.Licensing.Management.Services.Implementations
             try
             {
                 var entities = await _unitOfWork.Settings.GetRequiringRestartAsync();
-                return entities.Select(e => e.ToModel()).ToList();
+                return entities;
             }
             catch (Exception ex)
             {
@@ -320,7 +320,7 @@ namespace TechWayFit.Licensing.Management.Services.Implementations
             try
             {
                 var entities = await _unitOfWork.Settings.GetAllAsync(CancellationToken.None);
-                var settings = entities.Select(e => e.ToModel()).ToList();
+                var settings = entities;
                 return JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true });
             }
             catch (Exception ex)
@@ -341,21 +341,13 @@ namespace TechWayFit.Licensing.Management.Services.Implementations
                 var restoredCount = 0;
 
                 foreach (var setting in settings)
-                {
-                    setting.UpdatedAt = DateTime.UtcNow;
-                    setting.UpdatedBy = updatedBy;
-
-                    var entity = SettingEntity.FromModel(setting);
+                { 
                     var existing = await _unitOfWork.Settings.GetByIdAsync(setting.SettingId);
 
                     if (existing != null)
                     {
-                        await _unitOfWork.Settings.UpdateAsync(entity);
-                    }
-                    else
-                    {
-                        await _unitOfWork.Settings.AddAsync(entity);
-                    }
+                        await _unitOfWork.Settings.UpdateAsync(existing.SettingId,existing);
+                    } 
 
                     restoredCount++;
                 }
@@ -374,7 +366,7 @@ namespace TechWayFit.Licensing.Management.Services.Implementations
             try
             {
                 var entities = await _unitOfWork.Settings.GetByTagsAsync(tags);
-                return entities.Select(e => e.ToModel()).ToList();
+                return entities;
             }
             catch (Exception ex)
             {
@@ -388,7 +380,7 @@ namespace TechWayFit.Licensing.Management.Services.Implementations
             try
             {
                 var entities = await _unitOfWork.Settings.GetByEnvironmentAsync(environment);
-                return entities.Select(e => e.ToModel()).ToList();
+                return entities;
             }
             catch (Exception ex)
             {

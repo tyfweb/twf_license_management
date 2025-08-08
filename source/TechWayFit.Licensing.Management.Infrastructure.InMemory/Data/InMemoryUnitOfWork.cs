@@ -9,6 +9,7 @@ using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Noti
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Product;
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Settings;
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.User;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Workflow;
 using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Repositories.Audit;
 using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Repositories.Consumer;
 using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Repositories.License;
@@ -16,6 +17,7 @@ using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Repositorie
 using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Repositories.Product;
 using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Repositories.Settings;
 using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Repositories.User;
+using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Repositories.Workflow;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.InMemory.Data;
 
@@ -44,6 +46,11 @@ public class InMemoryUnitOfWork : IUnitOfWork
     private ISettingRepository? _settings;
     private IUserRoleRepository? _userRoles;
     private IUserRoleMappingRepository? _userRoleMappings;
+    
+    // Workflow repositories
+    private IWorkflowHistoryRepository? _workflowHistory;
+    private IApprovalRepository<Core.Models.Consumer.ConsumerAccount>? _consumerAccountApprovals;
+    
     private readonly IUserContext _userContext;
 
     public InMemoryUnitOfWork(InMemoryLicensingDbContext context, IUserContext userContext)
@@ -96,6 +103,16 @@ public class InMemoryUnitOfWork : IUnitOfWork
 
     public IUserRoleMappingRepository UserRoleMappings => 
         _userRoleMappings ??= new EfCoreUserRoleMappingRepository(_context, _userContext);
+
+    #endregion
+
+    #region Workflow Repositories
+
+    public IWorkflowHistoryRepository WorkflowHistory => 
+        _workflowHistory ??= new EfCoreWorkflowHistoryRepository(_context, _userContext);
+
+    public IApprovalRepository<Core.Models.Consumer.ConsumerAccount> ConsumerAccountApprovals => 
+        _consumerAccountApprovals ??= new EfCoreConsumerAccountApprovalRepository(_context, _userContext);
 
     #endregion
 

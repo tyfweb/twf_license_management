@@ -90,7 +90,7 @@ public class ProductLicenseService : IProductLicenseService
             var signedLicense = await _licenseGenerator.GenerateLicenseAsync(generationRequest);
 
             var licenseId = Guid.NewGuid().ToString();            // Create license entity for database storage
-            var licenseEntity = new ProductLicenseEntity
+            var licenseEntity = new ProductLicense
             {
                 ProductId = request.ProductId,
                 ConsumerId = request.ConsumerId,
@@ -100,8 +100,8 @@ public class ProductLicenseService : IProductLicenseService
                 LicenseKey = signedLicense.LicenseData, // Store the signed license data
                 ValidFrom = generationRequest.ValidFrom,
                 ValidTo = generationRequest.ValidTo,
-                Status = LicenseStatus.Active.ToString(),
-                MetadataJson = SerializeMetadata(request.Metadata ?? new Dictionary<string, object>()),
+                Status = LicenseStatus.Active,
+                Metadata = request.Metadata,
                 CreatedBy = generatedBy,
                 CreatedOn = DateTime.UtcNow,
                 UpdatedBy = generatedBy,
@@ -113,7 +113,7 @@ public class ProductLicenseService : IProductLicenseService
             await _unitOfWork.SaveChangesAsync();
 
             // Map to model
-            var result = createdEntity.ToModel();
+            var result = createdEntity;
 
             _logger.LogInformation("Successfully generated cryptographically signed license with ID: {LicenseId}", result.LicenseId);
             return result;
@@ -138,18 +138,18 @@ public class ProductLicenseService : IProductLicenseService
             // TODO: Implement GetByLicenseKeyAsync in repository
             _logger.LogWarning("GetLicenseByKeyAsync using search - GetByLicenseKeyAsync repository method missing");
 
-            var searchRequest = new SearchRequest<ProductLicenseEntity>
+            var searchRequest = new SearchRequest<ProductLicense>
             {
-                Filters = new List<Expression<Func<ProductLicenseEntity, bool>>>
+                Filters = new Dictionary<string, object>
                 {
-                    l => l.LicenseKey == licenseKey
+                    { nameof(ProductLicense.LicenseKey), licenseKey }
                 }
             };
 
             var searchResult = await _unitOfWork.Licenses.SearchAsync(searchRequest);
             var entity = searchResult.Results.FirstOrDefault();
 
-            return entity?.ToModel();
+            return entity;
         }
         catch (Exception ex)
         {
@@ -230,7 +230,7 @@ public class ProductLicenseService : IProductLicenseService
             _logger.LogWarning("License with ID {LicenseId} not found", licenseId);
             return null;
         }
-        return response.ToModel();
+        return response;
     }
 
     public async Task<IEnumerable<ProductLicense>> GetLicensesByConsumerAsync(Guid consumerId, LicenseStatus? status = null, int pageNumber = 1, int pageSize = 50)
@@ -239,9 +239,9 @@ public class ProductLicenseService : IProductLicenseService
         if (response == null || !response.Any())
         {
             return Enumerable.Empty<ProductLicense>();
-        }
-        var productLicenses = response.Select(l => l.ToModel()).ToList();
-        return productLicenses
+        } 
+
+        return response
             .Where(l => !status.HasValue || l.Status == status.Value)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
@@ -470,27 +470,23 @@ public class ProductLicenseService : IProductLicenseService
 
     public async Task<IEnumerable<ProductLicense>> GetLicensesAsync(LicenseStatus? status = null, string? searchTerm = null, int pageNumber = 1, int pageSize = 50)
     {
-        SearchRequest<ProductLicenseEntity> searchRequest = new SearchRequest<ProductLicenseEntity>
+        SearchRequest<ProductLicense> searchRequest = new SearchRequest<ProductLicense>
         {
-            Filters = new List<Expression<Func<ProductLicenseEntity, bool>>>(),
+            Filters = new Dictionary<string, object>(),
             Page = pageNumber,
-            PageSize = pageSize
+            PageSize = pageSize,
+            Query= searchTerm
         };
 
         if (status.HasValue)
         {
-            searchRequest.Filters.Add(license => license.Status == status.Value.ToString());
+            searchRequest.Filters.Add("Status", status.Value.ToString());
         }
 
-        if (!string.IsNullOrWhiteSpace(searchTerm))
-        {
-            searchRequest.Filters.Add(license => 
-                (license.Consumer != null && license.Consumer.CompanyName != null && license.Consumer.CompanyName.Contains(searchTerm)) ||
-                (license.Product != null && license.Product.Name != null && license.Product.Name.Contains(searchTerm)));
-        }
 
-        return await _unitOfWork.Licenses.SearchAsync(searchRequest)
-            .ContinueWith(task => task.Result.Results.Select(license => license.ToModel()).ToList());
+
+        var result = await _unitOfWork.Licenses.SearchAsync(searchRequest);
+        return result.Results;
     }
 
 

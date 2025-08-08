@@ -143,16 +143,17 @@ public static class SqlServerServiceExtensions
     public static IServiceCollection AddSqlServerInfrastructureForTesting(
         this IServiceCollection services,
         string connectionString,
-        bool useInMemoryForTesting = false,
+        bool useTestDatabase = false,
         string testDatabaseName = "TestLicensingDb",
         Action<DbContextOptionsBuilder>? configureOptions = null)
     {
-        if (useInMemoryForTesting)
+        if (useTestDatabase)
         {
-            // Use in-memory database for testing
+            // Use separate SQL Server database for testing  
+            var testConnectionString = connectionString.Replace("Initial Catalog=", $"Initial Catalog={testDatabaseName}_");
             services.AddEfCoreInfrastructureBase(options =>
             {
-                options.UseInMemoryDatabase(testDatabaseName);
+                options.UseSqlServer(testConnectionString);
                 options.EnableSensitiveDataLogging();
                 options.EnableDetailedErrors();
                 configureOptions?.Invoke(options);

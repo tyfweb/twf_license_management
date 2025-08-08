@@ -4,8 +4,8 @@ using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Caching.Memory;
-using TechWayFit.Licensing.Core.Models;
-using TechWayFit.Licensing.Core.Services;
+using TechWayFit.Licensing.Management.Core.Models.License;
+using TechWayFit.Licensing.Management.Core.Contracts;
 
 namespace TechWayFit.Licensing.Validation.Services
 {

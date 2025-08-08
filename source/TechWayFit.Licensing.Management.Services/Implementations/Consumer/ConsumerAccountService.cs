@@ -240,20 +240,16 @@ public class ConsumerAccountService : IConsumerAccountService
             // TODO: Implement count methods in repository
             _logger.LogWarning("GetConsumerAccountCountAsync using search for counting - repository count methods missing");
             
-            var searchRequest = new SearchRequest<ConsumerAccountEntity>
+            var searchRequest = new SearchRequest<ConsumerAccount>
             {
-                Filters = new List<Expression<Func<ConsumerAccountEntity, bool>>>()
+                Filters = new Dictionary<string, object>(),
+                Query=searchTerm
             };
             
             // Apply basic filtering
             if (isActive.HasValue)
-                searchRequest.Filters.Add(e => e.IsActive == isActive.Value);
-            
-            if (!string.IsNullOrWhiteSpace(searchTerm))
-            {
-                searchRequest.Filters.Add(e => 
-                     EF.Functions.Like(e.CompanyName, $"%{searchTerm}%"));
-            }
+                searchRequest.Filters.Add("IsActive", isActive.Value);
+             
 
             var searchResult = await _unitOfWork.Consumers.SearchAsync(searchRequest);
             return searchResult.TotalCount;
@@ -282,14 +278,9 @@ public class ConsumerAccountService : IConsumerAccountService
             {
                 _logger.LogWarning("Consumer account not found for activation: {ConsumerId}", consumerId);
                 return false;
-            }
+            } 
 
-            entity.IsActive = true;
-            entity.ActivatedAt = DateTime.UtcNow;
-            entity.UpdatedBy = activatedBy;
-            entity.UpdatedOn = DateTime.UtcNow;
-
-            await _unitOfWork.Consumers.UpdateAsync(entity);
+            await _unitOfWork.Consumers.ActivateAsync(entity.Id);
             await _unitOfWork.SaveChangesAsync();
             
             _logger.LogInformation("Successfully activated consumer account: {ConsumerId}", consumerId);
@@ -320,15 +311,8 @@ public class ConsumerAccountService : IConsumerAccountService
                 _logger.LogWarning("Consumer account not found for deactivation: {ConsumerId}", consumerId);
                 return false;
             }
-
-            entity.IsActive = false;
-            entity.Notes = string.IsNullOrWhiteSpace(entity.Notes) 
-                ? $"Deactivated on {DateTime.UtcNow:yyyy-MM-dd}: {reason}"
-                : $"{entity.Notes}\nDeactivated on {DateTime.UtcNow:yyyy-MM-dd}: {reason}";
-            entity.UpdatedBy = deactivatedBy;
-            entity.UpdatedOn = DateTime.UtcNow;
-
-            await _unitOfWork.Consumers.UpdateAsync(entity);
+ 
+            await _unitOfWork.Consumers.DeleteAsync(entity.Id);
             await _unitOfWork.SaveChangesAsync();
             
             _logger.LogInformation("Successfully deactivated consumer account: {ConsumerId}", consumerId);
@@ -362,11 +346,9 @@ public class ConsumerAccountService : IConsumerAccountService
 
             // TODO: Map status to entity when Status property exists
             _logger.LogWarning("Status update not fully implemented - Status property missing in entity");
-            
-            entity.UpdatedBy = updatedBy;
-            entity.UpdatedOn = DateTime.UtcNow;
+             
 
-            await _unitOfWork.Consumers.UpdateAsync(entity);
+            await _unitOfWork.Consumers.UpdateAsync(entity.Id, entity);
             await _unitOfWork.SaveChangesAsync();
             
             _logger.LogInformation("Successfully updated consumer status: {ConsumerId} to {Status}", consumerId, status);
