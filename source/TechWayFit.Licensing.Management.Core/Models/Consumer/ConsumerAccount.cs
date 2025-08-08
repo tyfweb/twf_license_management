@@ -11,7 +11,7 @@ public class ConsumerAccount : IWorkflowCapable
         Address = new Address();
         Audit.IsActive = true;
     }
-    
+
     /// <summary>
     /// Unique identifier for the consumer
     /// </summary>
@@ -25,10 +25,10 @@ public class ConsumerAccount : IWorkflowCapable
     /// <summary>
     /// Implementation of IWorkflowCapable.Id - maps to ConsumerId
     /// </summary>
-    public Guid Id 
-    { 
-        get => ConsumerId; 
-        set => ConsumerId = value; 
+    public Guid Id
+    {
+        get => ConsumerId;
+        set => ConsumerId = value;
     }
 
     /// <summary>
@@ -40,22 +40,22 @@ public class ConsumerAccount : IWorkflowCapable
     /// Workflow information for the consumer account
     /// </summary>
     public WorkflowInfo Workflow { get; set; } = new();
-    
+
     /// <summary>
     ///  Company or organization name
     /// </summary>
     public string CompanyName { get; set; } = string.Empty;
-    
+
     /// <summary>
     /// Account code for the consumer
     /// </summary>
     public string? AccountCode { get; set; }
-    
+
     /// <summary>
     /// Primary contact information for the consumer
     /// </summary>
     public ContactPerson PrimaryContact { get; set; } = new();
-    
+
     /// <summary>
     /// Secondary contact information for the consumer (optional)
     /// </summary>
@@ -64,26 +64,27 @@ public class ConsumerAccount : IWorkflowCapable
     /// <summary>
     /// Date when the consumer was created
     /// </summary>
-    public DateTime CreatedAt { 
-        get => Audit.CreatedOn; 
-        set => Audit.CreatedOn = value; 
+    public DateTime CreatedAt
+    {
+        get => Audit.CreatedOn;
+        set => Audit.CreatedOn = value;
     }
-    
+
     /// <summary>
     /// Date when the consumer was activated
     /// </summary>
     public DateTime ActivatedAt { get; set; } = DateTime.UtcNow;
-    
+
     /// <summary>
     /// Subscription end date
     /// </summary>
     public DateTime? SubscriptionEnd { get; set; }
-    
+
     /// <summary>
     /// Address of the consumer
     /// </summary>
     public Address Address { get; set; } = new();
-    
+
     /// <summary>
     /// Additional notes or comments about the consumer
     /// </summary>

@@ -5,8 +5,7 @@ using TechWayFit.Licensing.Management.Core.Models.Product;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Web.ViewModels.Product;
 using TechWayFit.Licensing.Management.Web.ViewModels.Shared;
-using TechWayFit.Licensing.Management.Web.Helpers;
-using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.Products;
+using TechWayFit.Licensing.Management.Web.Helpers; 
 using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 
