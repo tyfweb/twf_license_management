@@ -4,10 +4,10 @@ using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Comm
 namespace TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Workflow;
 
 /// <summary>
-/// Repository interface for managing entity approval workflows at the database level
+/// Repository interface for managing entity approval workflows
 /// </summary>
-/// <typeparam name="TEntity">Type of the database entity that inherits from BaseDbEntity</typeparam>
-public interface IApprovalRepository<TEntity> : IBaseRepository<TEntity> where TEntity : class
+/// <typeparam name="TModel">Type of the domain model that implements IWorkflowCapable</typeparam>
+public interface IApprovalRepository<TModel> : IBaseRepository<TModel> where TModel : class, IWorkflowCapable
 {
     /// <summary>
     /// Get all entities with a specific status
@@ -17,7 +17,7 @@ public interface IApprovalRepository<TEntity> : IBaseRepository<TEntity> where T
     /// <param name="pageSize">Number of items per page</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>List of entities with the specified status</returns>
-    Task<IEnumerable<TEntity>> GetByStatusAsync(EntityStatus status, int pageNumber = 1, int pageSize = 50, CancellationToken cancellationToken = default);
+    Task<IEnumerable<TModel>> GetByStatusAsync(EntityStatus status, int pageNumber = 1, int pageSize = 50, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get all entities pending approval
@@ -26,7 +26,7 @@ public interface IApprovalRepository<TEntity> : IBaseRepository<TEntity> where T
     /// <param name="pageSize">Number of items per page</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>List of entities pending approval</returns>
-    Task<IEnumerable<TEntity>> GetPendingApprovalAsync(int pageNumber = 1, int pageSize = 50, CancellationToken cancellationToken = default);
+    Task<IEnumerable<TModel>> GetPendingApprovalAsync(int pageNumber = 1, int pageSize = 50, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get entities created or submitted by a specific user
@@ -37,18 +37,17 @@ public interface IApprovalRepository<TEntity> : IBaseRepository<TEntity> where T
     /// <param name="pageSize">Number of items per page</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>List of entities for the user</returns>
-    Task<IEnumerable<TEntity>> GetUserEntitiesAsync(string userId, EntityStatus? status = null, int pageNumber = 1, int pageSize = 50, CancellationToken cancellationToken = default);
+    Task<IEnumerable<TModel>> GetUserEntitiesAsync(string userId, EntityStatus? status = null, int pageNumber = 1, int pageSize = 50, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Update entity status
     /// </summary>
     /// <param name="entityId">ID of the entity</param>
     /// <param name="newStatus">New status</param>
-    /// <param name="actionBy">User performing the action</param>
     /// <param name="comments">Optional comments</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Updated entity</returns>
-    Task<TEntity> UpdateStatusAsync(Guid entityId, EntityStatus newStatus, string actionBy, string? comments = null, CancellationToken cancellationToken = default);
+    Task<TModel> UpdateStatusAsync(Guid entityId, EntityStatus newStatus, string? comments = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get count of entities by status
@@ -71,5 +70,5 @@ public interface IApprovalRepository<TEntity> : IBaseRepository<TEntity> where T
     /// <param name="userId">User ID who submitted the entities</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>List of entities submitted by the user that are pending</returns>
-    Task<IEnumerable<TEntity>> GetUserPendingSubmissionsAsync(string userId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<TModel>> GetUserPendingSubmissionsAsync(string userId, CancellationToken cancellationToken = default);
 }

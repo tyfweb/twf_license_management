@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Logging;
+using TechWayFit.Licensing.Management.Core.Contracts;
 using TechWayFit.Licensing.Management.Core.Contracts.Services.Workflow;
 using TechWayFit.Licensing.Management.Core.Models.Common;
+using TechWayFit.Licensing.Management.Core.Models.Workflow;
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Workflow;
 
 namespace TechWayFit.Licensing.Management.Services.Implementations.Workflow;
@@ -9,44 +11,39 @@ namespace TechWayFit.Licensing.Management.Services.Implementations.Workflow;
 /// Generic workflow service implementation for managing entity approval workflows
 /// </summary>
 /// <typeparam name="TModel">Core model type that implements IWorkflowCapable</typeparam>
-/// <typeparam name="TEntity">Database entity type</typeparam>
-public class WorkflowService<TModel, TEntity> : IWorkflowService<TModel> 
-    where TModel : IWorkflowCapable 
-    where TEntity : class
+public class WorkflowService<TModel> : IWorkflowService<TModel> 
+    where TModel : class, IWorkflowCapable
 {
-    private readonly IApprovalRepository<TEntity> _repository;
+    private readonly IApprovalRepository<TModel> _repository;
     private readonly IWorkflowHistoryRepository _historyRepository;
-    private readonly ILogger<WorkflowService<TModel, TEntity>> _logger;
-    private readonly Func<TEntity, TModel> _toModel;
-    private readonly Func<TModel, TEntity> _toEntity;
+    private readonly IUserContext _userContext;
+    private readonly ILogger<WorkflowService<TModel>> _logger;
 
     public WorkflowService(
-        IApprovalRepository<TEntity> repository,
+        IApprovalRepository<TModel> repository,
         IWorkflowHistoryRepository historyRepository,
-        ILogger<WorkflowService<TModel, TEntity>> logger,
-        Func<TEntity, TModel> toModel,
-        Func<TModel, TEntity> toEntity)
+        IUserContext userContext,
+        ILogger<WorkflowService<TModel>> logger)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         _historyRepository = historyRepository ?? throw new ArgumentNullException(nameof(historyRepository));
+        _userContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _toModel = toModel ?? throw new ArgumentNullException(nameof(toModel));
-        _toEntity = toEntity ?? throw new ArgumentNullException(nameof(toEntity));
     }
 
-    public async Task<TModel> SubmitForApprovalAsync(Guid entityId, string submittedBy, CancellationToken cancellationToken = default)
+    public async Task<TModel> SubmitForApprovalAsync(Guid entityId, CancellationToken cancellationToken = default)
     {
         try
         {
-            _logger.LogInformation("Submitting entity {EntityId} for approval by {UserId}", entityId, submittedBy);
+            _logger.LogInformation("Submitting entity {EntityId} for approval", entityId);
 
-            var entity = await _repository.UpdateStatusAsync(entityId, EntityStatus.PendingApproval, submittedBy, 
+            var entity = await _repository.UpdateStatusAsync(entityId, EntityStatus.PendingApproval, 
                 "Submitted for approval", cancellationToken);
 
             await RecordWorkflowActionAsync(entityId, EntityStatus.Draft, EntityStatus.PendingApproval, 
-                submittedBy, "Submitted for approval", cancellationToken);
+                _userContext.UserName ?? "Unknown", "Submitted for approval", cancellationToken);
 
-            return _toModel(entity);
+            return entity;
         }
         catch (Exception ex)
         {
@@ -55,19 +52,19 @@ public class WorkflowService<TModel, TEntity> : IWorkflowService<TModel>
         }
     }
 
-    public async Task<TModel> ApproveAsync(Guid entityId, string approvedBy, string? comments = null, CancellationToken cancellationToken = default)
+    public async Task<TModel> ApproveAsync(Guid entityId, string? comments = null, CancellationToken cancellationToken = default)
     {
         try
         {
-            _logger.LogInformation("Approving entity {EntityId} by {UserId}", entityId, approvedBy);
+            _logger.LogInformation("Approving entity {EntityId} by {UserId}", entityId, _userContext.UserName);
 
-            var entity = await _repository.UpdateStatusAsync(entityId, EntityStatus.Approved, approvedBy, 
+            var entity = await _repository.UpdateStatusAsync(entityId, EntityStatus.Approved, 
                 comments ?? "Approved", cancellationToken);
 
             await RecordWorkflowActionAsync(entityId, EntityStatus.PendingApproval, EntityStatus.Approved, 
-                approvedBy, comments ?? "Approved", cancellationToken);
+                _userContext.UserName ?? "Unknown", comments ?? "Approved", cancellationToken);
 
-            return _toModel(entity);
+            return entity;
         }
         catch (Exception ex)
         {
@@ -76,19 +73,19 @@ public class WorkflowService<TModel, TEntity> : IWorkflowService<TModel>
         }
     }
 
-    public async Task<TModel> RejectAsync(Guid entityId, string rejectedBy, string reason, CancellationToken cancellationToken = default)
+    public async Task<TModel> RejectAsync(Guid entityId, string reason, CancellationToken cancellationToken = default)
     {
         try
         {
-            _logger.LogInformation("Rejecting entity {EntityId} by {UserId}", entityId, rejectedBy);
+            _logger.LogInformation("Rejecting entity {EntityId} by {UserId}", entityId, _userContext.UserName);
 
-            var entity = await _repository.UpdateStatusAsync(entityId, EntityStatus.Rejected, rejectedBy, 
+            var entity = await _repository.UpdateStatusAsync(entityId, EntityStatus.Rejected, 
                 reason, cancellationToken);
 
             await RecordWorkflowActionAsync(entityId, EntityStatus.PendingApproval, EntityStatus.Rejected, 
-                rejectedBy, reason, cancellationToken);
+                _userContext.UserName ?? "Unknown", reason, cancellationToken);
 
-            return _toModel(entity);
+            return entity;
         }
         catch (Exception ex)
         {
@@ -97,19 +94,19 @@ public class WorkflowService<TModel, TEntity> : IWorkflowService<TModel>
         }
     }
 
-    public async Task<TModel> WithdrawAsync(Guid entityId, string withdrawnBy, string? reason = null, CancellationToken cancellationToken = default)
+    public async Task<TModel> WithdrawAsync(Guid entityId, string? reason = null, CancellationToken cancellationToken = default)
     {
         try
         {
-            _logger.LogInformation("Withdrawing entity {EntityId} by {UserId}", entityId, withdrawnBy);
+            _logger.LogInformation("Withdrawing entity {EntityId} by {UserId}", entityId, _userContext.UserName);
 
-            var entity = await _repository.UpdateStatusAsync(entityId, EntityStatus.Withdrawn, withdrawnBy, 
+            var entity = await _repository.UpdateStatusAsync(entityId, EntityStatus.Withdrawn, 
                 reason ?? "Withdrawn by submitter", cancellationToken);
 
             await RecordWorkflowActionAsync(entityId, EntityStatus.PendingApproval, EntityStatus.Withdrawn, 
-                withdrawnBy, reason ?? "Withdrawn by submitter", cancellationToken);
+                _userContext.UserName ?? "Unknown", reason ?? "Withdrawn by submitter", cancellationToken);
 
-            return _toModel(entity);
+            return entity;
         }
         catch (Exception ex)
         {
@@ -123,7 +120,7 @@ public class WorkflowService<TModel, TEntity> : IWorkflowService<TModel>
         try
         {
             var entities = await _repository.GetPendingApprovalAsync(pageNumber, pageSize, cancellationToken);
-            return entities.Select(_toModel);
+            return entities;
         }
         catch (Exception ex)
         {
@@ -137,7 +134,7 @@ public class WorkflowService<TModel, TEntity> : IWorkflowService<TModel>
         try
         {
             var entities = await _repository.GetUserEntitiesAsync(userId, status, pageNumber, pageSize, cancellationToken);
-            return entities.Select(_toModel);
+            return entities;
         }
         catch (Exception ex)
         {
@@ -151,7 +148,7 @@ public class WorkflowService<TModel, TEntity> : IWorkflowService<TModel>
         try
         {
             var historyEntities = await _historyRepository.GetByEntityIdAsync(entityId, cancellationToken);
-            return historyEntities.Select(h => h.ToModel()).OrderByDescending(h => h.ActionDate);
+            return historyEntities.OrderByDescending(h => h.ActionDate);
         }
         catch (Exception ex)
         {
@@ -167,7 +164,7 @@ public class WorkflowService<TModel, TEntity> : IWorkflowService<TModel>
         return Task.FromResult(!string.IsNullOrWhiteSpace(userId) && userId != "Anonymous");
     }
 
-    public async Task<TModel> MoveToNextStatusAsync(Guid entityId, string actionBy, string? comments = null, CancellationToken cancellationToken = default)
+    public async Task<TModel> MoveToNextStatusAsync(Guid entityId, string? comments = null, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -176,16 +173,15 @@ public class WorkflowService<TModel, TEntity> : IWorkflowService<TModel>
             if (entity == null)
                 throw new InvalidOperationException($"Entity with ID {entityId} not found");
 
-            var currentModel = _toModel(entity);
-            var nextStatus = GetNextStatus(currentModel.Workflow.Status);
+            var nextStatus = GetNextStatus(entity.Workflow.Status);
 
-            var updatedEntity = await _repository.UpdateStatusAsync(entityId, nextStatus, actionBy, 
+            var updatedEntity = await _repository.UpdateStatusAsync(entityId, nextStatus, 
                 comments ?? $"Moved to {nextStatus}", cancellationToken);
 
-            await RecordWorkflowActionAsync(entityId, currentModel.Workflow.Status, nextStatus, 
-                actionBy, comments ?? $"Moved to {nextStatus}", cancellationToken);
+            await RecordWorkflowActionAsync(entityId, entity.Workflow.Status, nextStatus, 
+                _userContext.UserName ?? "Unknown", comments ?? $"Moved to {nextStatus}", cancellationToken);
 
-            return _toModel(updatedEntity);
+            return updatedEntity;
         }
         catch (Exception ex)
         {
@@ -194,7 +190,7 @@ public class WorkflowService<TModel, TEntity> : IWorkflowService<TModel>
         }
     }
 
-    public async Task<TModel> MoveToPreviousStatusAsync(Guid entityId, string actionBy, string? comments = null, CancellationToken cancellationToken = default)
+    public async Task<TModel> MoveToPreviousStatusAsync(Guid entityId, string? comments = null, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -203,16 +199,15 @@ public class WorkflowService<TModel, TEntity> : IWorkflowService<TModel>
             if (entity == null)
                 throw new InvalidOperationException($"Entity with ID {entityId} not found");
 
-            var currentModel = _toModel(entity);
-            var previousStatus = GetPreviousStatus(currentModel.Workflow.Status);
+            var previousStatus = GetPreviousStatus(entity.Workflow.Status);
 
-            var updatedEntity = await _repository.UpdateStatusAsync(entityId, previousStatus, actionBy, 
+            var updatedEntity = await _repository.UpdateStatusAsync(entityId, previousStatus, 
                 comments ?? $"Moved back to {previousStatus}", cancellationToken);
 
-            await RecordWorkflowActionAsync(entityId, currentModel.Workflow.Status, previousStatus, 
-                actionBy, comments ?? $"Moved back to {previousStatus}", cancellationToken);
+            await RecordWorkflowActionAsync(entityId, entity.Workflow.Status, previousStatus, 
+                _userContext.UserName ?? "Unknown", comments ?? $"Moved back to {previousStatus}", cancellationToken);
 
-            return _toModel(updatedEntity);
+            return updatedEntity;
         }
         catch (Exception ex)
         {
@@ -237,8 +232,7 @@ public class WorkflowService<TModel, TEntity> : IWorkflowService<TModel>
                 Comments = comments
             };
 
-            var historyEntity = Infrastructure.Models.Entities.Workflow.WorkflowHistoryEntity.FromModel(historyEntry);
-            await _historyRepository.RecordActionAsync(historyEntity, cancellationToken);
+            await _historyRepository.AddAsync(historyEntry, cancellationToken);
         }
         catch (Exception ex)
         {

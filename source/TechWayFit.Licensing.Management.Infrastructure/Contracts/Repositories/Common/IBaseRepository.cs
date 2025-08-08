@@ -84,14 +84,7 @@ public interface IBaseRepository<TEntity> where TEntity : class
     Task<TEntity?> FindOneAsync(
         SearchRequest<TEntity> request,
         CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Retrieves all entities with optional includes.
-    /// </summary>
-    /// <param name="includes"></param>
-    /// <returns></returns>
-    Task<IEnumerable<TEntity>> GetAllWithIncludesAsync(
-        params Expression<Func<TEntity, object>>[] includes);
+ 
     /// <summary>
     /// Checks if an entity exists by its ID.
     /// </summary>

@@ -15,22 +15,22 @@ public interface IWorkflowService<T> where T : IWorkflowCapable
     /// <summary>
     /// Submit an entity for approval
     /// </summary>
-    Task<T> SubmitForApprovalAsync(Guid entityId, string submittedBy, CancellationToken cancellationToken = default);
+    Task<T> SubmitForApprovalAsync(Guid entityId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Approve an entity
     /// </summary>
-    Task<T> ApproveAsync(Guid entityId, string approvedBy, string? comments = null, CancellationToken cancellationToken = default);
+    Task<T> ApproveAsync(Guid entityId, string? comments = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Reject an entity
     /// </summary>
-    Task<T> RejectAsync(Guid entityId, string rejectedBy, string reason, CancellationToken cancellationToken = default);
+    Task<T> RejectAsync(Guid entityId, string reason, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Withdraw an entity from approval
     /// </summary>
-    Task<T> WithdrawAsync(Guid entityId, string withdrawnBy, string? reason = null, CancellationToken cancellationToken = default);
+    Task<T> WithdrawAsync(Guid entityId, string? reason = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get entities pending approval
@@ -55,12 +55,12 @@ public interface IWorkflowService<T> where T : IWorkflowCapable
     /// <summary>
     /// Move entity to next status in the workflow
     /// </summary>
-    Task<T> MoveToNextStatusAsync(Guid entityId, string actionBy, string? comments = null, CancellationToken cancellationToken = default);
+    Task<T> MoveToNextStatusAsync(Guid entityId, string? comments = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Move entity to previous status in the workflow
     /// </summary>
-    Task<T> MoveToPreviousStatusAsync(Guid entityId, string actionBy, string? comments = null, CancellationToken cancellationToken = default);
+    Task<T> MoveToPreviousStatusAsync(Guid entityId, string? comments = null, CancellationToken cancellationToken = default);
 }
 
 /// <summary>

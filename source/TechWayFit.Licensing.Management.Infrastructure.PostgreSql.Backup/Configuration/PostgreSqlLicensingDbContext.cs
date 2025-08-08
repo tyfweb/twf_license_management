@@ -582,12 +582,12 @@ public partial class PostgreSqlPostgreSqlLicensingDbContext : DbContext
                     entry.Entity.CreatedOn = currentTime;
                     entry.Entity.TenantId = currentTenantId; // Set tenant ID for new entities
                     if(entry.Entity.CreatedBy == null)
-                        entry.Entity.CreatedBy = _userContext.UserId ?? "Anonymous"; // Default to Anonymous if not set
+                        entry.Entity.CreatedBy = _userContext.UserName ?? "Anonymous"; // Default to Anonymous if not set
                     break;
                 case EntityState.Modified:
                     entry.Entity.UpdatedOn = currentTime;
                     if (entry.Entity.UpdatedBy == null)
-                        entry.Entity.UpdatedBy = _userContext.UserId ?? "Anonymous"; // Default to Anonymous if not set
+                        entry.Entity.UpdatedBy = _userContext.UserName ?? "Anonymous"; // Default to Anonymous if not set
                     entry.Property(x => x.CreatedBy).IsModified = false;
                     entry.Property(x => x.CreatedOn).IsModified = false;
                     entry.Property(x => x.TenantId).IsModified = false; // Prevent tenant ID changes on updates
@@ -601,15 +601,15 @@ public partial class PostgreSqlPostgreSqlLicensingDbContext : DbContext
     /// </summary>
     private Guid GetCurrentTenantId()
     {
-        var tenantIdString = _userContext.TenantId;
-        if (Guid.TryParse(tenantIdString, out var tenantId))
+        var tenantId = _userContext.TenantId;
+        if (tenantId == Guid.Empty || tenantId == null)
         {
-            return tenantId;
-        }
-        
-        // Return empty Guid if no tenant ID is available (should not happen in production)
+            // Log warning or handle accordingly
+            // In production, consider throwing an exception or logging this as an error
+            tenantId = Guid.Empty; // Default to empty Guid if no tenant ID is available
+        }  
         // Consider throwing an exception in production environments
-        return Guid.Empty;
+        return tenantId.Value;
     }
 
     /// <summary>

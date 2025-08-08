@@ -10,7 +10,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Models.
 /// Database entity for workflow history tracking
 /// </summary>
 [Table("workflow_history")]
-public class WorkflowHistoryEntity : BaseEntity
+public class WorkflowHistoryEntity : BaseEntity, IEntityMapper<WorkflowHistoryEntry, WorkflowHistoryEntity>
 {
     /// <summary>
     /// ID of the entity this history entry relates to
@@ -51,33 +51,14 @@ public class WorkflowHistoryEntity : BaseEntity
     /// Additional metadata as JSON
     /// </summary>
     public string? Metadata { get; set; }
+ 
+
+    #region IEntityMapper Implementation
 
     /// <summary>
-    /// Convert entity to core model
+    /// Maps WorkflowHistoryEntry model to WorkflowHistoryEntity
     /// </summary>
-    /// <returns>WorkflowHistoryEntry core model</returns>
-    public WorkflowHistoryEntry ToModel()
-    {
-        return new WorkflowHistoryEntry
-        {
-            Id = Id,
-            EntityId = EntityId,
-            EntityType = EntityType,
-            FromStatus = (EntityStatus)FromStatus,
-            ToStatus = (EntityStatus)ToStatus,
-            ActionBy = ActionBy,
-            ActionDate = ActionDate,
-            Comments = Comments,
-            Metadata = Metadata
-        };
-    }
-
-    /// <summary>
-    /// Create entity from core model
-    /// </summary>
-    /// <param name="model">WorkflowHistoryEntry core model</param>
-    /// <returns>WorkflowHistoryEntity</returns>
-    public static WorkflowHistoryEntity FromModel(WorkflowHistoryEntry model)
+    public WorkflowHistoryEntity Map(WorkflowHistoryEntry model)
     {
         return new WorkflowHistoryEntity
         {
@@ -95,4 +76,25 @@ public class WorkflowHistoryEntity : BaseEntity
             IsActive = true
         };
     }
+
+    /// <summary>
+    /// Maps WorkflowHistoryEntity to WorkflowHistoryEntry model
+    /// </summary>
+    public WorkflowHistoryEntry Map()
+    {
+        return new WorkflowHistoryEntry
+        {
+            Id = Id,
+            EntityId = EntityId,
+            EntityType = EntityType,
+            FromStatus = (EntityStatus)FromStatus,
+            ToStatus = (EntityStatus)ToStatus,
+            ActionBy = ActionBy,
+            ActionDate = ActionDate,
+            Comments = Comments,
+            Metadata = Metadata
+        };
+    }
+
+    #endregion
 }

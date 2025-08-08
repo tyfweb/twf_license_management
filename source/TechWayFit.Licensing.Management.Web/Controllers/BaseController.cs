@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace TechWayFit.Licensing.Management.Web.Controllers
 {
@@ -6,5 +7,12 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
     {
         protected string CurrentUserName => User.Identity?.Name ?? "Anonymous";
 
+        protected string GetCurrentUserId()
+        {
+            return User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? 
+                   User.FindFirst("sub")?.Value ?? 
+                   User.Identity?.Name ?? 
+                   "Anonymous";
+        }
     }
 }

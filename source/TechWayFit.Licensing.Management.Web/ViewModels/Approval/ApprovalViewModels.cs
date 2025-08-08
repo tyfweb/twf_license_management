@@ -60,8 +60,7 @@ public class ApprovalActionViewModel
     [Display(Name = "Comments")]
     public string? Comments { get; set; }
     
-    [Required]
-    public string ActionBy { get; set; } = string.Empty;
+    // ActionBy is no longer needed as it's automatically handled by the UserContext in the service layer
 }
 
 /// <summary>
@@ -143,4 +142,18 @@ public class PaginationViewModel
     public int TotalPages => (int)Math.Ceiling((double)TotalItems / PageSize);
     public bool HasPrevious => CurrentPage > 1;
     public bool HasNext => CurrentPage < TotalPages;
+}
+
+/// <summary>
+/// Dashboard widget view model for pending approvals
+/// </summary>
+public class PendingApprovalsDashboardViewModel
+{
+    public List<PendingApprovalItemViewModel> PendingItems { get; set; } = new();
+    public int TotalPendingCount { get; set; }
+    public bool ShowActions { get; set; } = true;
+    public int MaxItems { get; set; } = 5;
+    public bool HasMoreItems { get; set; }
+    public string ViewAllUrl { get; set; } = string.Empty;
+    public string? ErrorMessage { get; set; }
 }

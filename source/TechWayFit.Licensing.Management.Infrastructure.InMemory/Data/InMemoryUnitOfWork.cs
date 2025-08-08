@@ -9,8 +9,6 @@ using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Noti
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Product;
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Settings;
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.User;
-using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Workflow;
-using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Configuration;
 using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Repositories.Audit;
 using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Repositories.Consumer;
 using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Repositories.License;
@@ -18,16 +16,15 @@ using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Repositorie
 using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Repositories.Product;
 using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Repositories.Settings;
 using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Repositories.User;
-using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Repositories.Workflow;
 
-namespace TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Data;
+namespace TechWayFit.Licensing.Management.Infrastructure.InMemory.Data;
 
 /// <summary>
-/// PostgreSQL implementation of Unit of Work pattern
+/// InMemory implementation of Unit of Work pattern
 /// </summary>
-public class EfCoreUnitOfWork : IUnitOfWork
+public class InMemoryUnitOfWork : IUnitOfWork
 {
-    private readonly EfCoreLicensingDbContext _context;
+    private readonly InMemoryLicensingDbContext _context;
     private IDbContextTransaction? _transaction;
     private bool _disposed = false;
 
@@ -47,13 +44,9 @@ public class EfCoreUnitOfWork : IUnitOfWork
     private ISettingRepository? _settings;
     private IUserRoleRepository? _userRoles;
     private IUserRoleMappingRepository? _userRoleMappings;
-    
-    // Workflow repositories
-    private IWorkflowHistoryRepository? _workflowHistory;
-    private IApprovalRepository<Core.Models.Consumer.ConsumerAccount>? _consumerAccountApprovals;
-    
-    private IUserContext    _userContext;
-    public EfCoreUnitOfWork(EfCoreLicensingDbContext context, IUserContext userContext)
+    private readonly IUserContext _userContext;
+
+    public InMemoryUnitOfWork(InMemoryLicensingDbContext context, IUserContext userContext)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
         _userContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
@@ -62,57 +55,47 @@ public class EfCoreUnitOfWork : IUnitOfWork
     #region Core Repositories
 
     public IProductRepository Products => 
-        _products ??= new EfCoreProductRepository(_context,_userContext);
+        _products ??= new EfCoreProductRepository(_context, _userContext);
 
     public IProductLicenseRepository Licenses => 
-        _licenses ??= new EfCoreProductLicenseRepository(_context,_userContext);
+        _licenses ??= new EfCoreProductLicenseRepository(_context, _userContext);
 
     public IConsumerAccountRepository Consumers => 
-        _consumers ??= new EfCoreConsumerAccountRepository(_context,_userContext);
+        _consumers ??= new EfCoreConsumerAccountRepository(_context, _userContext);
 
     public IUserProfileRepository Users => 
-        _users ??= new EfCoreUserProfileRepository(_context,_userContext);
+        _users ??= new EfCoreUserProfileRepository(_context, _userContext);
 
     #endregion
 
     #region Supporting Repositories
 
     public IProductFeatureRepository ProductFeatures => 
-        _productFeatures ??= new EfCoreProductFeatureRepository(_context,_userContext);
+        _productFeatures ??= new EfCoreProductFeatureRepository(_context, _userContext);
 
     public IProductTierRepository ProductTiers => 
-        _productTiers ??= new EfCoreProductTierRepository(_context,_userContext);
+        _productTiers ??= new EfCoreProductTierRepository(_context, _userContext);
 
     public IProductVersionRepository ProductVersions => 
-        _productVersions ??= new EfCoreProductVersionRepository(_context,_userContext);
+        _productVersions ??= new EfCoreProductVersionRepository(_context, _userContext);
 
     public IAuditEntryRepository AuditEntries => 
-        _auditEntries ??= new EfCoreAuditEntryRepository(_context,_userContext);
+        _auditEntries ??= new EfCoreAuditEntryRepository(_context, _userContext);
 
     public INotificationTemplateRepository NotificationTemplates => 
-        _notificationTemplates ??= new EfCoreNotificationTemplateRepository(_context,_userContext);
+        _notificationTemplates ??= new EfCoreNotificationTemplateRepository(_context, _userContext);
 
     public INotificationHistoryRepository NotificationHistory => 
-        _notificationHistory ??= new EfCoreNotificationHistoryRepository(_context,_userContext);
+        _notificationHistory ??= new EfCoreNotificationHistoryRepository(_context, _userContext);
 
     public ISettingRepository Settings => 
-        _settings ??= new EfCoreSettingRepository(_context,_userContext);
+        _settings ??= new EfCoreSettingRepository(_context, _userContext);
 
     public IUserRoleRepository UserRoles => 
-        _userRoles ??= new EfCoreUserRoleRepository(_context,_userContext);
+        _userRoles ??= new EfCoreUserRoleRepository(_context, _userContext);
 
     public IUserRoleMappingRepository UserRoleMappings => 
-        _userRoleMappings ??= new EfCoreUserRoleMappingRepository(_context,_userContext);
-
-    #endregion
-
-    #region Workflow Repositories
-
-    public IWorkflowHistoryRepository WorkflowHistory => 
-        _workflowHistory ??= new EfCoreWorkflowHistoryRepository(_context, _userContext);
-
-    public IApprovalRepository<Core.Models.Consumer.ConsumerAccount> ConsumerAccountApprovals => 
-        _consumerAccountApprovals ??= new EfCoreConsumerAccountApprovalRepository(_context, _userContext);
+        _userRoleMappings ??= new EfCoreUserRoleMappingRepository(_context, _userContext);
 
     #endregion
 

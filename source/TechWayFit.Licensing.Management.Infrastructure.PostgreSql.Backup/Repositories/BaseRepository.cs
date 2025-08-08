@@ -38,8 +38,8 @@ public partial class BaseRepository<TModel, TEntity> : IDataRepository<TModel> w
         entity.IsDeleted = false;
         entity.IsActive = true;
         entity.CreatedOn = DateTime.UtcNow;
-        entity.CreatedBy = _userContext.UserId ?? "Anonymous";
-        entity.UpdatedBy = _userContext.UserId ?? "Anonymous";
+        entity.CreatedBy = _userContext.UserName ?? "Anonymous";
+        entity.UpdatedBy = _userContext.UserName ?? "Anonymous";
         entity.UpdatedOn = DateTime.UtcNow;
         _dbSet.Add(entity);
         await _context.SaveChangesAsync(cancellationToken);
@@ -52,10 +52,10 @@ public partial class BaseRepository<TModel, TEntity> : IDataRepository<TModel> w
         if (entity == null) return false;
         entity.IsDeleted = true;
         entity.DeletedOn = DateTime.UtcNow;
-        entity.DeletedBy = _userContext.UserId ?? "Anonymous";
+        entity.DeletedBy = _userContext.UserName ?? "Anonymous";
         entity.IsActive = false;
         entity.UpdatedOn = DateTime.UtcNow;
-        entity.UpdatedBy = _userContext.UserId ?? "Anonymous";
+        entity.UpdatedBy = _userContext.UserName ?? "Anonymous";
         // _dbSet.Remove(entity);
         return await _context.SaveChangesAsync(cancellationToken).ContinueWith(t => t.Result > 0);
     }
@@ -187,7 +187,7 @@ public partial class BaseRepository<TModel, TEntity> : IDataRepository<TModel> w
 
         entity.IsActive = false;
         entity.UpdatedOn = DateTime.UtcNow;
-        entity.UpdatedBy = _userContext.UserId ?? "Anonymous";
+        entity.UpdatedBy = _userContext.UserName ?? "Anonymous";
         return await _context.SaveChangesAsync(cancellationToken).ContinueWith(t => t.Result > 0);
     }
     /// <summary>
@@ -237,7 +237,7 @@ public partial class BaseRepository<TModel, TEntity> : IDataRepository<TModel> w
 
         entity.Map(model);
         entity.UpdatedOn = DateTime.UtcNow;
-        entity.UpdatedBy = _userContext.UserId ?? "Anonymous";
+        entity.UpdatedBy = _userContext.UserName ?? "Anonymous";
 
         _context.Entry(entity).State = EntityState.Modified;
         return await _context.SaveChangesAsync(cancellationToken).ContinueWith(t => entity.Map());

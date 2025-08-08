@@ -35,13 +35,8 @@ public static class RepositoryInfrastructureExtensions
     public static void ValidateTenantAccess<TEntity>(TEntity entity, IUserContext userContext) 
         where TEntity : BaseEntity
     {
-        if (!Guid.TryParse(userContext.TenantId, out var userTenantId))
-        {
-            throw new InvalidOperationException("Invalid tenant ID in user context");
-        }
-        
-        if (entity.TenantId != Guid.Empty && 
-            entity.TenantId != userTenantId)
+       if (entity.TenantId != Guid.Empty && 
+           entity.TenantId != userContext.TenantId)
         {
             throw new UnauthorizedAccessException(
                 $"Access denied to entity {entity.Id} from tenant {entity.TenantId}. Current user tenant: {userContext.TenantId}");
@@ -127,7 +122,7 @@ public abstract partial class BaseRepository<TModel, TEntity>
                 typeof(TEntity).Name, 
                 stopwatch.Elapsed, 
                 true, 
-                _userContext.TenantId);
+                _userContext.TenantId.ToString());
             
             return result;
         }
@@ -141,8 +136,8 @@ public abstract partial class BaseRepository<TModel, TEntity>
                 typeof(TEntity).Name, 
                 stopwatch.Elapsed, 
                 false, 
-                _userContext.TenantId);
-            
+                _userContext.TenantId.ToString());
+
             // Re-throw with repository context (EF middleware will log the actual exception)
             throw new InvalidOperationException($"Repository operation '{operationName}' failed for {typeof(TEntity).Name}", ex);
         }

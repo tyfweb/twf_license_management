@@ -13,7 +13,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.Data.Entities.Consumer;
 /// Database entity for ConsumerAccount
 /// </summary>
 [Table("consumer_accounts")]
-public class ConsumerAccountEntity : BaseEntity, IEntityMapper<ConsumerAccount, ConsumerAccountEntity>
+public class ConsumerAccountEntity : AuditWorkflowEntity, IEntityMapper<ConsumerAccount, ConsumerAccountEntity>
 {
 
     /// <summary>
@@ -126,7 +126,14 @@ public class ConsumerAccountEntity : BaseEntity, IEntityMapper<ConsumerAccount, 
             UpdatedOn = model.Audit.UpdatedOn,
             DeletedBy = model.Audit.DeletedBy,
             DeletedOn = model.Audit.DeletedOn,
-            RowVersion = model.Audit.RowVersion
+            RowVersion = model.Audit.RowVersion,
+            // Workflow properties
+            EntityStatus = (int)model.Workflow.Status,
+            SubmittedBy = model.Workflow.SubmittedBy,
+            SubmittedOn = model.Workflow.SubmittedOn,
+            ReviewedBy = model.Workflow.ReviewedBy,
+            ReviewedOn = model.Workflow.ReviewedOn,
+            ReviewComments = model.Workflow.ReviewComments
         };
     }
 
@@ -169,6 +176,15 @@ public class ConsumerAccountEntity : BaseEntity, IEntityMapper<ConsumerAccount, 
                 DeletedBy = this.DeletedBy,
                 DeletedOn = this.DeletedOn,
                 RowVersion = this.RowVersion
+            },
+            Workflow = new WorkflowInfo
+            {
+                Status = (EntityStatus)this.EntityStatus,
+                SubmittedBy = this.SubmittedBy,
+                SubmittedOn = this.SubmittedOn,
+                ReviewedBy = this.ReviewedBy,
+                ReviewedOn = this.ReviewedOn,
+                ReviewComments = this.ReviewComments
             },
             Address = new Address
             {

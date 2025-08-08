@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>TechWayFit.Licensing.Management.Infrastructure.PostgreSql</AssemblyName>
+    <RootNamespace>TechWayFit.Licensing.Management.Infrastructure.PostgreSql</RootNamespace>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <!-- Assembly Information -->
+    <AssemblyTitle>TechWayFit Licensing Management Infrastructure PostgreSQL</AssemblyTitle>
+    <AssemblyDescription>PostgreSQL database provider for TechWayFit licensing management system</AssemblyDescription>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Core Entity Framework packages (aligned with Infrastructure project) -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.7" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.7" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.3" />
+    <PackageReference Include="EFCore.NamingConventions" Version="9.0.0" />
+    
+    <!-- Keep minimal packages to avoid conflicts -->
+    <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../TechWayFit.Licensing.Management.Core/TechWayFit.Licensing.Management.Core.csproj" />
+    <ProjectReference Include="../TechWayFit.Licensing.Management.Infrastructure/TechWayFit.Licensing.Management.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

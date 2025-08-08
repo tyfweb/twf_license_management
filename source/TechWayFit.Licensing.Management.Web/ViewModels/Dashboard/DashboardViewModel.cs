@@ -1,5 +1,6 @@
 using TechWayFit.Licensing.Management.Web.Models;
 using TechWayFit.Licensing.Management.Web.ViewModels.License;
+using TechWayFit.Licensing.Management.Web.ViewModels.Approval;
 
 namespace TechWayFit.Licensing.Management.Web.ViewModels.Dashboard
 {
@@ -17,6 +18,10 @@ namespace TechWayFit.Licensing.Management.Web.ViewModels.Dashboard
         
         // Recent activity
         public List<LicenseItemViewModel> RecentLicenses { get; set; } = new();
+        
+        // Workflow - pending approvals
+        public bool ShowPendingApprovals { get; set; } = true;
+        public int PendingApprovalsMaxItems { get; set; } = 5;
     }
 
     public class ProductSummaryViewModel

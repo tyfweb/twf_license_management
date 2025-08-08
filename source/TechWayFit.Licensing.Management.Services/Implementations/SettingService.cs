@@ -5,7 +5,7 @@ using System.Text.Json;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Core.Models.Settings;
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Data;
-using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Models.Entities.Settings;
+using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Models.Entities.Settings;
 
 namespace TechWayFit.Licensing.Management.Services.Implementations
 {

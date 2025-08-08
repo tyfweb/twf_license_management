@@ -31,8 +31,8 @@ public class EfCoreUserProfileRepository :  BaseRepository<UserProfile,UserProfi
         entity.IsDeleted = false;
         entity.IsActive = true;
         entity.CreatedOn = DateTime.UtcNow;
-        entity.CreatedBy = _userContext.UserId ?? "Anonymous";
-        entity.UpdatedBy = _userContext.UserId ?? "Anonymous";
+        entity.CreatedBy = _userContext.UserName ?? "Anonymous";
+        entity.UpdatedBy = _userContext.UserName ?? "Anonymous";
         entity.UpdatedOn = DateTime.UtcNow;
         _dbSet.Add(entity);
         await _context.SaveChangesAsync(cancellationToken);
@@ -291,7 +291,7 @@ public class EfCoreUserProfileRepository :  BaseRepository<UserProfile,UserProfi
         user.PasswordHash = hash;
         user.PasswordSalt = salt;
         user.UpdatedOn = DateTime.UtcNow;
-        user.UpdatedBy = _userContext.UserId ?? "Anonymous";
+        user.UpdatedBy = _userContext.UserName ?? "Anonymous";
         _dbSet.Update(user);
         await _context.SaveChangesAsync(cancellationToken);
         return true;

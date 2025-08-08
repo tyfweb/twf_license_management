@@ -8,9 +8,9 @@ public interface IUserContext
     /// <summary>
     /// Gets the current user's unique identifier
     /// </summary>
-    string? UserId { get; }
+    Guid? UserId { get; }
 
-    string? TenantId { get; }
+    Guid? TenantId { get; }
 
     /// <summary>
     /// Gets the current user's email
@@ -31,6 +31,8 @@ public interface IUserContext
     /// Checks if the current user is authenticated
     /// </summary>
     bool IsAuthenticated { get; }
+
+    bool IsAdmin { get; }
 
     /// <summary>
     /// Checks if the current user has a specific role

@@ -55,19 +55,19 @@ public class ApprovalController : BaseController
             {
                 pendingItems.Add(new PendingApprovalItemViewModel
                 {
-                    EntityId = consumer.Id,
+                    EntityId = consumer.ConsumerId,
                     EntityType = "Consumer",
                     EntityDisplayName = consumer.CompanyName,
                     EntityDescription = $"Consumer account for {consumer.CompanyName}",
-                    EntityStatus = consumer.EntityStatus,
-                    SubmittedBy = consumer.SubmittedBy ?? "Unknown",
-                    SubmittedOn = consumer.SubmittedOn ?? DateTime.MinValue,
-                    DaysInQueue = consumer.SubmittedOn.HasValue ? (DateTime.UtcNow - consumer.SubmittedOn.Value).Days : 0,
+                    EntityStatus = consumer.Workflow.Status,
+                    SubmittedBy = consumer.Workflow.SubmittedBy ?? "Unknown",
+                    SubmittedOn = consumer.Workflow.SubmittedOn ?? DateTime.MinValue,
+                    DaysInQueue = consumer.Workflow.SubmittedOn.HasValue ? (DateTime.UtcNow - consumer.Workflow.SubmittedOn.Value).Days : 0,
                     CanApprove = await _consumerWorkflowService.CanUserApproveAsync(GetCurrentUserId()),
                     CanReject = await _consumerWorkflowService.CanUserApproveAsync(GetCurrentUserId()),
-                    ApprovalUrl = Url.Action("Approve", new { id = consumer.Id, type = "Consumer" }) ?? "",
-                    RejectUrl = Url.Action("Reject", new { id = consumer.Id, type = "Consumer" }) ?? "",
-                    DetailsUrl = Url.Action("Details", "Consumer", new { id = consumer.Id }) ?? ""
+                    ApprovalUrl = Url.Action("Approve", new { id = consumer.ConsumerId, type = "Consumer" }) ?? "",
+                    RejectUrl = Url.Action("Reject", new { id = consumer.ConsumerId, type = "Consumer" }) ?? "",
+                    DetailsUrl = Url.Action("Details", "Consumer", new { id = consumer.ConsumerId }) ?? ""
                 });
             }
 
@@ -141,20 +141,18 @@ public class ApprovalController : BaseController
     {
         try
         {
-            var userId = GetCurrentUserId();
-            
             switch (type.ToLower())
             {
                 case "consumer":
-                    await _consumerWorkflowService.ApproveAsync(id, userId, comments);
+                    await _consumerWorkflowService.ApproveAsync(id, comments);
                     TempData["SuccessMessage"] = "Consumer account approved successfully.";
                     break;
                 case "product":
-                    await _productWorkflowService.ApproveAsync(id, userId, comments);
+                    await _productWorkflowService.ApproveAsync(id, comments);
                     TempData["SuccessMessage"] = "Product approved successfully.";
                     break;
                 case "license":
-                    await _licenseWorkflowService.ApproveAsync(id, userId, comments);
+                    await _licenseWorkflowService.ApproveAsync(id, comments);
                     TempData["SuccessMessage"] = "License approved successfully.";
                     break;
                 default:

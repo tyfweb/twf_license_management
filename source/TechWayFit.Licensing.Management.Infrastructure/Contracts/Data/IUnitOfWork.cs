@@ -5,6 +5,7 @@ using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Noti
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Product;
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Settings;
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.User;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Workflow;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.Contracts.Data;
 
@@ -83,6 +84,20 @@ public interface IUnitOfWork : IDisposable
     /// User Role Mapping repository
     /// </summary>
     IUserRoleMappingRepository UserRoleMappings { get; }
+    
+    #endregion
+
+    #region Workflow Repositories
+    
+    /// <summary>
+    /// Workflow History repository
+    /// </summary>
+    IWorkflowHistoryRepository WorkflowHistory { get; }
+    
+    /// <summary>
+    /// Consumer Account Approval repository
+    /// </summary>
+    IApprovalRepository<Core.Models.Consumer.ConsumerAccount> ConsumerAccountApprovals { get; }
     
     #endregion
 

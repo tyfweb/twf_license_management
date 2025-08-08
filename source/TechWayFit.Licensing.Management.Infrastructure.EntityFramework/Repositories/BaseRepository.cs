@@ -30,7 +30,7 @@ public partial class BaseRepository<TModel, TEntity> : IDataRepository<TModel> w
         _dbSet = _context.Set<TEntity>();
     }
 
-    public async virtual Task<TModel> AddAsync(TModel model, CancellationToken cancellationToken = default)
+    public virtual Task<TModel> AddAsync(TModel model, CancellationToken cancellationToken = default)
     {
         var entity = new TEntity();
         entity.Map(model);
@@ -38,26 +38,27 @@ public partial class BaseRepository<TModel, TEntity> : IDataRepository<TModel> w
         entity.IsDeleted = false;
         entity.IsActive = true;
         entity.CreatedOn = DateTime.UtcNow;
-        entity.CreatedBy = _userContext.UserId ?? "Anonymous";
-        entity.UpdatedBy = _userContext.UserId ?? "Anonymous";
+        entity.CreatedBy = _userContext.UserName ?? "Anonymous";
+        entity.UpdatedBy = _userContext.UserName ?? "Anonymous";
         entity.UpdatedOn = DateTime.UtcNow;
         _dbSet.Add(entity);
-        await _context.SaveChangesAsync(cancellationToken);
-        return entity.Map();
+        
+        return Task.FromResult(entity.Map());
     }
 
-    public async virtual  Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+    public virtual Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var entity = _dbSet.Find(id);
-        if (entity == null) return false;
+        if (entity == null) return Task.FromResult(false);
+        
         entity.IsDeleted = true;
         entity.DeletedOn = DateTime.UtcNow;
-        entity.DeletedBy = _userContext.UserId ?? "Anonymous";
+        entity.DeletedBy = _userContext.UserName ?? "Anonymous";
         entity.IsActive = false;
         entity.UpdatedOn = DateTime.UtcNow;
-        entity.UpdatedBy = _userContext.UserId ?? "Anonymous";
-        // _dbSet.Remove(entity);
-        return await _context.SaveChangesAsync(cancellationToken).ContinueWith(t => t.Result > 0);
+        entity.UpdatedBy = _userContext.UserName ?? "Anonymous";
+        
+        return Task.FromResult(true);
     }
     /// <summary>
     /// Checks if an entity exists by its ID.
@@ -180,15 +181,16 @@ public partial class BaseRepository<TModel, TEntity> : IDataRepository<TModel> w
     /// <param name="id"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public async virtual  Task<bool> MarkAsInactiveAsync(Guid id, CancellationToken cancellationToken = default)
+    public virtual Task<bool> MarkAsInactiveAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var entity = _dbSet.Find(id);
-        if (entity == null) return false;
+        if (entity == null) return Task.FromResult(false);
 
         entity.IsActive = false;
         entity.UpdatedOn = DateTime.UtcNow;
-        entity.UpdatedBy = _userContext.UserId ?? "Anonymous";
-        return await _context.SaveChangesAsync(cancellationToken).ContinueWith(t => t.Result > 0);
+        entity.UpdatedBy = _userContext.UserName ?? "Anonymous";
+        
+        return Task.FromResult(true);
     }
     /// <summary>
     /// Searches for entities based on the provided search request.
@@ -228,7 +230,7 @@ public partial class BaseRepository<TModel, TEntity> : IDataRepository<TModel> w
     /// <returns></returns>
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="KeyNotFoundException"></exception>
-    public async virtual  Task<TModel> UpdateAsync(Guid id, TModel model, CancellationToken cancellationToken = default)
+    public virtual Task<TModel> UpdateAsync(Guid id, TModel model, CancellationToken cancellationToken = default)
     {
         if (model == null) throw new ArgumentNullException(nameof(model));
 
@@ -237,10 +239,10 @@ public partial class BaseRepository<TModel, TEntity> : IDataRepository<TModel> w
 
         entity.Map(model);
         entity.UpdatedOn = DateTime.UtcNow;
-        entity.UpdatedBy = _userContext.UserId ?? "Anonymous";
+        entity.UpdatedBy = _userContext.UserName ?? "Anonymous";
 
         _context.Entry(entity).State = EntityState.Modified;
-        return await _context.SaveChangesAsync(cancellationToken).ContinueWith(t => entity.Map());
+        return Task.FromResult(entity.Map());
     }
 
 
