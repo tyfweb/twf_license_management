@@ -12,6 +12,8 @@ using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Models.Enti
 using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Models.Entities.Common;
 using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Models.Entities.Audit;
 using TechWayFit.Licensing.Management.Core.Contracts;
+using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Models.Entities.Tenants;
+using System.Reflection.Emit;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Configuration;
 
@@ -82,6 +84,8 @@ public partial class EfCoreLicensingDbContext : DbContext
     public DbSet<UserProfileEntity> UserProfiles { get; set; }
     public DbSet<UserRoleEntity> UserRoles { get; set; }
     public DbSet<UserRoleMappingEntity> UserRoleMappings { get; set; }
+    
+    public DbSet<TenantEntity> Tenants { get; set; }
 
     #endregion
 
@@ -90,6 +94,7 @@ public partial class EfCoreLicensingDbContext : DbContext
         base.OnModelCreating(modelBuilder);
 
         ConfigureAuditEntities(modelBuilder);
+        ConfigureTenantEntities(modelBuilder);
         ConfigureConsumerEntities(modelBuilder);
 
         // Configure entities
@@ -98,13 +103,32 @@ public partial class EfCoreLicensingDbContext : DbContext
 
         ConfigureNotificationEntities(modelBuilder);
         ConfigureSettingsEntities(modelBuilder);
-        ConfigureUserEntities(modelBuilder); 
+        ConfigureUserEntities(modelBuilder);
 
         // Configure indexes
         ConfigureIndexes(modelBuilder);
 
         // Configure global query filters for multi-tenancy
         ConfigureGlobalQueryFilters(modelBuilder);
+    }
+
+    private void ConfigureTenantEntities(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<TenantEntity>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).IsRequired();
+            entity.Property(e => e.TenantName).HasMaxLength(200).IsRequired();
+            entity.Property(e => e.TenantCode).HasMaxLength(50);
+            entity.Property(e => e.Description).HasMaxLength(1000);
+
+            // Audit fields
+            entity.Property(e => e.CreatedBy).HasMaxLength(100).IsRequired();
+            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
+
+            // Indexes
+            entity.HasIndex(e => e.TenantCode).IsUnique();
+        });
     }
 
 
@@ -569,29 +593,47 @@ public partial class EfCoreLicensingDbContext : DbContext
     /// </summary>
     private void UpdateAuditFields()
     {
-        var entries = ChangeTracker.Entries<BaseEntity>();
+        var entries = ChangeTracker.Entries<AuditEntity>();
         var currentTime = DateTime.UtcNow;
         var currentTenantId = GetCurrentTenantId();
+        var currentUsername = _userContext.UserName;
 
         foreach (var entry in entries)
         {
             switch (entry.State)
             {
                 case EntityState.Added:
-                    entry.Entity.Id = Guid.NewGuid();// Ensure Id is set for new entities
+                    if (entry.Entity.Id == Guid.Empty)
+                        entry.Entity.Id = Guid.NewGuid();// Ensure Id is set for new entities
                     entry.Entity.CreatedOn = currentTime;
-                    entry.Entity.TenantId = currentTenantId; // Set tenant ID for new entities
-                    if(entry.Entity.CreatedBy == null)
-                        entry.Entity.CreatedBy = _userContext.UserName ?? "Anonymous"; // Default to Anonymous if not set
+                    // Only set CreatedBy if it's not already set (preserve explicit assignments)
+                    if (entry.Entity.CreatedBy == null)
+                    {
+                        var createdBy = string.IsNullOrEmpty(currentUsername) ? "System" : currentUsername;
+                        entry.Entity.CreatedBy = createdBy; // Default to System for seeding operations
+                    }
                     break;
                 case EntityState.Modified:
                     entry.Entity.UpdatedOn = currentTime;
                     if (entry.Entity.UpdatedBy == null)
-                        entry.Entity.UpdatedBy = _userContext.UserName ?? "Anonymous"; // Default to Anonymous if not set
+                    {
+                        var updatedBy = string.IsNullOrEmpty(currentUsername) ? "System" : currentUsername;
+                        entry.Entity.UpdatedBy = updatedBy; // Default to System for seeding operations
+                    }
                     entry.Property(x => x.CreatedBy).IsModified = false;
                     entry.Property(x => x.CreatedOn).IsModified = false;
-                    entry.Property(x => x.TenantId).IsModified = false; // Prevent tenant ID changes on updates
-                    break;
+                   break;
+            }
+        }
+        // Ensure all entities have TenantId set
+        foreach (var entry in ChangeTracker.Entries<BaseEntity>())
+        {
+            if (entry.State == EntityState.Added || entry.State == EntityState.Modified)
+            {
+                if (entry.Entity.TenantId == Guid.Empty)
+                {
+                    entry.Entity.TenantId = currentTenantId; // Set TenantId from user context  
+                }
             }
         }
     }

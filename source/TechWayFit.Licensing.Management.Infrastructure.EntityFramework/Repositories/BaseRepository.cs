@@ -12,7 +12,8 @@ namespace TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Reposit
 /// <summary>
 /// PostgreSQL implementation of base repository
 /// </summary>
-public partial class BaseRepository<TModel, TEntity> : IDataRepository<TModel> where TEntity : BaseEntity, IEntityMapper<TModel, TEntity>, new()
+public partial class BaseRepository<TModel, TEntity> : IDataRepository<TModel> 
+    where TEntity : BaseEntity, IEntityMapper<TModel, TEntity>, new()
     where TModel : class, new()
 
 {
@@ -271,5 +272,18 @@ public partial class BaseRepository<TModel, TEntity> : IDataRepository<TModel> w
         return query;
     }
 
-   
+    public Task<TModel> AddWithIdOverrideAsync(TModel model, CancellationToken cancellationToken = default)
+    {
+        var entity = new TEntity();
+        entity.Map(model);
+        entity.IsDeleted = false;
+        entity.IsActive = true;
+        entity.CreatedOn = DateTime.UtcNow;
+        entity.CreatedBy = _userContext.UserName ?? "Anonymous";
+        entity.UpdatedBy = _userContext.UserName ?? "Anonymous";
+        entity.UpdatedOn = DateTime.UtcNow;
+        _dbSet.Add(entity);
+        
+        return Task.FromResult(entity.Map());
+    }
 }

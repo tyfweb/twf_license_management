@@ -106,31 +106,29 @@ public class SettingEntity : BaseEntity, IEntityMapper<Setting, SettingEntity>
     {
         if (model == null) return null!;
 
-        return new SettingEntity
-        {
-            Id = model.SettingId,
-            TenantId = model.TenantId,
-            Category = model.Category,
-            Key = model.Key,
-            Value = model.Value,
-            DefaultValue = model.DefaultValue,
-            DataType = model.DataType,
-            DisplayName = model.DisplayName,
-            Description = model.Description,
-            DisplayOrder = model.SortOrder,
-            IsEditable = !model.IsReadOnly,
-            IsRequired = model.IsRequired,
-            ValidationRules = model.ValidationPattern,
-            IsActive = model.Audit.IsActive,
-            IsDeleted = model.Audit.IsDeleted,
-            CreatedBy = model.Audit.CreatedBy,
-            CreatedOn = model.Audit.CreatedOn,
-            UpdatedBy = model.Audit.UpdatedBy,
-            UpdatedOn = model.Audit.UpdatedOn,
-            DeletedBy = model.Audit.DeletedBy,
-            DeletedOn = model.Audit.DeletedOn,
-            RowVersion = model.Audit.RowVersion
-        };
+        Id = model.SettingId;
+        TenantId = model.TenantId;
+        Category = model.Category;
+        Key = model.Key;
+        Value = model.Value;
+        DefaultValue = model.DefaultValue;
+        DataType = model.DataType;
+        DisplayName = model.DisplayName;
+        Description = model.Description;
+        DisplayOrder = model.SortOrder;
+        IsEditable = !model.IsReadOnly;
+        IsRequired = model.IsRequired;
+        ValidationRules = model.ValidationPattern;
+        IsActive = model.Audit.IsActive;
+        IsDeleted = model.Audit.IsDeleted;
+        CreatedBy = model.Audit.CreatedBy;
+        CreatedOn = model.Audit.CreatedOn;
+        UpdatedBy = model.Audit.UpdatedBy;
+        UpdatedOn = model.Audit.UpdatedOn;
+        DeletedBy = model.Audit.DeletedBy;
+        DeletedOn = model.Audit.DeletedOn;
+        RowVersion = model.Audit.RowVersion;
+        return this;
     }
 
     /// <summary>

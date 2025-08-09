@@ -7,7 +7,9 @@ using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Cons
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.License;
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Notification;
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Product;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Seeding;
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Settings;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Tenants;
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.User;
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Workflow;
 using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Configuration;
@@ -16,7 +18,9 @@ using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Repositorie
 using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Repositories.License;
 using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Repositories.Notification;
 using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Repositories.Product;
+using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Repositories.Seeding;
 using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Repositories.Settings;
+using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Repositories.Tenants;
 using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Repositories.User;
 using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Repositories.Workflow;
 
@@ -47,12 +51,19 @@ public class EfCoreUnitOfWork : IUnitOfWork
     private ISettingRepository? _settings;
     private IUserRoleRepository? _userRoles;
     private IUserRoleMappingRepository? _userRoleMappings;
+    private ITenantRepository? _tenants;
     
     // Workflow repositories
     private IWorkflowHistoryRepository? _workflowHistory;
     private IApprovalRepository<Core.Models.Consumer.ConsumerAccount>? _consumerAccountApprovals;
+    private IApprovalRepository<Core.Models.Product.EnterpriseProduct>? _enterpriseProductApprovals;
+    private IApprovalRepository<Core.Models.License.ProductLicense>? _productLicenseApprovals;
+    
+    // Seeding repositories
+    private ISeedingHistoryRepository? _seedingHistory;
     
     private IUserContext    _userContext;
+    private ITenantRepository _tenantRepository;
     public EfCoreUnitOfWork(EfCoreLicensingDbContext context, IUserContext userContext)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
@@ -113,6 +124,18 @@ public class EfCoreUnitOfWork : IUnitOfWork
 
     public IApprovalRepository<Core.Models.Consumer.ConsumerAccount> ConsumerAccountApprovals => 
         _consumerAccountApprovals ??= new EfCoreConsumerAccountApprovalRepository(_context, _userContext);
+
+    public IApprovalRepository<Core.Models.Product.EnterpriseProduct> EnterpriseProductApprovals => 
+        _enterpriseProductApprovals ??= new EfCoreEnterpriseProductApprovalRepository(_context, _userContext);
+
+    public IApprovalRepository<Core.Models.License.ProductLicense> ProductLicenseApprovals => 
+        _productLicenseApprovals ??= new EfCoreProductLicenseApprovalRepository(_context, _userContext);
+
+    public ISeedingHistoryRepository SeedingHistory => 
+        _seedingHistory ??= new EfCoreSeedingHistoryRepository(_context, _userContext);
+
+    public ITenantRepository Tenants=>
+        _tenantRepository ??= new EfCoreTenantRepository(_context, _userContext);
 
     #endregion
 

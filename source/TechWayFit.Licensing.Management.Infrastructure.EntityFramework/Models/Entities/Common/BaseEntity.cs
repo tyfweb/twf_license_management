@@ -1,12 +1,17 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using TechWayFit.Licensing.Management.Core.Models.Common;
-using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Models.Entities.Tenant;
+using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Models.Entities.Tenants;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Models.Entities.Common;
 
 public abstract class AuditEntity
 {
+     /// <summary>
+    /// Primary key
+    /// </summary>
+    [Key]
+    public Guid Id { get; set; } = Guid.Empty;
     /// <summary>
     /// Indicates if the record is active
     /// </summary>
@@ -90,11 +95,7 @@ public abstract class AuditEntity
 /// </summary>
 public abstract class BaseEntity : AuditEntity
 {
-    /// <summary>
-    /// Primary key
-    /// </summary>
-    [Key]
-    public Guid Id { get; set; } = Guid.NewGuid();
+   
     /// <summary>
     /// Unique identifier for the tenant
     /// </summary>

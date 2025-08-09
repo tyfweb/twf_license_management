@@ -13,8 +13,10 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging;
+using TechWayFit.Licensing.Management.Infrastructure.Extensions;
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Data;
 using TechWayFit.Licensing.Management.Infrastructure.PostgreSql.Extensions;
+using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Configuration;
 using TechWayFit.Licensing.Management.Services.Implementations.User;
 using TechWayFit.Licensing.Management.Services.Implementations.Account;
 using TechWayFit.Licensing.Management.Services.Implementations.Workflow;
@@ -29,6 +31,7 @@ using Serilog.Events;
 using TechWayFit.Licensing.Management.Web.Extensions;
 using TechWayFit.Licensing.Management.Web.Middleware;
 using TechWayFit.Licensing.Management.Core.Contracts;
+using TechWayFit.Licensing.Management.Infrastructure.SqlServer.Extensions;
 // OPERATIONS DASHBOARD MIDDLEWARE - DISABLED FOR CORE FOCUS
 // using TechWayFit.Licensing.Management.Web.Middleware;
 
@@ -86,16 +89,19 @@ try
     // Configure EF Core logging services
     builder.Services.ConfigureEfCoreLogging();
 
-    // Configure PostgreSQL Database to be used
-    // This will register the PostgreSQL DbContext and configure it with the connection string
-    // and other options from the configuration
-    builder.Services.AddPostgreSqlInfrastructure(builder.Configuration);
+    // Configure SQLite Database for local development (easier to inspect than in-memory)
+    // This will create a local licensing.db file that you can open with any SQLite browser
+    builder.Services.AddSqliteInfrastructure("licensing.db");
     builder.Services.AddHttpContextAccessor();
 
-    // Register User Context
-    builder.Services.AddScoped<IUserContext, TwfUserContext>();
+        // Register tenant scope infrastructure for system operations
+    builder.Services.AddSingleton<ITenantScope, TenantScope>();
+    builder.Services.AddScoped<IUserContext, TenantAwareUserContext>();
     RegisterServices(builder);    
     builder.Services.AddScoped<AuthenticationManager>();
+    
+    // Register seeding services
+    builder.Services.AddSeedingServices();
     
     // OPERATIONS DASHBOARD - DISABLED FOR CORE FOCUS
     // Register operations dashboard data collection services
@@ -125,8 +131,43 @@ try
         Log.Information("Created logs directory: {LogsPath}", logsPath);
     }
 
-    // Initialize database if using PostgreSQL
-    // await app.InitializeDatabaseAsync(builder.Configuration);
+    // Initialize database if using SQLite
+    try
+    {
+        Log.Information("Initializing SQLite database...");
+        
+        using var initScope = app.Services.CreateScope();
+        var dbContext = initScope.ServiceProvider.GetRequiredService<EfCoreLicensingDbContext>();
+        await dbContext.Database.EnsureCreatedAsync();
+        
+        Log.Information("SQLite database initialized successfully");
+    }
+    catch (Exception ex)
+    {
+        Log.Error(ex, "Failed to initialize SQLite database");
+        throw; // Stop the application if database initialization fails
+    }
+
+    // Seed database with initial data
+    try
+    {
+        Log.Information("Starting database seeding...");
+        
+        // Create a scope to get the tenant scope service and wrap seeding in system tenant context
+        using var seedingScope = app.Services.CreateScope();
+        var tenantScope = seedingScope.ServiceProvider.GetRequiredService<ITenantScope>();
+        
+        // Execute seeding within system tenant scope
+        using var systemScope = tenantScope.CreateSystemScope();
+        var seedCount = await app.Services.SeedDatabaseAsync();
+        
+        Log.Information("Database seeding completed successfully. {SeedCount} seeders executed", seedCount);
+    }
+    catch (Exception ex)
+    {
+        Log.Error(ex, "Failed to seed database");
+        // Don't stop the application if seeding fails
+    }
 
     // Configure the HTTP request pipeline.
     if (!app.Environment.IsDevelopment())
@@ -198,7 +239,7 @@ static void RegisterServices(WebApplicationBuilder builder)
     builder.Services.AddScoped<IAuthenticationService, AccountService>();
     
     // Register generic workflow services for approval system
-    builder.Services.AddScoped(typeof(IWorkflowService<>), typeof(WorkflowService<,>));
+    builder.Services.AddScoped(typeof(IWorkflowService<>), typeof(WorkflowService<>));
     
     // Register specific workflow services for approval system
     builder.Services.AddScoped<IConsumerAccountWorkflowService, ConsumerAccountWorkflowService>();

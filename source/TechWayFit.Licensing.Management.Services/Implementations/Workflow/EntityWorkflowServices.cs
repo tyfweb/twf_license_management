@@ -1,5 +1,6 @@
 using TechWayFit.Licensing.Management.Core.Contracts.Services.Workflow; 
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Workflow;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Data;
 using Microsoft.Extensions.Logging;
 using TechWayFit.Licensing.Management.Core.Models.Product;
 using TechWayFit.Licensing.Management.Core.Models.Consumer;
@@ -14,11 +15,10 @@ namespace TechWayFit.Licensing.Management.Services.Implementations.Workflow;
 public class ConsumerAccountWorkflowService : WorkflowService<ConsumerAccount>, IConsumerAccountWorkflowService
 {
     public ConsumerAccountWorkflowService(
-        IApprovalRepository<ConsumerAccount> repository,
-        IWorkflowHistoryRepository historyRepository,
+        IUnitOfWork unitOfWork,
         IUserContext userContext,
         ILogger<WorkflowService<ConsumerAccount>> logger)
-        : base(repository, historyRepository, userContext, logger)
+        : base(unitOfWork.ConsumerAccountApprovals, unitOfWork.WorkflowHistory, userContext, logger)
     {
     }
 }
@@ -29,11 +29,10 @@ public class ConsumerAccountWorkflowService : WorkflowService<ConsumerAccount>, 
 public class EnterpriseProductWorkflowService : WorkflowService<EnterpriseProduct>, IEnterpriseProductWorkflowService
 {
     public EnterpriseProductWorkflowService(
-        IApprovalRepository<EnterpriseProduct> repository,
-        IWorkflowHistoryRepository historyRepository,
+        IUnitOfWork unitOfWork,
         IUserContext userContext,
         ILogger<WorkflowService<EnterpriseProduct>> logger)
-        : base(repository, historyRepository, userContext, logger)
+        : base(unitOfWork.EnterpriseProductApprovals, unitOfWork.WorkflowHistory, userContext, logger)
     {
     }
 }
@@ -44,11 +43,10 @@ public class EnterpriseProductWorkflowService : WorkflowService<EnterpriseProduc
 public class ProductLicenseWorkflowService : WorkflowService<ProductLicense>, IProductLicenseWorkflowService
 {
     public ProductLicenseWorkflowService(
-        IApprovalRepository<ProductLicense> repository,
-        IWorkflowHistoryRepository historyRepository,
+        IUnitOfWork unitOfWork,
         IUserContext userContext,
         ILogger<WorkflowService<ProductLicense>> logger)
-        : base(repository, historyRepository, userContext, logger)
+        : base(unitOfWork.ProductLicenseApprovals, unitOfWork.WorkflowHistory, userContext, logger)
     {
     }
 }

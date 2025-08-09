@@ -35,6 +35,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../TechWayFit.Licensing.Management.Infrastructure.InMemory/TechWayFit.Licensing.Management.Infrastructure.InMemory.csproj" />
+    <ProjectReference Include="../TechWayFit.Licensing.Management.Infrastructure.SqlServer/TechWayFit.Licensing.Management.Infrastructure.SqlServer.csproj" />
     <ProjectReference Include="..\TechWayFit.Licensing.Generator\TechWayFit.Licensing.Generator.csproj" />
     <ProjectReference Include="..\TechWayFit.Licensing.Management.Services\TechWayFit.Licensing.Management.Services.csproj" />
     <ProjectReference Include="..\TechWayFit.Licensing.Management.Infrastructure\TechWayFit.Licensing.Management.Infrastructure.csproj" />

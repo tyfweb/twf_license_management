@@ -174,4 +174,46 @@ public static class SqlServerServiceExtensions
 
         return services;
     }
+
+    /// <summary>
+    /// Adds SQLite infrastructure services to the DI container for local development
+    /// </summary>
+    /// <param name="services">The service collection</param>
+    /// <param name="databasePath">The path to the SQLite database file (optional, defaults to "licensing.db")</param>
+    /// <param name="configureOptions">Optional configuration for additional DbContext options</param>
+    /// <returns>The service collection for method chaining</returns>
+    public static IServiceCollection AddSqliteInfrastructure(
+        this IServiceCollection services,
+        string? databasePath = null,
+        Action<DbContextOptionsBuilder>? configureOptions = null)
+    {
+        // Use default path if not provided
+        databasePath ??= "licensing.db";
+
+        // Create the connection string
+        var connectionString = $"Data Source={databasePath}";
+
+        // Add the EF Core base infrastructure with SQLite provider
+        services.AddEfCoreInfrastructureBase(options =>
+        {
+            options.UseSqlite(connectionString, sqliteOptions =>
+            {
+                // Configure SQLite specific options
+                sqliteOptions.CommandTimeout(30);
+                
+                // Set migrations assembly
+                sqliteOptions.MigrationsAssembly("TechWayFit.Licensing.Management.Infrastructure.SqlServer");
+            });
+
+            // Enable detailed logging for development
+            options.EnableSensitiveDataLogging();
+            options.EnableDetailedErrors();
+            options.LogTo(Console.WriteLine, LogLevel.Information);
+
+            // Apply additional configuration if provided
+            configureOptions?.Invoke(options);
+        });
+
+        return services;
+    }
 }
