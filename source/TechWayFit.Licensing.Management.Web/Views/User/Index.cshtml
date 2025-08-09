@@ -210,7 +210,7 @@
                                                 <i class="fas fa-lock me-1"></i>Locked
                                             </span>
                                         }
-                                        else if (user.IsActive)
+                                        else if (user.Audit.IsActive)
                                         {
                                             <span class="badge bg-success-subtle text-success">
                                                 <i class="fas fa-check-circle me-1"></i>Active
@@ -234,34 +234,34 @@
                                         }
                                     </td>
                                     <td class="px-4 py-3">
-                                        <span class="text-muted small">@user.CreatedDate.ToString("MMM dd, yyyy")</span>
+                                        <span class="text-muted small">@user.Audit.CreatedOn.ToString("MMM dd, yyyy")</span>
                                     </td>
                                     <td class="px-4 py-3 text-center">
                                         <div class="btn-group btn-group-sm" role="group">
-                                            <a href="@Url.Action("Details", new { id = user.UserProfileId })" 
+                                            <a href="@Url.Action("Details", new { id = user.UserId })" 
                                                class="btn btn-outline-primary btn-sm" title="View Details">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <a href="@Url.Action("Edit", new { id = user.UserProfileId })" 
+                                            <a href="@Url.Action("Edit", new { id = user.UserId })" 
                                                class="btn btn-outline-secondary btn-sm" title="Edit User">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                             @if (user.IsLocked)
                                             {
                                                 <button type="button" class="btn btn-outline-success btn-sm" 
-                                                        onclick="unlockUser('@user.UserProfileId')" title="Unlock User">
+                                                        onclick="unlockUser('@user.UserId')" title="Unlock User">
                                                     <i class="fas fa-unlock"></i>
                                                 </button>
                                             }
                                             else
                                             {
                                                 <button type="button" class="btn btn-outline-warning btn-sm" 
-                                                        onclick="lockUser('@user.UserProfileId')" title="Lock User">
+                                                        onclick="lockUser('@user.UserId')" title="Lock User">
                                                     <i class="fas fa-lock"></i>
                                                 </button>
                                             }
                                             <button type="button" class="btn btn-outline-danger btn-sm" 
-                                                    onclick="deleteUser('@user.UserProfileId', '@user.FullName')" title="Delete User">
+                                                    onclick="deleteUser('@user.UserId', '@user.FullName')" title="Delete User">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </div>

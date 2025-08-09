@@ -1,6 +1,4 @@
-using TechWayFit.Licensing.Core.Models;
 using TechWayFit.Licensing.Management.Core.Models.Audit;
-using TechWayFit.Licensing.Management.Core.Models.License;
 
 namespace TechWayFit.Licensing.Management.Core.Contracts.Services;
 
@@ -15,6 +13,15 @@ public interface IAuditService
     /// <param name="entry">Audit entry to log</param>
     /// <returns>Created audit entry ID</returns>
     Task<string> LogAuditEntryAsync(AuditEntry entry);
+    /// <summary>
+    /// Gets audit entries based on search criteria
+    /// </summary>
+    /// <param name="searchRequest"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    Task<IEnumerable<AuditEntry>> GetAuditEntriesAsync(
+       AuditSearchRequest searchRequest,
+       CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets audit entries for a specific license
@@ -136,50 +143,7 @@ public interface IAuditService
         DateTime? fromDate = null,
         DateTime? toDate = null);
 
-    /// <summary>
-    /// Logs license creation audit entry
-    /// </summary>
-    /// <param name="license">Created license</param>
-    /// <param name="createdBy">User who created the license</param>
-    /// <returns>Audit entry ID</returns>
-    Task<string> LogLicenseCreatedAsync(ProductLicense license, string createdBy);
-
-    /// <summary>
-    /// Logs license modification audit entry
-    /// </summary>
-    /// <param name="license">Modified license</param>
-    /// <param name="modifiedBy">User who modified the license</param>
-    /// <param name="changes">Dictionary of changes made</param>
-    /// <returns>Audit entry ID</returns>
-    Task<string> LogLicenseModifiedAsync(ProductLicense license, string modifiedBy, Dictionary<string, object> changes);
-
-    /// <summary>
-    /// Logs license status change audit entry
-    /// </summary>
-    /// <param name="licenseId">License ID</param>
-    /// <param name="oldStatus">Old status</param>
-    /// <param name="newStatus">New status</param>
-    /// <param name="changedBy">User who changed the status</param>
-    /// <param name="reason">Reason for change</param>
-    /// <returns>Audit entry ID</returns>
-    Task<string> LogLicenseStatusChangedAsync(string licenseId, LicenseStatus oldStatus, LicenseStatus newStatus, string changedBy, string? reason = null);
-
-    /// <summary>
-    /// Logs license activation audit entry
-    /// </summary>
-    /// <param name="licenseId">License ID</param>
-    /// <param name="activationInfo">Activation information</param>
-    /// <returns>Audit entry ID</returns>
-    Task<string> LogLicenseActivatedAsync(string licenseId, Dictionary<string, object> activationInfo);
-
-    /// <summary>
-    /// Logs license validation audit entry
-    /// </summary>
-    /// <param name="licenseKey">License key</param>
-    /// <param name="validationResult">Validation result</param>
-    /// <param name="validatedBy">User or system that performed validation</param>
-    /// <returns>Audit entry ID</returns>
-    Task<string> LogLicenseValidatedAsync(string licenseKey, bool validationResult, string validatedBy);
+   
 
     /// <summary>
     /// Gets audit statistics
@@ -190,30 +154,18 @@ public interface IAuditService
     Task<AuditStatistics> GetAuditStatisticsAsync(DateTime? fromDate = null, DateTime? toDate = null);
 
     /// <summary>
-    /// Exports audit entries to a specific format
-    /// </summary>
-    /// <param name="format">Export format (CSV, JSON, XML)</param>
-    /// <param name="entityType">Filter by entity type</param>
-    /// <param name="entityId">Filter by entity ID</param>
-    /// <param name="fromDate">Start date filter</param>
-    /// <param name="toDate">End date filter</param>
-    /// <returns>Exported data as byte array</returns>
-    Task<byte[]> ExportAuditEntriesAsync(
-        string format,
-        string? entityType = null,
-        string? entityId = null,
-        DateTime? fromDate = null,
-        DateTime? toDate = null);
-    /// <summary>
     /// Gets distinct entity types from audit entries
     /// </summary>
     /// <returns></returns>
     Task<IEnumerable<string>> GetDistinctEntityTypesAsync();
+
     /// <summary>
     /// Gets distinct entity IDs from audit entries
     /// </summary>
     /// <returns></returns>
-    Task<IEnumerable<string>> GetDistinctActionsAsync();    /// <summary>
+    Task<IEnumerable<string>> GetDistinctActionsAsync();
+
+    /// <summary>
     /// Gets security-related audit entries
     /// </summary>
     /// <param name="fromDate">Start date filter</param>

@@ -10,7 +10,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
     /// Home controller for basic navigation and system information
     /// </summary>
 [Authorize]
-    public class HomeController : Controller
+    public class HomeController : BaseController
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IProductLicenseService _productLicenseService;

@@ -100,7 +100,7 @@ public class PendingApprovalsViewComponent : ViewComponent
                     EntityId = license.Id,
                     EntityType = "License",
                     EntityDisplayName = $"License {license.LicenseCode}",
-                    EntityDescription = $"License for {license.ProductName} - Consumer: {license.ConsumerCompanyName}",
+                    EntityDescription = $"License for {license.LicenseConsumer.Product.Name} - Consumer: {license.LicenseConsumer.Consumer.CompanyName}",
                     EntityStatus = license.Workflow.Status,
                     SubmittedBy = license.Workflow.SubmittedBy ?? "Unknown",
                     SubmittedOn = license.Workflow.SubmittedOn ?? DateTime.MinValue,

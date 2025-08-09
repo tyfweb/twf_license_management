@@ -8,6 +8,7 @@ using TechWayFit.Licensing.Management.Web.ViewModels.Shared;
 using TechWayFit.Licensing.Management.Web.Helpers; 
 using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
+using TechWayFit.Licensing.Management.Core.Models.Common;
 
 namespace TechWayFit.Licensing.Management.Web.Controllers
 {
@@ -485,7 +486,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 ConsumerId = c.ConsumerId.ToString(),
                 OrganizationName = c.CompanyName,
                 ContactEmail = c.PrimaryContact.Email, 
-                IsActive = c.IsActive
+                IsActive = c.Audit.IsActive
             }).ToList();
             
         }
@@ -1021,12 +1022,12 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
             {
                 // This would load from your actual data service
                 var tiers = await GetProductTiersDataAsync(productId);
-                return Json(new { success = true, data = tiers });
+                return Json(JsonResponse.OK(tiers, "Product tiers loaded successfully"));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error loading product tiers for {ProductId}", productId);
-                return Json(new { success = false, message = "Error loading tiers" });
+                return Json(JsonResponse.Error("Error loading tiers"));
             }
         }
 
@@ -1045,7 +1046,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                         .SelectMany(v => v.Errors)
                         .Select(e => e.ErrorMessage)
                         .ToList();
-                    return Json(new { success = false, message = "Validation failed", errors });
+                    return Json(JsonResponse.Error("Validation failed", errors));
                 }
                 var serviceDto = new Core.Models.Product.ProductTier
                 {
@@ -1058,34 +1059,21 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                         ?? 0,
                         Currency = "USD"
                     },
-                    IsActive = model.IsActive,
+                    Audit = new AuditInfo
+                    {
+                        IsActive = model.IsActive
+                    },
                     MaxUsers = model.MaxUsers ?? 0
                 };
                var productTier= await _productTierService.CreateTierAsync(serviceDto, User.Identity?.Name ?? "System");
-
-                
-                var newTier = new 
-                {
-                    Id = productTier.TierId,
-                    Name = model.TierName,
-                    Description = model.Description,
-                    Price = model.MonthlyPrice.HasValue ? $"USD {model.MonthlyPrice:F2}/month" : "Free",
-                    IsActive = model.IsActive,
-                    CanDelete = true
-                };
-
+               
                 _logger.LogInformation("Product tier '{TierName}' added to product {ProductId}", model.TierName, model.ProductId);
-                
-                return Json(new { 
-                    success = true, 
-                    message = "Product tier added successfully", 
-                    data = newTier 
-                });
+                return Json(JsonResponse.OK(productTier,"Product tier added successfully"));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error adding product tier for product {ProductId}", model.ProductId);
-                return Json(new { success = false, message = "Error adding product tier" });
+                return Json(JsonResponse.Error("Error adding product tier"));
             }
         }
 
@@ -1256,10 +1244,10 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                     ReleaseDate = releaseDate,
                     ChangeLog = model.ReleaseNotes,
                     IsCurrent = model.IsCurrent,
-                    IsActive = model.IsActive, 
                     EndOfLifeDate = model.EndOfLifeDate
                 };
-                await _productService.AddProductVersionAsync(productId,newVersion,CurrentUserName);
+                newVersion.Audit.IsActive = model.IsActive;
+                await _productService.AddProductVersionAsync(productId, newVersion, CurrentUserName);
                 _logger.LogInformation("Product version '{Version}' added to product {ProductId}", 
                     model.Version, productId);
 
@@ -1308,28 +1296,23 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                     Name = model.VersionName,
                     ReleaseDate = releaseDate,
                     ChangeLog = model.ReleaseNotes,
-                    IsCurrent = model.IsCurrent,
-                    IsActive = model.IsActive,
+                    IsCurrent = model.IsCurrent,                
                     EndOfLifeDate = model.EndOfLifeDate
                 };
+                updatedVersion.Audit.IsActive = model.IsActive;
                 var status = await _productService.UpdateProductVersionAsync(productId, updatedVersion, CurrentUserName);
                 _logger.LogInformation("Product version '{Version}' (ID: {VersionId}) updated for product {ProductId}",
                     model.Version, versionId, productId);
                 if (status != null)
                 {
-                    return Json(new
-                    {
-                        success = true,
-                        message = $"Product version {model.Version} updated successfully",
-                        data = updatedVersion
-                    });
+                    return Json(JsonResponse.OK(updatedVersion, $"Product version {model.Version} updated successfully"));
                 }
-                return Json(new { success = false, message = "Error updating product version" });
+                return Json(JsonResponse.Error("Error updating product version"));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating product version {VersionId} for product {ProductId}", versionId, productId);
-                return Json(new { success = false, message = "Error updating product version" });
+                return Json(JsonResponse.Error("Error updating product version"));
             }
         }
 
@@ -1350,25 +1333,19 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 
                 if (isApproved)
                 {
-                    return Json(new { 
-                        success = false, 
-                        message = "Cannot delete approved versions. Please unapprove the version first." 
-                    });
+                    return Json(JsonResponse.Error("Cannot delete approved versions. Please unapprove the version first."));
                 }
                 
                 // In a real implementation, this would delete from the database
                 
                 _logger.LogInformation("Product version {VersionId} deleted from product {ProductId}", versionId, productId);
-                
-                return Json(new { 
-                    success = true, 
-                    message = "Product version deleted successfully" 
-                });
+
+                return Json(JsonResponse.OK(message: "Product version deleted successfully"));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting product version {VersionId} for product {ProductId}", versionId, productId);
-                return Json(new { success = false, message = "Error deleting product version" });
+                return Json(JsonResponse.Error("Error deleting product version"));
             }
         }         
 
@@ -1389,16 +1366,13 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 // Update the approval status
                 
                 _logger.LogInformation("Product version {VersionId} approved for product {ProductId}", versionId, productId);
-                
-                return Json(new { 
-                    success = true, 
-                    message = "Product version approved successfully" 
-                });
+
+                return Json(JsonResponse.OK(message: "Product version approved successfully"));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error approving product version {VersionId} for product {ProductId}", versionId, productId);
-                return Json(new { success = false, message = "Error approving product version" });
+                return Json(JsonResponse.Error("Error approving product version"));
             }
         }
 
@@ -1423,7 +1397,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 var product = await GetProductByIdAsync(productId);
                 if (product == null)
                 {
-                    return Json(new { success = false, message = "Product not found" });
+                    return Json(JsonResponse.Error("Product not found"));
                 }
                 
                 // In a real implementation, update the product version in the database
@@ -1432,16 +1406,13 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 await SaveProductAsync(product);
                 
                 _logger.LogInformation("Product {ProductId} current version set to version {VersionId}", productId, versionId);
-                
-                return Json(new { 
-                    success = true, 
-                    message = $"Product current version set to {versionNumber}" 
-                });
+
+                return Json(JsonResponse.OK(message: $"Product current version set to {versionNumber}"));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error setting current version {VersionId} for product {ProductId}", versionId, productId);
-                return Json(new { success = false, message = "Error setting current version" });
+                return Json(JsonResponse.Error("Error setting current version"));
             }
         }
 
@@ -1456,7 +1427,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
             {
                 if (string.IsNullOrEmpty(versionsJson))
                 {
-                    return Json(new { success = false, message = "No version data provided" });
+                    return Json(JsonResponse.Error("No version data provided"));
                 }
                 
                 // Parse the JSON
@@ -1468,12 +1439,12 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 catch (JsonException ex)
                 {
                     _logger.LogError(ex, "Invalid JSON format for product version import");
-                    return Json(new { success = false, message = "Invalid JSON format" });
+                    return Json(JsonResponse.Error("Invalid JSON format"));
                 }
                 
                 if (versions == null || versions.Count == 0)
                 {
-                    return Json(new { success = false, message = "No version data found in JSON" });
+                    return Json(JsonResponse.Error("No version data found in JSON"));
                 }
                 
                 // In a real implementation, this would process each version and add it to the database
@@ -1481,15 +1452,12 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 
                 _logger.LogInformation("Imported {Count} versions for product {ProductId}", versions.Count, productId);
                 
-                return Json(new { 
-                    success = true, 
-                    message = $"Successfully imported {versions.Count} product versions" 
-                });
+                return Json(JsonResponse.OK(message: $"Successfully imported {versions.Count} product versions"));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error importing versions for product {ProductId}", productId);
-                return Json(new { success = false, message = "Error importing versions" });
+                return Json(JsonResponse.Error("Error importing versions"));
             }
         }
 
@@ -1502,12 +1470,12 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
             try
             {
                 var features = await GetProductFeaturesDataAsync(productId);
-                return Json(new { success = true, data = features });
+                return Json(JsonResponse.OK(data: features));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error loading product features for {ProductId}", productId);
-                return Json(new { success = false, message = "Error loading features" });
+                return Json(JsonResponse.Error("Error loading features"));
             }
         }
 
@@ -1546,17 +1514,13 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 };
 
                 _logger.LogInformation("Product feature '{FeatureName}' added to product {ProductId}", model.Name, productId);
-                
-                return Json(new { 
-                    success = true, 
-                    message = "Product feature added successfully", 
-                    data = newFeature 
-                });
+
+                return Json(JsonResponse.OK(data: newFeature));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error adding product feature for product {ProductId}", productId);
-                return Json(new { success = false, message = "Error adding product feature" });
+                return Json(JsonResponse.Error("Error adding product feature"));
             }
         }
 
@@ -1596,17 +1560,13 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
 
                 _logger.LogInformation("Product feature '{FeatureName}' (ID: {FeatureId}) updated for product {ProductId}", 
                     model.Name, featureId, productId);
-                
-                return Json(new { 
-                    success = true, 
-                    message = "Product feature updated successfully", 
-                    data = updatedFeature 
-                });
+
+                return Json(JsonResponse.OK(data: updatedFeature));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating product feature {FeatureId} for product {ProductId}", featureId, productId);
-                return Json(new { success = false, message = "Error updating product feature" });
+                return Json(JsonResponse.Error("Error updating product feature"));
             }
         }
 
@@ -1623,16 +1583,13 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 await Task.CompletedTask; // For now, as this is mock implementation
                 
                 _logger.LogInformation("Product feature {FeatureId} deleted from product {ProductId}", featureId, productId);
-                
-                return Json(new { 
-                    success = true, 
-                    message = "Product feature deleted successfully" 
-                });
+
+                return Json(JsonResponse.OK("Product feature deleted successfully"));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting product feature {FeatureId} for product {ProductId}", featureId, productId);
-                return Json(new { success = false, message = "Error deleting product feature" });
+                return Json(JsonResponse.Error("Error deleting product feature"));
             }
         }
 
@@ -1660,12 +1617,12 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                     IsActive = true
                 };
 
-                return Json(new { success = true, data = feature });
+                return Json(JsonResponse.OK(data: feature));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting product feature {FeatureId} for product {ProductId}", featureId, productId);
-                return Json(new { success = false, message = "Error loading product feature" });
+                return Json(JsonResponse.Error("Error loading product feature"));
             }
         }
 
@@ -1687,7 +1644,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 Name = t.Name,
                 Description = t.Description,
                 Price = t.Price?.Amount > 0 ? $"USD {t.Price.Amount:F2}/month" : "Free",
-                IsActive = t.IsActive,
+                IsActive = t.Audit.IsActive,
                 CanDelete = true // Simplified, in real app check if tier can be deleted
             });
             return returnObj.Cast<object>().ToList();
@@ -1710,7 +1667,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 EndOfLifeDate = v.EndOfLifeDate,
                 SupportEndDate = v.SupportEndDate?? DateTime.UtcNow.AddYears(99),
                 ReleaseNotes = v.ChangeLog,
-                IsActive = v.IsActive,
+                IsActive = v.Audit.IsActive,
                 IsCurrent = v.IsCurrent,
                 CanDelete = true // Simplified, in real app check if version can be deleted
             }).ToList();

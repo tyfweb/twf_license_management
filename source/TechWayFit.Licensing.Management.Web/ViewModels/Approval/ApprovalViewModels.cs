@@ -38,11 +38,13 @@ public class PendingApprovalItemViewModel
     public bool CanApprove { get; set; }
     public bool CanReject { get; set; }
     public bool CanWithdraw { get; set; }
-    
+
     // Quick action buttons
     public string ApprovalUrl { get; set; } = string.Empty;
     public string RejectUrl { get; set; } = string.Empty;
     public string DetailsUrl { get; set; } = string.Empty;
+
+    
 }
 
 /// <summary>

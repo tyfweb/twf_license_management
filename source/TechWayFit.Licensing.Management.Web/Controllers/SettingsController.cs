@@ -12,7 +12,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
     /// </summary>
     [Authorize(Roles = "Administrator")]
 
-    public class SettingsController : Controller
+    public class SettingsController : BaseController
     {
         private readonly ISettingService _settingService;
         private readonly ILogger<SettingsController> _logger;
@@ -57,10 +57,10 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                             IsReadOnly = s.IsReadOnly,
                             ValidationPattern = s.ValidationPattern,
                             SortOrder = s.SortOrder,
-                            CreatedAt = s.CreatedAt,
-                            UpdatedAt = s.UpdatedAt,
-                            CreatedBy = s.CreatedBy,
-                            UpdatedBy = s.UpdatedBy
+                            CreatedAt = s.Audit.CreatedOn,
+                            UpdatedAt = s.Audit.UpdatedOn ?? s.Audit.CreatedOn,
+                            CreatedBy = s.Audit.CreatedBy,
+                            UpdatedBy = s.Audit.UpdatedBy
                         }).OrderBy(s => s.SortOrder).ToList()
                     ),
                     ConfigurationSettings = configurationSettings,
@@ -102,10 +102,10 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                     IsReadOnly = s.IsReadOnly,
                     ValidationPattern = s.ValidationPattern,
                     SortOrder = s.SortOrder,
-                    CreatedAt = s.CreatedAt,
-                    UpdatedAt = s.UpdatedAt,
-                    CreatedBy = s.CreatedBy,
-                    UpdatedBy = s.UpdatedBy
+                    CreatedAt = s.Audit.CreatedOn,
+                    UpdatedAt = s.Audit.UpdatedOn ?? s.Audit.CreatedOn,
+                    CreatedBy = s.Audit.CreatedBy,
+                    UpdatedBy = s.Audit.UpdatedBy
                 }).OrderBy(s => s.SortOrder).ToList();
 
                 return Json(viewModels);
@@ -154,10 +154,10 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                         IsReadOnly = updatedSetting.IsReadOnly,
                         ValidationPattern = updatedSetting.ValidationPattern,
                         SortOrder = updatedSetting.SortOrder,
-                        CreatedAt = updatedSetting.CreatedAt,
-                        UpdatedAt = updatedSetting.UpdatedAt,
-                        CreatedBy = updatedSetting.CreatedBy,
-                        UpdatedBy = updatedSetting.UpdatedBy
+                        CreatedAt = updatedSetting.Audit.CreatedOn,
+                        UpdatedAt = updatedSetting.Audit.UpdatedOn ?? updatedSetting.Audit.CreatedOn,
+                        CreatedBy = updatedSetting.Audit.CreatedBy,
+                        UpdatedBy = updatedSetting.Audit.UpdatedBy
                     }
                 });
             }
@@ -206,10 +206,10 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                         IsReadOnly = s.IsReadOnly,
                         ValidationPattern = s.ValidationPattern,
                         SortOrder = s.SortOrder,
-                        CreatedAt = s.CreatedAt,
-                        UpdatedAt = s.UpdatedAt,
-                        CreatedBy = s.CreatedBy,
-                        UpdatedBy = s.UpdatedBy
+                        CreatedAt = s.Audit.CreatedOn,
+                        UpdatedAt = s.Audit.UpdatedOn ?? s.Audit.CreatedOn,
+                        CreatedBy = s.Audit.CreatedBy,
+                        UpdatedBy = s.Audit.UpdatedBy
                     }).ToList()
                 });
             }
@@ -257,10 +257,10 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                         IsReadOnly = resetSetting.IsReadOnly,
                         ValidationPattern = resetSetting.ValidationPattern,
                         SortOrder = resetSetting.SortOrder,
-                        CreatedAt = resetSetting.CreatedAt,
-                        UpdatedAt = resetSetting.UpdatedAt,
-                        CreatedBy = resetSetting.CreatedBy,
-                        UpdatedBy = resetSetting.UpdatedBy
+                        CreatedAt = resetSetting.Audit.CreatedOn,
+                        UpdatedAt = resetSetting.Audit.UpdatedOn ?? resetSetting.Audit.CreatedOn,
+                        CreatedBy = resetSetting.Audit.CreatedBy,
+                        UpdatedBy = resetSetting.Audit.UpdatedBy
                     }
                 });
             }
@@ -303,10 +303,10 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                         IsReadOnly = s.IsReadOnly,
                         ValidationPattern = s.ValidationPattern,
                         SortOrder = s.SortOrder,
-                        CreatedAt = s.CreatedAt,
-                        UpdatedAt = s.UpdatedAt,
-                        CreatedBy = s.CreatedBy,
-                        UpdatedBy = s.UpdatedBy
+                        CreatedAt = s.Audit.CreatedOn,
+                        UpdatedAt = s.Audit.UpdatedOn ?? s.Audit.CreatedOn,
+                        CreatedBy = s.Audit.CreatedBy,
+                        UpdatedBy = s.Audit.UpdatedBy
                     }).ToList()
                 });
             }
@@ -347,10 +347,10 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                     IsReadOnly = s.IsReadOnly,
                     ValidationPattern = s.ValidationPattern,
                     SortOrder = s.SortOrder,
-                    CreatedAt = s.CreatedAt,
-                    UpdatedAt = s.UpdatedAt,
-                    CreatedBy = s.CreatedBy,
-                    UpdatedBy = s.UpdatedBy
+                    CreatedAt = s.Audit.CreatedOn,
+                    UpdatedAt = s.Audit.UpdatedOn ?? s.Audit.CreatedOn,
+                    CreatedBy = s.Audit.CreatedBy,
+                    UpdatedBy = s.Audit.UpdatedBy
                 }).OrderBy(s => s.Category).ThenBy(s => s.SortOrder).ToList();
 
                 return Json(viewModels);

@@ -10,7 +10,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers;
 /// Controller for user management operations
 /// </summary>
 [Authorize(Roles = "Administrator")]
-public class UserController : Controller
+public class UserController : BaseController
 {
     private readonly IUserService _userService;
     private readonly ILogger<UserController> _logger;
@@ -203,10 +203,10 @@ public class UserController : Controller
                 SelectedRoleIds = userRoles.Select(r => r.RoleId).ToList(),
                 AvailableRoles = roles.ToList(),
                 CurrentRoles = userRoles.ToList(),
-                CreatedOn = user.CreatedOn,
-                CreatedBy = user.CreatedBy,
-                UpdatedOn = user.UpdatedOn,
-                UpdatedBy = user.UpdatedBy,
+                CreatedOn = user.Audit.CreatedOn,
+                CreatedBy = user.Audit.CreatedBy,
+                UpdatedOn = user.Audit.UpdatedOn,
+                UpdatedBy = user.Audit.UpdatedBy,
                 LastLoginDate = user.LastLoginDate,
                 FailedLoginAttempts = user.FailedLoginAttempts
             };

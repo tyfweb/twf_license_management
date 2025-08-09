@@ -15,7 +15,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers;
 /// Controller for managing consumer accounts
 /// </summary>
 [Authorize]
-public class ConsumerController : Controller
+public class ConsumerController : BaseController
 {
     private readonly IConsumerAccountService _consumerAccountService;
     private readonly IProductLicenseService _productLicenseService; 
@@ -157,7 +157,10 @@ public class ConsumerController : Controller
                     PostalCode = model.PostalCode ?? string.Empty
                 },
                 Status = ConsumerStatus.Active,
-                IsActive = true,
+                Audit= new Core.Models.Common.AuditInfo
+                {
+                    IsActive = true
+                },
                 Notes = model.Notes ?? string.Empty
             };
 
@@ -209,7 +212,7 @@ public class ConsumerController : Controller
                 State = consumer.Address?.State ?? string.Empty,
                 Country = consumer.Address?.Country ?? string.Empty,
                 PostalCode = consumer.Address?.PostalCode ?? string.Empty,
-                IsActive = consumer.IsActive,
+                IsActive = consumer.Audit.IsActive,
                 Notes = consumer.Notes,
                 CreatedAt = consumer.CreatedAt,
                 CreatedBy = string.Empty, // Not available in domain model
@@ -255,7 +258,7 @@ public class ConsumerController : Controller
 
             // Update the existing consumer with new values
             existingConsumer.CompanyName = model.OrganizationName;
-            existingConsumer.IsActive = model.IsActive;
+            existingConsumer.Audit.IsActive = model.IsActive;
             existingConsumer.Notes = model.Notes;
 
             // Update primary contact
@@ -308,7 +311,7 @@ public class ConsumerController : Controller
             PrimaryContactPhone = consumer.PrimaryContact?.Phone ?? string.Empty,
             Address = $"{consumer.Address?.Street}, {consumer.Address?.City}, {consumer.Address?.State} {consumer.Address?.PostalCode}".Trim(' ', ','),
             Status = consumer.Status,
-            IsActive = consumer.IsActive,
+            IsActive = consumer.Audit.IsActive,
             Notes = consumer.Notes,
             CreatedBy = string.Empty, // Not available in domain model
             CreatedOn = consumer.CreatedAt,

@@ -1,10 +1,9 @@
 using Microsoft.Extensions.Logging;
-using TechWayFit.Licensing.Core.Models;
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Data; 
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Core.Models.Audit;
-using TechWayFit.Licensing.Management.Core.Models.License;
 using TechWayFit.Licensing.Management.Infrastructure.Models.Search;
+using TechWayFit.Licensing.Management.Core.Helpers;
 
 namespace TechWayFit.Licensing.Management.Services.Implementations.Audit;
 
@@ -30,14 +29,10 @@ public class AuditService : IAuditService
     public async Task<string> LogAuditEntryAsync(AuditEntry entry)
     {
         _logger.LogInformation("Logging audit entry: {Action} for {EntityType}", entry.ActionType, entry.EntityType);
-
-        // Input validation
-        if (entry == null)
-            throw new ArgumentNullException(nameof(entry));
-        if (string.IsNullOrWhiteSpace(entry.ActionType))
-            throw new ArgumentException("ActionType cannot be null or empty", nameof(entry));
-        if (string.IsNullOrWhiteSpace(entry.EntityType))
-            throw new ArgumentException("EntityType cannot be null or empty", nameof(entry));
+        // Ensure the entry is valid
+        Ensure.NotNull(entry, nameof(entry));
+        Ensure.NotEmpty(entry.ActionType, nameof(entry.ActionType));
+        Ensure.NotEmpty(entry.EntityType, nameof(entry.EntityType));
 
         try
         {
@@ -51,8 +46,8 @@ public class AuditService : IAuditService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error logging audit entry: {Action}", entry.ActionType);
-            throw;
         }
+        return string.Empty;
     }
 
     /// <summary>
@@ -134,7 +129,7 @@ public class AuditService : IAuditService
         }
     }
 
-    #region TODO: Missing Interface Methods - Require Implementation
+   
 
     public async Task<IEnumerable<AuditEntry>> GetProductAuditEntriesAsync(
         string productId,
@@ -189,42 +184,6 @@ public class AuditService : IAuditService
             _logger.LogError(ex, "Error getting audit entries by action: {Action}", action);
             return Enumerable.Empty<AuditEntry>();
         }
-    }
-
-    public async Task<IEnumerable<AuditEntry>> GetAuditEntriesByEntityTypeAsync(
-        string entityType,
-        DateTime? fromDate = null,
-        DateTime? toDate = null,
-        int pageNumber = 1,
-        int pageSize = 50)
-    {
-        // TODO: Implement
-        _logger.LogWarning("GetAuditEntriesByEntityTypeAsync not implemented");
-        await Task.CompletedTask;
-        return Enumerable.Empty<AuditEntry>();
-    }
-
-    public async Task<IEnumerable<AuditEntry>> GetAllAuditEntriesAsync(
-        DateTime? fromDate = null,
-        DateTime? toDate = null,
-        string? searchTerm = null,
-        int pageNumber = 1,
-        int pageSize = 50)
-    {
-        // TODO: Implement
-        _logger.LogWarning("GetAllAuditEntriesAsync not implemented");
-        await Task.CompletedTask;
-        return Enumerable.Empty<AuditEntry>();
-    }    public async Task<int> GetAuditEntryCountAsync(
-        string? entityType = null,
-        string? action = null,
-        DateTime? fromDate = null,
-        DateTime? toDate = null)
-    {
-        // TODO: Implement
-        _logger.LogWarning("GetAuditEntryCountAsync not implemented");
-        await Task.CompletedTask;
-        return 0;
     }
 
     public async Task<IEnumerable<string>> GetDistinctActionsAsync()
@@ -287,34 +246,6 @@ public class AuditService : IAuditService
             _logger.LogError(ex, "Error getting security audit entries");
             return Enumerable.Empty<AuditEntry>();
         }
-    }
-
-    public async Task<bool> DeleteAuditEntriesAsync(DateTime beforeDate)
-    {
-        // TODO: Implement
-        _logger.LogWarning("DeleteAuditEntriesAsync not implemented");
-        await Task.CompletedTask;
-        return false;
-    }
-
-    public async Task<bool> ArchiveAuditEntriesAsync(DateTime beforeDate, string archiveLocation)
-    {
-        // TODO: Implement
-        _logger.LogWarning("ArchiveAuditEntriesAsync not implemented");
-        await Task.CompletedTask;
-        return false;
-    }
-
-    public async Task<byte[]> ExportAuditEntriesAsync(
-        DateTime fromDate,
-        DateTime toDate,
-        string format = "csv",
-        string? entityType = null,
-        string? action = null)
-    {        // TODO: Implement
-        _logger.LogWarning("ExportAuditEntriesAsync not implemented");
-        await Task.CompletedTask;
-        return Array.Empty<byte>();
     }
 
     // Additional missing interface methods - implementing as TODOs
@@ -393,45 +324,6 @@ public class AuditService : IAuditService
         }
     }
 
-    public async Task<string> LogLicenseCreatedAsync(ProductLicense license, string createdBy)
-    {
-        // TODO: Implement
-        _logger.LogWarning("LogLicenseCreatedAsync not implemented");
-        await Task.CompletedTask;
-        return string.Empty;
-    }
-
-    public async Task<string> LogLicenseModifiedAsync(ProductLicense license, string modifiedBy, Dictionary<string, object> changes)
-    {
-        // TODO: Implement
-        _logger.LogWarning("LogLicenseModifiedAsync not implemented");
-        await Task.CompletedTask;
-        return string.Empty;
-    }
-
-    public async Task<string> LogLicenseStatusChangedAsync(string licenseId, LicenseStatus oldStatus, LicenseStatus newStatus, string changedBy, string? reason = null)
-    {
-        // TODO: Implement
-        _logger.LogWarning("LogLicenseStatusChangedAsync not implemented");
-        await Task.CompletedTask;
-        return string.Empty;
-    }
-
-    public async Task<string> LogLicenseActivatedAsync(string licenseId, Dictionary<string, object> activationInfo)
-    {
-        // TODO: Implement
-        _logger.LogWarning("LogLicenseActivatedAsync not implemented");
-        await Task.CompletedTask;
-        return string.Empty;
-    }
-
-    public async Task<string> LogLicenseValidatedAsync(string licenseId, bool isValid, string validatedBy)
-    {        // TODO: Implement
-        _logger.LogWarning("LogLicenseValidatedAsync not implemented");
-        await Task.CompletedTask;
-        return string.Empty;
-    }
-
     public async Task<AuditStatistics> GetAuditStatisticsAsync(DateTime? fromDate = null, DateTime? toDate = null)
     {
         try
@@ -463,17 +355,27 @@ public class AuditService : IAuditService
         }
     }
 
-    public async Task<byte[]> ExportAuditEntriesAsync(
-        string format,
-        string? entityType = null,
-        string? actionType = null,
-        DateTime? fromDate = null,
-        DateTime? toDate = null)
-    {        // TODO: Implement
-        _logger.LogWarning("ExportAuditEntriesAsync (overload) not implemented");
-        await Task.CompletedTask;
-        return Array.Empty<byte>();
-    }
+    public async Task<IEnumerable<AuditEntry>> GetAuditEntriesAsync(AuditSearchRequest searchRequest, CancellationToken cancellationToken = default)
+    {
+        Ensure.NotNull(searchRequest, nameof(searchRequest)); 
+        var entitySearchRequest = new SearchRequest<AuditEntry>
+        {
+            Page = searchRequest.PageNumber,
+            PageSize = searchRequest.PageSize,
+            Filters = new Dictionary<string, object>(),
+            FromDate = searchRequest.FromDate,
+            ToDate = searchRequest.ToDate
+        };
+        if (searchRequest.EntityType != null)
+            entitySearchRequest.Filters.Add(nameof(searchRequest.EntityType), searchRequest.EntityType.Value.ToString());
+        if (searchRequest.ActionType != null)
+            entitySearchRequest.Filters.Add(nameof(searchRequest.ActionType), searchRequest.ActionType.Value.ToString());
+        if (!string.IsNullOrEmpty(searchRequest.EntityId))
+            entitySearchRequest.Filters.Add(nameof(searchRequest.EntityId), searchRequest.EntityId);
 
-    #endregion
+        var searchResults = await _unitOfWork.AuditEntries.SearchAsync(entitySearchRequest, cancellationToken);
+
+        return searchResults.Results;
+    }
+ 
 }

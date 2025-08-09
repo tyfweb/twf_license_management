@@ -46,7 +46,7 @@
                                         <i class="fas fa-lock me-1"></i>Account Locked
                                     </span>
                                 }
-                                else if (Model.User.IsActive)
+                                else if (Model.User.Audit.IsActive)
                                 {
                                     <span class="badge bg-success">
                                         <i class="fas fa-check-circle me-1"></i>Active
@@ -76,7 +76,7 @@
                         </div>
                         <div class="text-end">
                             <div class="text-muted small">Member since</div>
-                            <div class="fw-semibold">@Model.User.CreatedOn.ToString("MMM dd, yyyy")</div>
+                            <div class="fw-semibold">@Model.User.Audit.CreatedOn.ToString("MMM dd, yyyy")</div>
                         </div>
                     </div>
                 </div>
@@ -154,7 +154,7 @@
                                             <i class="fas fa-lock me-1"></i>Locked
                                         </span>
                                     }
-                                    else if (Model.User.IsActive)
+                                    else if (Model.User.Audit.IsActive)
                                     {
                                         <span class="badge bg-success">
                                             <i class="fas fa-check me-1"></i>Active
@@ -277,17 +277,17 @@
                         <label class="detail-label">CREATED DATE</label>
                         <div class="detail-value">
                             <i class="fas fa-calendar-plus text-muted me-2"></i>
-                            @Model.User.CreatedOn.ToString("MMM dd, yyyy HH:mm")
+                            @Model.User.Audit.CreatedOn.ToString("MMM dd, yyyy HH:mm")
                         </div>
                     </div>
 
-                    @if (Model.User.UpdatedOn.HasValue)
+                    @if (Model.User.Audit.UpdatedOn.HasValue)
                     {
                         <div class="detail-group">
                             <label class="detail-label">LAST UPDATED</label>
                             <div class="detail-value">
                                 <i class="fas fa-calendar-edit text-muted me-2"></i>
-                                @Model.User.UpdatedOn.Value.ToString("MMM dd, yyyy HH:mm")
+                                @Model.User.Audit.UpdatedOn.Value.ToString("MMM dd, yyyy HH:mm")
                             </div>
                         </div>
                     }
@@ -296,17 +296,17 @@
                         <label class="detail-label">CREATED BY</label>
                         <div class="detail-value">
                             <i class="fas fa-user-plus text-muted me-2"></i>
-                            @Model.User.CreatedBy
+                            @Model.User.Audit.CreatedBy
                         </div>
                     </div>
 
-                    @if (!string.IsNullOrEmpty(Model.User.UpdatedBy))
+                    @if (!string.IsNullOrEmpty(Model.User.Audit.UpdatedBy))
                     {
                         <div class="detail-group">
                             <label class="detail-label">UPDATED BY</label>
                             <div class="detail-value">
                                 <i class="fas fa-user-edit text-muted me-2"></i>
-                                @Model.User.UpdatedBy
+                                @Model.User.Audit.UpdatedBy
                             </div>
                         </div>
                     }

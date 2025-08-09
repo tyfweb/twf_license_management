@@ -4,6 +4,7 @@ using TechWayFit.Licensing.Management.Core.Models.Common;
 using TechWayFit.Licensing.Management.Core.Models.Consumer;
 using TechWayFit.Licensing.Management.Core.Models.License;
 using TechWayFit.Licensing.Management.Core.Models.Product;
+using TechWayFit.Licensing.Management.Infrastructure.Helpers;
 using TechWayFit.Licensing.Management.Web.Helpers;
 
 namespace TechWayFit.Licensing.Management.Web.Extensions;
@@ -23,7 +24,7 @@ public static class ModelConverterExtensions
             SecondaryContactPerson = consumer.SecondaryContact?.Name,
             SecondaryContactEmail = consumer.SecondaryContact?.Email,
             Address = consumer.Address.ToString(),
-            IsActive = consumer.IsActive,
+            IsActive = consumer.Audit.IsActive,
             CreatedAt = consumer.CreatedAt
         };
     }
@@ -56,7 +57,7 @@ public static class ModelConverterExtensions
             Status = license.Status,
             RevokedAt = license.RevokedAt,
             RevocationReason = license.RevocationReason,
-            Metadata = license.Metadata,
+            Metadata = JsonHelper.Convert<Dictionary<string,object>, Dictionary<string, string>>(license.Metadata),
             FeaturesIncluded = license.LicenseConsumer.Features.Select(f => new LicenseFeature
             {
                 Id = f.FeatureId.ToString(),

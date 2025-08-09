@@ -8,7 +8,7 @@ using TechWayFit.Licensing.Management.Web.Extensions;
 namespace TechWayFit.Licensing.Management.Web.Controllers
 {
     
-    public class AccountController : Controller
+    public class AccountController : BaseController
     {
         private readonly AuthenticationManager _authService;
         private readonly ILogger<AccountController> _logger;

@@ -281,25 +281,6 @@ namespace TechWayFit.Licensing.Management.Web.ViewModels.Notification
     }
 
     /// <summary>
-    /// Notification preferences view model
-    /// </summary>
-    public class NotificationPreferencesViewModel
-    {
-        public string ConsumerId { get; set; } = string.Empty;
-        public string ConsumerName { get; set; } = string.Empty;
-        public NotificationMode PreferredMode { get; set; } = NotificationMode.Email;
-        public string EmailAddress { get; set; } = string.Empty;
-        public string PhoneNumber { get; set; } = string.Empty;
-        public bool EnableLicenseExpirationAlerts { get; set; } = true;
-        public bool EnableLicenseActivationNotifications { get; set; } = true;
-        public bool EnableLicenseRevocationAlerts { get; set; } = true;
-        public bool EnableSystemAlerts { get; set; } = true;
-        public bool EnableUsageThresholdAlerts { get; set; } = false;
-        public int ExpirationAlertDays { get; set; } = 30;
-        public Dictionary<NotificationType, bool> TypePreferences { get; set; } = new();
-    }
-
-    /// <summary>
     /// Dashboard view model for notifications
     /// </summary>
     public class NotificationDashboardViewModel

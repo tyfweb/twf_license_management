@@ -56,7 +56,7 @@
         </div>
         <div class="col-sm-6 col-lg-3">
             @{
-                var statusCardClass = Model.Consumer.IsActive ? "stats-card-success" : "stats-card-secondary";
+                var statusCardClass = Model.Consumer.Audit.IsActive ? "stats-card-success" : "stats-card-secondary";
             }
             <div class="stats-card @statusCardClass">
                 <div class="stats-icon">
@@ -64,7 +64,7 @@
                 </div>
                 <div class="stats-content">
                     <div class="stats-label">Status</div>
-                    <div class="stats-number">@(Model.Consumer.IsActive ? "Active" : "Inactive")</div>
+                    <div class="stats-number">@(Model.Consumer.Audit.IsActive ? "Active" : "Inactive")</div>
                 </div>
             </div>
         </div>
@@ -114,7 +114,7 @@
                                 <label class="detail-label">Status</label>
                                 <div class="detail-value">
                                     <i class="fas fa-circle-check me-2 text-muted"></i>
-                                    @if (Model.Consumer.IsActive)
+                                    @if (Model.Consumer.Audit.IsActive)
                                     {
                                         <span class="badge bg-success">Active</span>
                                     }

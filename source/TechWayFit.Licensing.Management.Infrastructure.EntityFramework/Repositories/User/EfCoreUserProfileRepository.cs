@@ -182,7 +182,6 @@ public class EfCoreUserProfileRepository :  BaseRepository<UserProfile,UserProfi
             user.LastLoginDate = DateTime.UtcNow;
             user.FailedLoginAttempts = 0; // Reset failed attempts on successful login
             user.UpdatedOn = DateTime.UtcNow;
-            await _context.SaveChangesAsync(cancellationToken);
         }
     }
 
@@ -200,8 +199,6 @@ public class EfCoreUserProfileRepository :  BaseRepository<UserProfile,UserProfi
                 user.IsLocked = true;
                 user.LockedDate = DateTime.UtcNow;
             }
-
-            await _context.SaveChangesAsync(cancellationToken);
         }
     }
 
@@ -212,8 +209,7 @@ public class EfCoreUserProfileRepository :  BaseRepository<UserProfile,UserProfi
         {
             user.IsLocked = true;
             user.LockedDate = DateTime.UtcNow;
-            user.UpdatedOn = DateTime.UtcNow;
-            await _context.SaveChangesAsync(cancellationToken);
+                user.UpdatedOn = DateTime.UtcNow;
         }
     }
 
@@ -226,7 +222,6 @@ public class EfCoreUserProfileRepository :  BaseRepository<UserProfile,UserProfi
             user.LockedDate = null;
             user.FailedLoginAttempts = 0;
             user.UpdatedOn = DateTime.UtcNow;
-            await _context.SaveChangesAsync(cancellationToken);
         }
     }
 
@@ -293,7 +288,7 @@ public class EfCoreUserProfileRepository :  BaseRepository<UserProfile,UserProfi
         user.UpdatedOn = DateTime.UtcNow;
         user.UpdatedBy = _userContext.UserName ?? "Anonymous";
         _dbSet.Update(user);
-        await _context.SaveChangesAsync(cancellationToken);
+        
         return true;
     }
 }

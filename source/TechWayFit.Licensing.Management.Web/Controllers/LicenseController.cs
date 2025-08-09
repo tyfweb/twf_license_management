@@ -17,7 +17,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
     /// Handles license generation, validation, and lifecycle management
     /// </summary>
     [Authorize]
-    public class LicenseController : Controller
+    public class LicenseController : BaseController
     {
         private readonly ILogger<LicenseController> _logger;
         private readonly IProductLicenseService _licenseService;

@@ -37,7 +37,24 @@ public static class JsonHelper
             return default(T);
         }
     }
+    public static TTarget Convert<TSource,TTarget>(TSource? source) 
+        where TSource : class
+        where TTarget : class,new()
+    {
+        if (source == null)
+            return new TTarget();
 
+        try
+        {
+            var stringJson = JsonSerializer.Serialize(source, DefaultOptions);
+            return JsonSerializer.Deserialize<TTarget>(stringJson, DefaultOptions) ?? new TTarget();
+        }
+        catch (JsonException)
+        {
+            return new TTarget();
+        }
+    }
+ 
     public static Dictionary<string, string> FromDictJson(string? json)
     {
         json ??= "{}";

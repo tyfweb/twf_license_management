@@ -44,71 +44,50 @@ public class ApprovalController : BaseController
             var viewModel = new ApprovalDashboardViewModel();
 
             // Get pending items from all workflow services
-            var pendingConsumers = await _consumerWorkflowService.GetPendingApprovalAsync();
-            var pendingProducts = await _productWorkflowService.GetPendingApprovalAsync();
-            var pendingLicenses = await _licenseWorkflowService.GetPendingApprovalAsync();
+            var pendingConsumers =  _consumerWorkflowService.GetPendingApprovalAsync();
+            var pendingProducts =  _productWorkflowService.GetPendingApprovalAsync();
+            var pendingLicenses =  _licenseWorkflowService.GetPendingApprovalAsync();
 
             // Convert to view models
             var pendingItems = new List<PendingApprovalItemViewModel>();
-
-            foreach (var consumer in pendingConsumers)
+            var userCanApprove = await _consumerWorkflowService.CanUserApproveAsync(GetCurrentUserId());
+            foreach (var consumer in await pendingConsumers)
             {
-                pendingItems.Add(new PendingApprovalItemViewModel
+                var pendingApprovalItem = new PendingApprovalItemViewModel
                 {
-                    EntityId = consumer.ConsumerId,
-                    EntityType = "Consumer",
                     EntityDisplayName = consumer.CompanyName,
                     EntityDescription = $"Consumer account for {consumer.CompanyName}",
-                    EntityStatus = consumer.Workflow.Status,
-                    SubmittedBy = consumer.Workflow.SubmittedBy ?? "Unknown",
-                    SubmittedOn = consumer.Workflow.SubmittedOn ?? DateTime.MinValue,
-                    DaysInQueue = consumer.Workflow.SubmittedOn.HasValue ? (DateTime.UtcNow - consumer.Workflow.SubmittedOn.Value).Days : 0,
-                    CanApprove = await _consumerWorkflowService.CanUserApproveAsync(GetCurrentUserId()),
-                    CanReject = await _consumerWorkflowService.CanUserApproveAsync(GetCurrentUserId()),
-                    ApprovalUrl = Url.Action("Approve", new { id = consumer.ConsumerId, type = "Consumer" }) ?? "",
-                    RejectUrl = Url.Action("Reject", new { id = consumer.ConsumerId, type = "Consumer" }) ?? "",
-                    DetailsUrl = Url.Action("Details", "Consumer", new { id = consumer.ConsumerId }) ?? ""
-                });
+                    CanApprove = userCanApprove,
+                    CanReject = userCanApprove
+                };
+                Update(consumer, pendingApprovalItem, "Consumer", consumer.ConsumerId);
+                pendingItems.Add(pendingApprovalItem);
             }
 
-            foreach (var product in pendingProducts)
+            foreach (var product in await pendingProducts)
             {
-                pendingItems.Add(new PendingApprovalItemViewModel
+                var pendingApprovalItem = new PendingApprovalItemViewModel
                 {
-                    EntityId = product.Id,
-                    EntityType = "Product",
                     EntityDisplayName = product.Name,
                     EntityDescription = $"Product: {product.Name} - {product.Description}",
-                    EntityStatus = product.EntityStatus,
-                    SubmittedBy = product.SubmittedBy ?? "Unknown",
-                    SubmittedOn = product.SubmittedOn ?? DateTime.MinValue,
-                    DaysInQueue = product.SubmittedOn.HasValue ? (DateTime.UtcNow - product.SubmittedOn.Value).Days : 0,
-                    CanApprove = await _productWorkflowService.CanUserApproveAsync(GetCurrentUserId()),
-                    CanReject = await _productWorkflowService.CanUserApproveAsync(GetCurrentUserId()),
-                    ApprovalUrl = Url.Action("Approve", new { id = product.Id, type = "Product" }) ?? "",
-                    RejectUrl = Url.Action("Reject", new { id = product.Id, type = "Product" }) ?? "",
-                    DetailsUrl = Url.Action("Details", "Product", new { id = product.Id }) ?? ""
-                });
+                    CanApprove = userCanApprove,
+                    CanReject = userCanApprove
+                };
+                Update(product, pendingApprovalItem, "Product", product.Id);
+                pendingItems.Add(pendingApprovalItem);
             }
 
-            foreach (var license in pendingLicenses)
+            foreach (var license in await pendingLicenses)
             {
-                pendingItems.Add(new PendingApprovalItemViewModel
+                var pendingApprovalItem = new PendingApprovalItemViewModel
                 {
-                    EntityId = license.Id,
-                    EntityType = "License",
                     EntityDisplayName = $"License {license.LicenseCode}",
                     EntityDescription = $"License for {license.LicenseConsumer.Consumer.CompanyName}",
-                    EntityStatus = license.EntityStatus,
-                    SubmittedBy = license.SubmittedBy ?? "Unknown",
-                    SubmittedOn = license.SubmittedOn ?? DateTime.MinValue,
-                    DaysInQueue = license.SubmittedOn.HasValue ? (DateTime.UtcNow - license.SubmittedOn.Value).Days : 0,
-                    CanApprove = await _licenseWorkflowService.CanUserApproveAsync(GetCurrentUserId()),
-                    CanReject = await _licenseWorkflowService.CanUserApproveAsync(GetCurrentUserId()),
-                    ApprovalUrl = Url.Action("Approve", new { id = license.Id, type = "License" }) ?? "",
-                    RejectUrl = Url.Action("Reject", new { id = license.Id, type = "License" }) ?? "",
-                    DetailsUrl = Url.Action("Details", "License", new { id = license.Id }) ?? ""
-                });
+                    CanApprove = userCanApprove,
+                    CanReject = userCanApprove                    
+                };
+                Update(license, pendingApprovalItem, "License", license.Id);
+                pendingItems.Add(pendingApprovalItem);
             }
 
             // Sort by submission date (oldest first)
@@ -182,21 +161,19 @@ public class ApprovalController : BaseController
         }
 
         try
-        {
-            var userId = GetCurrentUserId();
-            
+        {            
             switch (type.ToLower())
             {
                 case "consumer":
-                    await _consumerWorkflowService.RejectAsync(id, userId, reason);
+                    await _consumerWorkflowService.RejectAsync(id, reason);
                     TempData["SuccessMessage"] = "Consumer account rejected.";
                     break;
                 case "product":
-                    await _productWorkflowService.RejectAsync(id, userId, reason);
+                    await _productWorkflowService.RejectAsync(id, reason);
                     TempData["SuccessMessage"] = "Product rejected.";
                     break;
                 case "license":
-                    await _licenseWorkflowService.RejectAsync(id, userId, reason);
+                    await _licenseWorkflowService.RejectAsync(id, reason);
                     TempData["SuccessMessage"] = "License rejected.";
                     break;
                 default:
@@ -238,13 +215,13 @@ public class ApprovalController : BaseController
                     EntityId = consumer.Id,
                     EntityType = "Consumer",
                     EntityDisplayName = consumer.CompanyName,
-                    EntityStatus = consumer.EntityStatus,
-                    SubmittedOn = consumer.SubmittedOn ?? consumer.CreatedOn,
-                    ReviewedBy = consumer.ReviewedBy,
-                    ReviewedOn = consumer.ReviewedOn,
-                    ReviewComments = consumer.ReviewComments,
-                    CanWithdraw = consumer.EntityStatus == EntityStatus.PendingApproval,
-                    CanEdit = consumer.EntityStatus == EntityStatus.Draft || consumer.EntityStatus == EntityStatus.Rejected,
+                    EntityStatus = consumer.Workflow.Status,
+                    SubmittedOn = consumer.Workflow.SubmittedOn ?? consumer.Audit.CreatedOn,
+                    ReviewedBy = consumer.Workflow.ReviewedBy,
+                    ReviewedOn = consumer.Workflow.ReviewedOn,
+                    ReviewComments = consumer.Workflow.ReviewComments,
+                    CanWithdraw = consumer.Workflow.Status == EntityStatus.PendingApproval,
+                    CanEdit = consumer.Workflow.Status == EntityStatus.Draft || consumer.Workflow.Status == EntityStatus.Rejected,
                     EditUrl = Url.Action("Edit", "Consumer", new { id = consumer.Id }) ?? "",
                     DetailsUrl = Url.Action("Details", "Consumer", new { id = consumer.Id }) ?? ""
                 });
@@ -270,20 +247,19 @@ public class ApprovalController : BaseController
     {
         try
         {
-            var userId = GetCurrentUserId();
             
             switch (type.ToLower())
             {
                 case "consumer":
-                    await _consumerWorkflowService.WithdrawAsync(id, userId, reason);
+                    await _consumerWorkflowService.WithdrawAsync(id, reason);
                     TempData["SuccessMessage"] = "Consumer account withdrawn from approval.";
                     break;
                 case "product":
-                    await _productWorkflowService.WithdrawAsync(id, userId, reason);
+                    await _productWorkflowService.WithdrawAsync(id, reason);
                     TempData["SuccessMessage"] = "Product withdrawn from approval.";
                     break;
                 case "license":
-                    await _licenseWorkflowService.WithdrawAsync(id, userId, reason);
+                    await _licenseWorkflowService.WithdrawAsync(id, reason);
                     TempData["SuccessMessage"] = "License withdrawn from approval.";
                     break;
                 default:
@@ -313,15 +289,15 @@ public class ApprovalController : BaseController
             switch (type.ToLower())
             {
                 case "consumer":
-                    await _consumerWorkflowService.SubmitForApprovalAsync(id, userId);
+                    await _consumerWorkflowService.SubmitForApprovalAsync(id );
                     TempData["SuccessMessage"] = "Consumer account submitted for approval.";
                     break;
                 case "product":
-                    await _productWorkflowService.SubmitForApprovalAsync(id, userId);
+                    await _productWorkflowService.SubmitForApprovalAsync(id);
                     TempData["SuccessMessage"] = "Product submitted for approval.";
                     break;
                 case "license":
-                    await _licenseWorkflowService.SubmitForApprovalAsync(id, userId);
+                    await _licenseWorkflowService.SubmitForApprovalAsync(id);
                     TempData["SuccessMessage"] = "License submitted for approval.";
                     break;
                 default:
@@ -337,10 +313,20 @@ public class ApprovalController : BaseController
             TempData["ErrorMessage"] = "Error submitting item for approval. Please try again.";
             return RedirectToAction("MySubmissions");
         }
+        
     }
-
-    private string GetCurrentUserId()
+    private PendingApprovalItemViewModel Update(IWorkflowCapable entity, PendingApprovalItemViewModel viewModel, string entityType, Guid entityId)
     {
-        return User.Identity?.Name ?? "Anonymous";
-    }
+        viewModel.EntityId = entityId;
+        viewModel.EntityType = entityType;
+        viewModel.EntityStatus = entity.Workflow.Status;
+        viewModel.SubmittedBy = entity.Workflow.SubmittedBy ?? "Unknown";
+        viewModel.SubmittedOn = entity.Workflow.SubmittedOn ?? DateTime.MinValue;
+        viewModel.DaysInQueue = entity.Workflow.SubmittedOn.HasValue ? (DateTime.UtcNow - entity.Workflow.SubmittedOn.Value).Days : 0;
+        viewModel.ApprovalUrl = Url.Action("Approve", new { id = entityId, type = entityType }) ?? "";
+        viewModel.RejectUrl = Url.Action("Reject", new { id = entityId, type = entityType }) ?? "";
+        viewModel.DetailsUrl = Url.Action("Details", entityType, new { id = entityId }) ?? "";
+        
+        return viewModel;
+    }     
 }

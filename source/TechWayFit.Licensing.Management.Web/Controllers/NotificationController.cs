@@ -12,7 +12,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
     /// Handles notification history, templates, and delivery management
     /// </summary>
     [Authorize]
-    public class NotificationController : Controller
+    public class NotificationController : BaseController
     {
         private readonly INotificationService _notificationService;
         private readonly ILogger<NotificationController> _logger;
@@ -80,7 +80,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                         NotificationType = n.NotificationType,
                         Recipients = n.Recipients,
                         SentDate = n.SentDate,
-                        DeliveryStatus = n.DeliveryStatus,
+                        DeliveryStatus = n.Status,
                         DeliveryError = n.DeliveryError,
                         RecipientDisplay = GetRecipientDisplay(n.Recipients)
                     }).ToList(),
@@ -150,7 +150,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
 
                 if (deliveryStatus.HasValue)
                 {
-                    filteredNotifications = filteredNotifications.Where(n => n.DeliveryStatus == deliveryStatus.Value);
+                    filteredNotifications = filteredNotifications.Where(n => n.Status == deliveryStatus.Value);
                 }
 
                 if (!string.IsNullOrEmpty(entityType))
@@ -175,7 +175,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                         NotificationType = n.NotificationType,
                         Recipients = n.Recipients,
                         SentDate = n.SentDate,
-                        DeliveryStatus = n.DeliveryStatus,
+                        DeliveryStatus = n.Status,
                         DeliveryError = n.DeliveryError,
                         TemplateName = "Unknown", // TODO: Get template name
                         Subject = "N/A", // TODO: Get subject from template
@@ -307,7 +307,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                         NotificationType = n.NotificationType,
                         Recipients = n.Recipients,
                         SentDate = n.SentDate,
-                        DeliveryStatus = n.DeliveryStatus,
+                        DeliveryStatus = n.Status,
                         DeliveryError = n.DeliveryError,
                         RecipientDisplay = GetRecipientDisplay(n.Recipients)
                     }).ToList();
@@ -631,7 +631,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                     NotificationType = notification.NotificationType,
                     Recipients = notification.Recipients,
                     SentDate = notification.SentDate,
-                    DeliveryStatus = notification.DeliveryStatus,
+                    DeliveryStatus = notification.Status,
                     DeliveryError = notification.DeliveryError,
                     RecipientDisplay = GetRecipientDisplay(notification.Recipients)
                 };

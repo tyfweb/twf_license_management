@@ -24,3 +24,21 @@ public class AuditEntry
     public string? Reason { get; set; }
     public Dictionary<string, string> Metadata { get; set; } = new();
 }
+public enum AuditEntityType
+{
+    Product,
+    License,
+    Consumer,
+    Approval,
+    Workflow
+}
+public enum AuditActionType
+{
+    Created,
+    Updated,
+    Deleted,
+    Approved,
+    Rejected,
+    Activated,
+    Deactivated
+}

@@ -12,7 +12,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers;
 /// </summary>
 [Authorize]
 [Route("[controller]")]
-public class AuditController : Controller
+public class AuditController : BaseController
 {
     private readonly IAuditService _auditService;
     private readonly ILogger<AuditController> _logger;
@@ -361,12 +361,7 @@ public class AuditController : Controller
                 return RedirectToAction(nameof(Entries));
             }
 
-            var exportData = await _auditService.ExportAuditEntriesAsync(
-                model.Format,
-                model.EntityType,
-                model.EntityId.ToString(),
-                model.StartDate,
-                model.EndDate);
+            //TODO: Implement export logic based on model parameters
 
             var contentType = model.Format.ToLowerInvariant() switch
             {
@@ -375,7 +370,7 @@ public class AuditController : Controller
                 _ => "text/csv"
             };
 
-            return File(exportData, contentType, model.FileName);
+            return File("", contentType, model.FileName);
         }
         catch (Exception ex)
         {
