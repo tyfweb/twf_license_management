@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using TechWayFit.Licensing.Management.Core.Models.Common;
 using TechWayFit.Licensing.Management.Core.Models.User;
 using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Models.Entities.Common;
@@ -7,6 +8,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Models.
 /// <summary>
 /// Entity representing the mapping between users and roles
 /// </summary>
+[Table("user_role_mappings")]
 public class UserRoleMappingEntity : BaseEntity, IEntityMapper<UserRoleMapping, UserRoleMappingEntity>
 {
     /// <summary>
@@ -40,31 +42,30 @@ public class UserRoleMappingEntity : BaseEntity, IEntityMapper<UserRoleMapping, 
     public virtual UserRoleEntity Role { get; set; } = null!;
 
     #region IEntityMapper Implementation
-       public UserRoleMappingEntity Map( UserRoleMapping model)
+    public UserRoleMappingEntity Map(UserRoleMapping model)
     {
         if (model == null) return null!;
 
-        return new UserRoleMappingEntity
-        {
-            Id = model.MappingId,
-            TenantId = model.TenantId,
-            UserId = model.UserId,
-            RoleId = model.RoleId,
-            AssignedDate = model.AssignedDate,
-            ExpiryDate = model.ExpiryDate,
-            IsActive = model.Audit.IsActive,
-            CreatedBy = model.Audit.CreatedBy,
-            CreatedOn = model.Audit.CreatedOn,
-            UpdatedBy = model.Audit.UpdatedBy,
-            UpdatedOn = model.Audit.UpdatedOn
-        };
+        Id = model.MappingId;
+        TenantId = model.TenantId;
+        UserId = model.UserId;
+        RoleId = model.RoleId;
+        AssignedDate = model.AssignedDate;
+        ExpiryDate = model.ExpiryDate;
+        IsActive = model.Audit.IsActive;
+        CreatedBy = model.Audit.CreatedBy;
+        CreatedOn = model.Audit.CreatedOn;
+        UpdatedBy = model.Audit.UpdatedBy;
+        UpdatedOn = model.Audit.UpdatedOn;
+
+        return this;
     }
 
     /// <summary>
     /// Converts UserRoleMappingEntity to UserRoleMapping core model
     /// </summary>
     public UserRoleMapping Map()
-    { 
+    {
 
         return new UserRoleMapping
         {

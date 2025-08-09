@@ -33,11 +33,6 @@ public class UserProfileSeeder : BaseDataSeeder
         }
 
 
-        // Get available roles (should exist after role seeder)
-        var roles = await _unitOfWork.UserRoles.GetAllAsync(cancellationToken);
-        var adminRole = roles.FirstOrDefault(r => r.RoleName == "SuperAdmin");
-        var managerRole = roles.FirstOrDefault(r => r.RoleName == "LicenseManager");
-
         // Default system users
         var defaultUsers = new[]
         {
@@ -70,6 +65,7 @@ public class UserProfileSeeder : BaseDataSeeder
             {
                 await _unitOfWork.Users.AddAsync(user, cancellationToken);
                 recordsCreated++;
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
                 _logger.LogDebug("Created user profile: {Username}", user.UserName);
             }
             catch (Exception ex)
@@ -77,7 +73,22 @@ public class UserProfileSeeder : BaseDataSeeder
                 _logger.LogError(ex, "Failed to create user profile: {Username}", user.UserName);
             }
         }
-
+        await _unitOfWork.UserRoleMappings.AddAsync(new UserRoleMapping
+        {
+            RoleId = IdConstants.AdminRoleId,
+            UserId = IdConstants.AdminUserId,
+            CreatedBy = "System",
+            CreatedOn = DateTime.UtcNow,
+            TenantId = IdConstants.SystemTenantId
+        }, cancellationToken);
+        await _unitOfWork.UserRoleMappings.AddAsync(new UserRoleMapping
+        {
+            RoleId = IdConstants.ManagerRoleId,
+            UserId = IdConstants.ManagerUserId,
+            CreatedBy = "System",
+            CreatedOn = DateTime.UtcNow,
+            TenantId = IdConstants.SystemTenantId
+        }, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation("Created {Count} default user profiles", recordsCreated);

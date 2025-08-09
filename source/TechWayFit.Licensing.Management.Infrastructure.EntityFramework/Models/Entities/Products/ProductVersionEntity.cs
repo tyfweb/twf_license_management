@@ -63,32 +63,31 @@ public class ProductVersionEntity : AuditWorkflowEntity, IEntityMapper<ProductVe
     {
         if (model == null) return null!;
 
-        return new ProductVersionEntity
-        {
-            Id = model.VersionId,
-            ProductId = model.ProductId,
-            Name = model.Name,
-            IsCurrent = model.IsCurrent,
-            Version = model.Version.ToString(),
-            ReleaseDate = model.ReleaseDate,
-            EndOfLifeDate = model.EndOfLifeDate,
-            SupportEndDate = model.SupportEndDate,
-            IsActive = model.Audit.IsActive,
-            IsDeleted = model.Audit.IsDeleted,
-            CreatedBy = model.Audit.CreatedBy,
-            CreatedOn = model.Audit.CreatedOn,
-            UpdatedBy = model.Audit.UpdatedBy,
-            UpdatedOn = model.Audit.UpdatedOn,
-            DeletedBy = model.Audit.DeletedBy,
-            DeletedOn = model.Audit.DeletedOn,
-            EntityStatus = (int)model.Workflow.Status,
-            SubmittedBy = model.Workflow.SubmittedBy,
-            SubmittedOn = model.Workflow.SubmittedOn,
-            ReviewedBy = model.Workflow.ReviewedBy,
-            ReviewedOn = model.Workflow.ReviewedOn,
-            ReviewComments = model.Workflow.ReviewComments,
-            RowVersion = model.Audit.RowVersion
-        };
+        Id = model.VersionId;
+        ProductId = model.ProductId;
+        Name = model.Name;
+        IsCurrent = model.IsCurrent;
+        Version = model.Version.ToString();
+        ReleaseDate = model.ReleaseDate;
+        EndOfLifeDate = model.EndOfLifeDate;
+        SupportEndDate = model.SupportEndDate;
+        IsActive = model.Audit.IsActive;
+        IsDeleted = model.Audit.IsDeleted;
+        CreatedBy = model.Audit.CreatedBy;
+        CreatedOn = model.Audit.CreatedOn;
+        UpdatedBy = model.Audit.UpdatedBy;
+        UpdatedOn = model.Audit.UpdatedOn;
+        DeletedBy = model.Audit.DeletedBy;
+        DeletedOn = model.Audit.DeletedOn;
+        EntityStatus = (int)model.Workflow.Status;
+        SubmittedBy = model.Workflow.SubmittedBy;
+        SubmittedOn = model.Workflow.SubmittedOn;
+        ReviewedBy = model.Workflow.ReviewedBy;
+        ReviewedOn = model.Workflow.ReviewedOn;
+        ReviewComments = model.Workflow.ReviewComments;
+        RowVersion = model.Audit.RowVersion;
+
+        return this;
     }
 
     /// <summary>

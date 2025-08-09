@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using TechWayFit.Licensing.Management.Core.Models.Common;
 using TechWayFit.Licensing.Management.Core.Models.Settings;
 using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Models.Entities.Common;
@@ -8,6 +9,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Models.
 /// <summary>
 /// Entity model for system settings storage
 /// </summary>
+[Table("settings")]
 public class SettingEntity : BaseEntity, IEntityMapper<Setting, SettingEntity>
 {
 

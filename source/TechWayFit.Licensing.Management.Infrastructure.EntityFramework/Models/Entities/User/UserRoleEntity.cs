@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using TechWayFit.Licensing.Management.Core.Models.Common;
 using TechWayFit.Licensing.Management.Core.Models.User;
 using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Models.Entities.Common;
@@ -7,6 +8,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Models.
 /// <summary>
 /// Entity representing a user role in the system
 /// </summary>
+[Table("user_roles")]
 public class UserRoleEntity : BaseEntity, IEntityMapper<UserRole, UserRoleEntity>
 {
 
@@ -35,19 +37,17 @@ public class UserRoleEntity : BaseEntity, IEntityMapper<UserRole, UserRoleEntity
     {
         if (model == null) return null!;
 
-        return new UserRoleEntity
-        {
-            Id = model.RoleId,
-            TenantId = model.TenantId,
-            RoleName = model.RoleName,
-            RoleDescription = model.RoleDescription,
-            IsAdmin = model.IsAdmin,
-            IsActive = model.Audit.IsActive,
-            CreatedBy = model.Audit.CreatedBy,
-            CreatedOn = model.Audit.CreatedOn,
-            UpdatedBy = model.Audit.UpdatedBy,
-            UpdatedOn = model.Audit.UpdatedOn
-        };
+        Id = model.RoleId;
+        TenantId = model.TenantId;
+        RoleName = model.RoleName;
+        RoleDescription = model.RoleDescription;
+        IsAdmin = model.IsAdmin;
+        IsActive = model.Audit.IsActive;
+        CreatedBy = model.Audit.CreatedBy;
+        CreatedOn = model.Audit.CreatedOn;
+        UpdatedBy = model.Audit.UpdatedBy;
+        UpdatedOn = model.Audit.UpdatedOn;
+        return this;
     }
 
     /// <summary>

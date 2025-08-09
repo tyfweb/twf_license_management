@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using TechWayFit.Licensing.Management.Core.Models.Common;
 using TechWayFit.Licensing.Management.Core.Models.User;
 using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Models.Entities.Common;
@@ -7,6 +8,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Models.
 /// <summary>
 /// Entity representing a user profile in the system
 /// </summary>
+[Table("user_profiles")]
 public class UserProfileEntity : BaseEntity, IEntityMapper<UserProfile, UserProfileEntity>
 {
 
@@ -75,22 +77,21 @@ public class UserProfileEntity : BaseEntity, IEntityMapper<UserProfile, UserProf
     {
         if (model == null) return null!;
 
-        var entity = new UserProfileEntity
-        {
-            Id = model.UserId,
-            TenantId = model.TenantId,
-            UserName = model.UserName,
-            FullName = model.FullName,
-            Email = model.Email,
-            Department = model.Department,
-            IsLocked = model.IsLocked,
-            IsAdmin = model.IsAdmin,
-            LastLoginDate = model.LastLoginDate,
-            FailedLoginAttempts = model.FailedLoginAttempts,
-            LockedDate = model.LockedDate
-        };
+
+        Id = model.UserId;
+        TenantId = model.TenantId;
+        UserName = model.UserName;
+        FullName = model.FullName;
+        Email = model.Email;
+        Department = model.Department;
+        IsLocked = model.IsLocked;
+        IsAdmin = model.IsAdmin;
+        LastLoginDate = model.LastLoginDate;
+        FailedLoginAttempts = model.FailedLoginAttempts;
+        LockedDate = model.LockedDate;
+
         UpdateAuditInfo(model.Audit);
-        return entity;
+        return this;
     }
 
     /// <summary>

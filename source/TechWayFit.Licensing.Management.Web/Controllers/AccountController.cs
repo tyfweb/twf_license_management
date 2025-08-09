@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using TechWayFit.Licensing.Management.Web.Models.Authentication;
 using TechWayFit.Licensing.Management.Web.Services;
 using TechWayFit.Licensing.Management.Web.Extensions;
+using TechWayFit.Licensing.Management.Core.Contracts;
 
 namespace TechWayFit.Licensing.Management.Web.Controllers
 {
@@ -12,11 +13,13 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
     {
         private readonly AuthenticationManager _authService;
         private readonly ILogger<AccountController> _logger;
+        private readonly ITenantScope _tenantScope;
 
-        public AccountController(AuthenticationManager authService, ILogger<AccountController> logger)
+        public AccountController(AuthenticationManager authService, ILogger<AccountController> logger, ITenantScope tenantScope)
         {
             _authService = authService;
             _logger = logger;
+            _tenantScope = tenantScope;
         }
 
         [HttpGet]
@@ -46,8 +49,11 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 return View(model);
             }
 
-            var isValid = await _authService.ValidateUserAsync(model.Username, model.Password);
-
+            bool isValid = false;
+            // Execute seeding within system tenant scope
+            using var systemScope = _tenantScope.CreateSystemScope();            
+                isValid = await _authService.ValidateUserAsync(model.Username, model.Password);
+            
             if (isValid)
             {
                 var user = await _authService.GetUserAsync(model.Username);

@@ -95,46 +95,45 @@ public class ConsumerAccountEntity : AuditWorkflowEntity, IEntityMapper<Consumer
     {
         if (model == null) return null!;
 
-        return new ConsumerAccountEntity
-        {
-            Id = model.ConsumerId,
-            TenantId = model.TenantId,
-            CompanyName = model.CompanyName,
-            AccountCode = model.AccountCode,
-            PrimaryContactName = model.PrimaryContact.Name,
-            PrimaryContactEmail = model.PrimaryContact.Email,
-            PrimaryContactPhone = model.PrimaryContact.Phone,
-            PrimaryContactPosition = model.PrimaryContact.Position,
-            SecondaryContactName = model.SecondaryContact?.Name,
-            SecondaryContactEmail = model.SecondaryContact?.Email,
-            SecondaryContactPhone = model.SecondaryContact?.Phone,
-            SecondaryContactPosition = model.SecondaryContact?.Position,
-            ActivatedAt = model.ActivatedAt,
-            SubscriptionEnd = model.SubscriptionEnd,
-            IsActive = model.Audit.IsActive,
-            IsDeleted = model.Audit.IsDeleted,
-            AddressStreet = model.Address.Street,
-            AddressCity = model.Address.City,
-            AddressState = model.Address.State,
-            AddressPostalCode = model.Address.PostalCode,
-            AddressCountry = model.Address.Country,
-            Notes = model.Notes,
-            Status = model.Status.ToString(),
-            CreatedBy = model.Audit.CreatedBy,
-            CreatedOn = model.Audit.CreatedOn,
-            UpdatedBy = model.Audit.UpdatedBy,
-            UpdatedOn = model.Audit.UpdatedOn,
-            DeletedBy = model.Audit.DeletedBy,
-            DeletedOn = model.Audit.DeletedOn,
-            RowVersion = model.Audit.RowVersion,
-            // Workflow properties
-            EntityStatus = (int)model.Workflow.Status,
-            SubmittedBy = model.Workflow.SubmittedBy,
-            SubmittedOn = model.Workflow.SubmittedOn,
-            ReviewedBy = model.Workflow.ReviewedBy,
-            ReviewedOn = model.Workflow.ReviewedOn,
-            ReviewComments = model.Workflow.ReviewComments
-        };
+        Id = model.ConsumerId;
+        TenantId = model.TenantId;
+        CompanyName = model.CompanyName;
+        AccountCode = model.AccountCode;
+        PrimaryContactName = model.PrimaryContact.Name;
+        PrimaryContactEmail = model.PrimaryContact.Email;
+        PrimaryContactPhone = model.PrimaryContact.Phone;
+        PrimaryContactPosition = model.PrimaryContact.Position;
+        SecondaryContactName = model.SecondaryContact?.Name;
+        SecondaryContactEmail = model.SecondaryContact?.Email;
+        SecondaryContactPhone = model.SecondaryContact?.Phone;
+        SecondaryContactPosition = model.SecondaryContact?.Position;
+        ActivatedAt = model.ActivatedAt;
+        SubscriptionEnd = model.SubscriptionEnd;
+        IsActive = model.Audit.IsActive;
+        IsDeleted = model.Audit.IsDeleted;
+        AddressStreet = model.Address.Street;
+        AddressCity = model.Address.City;
+        AddressState = model.Address.State;
+        AddressPostalCode = model.Address.PostalCode;
+        AddressCountry = model.Address.Country;
+        Notes = model.Notes;
+        Status = model.Status.ToString();
+        CreatedBy = model.Audit.CreatedBy;
+        CreatedOn = model.Audit.CreatedOn;
+        UpdatedBy = model.Audit.UpdatedBy;
+        UpdatedOn = model.Audit.UpdatedOn;
+        DeletedBy = model.Audit.DeletedBy;
+        DeletedOn = model.Audit.DeletedOn;
+        RowVersion = model.Audit.RowVersion;
+        // Workflow properties
+        EntityStatus = (int)model.Workflow.Status;
+        SubmittedBy = model.Workflow.SubmittedBy;
+        SubmittedOn = model.Workflow.SubmittedOn;
+        ReviewedBy = model.Workflow.ReviewedBy;
+        ReviewedOn = model.Workflow.ReviewedOn;
+        ReviewComments = model.Workflow.ReviewComments;
+
+        return this;
     }
 
     /// <summary>

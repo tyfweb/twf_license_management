@@ -11,7 +11,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Reposit
 /// <summary>
 /// Audit entry repository implementation
 /// </summary>
-public class EfCoreAuditEntryRepository :  BaseRepository<AuditEntry,AuditEntryEntity>, IAuditEntryRepository
+public class EfCoreAuditEntryRepository :  AuditRepository<AuditEntry,AuditEntryEntity>, IAuditEntryRepository
 {
     public EfCoreAuditEntryRepository(EfCoreLicensingDbContext context,IUserContext userContext) : base(context,userContext)
     {

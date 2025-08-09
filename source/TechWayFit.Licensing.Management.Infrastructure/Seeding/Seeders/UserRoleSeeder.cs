@@ -30,9 +30,9 @@ public class UserRoleSeeder : BaseDataSeeder
             _logger.LogInformation("User roles already exist, skipping seeding");
             return 0;
         }
-        Guid adminRoleId = Guid.NewGuid();
-        Guid managerRoleId = Guid.NewGuid();
-        Guid userRoleId = Guid.NewGuid();
+        Guid adminRoleId = IdConstants.AdminRoleId;
+        Guid managerRoleId = IdConstants.ManagerRoleId;
+        Guid userRoleId = IdConstants.UserRoleId;
 
         // Default roles for the licensing system
         var defaultRoles = new[]
@@ -76,8 +76,9 @@ public class UserRoleSeeder : BaseDataSeeder
         {
             try
             {
-                await _unitOfWork.UserRoles.AddWithIdOverrideAsync(role, cancellationToken);
+                await _unitOfWork.UserRoles.AddAsync(role, cancellationToken);
                 recordsCreated++;
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
                 _logger.LogDebug("Created role: {RoleName}", role.RoleName);
             }
             catch (Exception ex)
@@ -85,22 +86,7 @@ public class UserRoleSeeder : BaseDataSeeder
                 _logger.LogError(ex, "Failed to create role: {RoleName}", role.RoleName);
             }
         }
-        await _unitOfWork.UserRoleMappings.AddAsync(new UserRoleMapping
-        {
-            RoleId = adminRoleId,
-            UserId = IdConstants.AdminUserId,
-            CreatedBy = "System",
-            CreatedOn = DateTime.UtcNow,
-            TenantId = IdConstants.SystemTenantId
-        }, cancellationToken);
-        await _unitOfWork.UserRoleMappings.AddAsync(new UserRoleMapping
-        {
-            RoleId = managerRoleId,
-            UserId = IdConstants.ManagerUserId,
-            CreatedBy = "System",
-            CreatedOn = DateTime.UtcNow,
-            TenantId = IdConstants.SystemTenantId
-        }, cancellationToken);
+        
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 

@@ -11,13 +11,13 @@ public static class IdConstants
     public static Guid AdminUserId = Guid.Parse("{31b0de6c-8578-414d-8b78-2f2ec2556167}");
 
     public static Guid ManagerUserId = Guid.Parse("{f5d071a1-bed0-4ba1-a0ee-c6f421dd09aa}");
+    public static Guid AdminRoleId = Guid.Parse("{6bf690cd-ac8a-4b38-9ecd-fa9314f3a6eb}");
+    public static Guid ManagerRoleId = Guid.Parse("{8d29949c-b90a-4fe4-9f94-9aadda7d5078}");
+    public static Guid UserRoleId = Guid.Parse("{b1c0f8d2-3e4f-4c5a-9b6d-7e8f9a0b1c2d}");
 
     /*
    
-
-{f5d071a1-bed0-4ba1-a0ee-c6f421dd09aa}
-{6bf690cd-ac8a-4b38-9ecd-fa9314f3a6eb}
-{8d29949c-b90a-4fe4-9f94-9aadda7d5078}
+ 
 {32696d99-4af2-47f2-a996-6a8749924afd}
 {ac7fd921-4b3d-4f54-adb0-0db961617483}
 {610bf48e-32cf-4df8-9687-7db43f79a6da}

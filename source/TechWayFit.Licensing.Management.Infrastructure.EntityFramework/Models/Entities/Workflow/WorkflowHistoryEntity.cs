@@ -60,21 +60,20 @@ public class WorkflowHistoryEntity : BaseEntity, IEntityMapper<WorkflowHistoryEn
     /// </summary>
     public WorkflowHistoryEntity Map(WorkflowHistoryEntry model)
     {
-        return new WorkflowHistoryEntity
-        {
-            Id = model.Id,
-            EntityId = model.EntityId,
-            EntityType = model.EntityType,
-            FromStatus = (int)model.FromStatus,
-            ToStatus = (int)model.ToStatus,
-            ActionBy = model.ActionBy,
-            ActionDate = model.ActionDate,
-            Comments = model.Comments,
-            Metadata = model.Metadata,
-            CreatedBy = model.ActionBy,
-            CreatedOn = model.ActionDate,
-            IsActive = true
-        };
+        Id = model.Id;
+        EntityId = model.EntityId;
+        EntityType = model.EntityType;
+        FromStatus = (int)model.FromStatus;
+        ToStatus = (int)model.ToStatus;
+        ActionBy = model.ActionBy;
+        ActionDate = model.ActionDate;
+        Comments = model.Comments;
+        Metadata = model.Metadata;
+        CreatedBy = model.ActionBy;
+        CreatedOn = model.ActionDate;
+        IsActive = true;
+
+        return this;
     }
 
     /// <summary>

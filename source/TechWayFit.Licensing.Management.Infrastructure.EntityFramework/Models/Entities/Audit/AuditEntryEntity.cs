@@ -10,7 +10,7 @@ namespace TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Models.
 /// Database entity for Audit Entries
 /// </summary>
 [Table("audit_entries")]
-public class AuditEntryEntity : BaseEntity, IEntityMapper<AuditEntry, AuditEntryEntity>
+public class AuditEntryEntity : AuditEntity, IEntityMapper<AuditEntry, AuditEntryEntity>
 {
     public string EntityType { get; set; } = string.Empty;
     public string EntityId { get; set; } = string.Empty;
@@ -27,23 +27,21 @@ public class AuditEntryEntity : BaseEntity, IEntityMapper<AuditEntry, AuditEntry
     {
         if (model == null) return null!;
 
-        return new AuditEntryEntity
-        {
-            Id = model.EntryId,
-            TenantId = model.TenantId,
-            EntityType = model.EntityType,
-            EntityId = model.EntityId,
-            ActionType = model.ActionType,
-            OldValue = model.OldValue,
-            NewValue = model.NewValue,
-            IpAddress = model.IpAddress,
-            UserAgent = model.UserAgent,
-            Reason = model.Reason,
-            Metadata = model.Metadata?.Count > 0 ? JsonSerializer.Serialize(model.Metadata) : null,
-            CreatedBy = model.UserName,
-            CreatedOn = model.Timestamp,
-            IsActive = true
-        };
+        Id = model.EntryId;
+        EntityType = model.EntityType;
+        EntityId = model.EntityId;
+        ActionType = model.ActionType;
+        OldValue = model.OldValue;
+        NewValue = model.NewValue;
+        IpAddress = model.IpAddress;
+        UserAgent = model.UserAgent;
+        Reason = model.Reason;
+        Metadata = model.Metadata?.Count > 0 ? JsonSerializer.Serialize(model.Metadata) : null;
+        CreatedBy = model.UserName;
+        CreatedOn = model.Timestamp;
+        IsActive = true;
+
+        return this;
     }
 
     /// <summary>
@@ -68,7 +66,6 @@ public class AuditEntryEntity : BaseEntity, IEntityMapper<AuditEntry, AuditEntry
         return new AuditEntry
         {
             EntryId = this.Id,
-            TenantId = this.TenantId,
             EntityType = this.EntityType,
             EntityId = this.EntityId,
             ActionType = this.ActionType,

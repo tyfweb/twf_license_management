@@ -32,24 +32,23 @@ public class NotificationHistoryEntity : BaseEntity, IEntityMapper<NotificationH
 
     public NotificationHistoryEntity Map(NotificationHistory model)
     {
-        return new NotificationHistoryEntity
-        {
-            Id = model.NotificationId,
-            TenantId = model.TenantId,
-            EntityId = model.EntityId,
-            EntityType = model.EntityType,
-            NotificationMode = model.NotificationMode.ToString(),
-            NotificationTemplateId = model.NotificationTemplateId,
-            NotificationType = model.NotificationType.ToString(),
-            RecipientsJson = JsonHelper.ToJson(model.Recipients),
-            SentDate = model.SentDate,
-            Status = model.Status.ToString(),
-            DeliveryError = model.DeliveryError,
-            CreatedBy = "system", // Assuming system user for creation
-            CreatedOn = DateTime.UtcNow,
-            UpdatedBy = "system", // Assuming system user for creation
-            UpdatedOn = DateTime.UtcNow // Assuming UpdatedOn is set to current time on creation
-        };
+        Id = model.NotificationId;
+        TenantId = model.TenantId;
+        EntityId = model.EntityId;
+        EntityType = model.EntityType;
+        NotificationMode = model.NotificationMode.ToString();
+        NotificationTemplateId = model.NotificationTemplateId;
+        NotificationType = model.NotificationType.ToString();
+        RecipientsJson = JsonHelper.ToJson(model.Recipients);
+        SentDate = model.SentDate;
+        Status = model.Status.ToString();
+        DeliveryError = model.DeliveryError;
+        CreatedBy = "system"; // Assuming system user for creation
+        CreatedOn = DateTime.UtcNow;
+        UpdatedBy = "system"; // Assuming system user for creation
+        UpdatedOn = DateTime.UtcNow; // Assuming UpdatedOn is set to current time on creation
+
+        return this;
     }
     public NotificationHistory Map()
     {

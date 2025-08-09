@@ -70,33 +70,32 @@ public class ProductFeatureEntity : AuditWorkflowEntity, IEntityMapper<ProductFe
     {
         if (model == null) return null!;
 
-        return new ProductFeatureEntity
-        {
-            Id = model.FeatureId,
-            TenantId = model.TenantId,
-            ProductId = model.ProductId,
-            TierId = model.TierId,
-            Code = model.Code,
-            Name = model.Name,
-            Description = model.Description,
-            IsEnabled = model.IsEnabled,
-            DisplayOrder = model.DisplayOrder,
-            IsActive = model.Audit.IsActive,
-            IsDeleted = model.Audit.IsDeleted,
-            CreatedBy = model.Audit.CreatedBy,
-            CreatedOn = model.Audit.CreatedOn,
-            UpdatedBy = model.Audit.UpdatedBy,
-            UpdatedOn = model.Audit.UpdatedOn,
-            DeletedBy = model.Audit.DeletedBy,
-            DeletedOn = model.Audit.DeletedOn,
-            EntityStatus = (int)model.Workflow.Status,
-            SubmittedBy = model.Workflow.SubmittedBy,
-            SubmittedOn = model.Workflow.SubmittedOn,
-            ReviewedBy = model.Workflow.ReviewedBy,
-            ReviewedOn = model.Workflow.ReviewedOn,
-            ReviewComments = model.Workflow.ReviewComments,
-            RowVersion = model.Audit.RowVersion
-        };
+        Id = model.FeatureId;
+        TenantId = model.TenantId;
+        ProductId = model.ProductId;
+        TierId = model.TierId;
+        Code = model.Code;
+        Name = model.Name;
+        Description = model.Description;
+        IsEnabled = model.IsEnabled;
+        DisplayOrder = model.DisplayOrder;
+        IsActive = model.Audit.IsActive;
+        IsDeleted = model.Audit.IsDeleted;
+        CreatedBy = model.Audit.CreatedBy;
+        CreatedOn = model.Audit.CreatedOn;
+        UpdatedBy = model.Audit.UpdatedBy;
+        UpdatedOn = model.Audit.UpdatedOn;
+        DeletedBy = model.Audit.DeletedBy;
+        DeletedOn = model.Audit.DeletedOn;
+        EntityStatus = (int)model.Workflow.Status;
+        SubmittedBy = model.Workflow.SubmittedBy;
+        SubmittedOn = model.Workflow.SubmittedOn;
+        ReviewedBy = model.Workflow.ReviewedBy;
+        ReviewedOn = model.Workflow.ReviewedOn;
+        ReviewComments = model.Workflow.ReviewComments;
+        RowVersion = model.Audit.RowVersion;
+
+        return this;
     }
 
     /// <summary>

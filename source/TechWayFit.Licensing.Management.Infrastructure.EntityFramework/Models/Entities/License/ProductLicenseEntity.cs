@@ -130,11 +130,7 @@ public class ProductLicenseEntity : AuditWorkflowEntity, IEntityMapper<ProductLi
     /// </summary>
     public virtual ProductTierEntity? ProductTier { get; set; }
 
-    /// <summary>
-    /// Navigation property to Features (kept for backward compatibility but tier-based features are preferred)
-    /// </summary>
-    public virtual ICollection<ProductFeatureEntity> Features { get; set; } = new List<ProductFeatureEntity>();
-
+   
     #endregion
 
     #region IEntityMapper Implementation
@@ -142,45 +138,44 @@ public class ProductLicenseEntity : AuditWorkflowEntity, IEntityMapper<ProductLi
     {
         if (model == null) return null!;
 
-        return new ProductLicenseEntity
-        {
-            Id = model.LicenseId,
-            TenantId = model.TenantId,
-            LicenseCode = model.LicenseCode,
-            ProductId = model.ProductId,
-            ConsumerId = model.ConsumerId,
-            ProductTierId = model.ProductTierId,
-            ValidFrom = model.ValidFrom,
-            ValidTo = model.ValidTo,
-            ValidProductVersionFrom = model.ValidProductVersionFrom,
-            ValidProductVersionTo = model.ValidProductVersionTo,
-            Encryption = model.Encryption,
-            Signature = model.Signature,
-            LicenseKey = model.LicenseKey,
-            PublicKey = model.PublicKey,
-            LicenseSignature = model.LicenseSignature,
-            KeyGeneratedAt = model.KeyGeneratedAt,
-            Status = model.Status.ToString(),
-            IssuedBy = model.IssuedBy,
-            RevokedAt = model.RevokedAt,
-            RevocationReason = model.RevocationReason,
-            MetadataJson = model.Metadata != null ? JsonSerializer.Serialize(model.Metadata) : "{}",
-            IsActive = model.IsActive,
-            IsDeleted = model.IsDeleted,
-            CreatedBy = model.CreatedBy,
-            CreatedOn = model.CreatedOn,
-            UpdatedBy = model.UpdatedBy,
-            UpdatedOn = model.UpdatedOn,
-            DeletedBy = model.DeletedBy,
-            DeletedOn = model.DeletedOn,
-            EntityStatus = (int)model.EntityStatus,
-            SubmittedBy = model.SubmittedBy,
-            SubmittedOn = model.SubmittedOn,
-            ReviewedBy = model.ReviewedBy,
-            ReviewedOn = model.ReviewedOn,
-            ReviewComments = model.ReviewComments,
-            RowVersion = model.RowVersion
-        };
+        Id = model.LicenseId;
+        TenantId = model.TenantId;
+        LicenseCode = model.LicenseCode;
+        ProductId = model.ProductId;
+        ConsumerId = model.ConsumerId;
+        ProductTierId = model.ProductTierId;
+        ValidFrom = model.ValidFrom;
+        ValidTo = model.ValidTo;
+        ValidProductVersionFrom = model.ValidProductVersionFrom;
+        ValidProductVersionTo = model.ValidProductVersionTo;
+        Encryption = model.Encryption;
+        Signature = model.Signature;
+        LicenseKey = model.LicenseKey;
+        PublicKey = model.PublicKey;
+        LicenseSignature = model.LicenseSignature;
+        KeyGeneratedAt = model.KeyGeneratedAt;
+        Status = model.Status.ToString();
+        IssuedBy = model.IssuedBy;
+        RevokedAt = model.RevokedAt;
+        RevocationReason = model.RevocationReason;
+        MetadataJson = model.Metadata != null ? JsonSerializer.Serialize(model.Metadata) : "{}";
+        IsActive = model.IsActive;
+        IsDeleted = model.IsDeleted;
+        CreatedBy = model.CreatedBy;
+        CreatedOn = model.CreatedOn;
+        UpdatedBy = model.UpdatedBy;
+        UpdatedOn = model.UpdatedOn;
+        DeletedBy = model.DeletedBy;
+        DeletedOn = model.DeletedOn;
+        EntityStatus = (int)model.EntityStatus;
+        SubmittedBy = model.SubmittedBy;
+        SubmittedOn = model.SubmittedOn;
+        ReviewedBy = model.ReviewedBy;
+        ReviewedOn = model.ReviewedOn;
+        ReviewComments = model.ReviewComments;
+        RowVersion = model.RowVersion;
+
+        return this;
     }
 
     public ProductLicense Map()

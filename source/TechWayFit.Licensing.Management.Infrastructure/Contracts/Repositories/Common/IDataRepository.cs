@@ -10,13 +10,6 @@ public interface IDataRepository<TModel> where TModel : class
     /// </summary>
     Task<TModel> AddAsync(TModel entity, CancellationToken cancellationToken = default);
     /// <summary>
-    /// Adds a new entity to the repository with an overridden ID.
-    /// </summary>
-    /// <param name="entity"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    Task<TModel> AddWithIdOverrideAsync(TModel entity, CancellationToken cancellationToken = default);
-    /// <summary>
     /// Deletes an entity from the repository by its ID.
     /// </summary>
     Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default);

@@ -79,34 +79,33 @@ public class ProductEntity : AuditWorkflowEntity, IEntityMapper<EnterpriseProduc
     {
         if (model == null) return null!;
 
-        return new ProductEntity
-        {
-            Id = model.ProductId,
-            TenantId = model.TenantId,
-            Name = model.Name,
-            Description = model.Description,
-            ReleaseDate = model.ReleaseDate,
-            SupportEmail = model.SupportEmail,
-            SupportPhone = model.SupportPhone,
-            DecommissionDate = model.DecommissionDate,
-            Status = model.Status.ToString(),
-            MetadataJson = model.Metadata != null ? JsonSerializer.Serialize(model.Metadata) : "{}",
-            IsActive = model.Audit.IsActive,
-            IsDeleted = model.Audit.IsDeleted,
-            CreatedBy = model.Audit.CreatedBy,
-            CreatedOn = model.Audit.CreatedOn,
-            UpdatedBy = model.Audit.UpdatedBy,
-            UpdatedOn = model.Audit.UpdatedOn,
-            DeletedBy = model.Audit.DeletedBy,
-            DeletedOn = model.Audit.DeletedOn,
-            EntityStatus = (int)model.Workflow.Status,
-            SubmittedBy = model.Workflow.SubmittedBy,
-            SubmittedOn = model.Workflow.SubmittedOn,
-            ReviewedBy = model.Workflow.ReviewedBy,
-            ReviewedOn = model.Workflow.ReviewedOn,
-            ReviewComments = model.Workflow.ReviewComments,
-            RowVersion = model.Audit.RowVersion
-        };
+        Id = model.ProductId;
+        TenantId = model.TenantId;
+        Name = model.Name;
+        Description = model.Description;
+        ReleaseDate = model.ReleaseDate;
+        SupportEmail = model.SupportEmail;
+        SupportPhone = model.SupportPhone;
+        DecommissionDate = model.DecommissionDate;
+        Status = model.Status.ToString();
+        MetadataJson = model.Metadata != null ? JsonSerializer.Serialize(model.Metadata) : "{}";
+        IsActive = model.Audit.IsActive;
+        IsDeleted = model.Audit.IsDeleted;
+        CreatedBy = model.Audit.CreatedBy;
+        CreatedOn = model.Audit.CreatedOn;
+        UpdatedBy = model.Audit.UpdatedBy;
+        UpdatedOn = model.Audit.UpdatedOn;
+        DeletedBy = model.Audit.DeletedBy;
+        DeletedOn = model.Audit.DeletedOn;
+        EntityStatus = (int)model.Workflow.Status;
+        SubmittedBy = model.Workflow.SubmittedBy;
+        SubmittedOn = model.Workflow.SubmittedOn;
+        ReviewedBy = model.Workflow.ReviewedBy;
+        ReviewedOn = model.Workflow.ReviewedOn;
+        ReviewComments = model.Workflow.ReviewComments;
+        RowVersion = model.Audit.RowVersion;
+
+        return this;
     }
 
     /// <summary>

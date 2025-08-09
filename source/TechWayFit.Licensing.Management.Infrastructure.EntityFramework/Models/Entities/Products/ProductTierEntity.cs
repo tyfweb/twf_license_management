@@ -52,29 +52,28 @@ public class ProductTierEntity : AuditWorkflowEntity, IEntityMapper<ProductTier,
     {
         if (model == null) return null!;
 
-        return new ProductTierEntity
-        {
-            Id = model.TierId,
-            ProductId = model.ProductId,
-            Name = model.Name,
-            Description = model.Description,
-            DisplayOrder = model.DisplayOrder,
-            IsActive = model.Audit.IsActive,
-            IsDeleted = model.Audit.IsDeleted,
-            CreatedBy = model.Audit.CreatedBy,
-            CreatedOn = model.Audit.CreatedOn,
-            UpdatedBy = model.Audit.UpdatedBy,
-            UpdatedOn = model.Audit.UpdatedOn,
-            DeletedBy = model.Audit.DeletedBy,
-            DeletedOn = model.Audit.DeletedOn,
-            EntityStatus = (int)model.Workflow.Status,
-            SubmittedBy = model.Workflow.SubmittedBy,
-            SubmittedOn = model.Workflow.SubmittedOn,
-            ReviewedBy = model.Workflow.ReviewedBy,
-            ReviewedOn = model.Workflow.ReviewedOn,
-            ReviewComments = model.Workflow.ReviewComments,
-            RowVersion = model.Audit.RowVersion
-        };
+        Id = model.TierId;
+        ProductId = model.ProductId;
+        Name = model.Name;
+        Description = model.Description;
+        DisplayOrder = model.DisplayOrder;
+        IsActive = model.Audit.IsActive;
+        IsDeleted = model.Audit.IsDeleted;
+        CreatedBy = model.Audit.CreatedBy;
+        CreatedOn = model.Audit.CreatedOn;
+        UpdatedBy = model.Audit.UpdatedBy;
+        UpdatedOn = model.Audit.UpdatedOn;
+        DeletedBy = model.Audit.DeletedBy;
+        DeletedOn = model.Audit.DeletedOn;
+        EntityStatus = (int)model.Workflow.Status;
+        SubmittedBy = model.Workflow.SubmittedBy;
+        SubmittedOn = model.Workflow.SubmittedOn;
+        ReviewedBy = model.Workflow.ReviewedBy;
+        ReviewedOn = model.Workflow.ReviewedOn;
+        ReviewComments = model.Workflow.ReviewComments;
+        RowVersion = model.Audit.RowVersion;
+
+        return this;
     }
 
     /// <summary>

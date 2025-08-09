@@ -1,9 +1,10 @@
 using System;
+using System.ComponentModel.DataAnnotations.Schema;
 using TechWayFit.Licensing.Management.Core.Models.Tenant;
 using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Models.Entities.Common;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Models.Entities.Tenants;
-
+[Table("tenants")]
 public class TenantEntity: AuditEntity, IEntityMapper<Tenant, TenantEntity>
 {
     public string TenantCode { get; set; } = string.Empty;

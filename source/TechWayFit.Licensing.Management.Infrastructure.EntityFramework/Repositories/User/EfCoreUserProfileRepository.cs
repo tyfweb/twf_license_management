@@ -27,7 +27,10 @@ public class EfCoreUserProfileRepository :  BaseRepository<UserProfile,UserProfi
         entity.Map(model);
         entity.PasswordHash = hash;
         entity.PasswordSalt = salt;
-        entity.Id = Guid.NewGuid();
+        if(entity.Id == Guid.Empty)
+        {
+            entity.Id = Guid.NewGuid();
+        } 
         entity.IsDeleted = false;
         entity.IsActive = true;
         entity.CreatedOn = DateTime.UtcNow;

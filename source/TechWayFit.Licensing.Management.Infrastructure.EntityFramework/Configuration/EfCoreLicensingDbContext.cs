@@ -14,6 +14,7 @@ using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Models.Enti
 using TechWayFit.Licensing.Management.Core.Contracts;
 using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Models.Entities.Tenants;
 using System.Reflection.Emit;
+using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Models.Entities.Seeding;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Configuration;
 
@@ -86,6 +87,7 @@ public partial class EfCoreLicensingDbContext : DbContext
     public DbSet<UserRoleMappingEntity> UserRoleMappings { get; set; }
     
     public DbSet<TenantEntity> Tenants { get; set; }
+    public DbSet<SeedingHistoryEntity> SeedingHistories { get; set; }
 
     #endregion
 
@@ -104,12 +106,55 @@ public partial class EfCoreLicensingDbContext : DbContext
         ConfigureNotificationEntities(modelBuilder);
         ConfigureSettingsEntities(modelBuilder);
         ConfigureUserEntities(modelBuilder);
+        ConfigureSeedingHistoryEntities(modelBuilder);
 
         // Configure indexes
         ConfigureIndexes(modelBuilder);
 
         // Configure global query filters for multi-tenancy
         ConfigureGlobalQueryFilters(modelBuilder);
+    }
+
+    private void ConfigureSeedingHistoryEntities(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<SeedingHistoryEntity>(entity =>
+        {
+            // Primary key
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).IsRequired();
+            
+            // Table name
+            entity.ToTable("seeding_history");
+            
+            // Required properties
+            entity.Property(e => e.TenantId).IsRequired();
+            entity.Property(e => e.SeederName).HasMaxLength(200).IsRequired();
+            entity.Property(e => e.Version).HasMaxLength(50).IsRequired();
+            entity.Property(e => e.ExecutedOn).IsRequired();
+            entity.Property(e => e.ExecutedBy).HasMaxLength(200).IsRequired();
+            entity.Property(e => e.IsSuccessful).IsRequired();
+
+            // Optional properties
+            entity.Property(e => e.ErrorMessage).HasMaxLength(2000);
+            entity.Property(e => e.MetadataJson).HasMaxLength(4000).IsRequired();
+            entity.Property(e => e.RecordsCreated).HasDefaultValue(0);
+            entity.Property(e => e.DurationMs).HasDefaultValue(0);
+
+            // Audit fields from BaseEntity
+            entity.Property(e => e.CreatedBy).HasMaxLength(100).IsRequired();
+            entity.Property(e => e.CreatedOn).IsRequired();
+            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
+            entity.Property(e => e.UpdatedOn);
+            entity.Property(e => e.IsActive).IsRequired().HasDefaultValue(true);
+            entity.Property(e => e.IsDeleted).IsRequired().HasDefaultValue(false);
+
+            // Indexes for performance
+            entity.HasIndex(e => e.TenantId);
+            entity.HasIndex(e => e.SeederName);
+            entity.HasIndex(e => new { e.TenantId, e.SeederName });
+            entity.HasIndex(e => e.ExecutedOn);
+            entity.HasIndex(e => e.IsSuccessful);
+        });
     }
 
     private void ConfigureTenantEntities(ModelBuilder modelBuilder)
@@ -386,8 +431,6 @@ public partial class EfCoreLicensingDbContext : DbContext
                   .HasForeignKey(e => e.ConsumerId)
                   .OnDelete(DeleteBehavior.Restrict);
 
-            entity.HasMany(e => e.Features)
-                  .WithMany(t => t.ProductLicenses);
 
             // Indexes
             entity.HasIndex(e => e.LicenseKey).IsUnique();
@@ -498,8 +541,6 @@ public partial class EfCoreLicensingDbContext : DbContext
         // Consumer related entities
         modelBuilder.Entity<ConsumerAccountEntity>().HasIndex(e => e.TenantId);
 
-        // Audit related entities
-        modelBuilder.Entity<AuditEntryEntity>().HasIndex(e => e.TenantId);
 
         // Notification related entities
         modelBuilder.Entity<NotificationTemplateEntity>().HasIndex(e => e.TenantId);
@@ -512,6 +553,9 @@ public partial class EfCoreLicensingDbContext : DbContext
         modelBuilder.Entity<UserProfileEntity>().HasIndex(e => e.TenantId);
         modelBuilder.Entity<UserRoleEntity>().HasIndex(e => e.TenantId);
         modelBuilder.Entity<UserRoleMappingEntity>().HasIndex(e => e.TenantId);
+
+        // Seeding related entities
+        modelBuilder.Entity<SeedingHistoryEntity>().HasIndex(e => e.TenantId);
 
         // Composite indexes for frequently queried combinations
         modelBuilder.Entity<ProductEntity>().HasIndex(e => new { e.TenantId, e.IsActive });
@@ -607,7 +651,7 @@ public partial class EfCoreLicensingDbContext : DbContext
                         entry.Entity.Id = Guid.NewGuid();// Ensure Id is set for new entities
                     entry.Entity.CreatedOn = currentTime;
                     // Only set CreatedBy if it's not already set (preserve explicit assignments)
-                    if (entry.Entity.CreatedBy == null)
+                    if (string.IsNullOrWhiteSpace(entry.Entity.CreatedBy))
                     {
                         var createdBy = string.IsNullOrEmpty(currentUsername) ? "System" : currentUsername;
                         entry.Entity.CreatedBy = createdBy; // Default to System for seeding operations
@@ -630,7 +674,7 @@ public partial class EfCoreLicensingDbContext : DbContext
         {
             if (entry.State == EntityState.Added || entry.State == EntityState.Modified)
             {
-                if (entry.Entity.TenantId == Guid.Empty)
+                if (entry.Entity.TenantId == Guid.Empty || entry.Entity.TenantId != currentTenantId)
                 {
                     entry.Entity.TenantId = currentTenantId; // Set TenantId from user context  
                 }
@@ -969,9 +1013,6 @@ public partial class EfCoreLicensingDbContext : DbContext
         // Consumer related entities
         modelBuilder.Entity<ConsumerAccountEntity>().HasQueryFilter(e => e.TenantId == GetCurrentTenantId());
 
-        // Audit related entities
-        modelBuilder.Entity<AuditEntryEntity>().HasQueryFilter(e => e.TenantId == GetCurrentTenantId());
-
         // Notification related entities
         modelBuilder.Entity<NotificationTemplateEntity>().HasQueryFilter(e => e.TenantId == GetCurrentTenantId());
         modelBuilder.Entity<NotificationHistoryEntity>().HasQueryFilter(e => e.TenantId == GetCurrentTenantId());
@@ -983,6 +1024,9 @@ public partial class EfCoreLicensingDbContext : DbContext
         modelBuilder.Entity<UserProfileEntity>().HasQueryFilter(e => e.TenantId == GetCurrentTenantId());
         modelBuilder.Entity<UserRoleEntity>().HasQueryFilter(e => e.TenantId == GetCurrentTenantId());
         modelBuilder.Entity<UserRoleMappingEntity>().HasQueryFilter(e => e.TenantId == GetCurrentTenantId());
+
+        // Seeding related entities
+        modelBuilder.Entity<SeedingHistoryEntity>().HasQueryFilter(e => e.TenantId == GetCurrentTenantId());
     }
 
    

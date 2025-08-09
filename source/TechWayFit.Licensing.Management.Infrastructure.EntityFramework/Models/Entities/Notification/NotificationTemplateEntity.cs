@@ -28,22 +28,21 @@ public class NotificationTemplateEntity : BaseEntity,IEntityMapper<NotificationT
 #region IEntityMapper Implementation
     public NotificationTemplateEntity Map(NotificationTemplate model)
     {
-        return new NotificationTemplateEntity
-        {
-            Id = model.TemplateId,
-            TenantId = model.TenantId,
-            TemplateName = model.TemplateName,
-            NotificationType = model.NotificationType.ToString(),
-            NotificationMode = model.Preferences.Mode.ToString(),
-            Subject = model.Subject,
-            MessageTemplate = model.MessageTemplate,
-            IsActive = model.IsActive,
-            TemplateVariableJson = JsonHelper.ToJson(model.TemplateVariables),
-            CreatedBy = model.CreatedBy,
-            CreatedOn = model.CreatedDate,
-            UpdatedBy = "system", // Assuming system user for creation
-            UpdatedOn = DateTime.UtcNow, // Assuming UpdatedOn is set to current time on creation
-        };
+        Id = model.TemplateId;
+        TenantId = model.TenantId;
+        TemplateName = model.TemplateName;
+        NotificationType = model.NotificationType.ToString();
+        NotificationMode = model.Preferences.Mode.ToString();
+        Subject = model.Subject;
+        MessageTemplate = model.MessageTemplate;
+        IsActive = model.IsActive;
+        TemplateVariableJson = JsonHelper.ToJson(model.TemplateVariables);
+        CreatedBy = model.CreatedBy;
+        CreatedOn = model.CreatedDate;
+        UpdatedBy = "system"; // Assuming system user for creation
+        UpdatedOn = DateTime.UtcNow; // Assuming UpdatedOn is set to current time on creation
+
+        return this;
     }
     public NotificationTemplate Map()
     {

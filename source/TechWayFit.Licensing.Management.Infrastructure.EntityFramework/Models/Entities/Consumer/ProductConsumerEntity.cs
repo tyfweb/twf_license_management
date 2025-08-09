@@ -33,20 +33,19 @@ public class ProductConsumerEntity : BaseEntity, IEntityMapper<ProductConsumer, 
     {
         if (model == null) return null!;
 
-        return new ProductConsumerEntity
-        {
-            Id = model.ProductConsumerId,
-            TenantId = model.TenantId,
-            ProductId = model.Product?.ProductId ?? Guid.Empty,
-            ConsumerId = model.Consumer?.ConsumerId ?? Guid.Empty,
-            AccountManagerName = model.AccountManager?.Name ?? string.Empty,
-            AccountManagerEmail = model.AccountManager?.Email ?? string.Empty,
-            AccountManagerPhone = model.AccountManager?.Phone ?? string.Empty,
-            AccountManagerPosition = model.AccountManager?.Position ?? string.Empty,
-            IsActive = true,
-            CreatedBy = "System",
-            CreatedOn = DateTime.UtcNow
-        };
+        Id = model.ProductConsumerId;
+        TenantId = model.TenantId;
+        ProductId = model.Product?.ProductId ?? Guid.Empty;
+        ConsumerId = model.Consumer?.ConsumerId ?? Guid.Empty;
+        AccountManagerName = model.AccountManager?.Name ?? string.Empty;
+        AccountManagerEmail = model.AccountManager?.Email ?? string.Empty;
+        AccountManagerPhone = model.AccountManager?.Phone ?? string.Empty;
+        AccountManagerPosition = model.AccountManager?.Position ?? string.Empty;
+        IsActive = true;
+        CreatedBy = "System";
+        CreatedOn = DateTime.UtcNow;
+
+        return this;
     }
 
     /// <summary>
