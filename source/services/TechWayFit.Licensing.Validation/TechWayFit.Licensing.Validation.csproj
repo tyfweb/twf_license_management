@@ -36,7 +36,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../TechWayFit.Licensing.Management.Core/TechWayFit.Licensing.Management.Core.csproj" />
+    <ProjectReference Include="../../core/TechWayFit.Licensing.Management.Core/TechWayFit.Licensing.Management.Core.csproj" />
   </ItemGroup>
 
 </Project>

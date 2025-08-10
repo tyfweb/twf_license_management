@@ -35,12 +35,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../TechWayFit.Licensing.Management.Infrastructure.InMemory/TechWayFit.Licensing.Management.Infrastructure.InMemory.csproj" />
-    <ProjectReference Include="../TechWayFit.Licensing.Management.Infrastructure.SqlServer/TechWayFit.Licensing.Management.Infrastructure.SqlServer.csproj" />
-    <ProjectReference Include="..\TechWayFit.Licensing.Generator\TechWayFit.Licensing.Generator.csproj" />
-    <ProjectReference Include="..\TechWayFit.Licensing.Management.Services\TechWayFit.Licensing.Management.Services.csproj" />
-    <ProjectReference Include="..\TechWayFit.Licensing.Management.Infrastructure\TechWayFit.Licensing.Management.Infrastructure.csproj" />
-    <ProjectReference Include="..\TechWayFit.Licensing.Management.Infrastructure.PostgreSql\TechWayFit.Licensing.Management.Infrastructure.PostgreSql.csproj" />
+    <ProjectReference Include="../../repositories/TechWayFit.Licensing.Management.Infrastructure.InMemory/TechWayFit.Licensing.Management.Infrastructure.InMemory.csproj" />
+    <ProjectReference Include="../../repositories/TechWayFit.Licensing.Management.Infrastructure.SqlServer/TechWayFit.Licensing.Management.Infrastructure.SqlServer.csproj" />
+    <ProjectReference Include="../../core/TechWayFit.Licensing.Generator/TechWayFit.Licensing.Generator.csproj" />
+    <ProjectReference Include="../../services/TechWayFit.Licensing.Management.Services/TechWayFit.Licensing.Management.Services.csproj" />
+    <ProjectReference Include="../../core/TechWayFit.Licensing.Management.Infrastructure/TechWayFit.Licensing.Management.Infrastructure.csproj" />
+    <ProjectReference Include="../../core/TechWayFit.Licensing.Management.Core/TechWayFit.Licensing.Management.Core.csproj" />
+    <ProjectReference Include="../../repositories/TechWayFit.Licensing.Management.Infrastructure.PostgreSql/TechWayFit.Licensing.Management.Infrastructure.PostgreSql.csproj" />
+    <ProjectReference Include="../../repositories/TechWayFit.Licensing.Management.Infrastructure.EntityFramework/TechWayFit.Licensing.Management.Infrastructure.EntityFramework.csproj" />
   </ItemGroup>
 
   <ItemGroup>

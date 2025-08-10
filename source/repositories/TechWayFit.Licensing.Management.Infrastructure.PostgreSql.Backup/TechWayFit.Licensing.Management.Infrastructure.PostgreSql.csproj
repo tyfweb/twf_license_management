@@ -25,8 +25,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../TechWayFit.Licensing.Management.Core/TechWayFit.Licensing.Management.Core.csproj" />
-    <ProjectReference Include="../TechWayFit.Licensing.Management.Infrastructure/TechWayFit.Licensing.Management.Infrastructure.csproj" />
+    <ProjectReference Include="../../core/TechWayFit.Licensing.Management.Core/TechWayFit.Licensing.Management.Core.csproj" />
+    <ProjectReference Include="../../core/TechWayFit.Licensing.Management.Infrastructure/TechWayFit.Licensing.Management.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
