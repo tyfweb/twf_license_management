@@ -117,10 +117,13 @@ public class SettingEntity : BaseEntity, IEntityMapper<Setting, SettingEntity>
         DataType = model.DataType;
         DisplayName = model.DisplayName;
         Description = model.Description;
+        GroupName = model.GroupName;
         DisplayOrder = model.SortOrder;
         IsEditable = !model.IsReadOnly;
         IsRequired = model.IsRequired;
+        IsSensitive = model.IsSensitive;
         ValidationRules = model.ValidationPattern;
+        PossibleValues = model.PossibleValues;
         IsActive = model.Audit.IsActive;
         IsDeleted = model.Audit.IsDeleted;
         CreatedBy = model.Audit.CreatedBy;
@@ -149,10 +152,13 @@ public class SettingEntity : BaseEntity, IEntityMapper<Setting, SettingEntity>
             DataType = this.DataType,
             DisplayName = this.DisplayName,
             Description = this.Description,
+            GroupName = this.GroupName,
             SortOrder = this.DisplayOrder,
             IsReadOnly = !this.IsEditable,
             IsRequired = this.IsRequired,
+            IsSensitive = this.IsSensitive,
             ValidationPattern = this.ValidationRules,
+            PossibleValues = this.PossibleValues,
             Audit = new AuditInfo
             {
                 IsActive = this.IsActive,

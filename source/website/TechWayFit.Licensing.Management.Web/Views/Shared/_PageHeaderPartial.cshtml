@@ -1,0 +1,46 @@
+@model TechWayFit.Licensing.Management.Web.ViewModels.Shared.PageHeaderViewModel
+
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="header-section">
+        <div class="d-flex justify-content-between align-items-start">
+            <div class="header-content">
+                <h1 class="page-title">
+                    @if (!string.IsNullOrEmpty(Model.Icon))
+                    {
+                        <i class="@Model.Icon me-2"></i>
+                    }
+                    @Model.Title
+                </h1>
+                @if (Model.BreadcrumbItems?.Any() == true)
+                {
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            @foreach (var item in Model.BreadcrumbItems)
+                            {
+                                @if (item.IsActive)
+                                {
+                                    <li class="breadcrumb-item active" aria-current="page">@item.Text</li>
+                                }
+                                else
+                                {
+                                    <li class="breadcrumb-item">
+                                        <a asp-controller="@item.Controller" asp-action="@item.Action">@item.Text</a>
+                                    </li>
+                                }
+                            }
+                        </ol>
+                    </nav>
+                }
+            </div>
+            <div class="header-actions">
+                @if (!string.IsNullOrEmpty(Model.BackButtonText) && !string.IsNullOrEmpty(Model.BackButtonAction))
+                {
+                    <a asp-controller="@Model.BackButtonController" asp-action="@Model.BackButtonAction" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>@Model.BackButtonText
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+</div>

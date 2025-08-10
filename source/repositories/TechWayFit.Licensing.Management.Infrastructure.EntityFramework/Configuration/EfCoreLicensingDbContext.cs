@@ -13,6 +13,7 @@ using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Models.Enti
 using System.Reflection.Emit;
 using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Models.Entities.Seeding;
 using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Configuration.EntityConfigurations;
+using TechWayFit.Licensing.Management.Core.Helpers;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Configuration;
 
@@ -429,32 +430,32 @@ public partial class EfCoreLicensingDbContext : DbContext
     private void ConfigureGlobalQueryFilters(ModelBuilder modelBuilder)
     {
         // Product related entities
-        modelBuilder.Entity<ProductEntity>().HasQueryFilter(e => e.TenantId == GetCurrentTenantId());
-        modelBuilder.Entity<ProductVersionEntity>().HasQueryFilter(e => e.TenantId == GetCurrentTenantId());
-        modelBuilder.Entity<ProductTierEntity>().HasQueryFilter(e => e.TenantId == GetCurrentTenantId());
-        modelBuilder.Entity<ProductFeatureEntity>().HasQueryFilter(e => e.TenantId == GetCurrentTenantId());
-        modelBuilder.Entity<ProductConsumerEntity>().HasQueryFilter(e => e.TenantId == GetCurrentTenantId());
+        modelBuilder.Entity<ProductEntity>().HasQueryFilter(e =>GetCurrentTenantId()==IdConstants.SystemTenantId || e.TenantId == GetCurrentTenantId());
+        modelBuilder.Entity<ProductVersionEntity>().HasQueryFilter(e =>GetCurrentTenantId()==IdConstants.SystemTenantId ||  e.TenantId == GetCurrentTenantId());
+        modelBuilder.Entity<ProductTierEntity>().HasQueryFilter(e =>GetCurrentTenantId()==IdConstants.SystemTenantId ||  e.TenantId == GetCurrentTenantId());
+        modelBuilder.Entity<ProductFeatureEntity>().HasQueryFilter(e =>GetCurrentTenantId()==IdConstants.SystemTenantId ||  e.TenantId == GetCurrentTenantId());
+        modelBuilder.Entity<ProductConsumerEntity>().HasQueryFilter(e =>GetCurrentTenantId()==IdConstants.SystemTenantId ||  e.TenantId == GetCurrentTenantId());
 
         // License related entities
-        modelBuilder.Entity<ProductLicenseEntity>().HasQueryFilter(e => e.TenantId == GetCurrentTenantId());
+        modelBuilder.Entity<ProductLicenseEntity>().HasQueryFilter(e =>GetCurrentTenantId()==IdConstants.SystemTenantId ||  e.TenantId == GetCurrentTenantId());
 
         // Consumer related entities
-        modelBuilder.Entity<ConsumerAccountEntity>().HasQueryFilter(e => e.TenantId == GetCurrentTenantId());
+        modelBuilder.Entity<ConsumerAccountEntity>().HasQueryFilter(e =>GetCurrentTenantId()==IdConstants.SystemTenantId ||  e.TenantId == GetCurrentTenantId());
 
         // Notification related entities
-        modelBuilder.Entity<NotificationTemplateEntity>().HasQueryFilter(e => e.TenantId == GetCurrentTenantId());
-        modelBuilder.Entity<NotificationHistoryEntity>().HasQueryFilter(e => e.TenantId == GetCurrentTenantId());
+        modelBuilder.Entity<NotificationTemplateEntity>().HasQueryFilter(e =>GetCurrentTenantId()==IdConstants.SystemTenantId ||  e.TenantId == GetCurrentTenantId());
+        modelBuilder.Entity<NotificationHistoryEntity>().HasQueryFilter(e =>GetCurrentTenantId()==IdConstants.SystemTenantId ||  e.TenantId == GetCurrentTenantId());
 
         // Settings related entities
-        modelBuilder.Entity<SettingEntity>().HasQueryFilter(e => e.TenantId == GetCurrentTenantId());
+        modelBuilder.Entity<SettingEntity>().HasQueryFilter(e =>GetCurrentTenantId()==IdConstants.SystemTenantId ||  e.TenantId == GetCurrentTenantId());
 
         // User related entities
-        modelBuilder.Entity<UserProfileEntity>().HasQueryFilter(e => e.TenantId == GetCurrentTenantId());
-        modelBuilder.Entity<UserRoleEntity>().HasQueryFilter(e => e.TenantId == GetCurrentTenantId());
-        modelBuilder.Entity<UserRoleMappingEntity>().HasQueryFilter(e => e.TenantId == GetCurrentTenantId());
+        modelBuilder.Entity<UserProfileEntity>().HasQueryFilter(e =>GetCurrentTenantId()==IdConstants.SystemTenantId ||  e.TenantId == GetCurrentTenantId());
+        modelBuilder.Entity<UserRoleEntity>().HasQueryFilter(e =>GetCurrentTenantId()==IdConstants.SystemTenantId ||  e.TenantId == GetCurrentTenantId());
+        modelBuilder.Entity<UserRoleMappingEntity>().HasQueryFilter(e =>GetCurrentTenantId()==IdConstants.SystemTenantId ||  e.TenantId == GetCurrentTenantId());
 
         // Seeding related entities
-        modelBuilder.Entity<SeedingHistoryEntity>().HasQueryFilter(e => e.TenantId == GetCurrentTenantId());
+        modelBuilder.Entity<SeedingHistoryEntity>().HasQueryFilter(e =>GetCurrentTenantId()==IdConstants.SystemTenantId ||  e.TenantId == GetCurrentTenantId());
     }
 
 }

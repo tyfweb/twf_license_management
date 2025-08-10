@@ -662,25 +662,25 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         {
             return new List<string>
             {
-                "{{ConsumerName}}",
-                "{{ProductName}}",
-                "{{LicenseId}}",
-                "{{ExpiryDate}}",
-                "{{ValidFromDate}}",
-                "{{ValidToDate}}",
-                "{{ContactEmail}}",
-                "{{ContactName}}",
-                "{{CompanyName}}",
-                "{{LicenseTier}}",
-                "{{CurrentDate}}",
-                "{{SystemName}}",
-                "{{SupportEmail}}",
-                "{{DaysUntilExpiry}}",
-                "{{LicenseStatus}}",
-                "{{ProductVersion}}",
-                "{{Features}}",
-                "{{Reason}}",
-                "{{ActionRequired}}"
+                "{{consumerName}}",
+                "{{productName}}",
+                "{{licenseId}}",
+                "{{expiryDate}}",
+                "{{validFromDate}}",
+                "{{validToDate}}",
+                "{{contactEmail}}",
+                "{{contactName}}",
+                "{{companyName}}",
+                "{{licenseTier}}",
+                "{{currentDate}}",
+                "{{systemName}}",
+                "{{supportEmail}}",
+                "{{daysUntilExpiry}}",
+                "{{licenseStatus}}",
+                "{{productVersion}}",
+                "{{features}}",
+                "{{reason}}",
+                "{{actionRequired}}"
             };
         }
 

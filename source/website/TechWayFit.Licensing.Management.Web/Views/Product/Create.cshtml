@@ -1,68 +1,69 @@
 @model TechWayFit.Licensing.Management.Web.ViewModels.Product.ProductCreateViewModel
 @{
     ViewData["Title"] = "Create Product";
-    ViewData["Description"] = "Create a new software product with licensing configuration";
+
+    // Prepare header data
+    var headerModel = new TechWayFit.Licensing.Management.Web.ViewModels.Shared.PageHeaderViewModel
+    {
+        Title = "Create Product",
+        Icon = "fas fa-box-open",
+        BreadcrumbItems = new List<TechWayFit.Licensing.Management.Web.ViewModels.Shared.BreadcrumbItem>
+        {
+            new() { Text = "Dashboard", Controller = "License", Action = "Index" },
+            new() { Text = "Products", Controller = "Product", Action = "Index" },
+            new() { Text = "Create", IsActive = true }
+        },
+        BackButtonText = "Back to Products",
+        BackButtonController = "Product",
+        BackButtonAction = "Index"
+    };
 }
 
 @section Styles {
     <link rel="stylesheet" href="~/css/product-management.css" />
+    <link rel="stylesheet" href="~/css/form-styles.css" />
 }
 
-<div class="container-fluid py-4">
-    <!-- Header Section -->
-    <div class="header">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <h2 class="mb-1">Create New Product</h2>
-                <p class="text-muted mb-0">Configure a new software product with licensing tiers and features</p>
-            </div>
-            <div class="d-flex gap-2">
-                <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
-                    <i class="fas fa-arrow-left me-2"></i>Back to Products
-                </a>
-            </div>
-        </div>
-    </div>
+@await Html.PartialAsync("_PageHeaderPartial", headerModel)
 
+<div class="container-fluid">
     <form method="post" asp-action="Create" class="needs-validation" novalidate>
         <div class="row">
-            <div class="col-lg-8">
+            <!-- Main Content - Scrollable -->
+            <div class="col-md-8">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
                 <!-- Basic Information Section -->
-                <div class="edit-section mb-4">
-                    <div class="section-header">
-                        <h5><i class="fas fa-info-circle me-2"></i>Basic Information</h5>
-                    </div>
-                    <div class="section-content">
-                        <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div>
-                        
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="form-group mb-3">
-                                    <label asp-for="ProductName" class="form-label">Product Name</label>
-                                    <input asp-for="ProductName" class="form-control" placeholder="Enter product name" />
-                                    <span asp-validation-for="ProductName" class="text-danger"></span>
-                                </div>
+                <div class="form-section">
+                    <h5><i class="fas fa-info-circle me-2"></i>Basic Information</h5>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label asp-for="ProductName" class="form-label">Product Name</label>
+                                <input asp-for="ProductName" class="form-control" placeholder="Enter product name" />
+                                <span asp-validation-for="ProductName" class="text-danger"></span>
                             </div>
                         </div>
-
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-group mb-3">
-                                    <label asp-for="ProductType" class="form-label">Product Type</label>
-                                    <select asp-for="ProductType" class="form-select" asp-items="Html.GetEnumSelectList<TechWayFit.Licensing.Core.Models.ProductType>()">
-                                        <option value="">Select Type</option>
-                                    </select>
-                                    <span asp-validation-for="ProductType" class="text-danger"></span>
-                                </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="ProductType" class="form-label">Product Type</label>
+                                <select asp-for="ProductType" class="form-select" asp-items="Html.GetEnumSelectList<TechWayFit.Licensing.Core.Models.ProductType>()">
+                                    <option value="">Select Type</option>
+                                </select>
+                                <span asp-validation-for="ProductType" class="text-danger"></span>
                             </div>
-                            <div class="col-md-4">
-                                <div class="form-group mb-3">
-                                    <label asp-for="Version" class="form-label">Version</label>
-                                    <input asp-for="Version" class="form-control" placeholder="e.g., 1.0.0" />
-                                    <span asp-validation-for="Version" class="text-danger"></span>
-                                </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="Version" class="form-label">Version</label>
+                                <input asp-for="Version" class="form-control" placeholder="e.g., 1.0.0" />
+                                <span asp-validation-for="Version" class="text-danger"></span>
                             </div>
-                            <div class="col-md-4">
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
                                 <div class="form-check mt-4">
                                     <input asp-for="IsActive" class="form-check-input" type="checkbox" />
                                     <label asp-for="IsActive" class="form-check-label">
@@ -71,124 +72,109 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div class="form-group mb-3">
-                            <label asp-for="Description" class="form-label">Description</label>
-                            <textarea asp-for="Description" class="form-control" rows="3" placeholder="Describe the product and its capabilities..."></textarea>
-                            <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label asp-for="Description" class="form-label">Description</label>
+                                <textarea asp-for="Description" class="form-control" rows="3" placeholder="Describe the product and its capabilities..."></textarea>
+                                <span asp-validation-for="Description" class="text-danger"></span>
+                            </div>
                         </div>
+                    </div>
+                </div>
 
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-group mb-3">
-                                    <label asp-for="ReleaseDate" class="form-label">Release Date</label>
-                                    <input asp-for="ReleaseDate" type="date" class="form-control" />
-                                    <span asp-validation-for="ReleaseDate" class="text-danger"></span>
-                                </div>
+                <!-- Contact & Support Information -->
+                <div class="form-section">
+                    <h5><i class="fas fa-headset me-2"></i>Support & Contact Information</h5>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="ReleaseDate" class="form-label">Release Date</label>
+                                <input asp-for="ReleaseDate" type="date" class="form-control" />
+                                <span asp-validation-for="ReleaseDate" class="text-danger"></span>
                             </div>
-                            <div class="col-md-4">
-                                <div class="form-group mb-3">
-                                    <label asp-for="SupportEmail" class="form-label">Support Email</label>
-                                    <input asp-for="SupportEmail" type="email" class="form-control" placeholder="support@example.com" />
-                                    <span asp-validation-for="SupportEmail" class="text-danger"></span>
-                                </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="SupportEmail" class="form-label">Support Email</label>
+                                <input asp-for="SupportEmail" type="email" class="form-control" placeholder="support@example.com" />
+                                <span asp-validation-for="SupportEmail" class="text-danger"></span>
                             </div>
-                            <div class="col-md-4">
-                                <div class="form-group mb-3">
-                                    <label asp-for="SupportPhone" class="form-label">Support Phone</label>
-                                    <input asp-for="SupportPhone" type="tel" class="form-control" placeholder="+1 (555) 123-4567" />
-                                    <span asp-validation-for="SupportPhone" class="text-danger"></span>
-                                </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="SupportPhone" class="form-label">Support Phone</label>
+                                <input asp-for="SupportPhone" type="tel" class="form-control" placeholder="+1 (555) 123-4567" />
+                                <span asp-validation-for="SupportPhone" class="text-danger"></span>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Metadata Section -->
-                <div class="edit-section mb-4">
-                    <div class="section-header">
-                        <h5><i class="fas fa-tags me-2"></i>Metadata & Settings</h5>
-                    </div>
-                    <div class="section-content">
-                        <div id="metadata-container">
-                            @if (Model.Metadata != null && Model.Metadata.Any())
+                <div class="form-section">
+                    <h5><i class="fas fa-tags me-2"></i>Metadata & Settings</h5>
+                    <div id="metadata-container">
+                        @if (Model.Metadata != null && Model.Metadata.Any())
+                        {
+                            @for (int i = 0; i < Model.Metadata.Count; i++)
                             {
-                                @for (int i = 0; i < Model.Metadata.Count; i++)
-                                {
-                                    var kvp = Model.Metadata.ElementAt(i);
-                                    <div class="row mb-3 metadata-row">
-                                        <div class="col-md-5">
+                                var kvp = Model.Metadata.ElementAt(i);
+                                <div class="row metadata-row">
+                                    <div class="col-md-5">
+                                        <div class="form-group">
                                             <input type="text" name="Metadata[@i].Key" value="@kvp.Key" class="form-control" placeholder="Key" />
                                         </div>
-                                        <div class="col-md-5">
+                                    </div>
+                                    <div class="col-md-5">
+                                        <div class="form-group">
                                             <input type="text" name="Metadata[@i].Value" value="@kvp.Value" class="form-control" placeholder="Value" />
                                         </div>
-                                        <div class="col-md-2">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
                                             <button type="button" class="btn btn-outline-danger btn-sm remove-metadata">
                                                 <i class="fas fa-times"></i>
                                             </button>
                                         </div>
                                     </div>
-                                }
+                                </div>
                             }
-                        </div>
-                        <button type="button" id="add-metadata" class="btn btn-outline-primary btn-sm">
-                            <i class="fas fa-plus me-1"></i>Add Metadata
-                        </button>
+                        }
                     </div>
+                    <button type="button" id="add-metadata" class="btn btn-add-metadata">
+                        <i class="fas fa-plus me-1"></i>Add Metadata
+                    </button>
                 </div>
+
             </div>
-            
-            <!-- Sidebar -->
-            <div class="col-lg-4">
-                <!-- Save Actions -->
-                <div class="sidebar-section mb-4">
-                    <div class="section-header">
-                        <h5><i class="fas fa-save me-2"></i>Create Product</h5>
-                    </div>
-                    <div class="section-content">
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save me-2"></i>Create Product
-                            </button>
-                            <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
-                                <i class="fas fa-times me-2"></i>Cancel
-                            </a>
-                        </div>
-                        
-                        <div class="alert alert-info mt-3">
-                            <i class="fas fa-info-circle me-2"></i>
-                            <strong>Note:</strong> Product ID will be automatically generated upon creation.
-                        </div>
+            <!-- Sidebar - Fixed -->
+            <div class="col-md-4">
+                <div class="form-section">
+                    <h5><i class="fas fa-info me-2"></i>Information</h5>
+                    <div class="alert alert-info alert-persistent">
+                        <h6><i class="fas fa-lightbulb me-1"></i>Tips</h6>
+                        <ul class="mb-0 small">
+                            <li>Choose a clear and descriptive name for your product</li>
+                            <li>Product Type helps categorize your software application</li>
+                            <li>Use semantic versioning format (e.g., 1.0.0, 2.1.3)</li>
+                            <li>Provide valid contact information for customer support</li>
+                            <li>Add metadata for additional product configuration</li>
+                        </ul>
                     </div>
                 </div>
 
-                <!-- Creation Guidelines -->
-                <div class="sidebar-section">
-                    <div class="section-header">
-                        <h5><i class="fas fa-info-circle me-2"></i>Guidelines</h5>
-                    </div>
-                    <div class="section-content">
-                        <div class="setting-item">
-                            <label class="setting-label">Product Name</label>
-                            <div class="setting-value small text-muted">Choose a clear and descriptive name for your product.</div>
-                        </div>
-                        <div class="setting-item">
-                            <label class="setting-label">Product Type</label>
-                            <div class="setting-value small text-muted">Choose the category that best describes your software application.</div>
-                        </div>
-                        <div class="setting-item">
-                            <label class="setting-label">Version</label>
-                            <div class="setting-value small text-muted">Use semantic versioning format (e.g., 1.0.0, 2.1.3) for consistency.</div>
-                        </div>
-                        <div class="setting-item">
-                            <label class="setting-label">Support Contact</label>
-                            <div class="setting-value small text-muted">Provide valid contact information for customer support inquiries.</div>
-                        </div>
-                        <div class="setting-item">
-                            <label class="setting-label">Metadata</label>
-                            <div class="setting-value small text-muted">Add custom key-value pairs for additional product configuration and information.</div>
-                        </div>
+                <!-- Actions -->
+                <div class="form-section">
+                    <h5><i class="fas fa-tasks me-2"></i>Actions</h5>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>Create Product
+                        </button>
+                        <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-1"></i>Cancel
+                        </a>
                     </div>
                 </div>
             </div>
@@ -205,18 +191,24 @@
         document.getElementById('add-metadata').addEventListener('click', function() {
             const container = document.getElementById('metadata-container');
             const newRow = document.createElement('div');
-            newRow.className = 'row mb-3 metadata-row';
+            newRow.className = 'row metadata-row';
             newRow.innerHTML = `
                 <div class="col-md-5">
-                    <input type="text" name="Metadata[${metadataIndex}].Key" class="form-control" placeholder="Key" />
+                    <div class="form-group">
+                        <input type="text" name="Metadata[${metadataIndex}].Key" class="form-control" placeholder="Key" />
+                    </div>
                 </div>
                 <div class="col-md-5">
-                    <input type="text" name="Metadata[${metadataIndex}].Value" class="form-control" placeholder="Value" />
+                    <div class="form-group">
+                        <input type="text" name="Metadata[${metadataIndex}].Value" class="form-control" placeholder="Value" />
+                    </div>
                 </div>
                 <div class="col-md-2">
-                    <button type="button" class="btn btn-outline-danger btn-sm remove-metadata">
-                        <i class="fas fa-times"></i>
-                    </button>
+                    <div class="form-group">
+                        <button type="button" class="btn btn-outline-danger btn-sm remove-metadata">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
                 </div>
             `;
             container.appendChild(newRow);
@@ -238,6 +230,18 @@
             window.addEventListener('load', function() {
                 var forms = document.getElementsByClassName('needs-validation');
                 var validation = Array.prototype.filter.call(forms, function(form) {
+                    form.addEventListener('submit', function(event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+    </script>
+}
                     form.addEventListener('submit', function(event) {
                         if (form.checkValidity() === false) {
                             event.preventDefault();

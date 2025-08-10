@@ -24,7 +24,7 @@ public class TwfUserContext : IUserContext
     public IEnumerable<string> UserRoles => CurrentUser?.FindAll(ClaimTypes.Role)?.Select(c => c.Value) ?? Enumerable.Empty<string>();
 
     public bool IsAuthenticated => CurrentUser?.Identity?.IsAuthenticated ?? false;
-    public bool IsAdmin => GetClaimValue(ClaimTypes.Role) == "Admin";
+    public bool IsAdmin => GetClaimValue(ClaimTypes.Role) == "Administrator" || UserRoles.Contains("Administrator");
 
     public bool HasRole(string role)
     {

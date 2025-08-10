@@ -81,6 +81,21 @@ namespace TechWayFit.Licensing.Management.Core.Models.Settings
         public int SortOrder { get; set; } = 0;
 
         /// <summary>
+        /// Category for grouping in UI (sub-category within Category)
+        /// </summary>
+        public string? GroupName { get; set; }
+
+        /// <summary>
+        /// Whether this setting contains sensitive data (passwords, API keys)
+        /// </summary>
+        public bool IsSensitive { get; set; } = false;
+
+        /// <summary>
+        /// JSON string containing possible values for dropdown/select inputs
+        /// </summary>
+        public string? PossibleValues { get; set; }
+
+        /// <summary>
         /// Get the typed value of the setting based on its DataType
         /// </summary>
         /// <typeparam name="T">The type to convert the value to</typeparam>

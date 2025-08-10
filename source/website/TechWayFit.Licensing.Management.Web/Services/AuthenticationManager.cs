@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using System.Security.Claims;
 using CoreServices = TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Web.Models.Authentication;
+using TechWayFit.Licensing.Management.Core.Helpers;
 
 namespace TechWayFit.Licensing.Management.Web.Services
 {
@@ -56,11 +57,16 @@ namespace TechWayFit.Licensing.Management.Web.Services
 
         public async Task SignInAsync(HttpContext context, User user, bool rememberMe)
         {
+            var tenantId = user.TenantId;
+            if (user.Roles.Contains("Administrator"))
+            {
+                tenantId = IdConstants.SystemTenantId; // Use system tenant for admin users
+            }
             var claims = new List<Claim>
             {
                 new (ClaimTypes.Name, user.Name),
                 new ("Username", user.Username),
-                new ("tenant_id", user.TenantId.ToString()),
+                new ("tenant_id", tenantId.ToString()),
                 new ("sub", user.UserId.ToString()),
                 new (ClaimTypes.NameIdentifier, user.UserId.ToString()),
                 new (ClaimTypes.Email, user.Email)
