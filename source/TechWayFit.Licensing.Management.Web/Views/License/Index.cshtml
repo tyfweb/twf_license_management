@@ -111,7 +111,7 @@
                 <form method="get" asp-action="Index" class="row g-2 align-items-end">
                     <div class="col-md-4">
                         <label class="form-label">Search</label>
-                        <input asp-for="Filter.SearchTerm" class="form-control" placeholder="Search licenses (ID or Consumer name)..." value="@Model.Filter.SearchTerm">
+                        <input asp-for="Filter.SearchTerm" class="form-control" placeholder="Search licenses (ID or Consumer name)..." value="@Model?.Filter.SearchTerm">
                     </div>
                     <div class="col-md-2">
                         <label class="form-label">Status</label>

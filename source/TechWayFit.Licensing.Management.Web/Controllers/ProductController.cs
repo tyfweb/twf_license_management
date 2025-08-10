@@ -504,8 +504,10 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 CreatedAt = l.CreatedAt,
                 ExpiresAt = l.ValidTo
             }).ToList();
-        }        private async Task<ProductStatisticsViewModel> GetProductStatisticsAsync(Guid productId)
+        }
+        private async Task<ProductStatisticsViewModel> GetProductStatisticsAsync(Guid productId)
         {
+            await Task.Delay(0);  // Simulate fetching statistics from a service
             // TODO: Implement actual statistics calculation
             // For now, return sample data
             return new ProductStatisticsViewModel
@@ -756,6 +758,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         [Route("Product/EditEnhanced/{id:guid}/tiers")]
         public async Task<IActionResult> EditEnhancedTiers(Guid id)
         {
+            await Task.Delay(0); // Simulate async operation if needed
             return RedirectToAction("Tiers", new { id });
         }
 
@@ -766,6 +769,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         [Route("Product/EditEnhanced/{id:guid}/versions")]
         public async Task<IActionResult> EditEnhancedVersions(Guid id)
         {
+            await Task.Delay(0); // Simulate async operation if needed
             return RedirectToAction("Versions", new { id });
         }
 
@@ -776,6 +780,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         [Route("Product/EditEnhanced/{id:guid}/features")]
         public async Task<IActionResult> EditEnhancedFeatures(Guid id)
         {
+            await Task.Delay(0); // Simulate async operation if needed
             return RedirectToAction("Features", new { id });
         }        /// <summary>
         /// Dedicated Product Tiers management page
@@ -1327,7 +1332,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
             {
                 // In a real implementation, check if version can be deleted
                 // Approved versions and versions currently in use should not be deleted
-                
+                await Task.Delay(0);
                 // Simulate checking if the version is approved (cannot be deleted if approved)
                 var isApproved = false; // In real app, get this from database
                 
@@ -1364,7 +1369,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 // Verify the version exists
                 // Verify it's not already approved
                 // Update the approval status
-                
+                await Task.Delay(0); // Simulate async operation
                 _logger.LogInformation("Product version {VersionId} approved for product {ProductId}", versionId, productId);
 
                 return Json(JsonResponse.OK(message: "Product version approved successfully"));
@@ -1429,29 +1434,29 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 {
                     return Json(JsonResponse.Error("No version data provided"));
                 }
-                
+                await Task.CompletedTask;
                 // Parse the JSON
                 List<object> versions;
                 try
                 {
-                    versions = JsonSerializer.Deserialize<List<object>>(versionsJson);
+                    versions = JsonSerializer.Deserialize<List<object>>(versionsJson)?? new List<object>();
                 }
                 catch (JsonException ex)
                 {
                     _logger.LogError(ex, "Invalid JSON format for product version import");
                     return Json(JsonResponse.Error("Invalid JSON format"));
                 }
-                
+
                 if (versions == null || versions.Count == 0)
                 {
                     return Json(JsonResponse.Error("No version data found in JSON"));
                 }
-                
+
                 // In a real implementation, this would process each version and add it to the database
                 // For the mock implementation, we'll just return success
-                
+
                 _logger.LogInformation("Imported {Count} versions for product {ProductId}", versions.Count, productId);
-                
+
                 return Json(JsonResponse.OK(message: $"Successfully imported {versions.Count} product versions"));
             }
             catch (Exception ex)
@@ -1459,6 +1464,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 _logger.LogError(ex, "Error importing versions for product {ProductId}", productId);
                 return Json(JsonResponse.Error("Error importing versions"));
             }
+            
         }
 
         /// <summary>
