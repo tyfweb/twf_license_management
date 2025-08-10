@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Web.ViewModels.User;
 using Microsoft.AspNetCore.Authorization;
@@ -13,11 +14,16 @@ namespace TechWayFit.Licensing.Management.Web.Controllers;
 public class UserController : BaseController
 {
     private readonly IUserService _userService;
+    private readonly ITenantService _tenantService;
     private readonly ILogger<UserController> _logger;
 
-    public UserController(IUserService userService, ILogger<UserController> logger)
+    public UserController(
+        IUserService userService, 
+        ITenantService tenantService,
+        ILogger<UserController> logger)
     {
         _userService = userService;
+        _tenantService = tenantService;
         _logger = logger;
     }
 
@@ -112,10 +118,16 @@ public class UserController : BaseController
         try
         {
             var roles = await _userService.GetAllRolesAsync();
+            var tenants = await _tenantService.GetAllTenantsAsync();
             
             var viewModel = new CreateUserViewModel
             {
-                AvailableRoles = roles.ToList()
+                AvailableRoles = roles.ToList(),
+                AvailableTenants = tenants.Select(t => new SelectListItem 
+                { 
+                    Value = t.TenantId.ToString(), 
+                    Text = $"{t.TenantName} ({t.TenantCode})" 
+                }).ToList()
             };
 
             return View(viewModel);
@@ -140,6 +152,12 @@ public class UserController : BaseController
             if (!ModelState.IsValid)
             {
                 model.AvailableRoles = (await _userService.GetAllRolesAsync()).ToList();
+                var tenants = await _tenantService.GetAllTenantsAsync();
+                model.AvailableTenants = tenants.Select(t => new SelectListItem 
+                { 
+                    Value = t.TenantId.ToString(), 
+                    Text = $"{t.TenantName} ({t.TenantCode})" 
+                }).ToList();
                 return View(model);
             }
 

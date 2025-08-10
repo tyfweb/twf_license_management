@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using TechWayFit.Licensing.Management.Core.Models.User;
 
 namespace TechWayFit.Licensing.Management.Web.ViewModels.User;
@@ -63,6 +64,10 @@ public class CreateUserViewModel
     [Compare("Password", ErrorMessage = "Password and confirmation password do not match")]
     public string ConfirmPassword { get; set; } = string.Empty;
 
+    [Required(ErrorMessage = "Please select a tenant")]
+    [Display(Name = "Tenant")]
+    public Guid TenantId { get; set; }
+
     [Required(ErrorMessage = "Please select at least one role")]
     public List<Guid> SelectedRoleIds { get; set; } = new();
 
@@ -70,6 +75,7 @@ public class CreateUserViewModel
     public bool IsActive { get; set; } = true;
     public bool RequirePasswordChange { get; set; } = true;
 
-    // Available roles for selection
+    // Available items for selection
     public List<UserRole> AvailableRoles { get; set; } = new();
+    public List<SelectListItem> AvailableTenants { get; set; } = new();
 }

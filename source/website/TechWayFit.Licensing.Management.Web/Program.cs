@@ -219,8 +219,11 @@ static void RegisterServices(WebApplicationBuilder builder)
     // Step 9: User management services
     builder.Services.AddScoped<IUserService, UserService>();
 
+    // Step 10: Tenant management services
+    builder.Services.AddScoped<ITenantService, TechWayFit.Licensing.Management.Services.Implementations.Tenant.TenantService>();
+
     // OPERATIONS DASHBOARD - DISABLED FOR CORE FOCUS
-    // Step 10: Operations Dashboard services
+    // Step 11: Operations Dashboard services
     // builder.Services.AddScoped<IOperationsDashboardService, OperationsDashboardService>();
 
     // Register authentication service
