@@ -52,7 +52,7 @@ public class EfCoreWorkflowHistoryRepository : BaseRepository<WorkflowHistoryEnt
         return entities.Select(e => e.Map());
     }
 
-    public async Task<WorkflowHistoryEntry> RecordActionAsync(WorkflowHistoryEntry historyEntry, CancellationToken cancellationToken = default)
+    public Task<WorkflowHistoryEntry> RecordActionAsync(WorkflowHistoryEntry historyEntry, CancellationToken cancellationToken = default)
     {
         var entity = new WorkflowHistoryEntity();
         entity.Map(historyEntry);
@@ -65,7 +65,7 @@ public class EfCoreWorkflowHistoryRepository : BaseRepository<WorkflowHistoryEnt
         entity.UpdatedOn = DateTime.UtcNow;
         
         _dbSet.Add(entity);
-        return entity.Map();
+        return Task.FromResult(entity.Map());
     }
 
     // Implement missing IBaseRepository methods for workflow history specific behavior

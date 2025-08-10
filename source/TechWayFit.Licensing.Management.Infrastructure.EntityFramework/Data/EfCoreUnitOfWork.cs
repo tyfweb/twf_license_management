@@ -51,7 +51,6 @@ public class EfCoreUnitOfWork : IUnitOfWork
     private ISettingRepository? _settings;
     private IUserRoleRepository? _userRoles;
     private IUserRoleMappingRepository? _userRoleMappings;
-    private ITenantRepository? _tenants;
     
     // Workflow repositories
     private IWorkflowHistoryRepository? _workflowHistory;
@@ -63,7 +62,7 @@ public class EfCoreUnitOfWork : IUnitOfWork
     private ISeedingHistoryRepository? _seedingHistory;
     
     private IUserContext    _userContext;
-    private ITenantRepository _tenantRepository;
+    private ITenantRepository? _tenantRepository;
     public EfCoreUnitOfWork(EfCoreLicensingDbContext context, IUserContext userContext)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));

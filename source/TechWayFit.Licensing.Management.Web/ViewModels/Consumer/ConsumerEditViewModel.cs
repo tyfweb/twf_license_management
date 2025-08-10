@@ -8,7 +8,7 @@ namespace TechWayFit.Licensing.Management.Web.ViewModels.Consumer
     public class ConsumerEditViewModel
     {
         [Required]
-        public string ConsumerId { get; set; }
+        public string ConsumerId { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Organization name is required")]
         [StringLength(200, ErrorMessage = "Organization name cannot exceed 200 characters")]

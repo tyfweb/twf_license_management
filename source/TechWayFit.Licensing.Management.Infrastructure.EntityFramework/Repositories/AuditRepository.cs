@@ -104,7 +104,7 @@ public partial class AuditRepository<TModel, TEntity> : IDataRepository<TModel>
         {
             foreach (var filter in request.Filters)
             {
-                query = query.Where(e => EF.Property<string>(e, filter.Key) == filter.Value);
+                query = query.Where(e => EF.Property<string>(e, filter.Key) == (string)filter.Value);
             }
         }
 
@@ -216,7 +216,7 @@ public partial class AuditRepository<TModel, TEntity> : IDataRepository<TModel>
         {
             foreach (var filter in request.Filters)
             {
-                query = query.Where(e => EF.Property<string>(e, filter.Key) == filter.Value);
+                query = query.Where(e => EF.Property<string>(e, filter.Key) == (string)filter.Value);
             }
         }
         var totalCount = await query.CountAsync(cancellationToken);

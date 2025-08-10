@@ -278,12 +278,12 @@ public class EfCoreUserProfileRepository :  BaseRepository<UserProfile,UserProfi
         return result;
     }
 
-    public async Task<bool> UpdatePasswordAsync(Guid userId, string newPassword, CancellationToken cancellationToken = default)
+    public Task<bool> UpdatePasswordAsync(Guid userId, string newPassword, CancellationToken cancellationToken = default)
     {
         var user = _dbSet.Find(userId);
         if (user == null || user.IsDeleted)
         {
-            return false; // User not found or deleted
+            return Task.FromResult(false); // User not found or deleted
         }
         var (hash, salt) = SecurityHelper.HashPassword(newPassword);
         user.PasswordHash = hash;
@@ -292,6 +292,6 @@ public class EfCoreUserProfileRepository :  BaseRepository<UserProfile,UserProfi
         user.UpdatedBy = _userContext.UserName ?? "Anonymous";
         _dbSet.Update(user);
         
-        return true;
+        return Task.FromResult(true);
     }
 }

@@ -8,6 +8,7 @@ using TechWayFit.Licensing.Management.Web.Models;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Web.Extensions;
 using TechWayFit.Licensing.Management.Core.Models.Product;
+using TechWayFit.Licensing.Management.Core.Models.Consumer;
 using TechWayFit.Licensing.Management.Web.Helpers;
 
 namespace TechWayFit.Licensing.Management.Web.Controllers
@@ -217,8 +218,8 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                     var viewModel = new LicenseDetailViewModel
                     {
                         License = license,
-                        Consumer = consumer,
-                        Product = product
+                        Consumer = consumer ?? new ConsumerAccount(), // Provide fallback
+                        Product = product ?? new EnterpriseProduct() // Provide fallback
                     };
 
                     TempData["SuccessMessage"] = "License generated successfully!";

@@ -351,14 +351,14 @@ public class AuditController : BaseController
     /// Export audit data
     /// </summary>
     [HttpPost("Export")]
-    public async Task<IActionResult> Export(AuditExportViewModel model)
+    public Task<IActionResult> Export(AuditExportViewModel model)
     {
         try
         {
             if (!ModelState.IsValid)
             {
                 TempData["ErrorMessage"] = "Invalid export parameters.";
-                return RedirectToAction(nameof(Entries));
+                return Task.FromResult<IActionResult>(RedirectToAction(nameof(Entries)));
             }
 
             //TODO: Implement export logic based on model parameters
@@ -370,13 +370,13 @@ public class AuditController : BaseController
                 _ => "text/csv"
             };
 
-            return File("", contentType, model.FileName);
+            return Task.FromResult<IActionResult>(File("", contentType, model.FileName));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error exporting audit data");
             TempData["ErrorMessage"] = "Error exporting audit data. Please try again.";
-            return RedirectToAction(nameof(Entries));
+            return Task.FromResult<IActionResult>(RedirectToAction(nameof(Entries)));
         }
     }
 

@@ -97,11 +97,11 @@ public class ProductLicenseService : IProductLicenseService
                 ProductTierId = request.TierId,
                 ValidProductVersionFrom = request.ValidProductVersionFrom,
                 ValidProductVersionTo = request.ValidProductVersionTo,
-                LicenseKey = signedLicense.LicenseData, // Store the signed license data
+                LicenseKey = signedLicense.LicenseData ?? string.Empty, // Store the signed license data
                 ValidFrom = generationRequest.ValidFrom,
                 ValidTo = generationRequest.ValidTo,
                 Status = LicenseStatus.Active,
-                Metadata = request.Metadata,
+                Metadata = request.Metadata ?? new Dictionary<string, object>(),
                 CreatedBy = generatedBy,
                 CreatedOn = DateTime.UtcNow,
                 UpdatedBy = generatedBy,

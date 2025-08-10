@@ -14,9 +14,9 @@ public class TenantEntity: AuditEntity, IEntityMapper<Tenant, TenantEntity>
     public TenantEntity Map(Tenant model)
     {
         Id = model.TenantId;
-        TenantCode = model.TenantCode;
-        Description = model.Description;
-        TenantName = model.TenantName;
+        TenantCode = model.TenantCode ?? string.Empty;
+        Description = model.Description ?? string.Empty;
+        TenantName = model.TenantName ?? string.Empty;
         return this;
     }
  

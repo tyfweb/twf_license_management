@@ -1,7 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using System.ComponentModel.DataAnnotations.Schema;
 using TechWayFit.Licensing.Management.Infrastructure.Data.Entities.Consumer;
 using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Models.Entities.Notification;
 using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Models.Entities.Products;
@@ -15,37 +12,13 @@ using TechWayFit.Licensing.Management.Core.Contracts;
 using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Models.Entities.Tenants;
 using System.Reflection.Emit;
 using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Models.Entities.Seeding;
+using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Configuration.EntityConfigurations;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Configuration;
 
 /// <summary>
-/// PostgreSQL-specific Entity Framework DbContext for the licensing management system
-/// 
-/// MULTI-TENANT IMPLEMENTATION:
-/// This DbContext implements multi-tenancy through the following mechanisms:
-/// 
-/// 1. TENANT ID FILTERING:
-///    - All entities inherit from BaseEntity which includes TenantId property
-///    - Global query filters automatically filter all queries by current user's TenantId
-///    - Prevents cross-tenant data access without explicit bypass
-/// 
-/// 2. AUTOMATIC TENANT ID ASSIGNMENT:
-///    - New entities automatically get TenantId set from current user context
-///    - TenantId cannot be modified after entity creation (prevented in UpdateAuditFields)
-/// 
-/// 3. PERFORMANCE OPTIMIZATION:
-///    - TenantId indexes on all entities for optimal query performance
-///    - Composite indexes combining TenantId with frequently queried fields
-/// 
-/// 4. ADMINISTRATIVE BYPASS:
-///    - WithoutTenantFilter methods for system-level operations
-///    - Use with extreme caution for cross-tenant administrative tasks
-/// 
-/// SECURITY CONSIDERATIONS:
-/// - All queries are automatically filtered by TenantId
-/// - No raw SQL should bypass tenant filtering
-/// - Admin operations must explicitly use bypass methods
-/// - TenantId must be properly set in user context (claims)
+/// Entity Framework DbContext for the licensing management system
+/// This is the base DbContext that can be extended for specific database providers
 /// </summary>
 public partial class EfCoreLicensingDbContext : DbContext
 {
@@ -95,18 +68,37 @@ public partial class EfCoreLicensingDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        ConfigureAuditEntities(modelBuilder);
-        ConfigureTenantEntities(modelBuilder);
-        ConfigureConsumerEntities(modelBuilder);
+        // Apply modular entity configurations
+        // Product-related entities
+        modelBuilder.ApplyConfiguration(new ProductEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new ProductVersionEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new ProductTierEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new ProductFeatureEntityConfiguration());
 
-        // Configure entities
-        ConfigureProductEntities(modelBuilder);
-        ConfigureLicenseEntities(modelBuilder);
+        // User-related entities
+        modelBuilder.ApplyConfiguration(new UserProfileEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new UserRoleEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new UserRoleMappingEntityConfiguration());
 
-        ConfigureNotificationEntities(modelBuilder);
-        ConfigureSettingsEntities(modelBuilder);
-        ConfigureUserEntities(modelBuilder);
-        ConfigureSeedingHistoryEntities(modelBuilder);
+        // Consumer-related entities
+        modelBuilder.ApplyConfiguration(new ConsumerAccountEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new ProductConsumerEntityConfiguration());
+
+        // License-related entities
+        modelBuilder.ApplyConfiguration(new ProductLicenseEntityConfiguration());
+
+        // Notification-related entities
+        modelBuilder.ApplyConfiguration(new NotificationTemplateEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new NotificationHistoryEntityConfiguration());
+
+        // Settings-related entities
+        modelBuilder.ApplyConfiguration(new SettingEntityConfiguration());
+        // Audit-related entities
+        modelBuilder.ApplyConfiguration(new AuditEntryEntityConfiguration());
+        // Seeding history entities
+        modelBuilder.ApplyConfiguration(new SeedingHistoryEntityConfiguration());
+        // Tenant-related entities
+        modelBuilder.ApplyConfiguration(new TenantEntityConfiguration());
 
         // Configure indexes
         ConfigureIndexes(modelBuilder);
@@ -114,403 +106,7 @@ public partial class EfCoreLicensingDbContext : DbContext
         // Configure global query filters for multi-tenancy
         ConfigureGlobalQueryFilters(modelBuilder);
     }
-
-    private void ConfigureSeedingHistoryEntities(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<SeedingHistoryEntity>(entity =>
-        {
-            // Primary key
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Id).IsRequired();
-            
-            // Table name
-            entity.ToTable("seeding_history");
-            
-            // Required properties
-            entity.Property(e => e.TenantId).IsRequired();
-            entity.Property(e => e.SeederName).HasMaxLength(200).IsRequired();
-            entity.Property(e => e.Version).HasMaxLength(50).IsRequired();
-            entity.Property(e => e.ExecutedOn).IsRequired();
-            entity.Property(e => e.ExecutedBy).HasMaxLength(200).IsRequired();
-            entity.Property(e => e.IsSuccessful).IsRequired();
-
-            // Optional properties
-            entity.Property(e => e.ErrorMessage).HasMaxLength(2000);
-            entity.Property(e => e.MetadataJson).HasMaxLength(4000).IsRequired();
-            entity.Property(e => e.RecordsCreated).HasDefaultValue(0);
-            entity.Property(e => e.DurationMs).HasDefaultValue(0);
-
-            // Audit fields from BaseEntity
-            entity.Property(e => e.CreatedBy).HasMaxLength(100).IsRequired();
-            entity.Property(e => e.CreatedOn).IsRequired();
-            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
-            entity.Property(e => e.UpdatedOn);
-            entity.Property(e => e.IsActive).IsRequired().HasDefaultValue(true);
-            entity.Property(e => e.IsDeleted).IsRequired().HasDefaultValue(false);
-
-            // Indexes for performance
-            entity.HasIndex(e => e.TenantId);
-            entity.HasIndex(e => e.SeederName);
-            entity.HasIndex(e => new { e.TenantId, e.SeederName });
-            entity.HasIndex(e => e.ExecutedOn);
-            entity.HasIndex(e => e.IsSuccessful);
-        });
-    }
-
-    private void ConfigureTenantEntities(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<TenantEntity>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Id).IsRequired();
-            entity.Property(e => e.TenantName).HasMaxLength(200).IsRequired();
-            entity.Property(e => e.TenantCode).HasMaxLength(50);
-            entity.Property(e => e.Description).HasMaxLength(1000);
-
-            // Audit fields
-            entity.Property(e => e.CreatedBy).HasMaxLength(100).IsRequired();
-            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
-
-            // Indexes
-            entity.HasIndex(e => e.TenantCode).IsUnique();
-        });
-    }
-
-
-    /// <summary>
-    /// Configure Audit related entities
-    /// </summary>
-    private static void ConfigureAuditEntities(ModelBuilder modelBuilder)
-    {
-        // AuditEntryEntity configuration
-        modelBuilder.Entity<AuditEntryEntity>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Id).IsRequired();
-            entity.Property(e => e.EntityType).HasMaxLength(100).IsRequired();
-            entity.Property(e => e.EntityId).HasMaxLength(50).IsRequired();
-            entity.Property(e => e.CreatedBy).HasMaxLength(100).IsRequired();
-            entity.Property(e => e.Reason).HasMaxLength(1000);
-            entity.Property(e => e.OldValue).HasMaxLength(4000);
-            entity.Property(e => e.NewValue).HasMaxLength(4000);
-            entity.Property(e => e.Metadata).HasMaxLength(1000);
-            entity.Property(e => e.IpAddress).HasMaxLength(45);
-            entity.Property(e => e.UserAgent).HasMaxLength(500);
-            entity.Property(e => e.ActionType).HasMaxLength(20);
-
-            // Audit fields
-            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
-
-            // Indexes
-            entity.HasIndex(e => new { e.EntityType, e.EntityId });
-            entity.HasIndex(e => e.ActionType);
-        });
-    }
-
-    /// <summary>
-    /// Configure Consumer related entities
-    /// </summary>
-    private static void ConfigureConsumerEntities(ModelBuilder modelBuilder)
-    {
-        // ConsumerAccountEntity configuration
-        modelBuilder.Entity<ConsumerAccountEntity>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Id).IsRequired();
-            entity.Property(e => e.CompanyName).HasMaxLength(200).IsRequired();
-            entity.Property(e => e.AccountCode).HasMaxLength(50);
-
-            entity.Property(e => e.PrimaryContactName).HasMaxLength(200);
-            entity.Property(e => e.PrimaryContactEmail).HasMaxLength(255);
-            entity.Property(e => e.PrimaryContactPhone).HasMaxLength(50);
-            entity.Property(e => e.PrimaryContactPosition).HasMaxLength(100);
-
-            entity.Property(e => e.SecondaryContactName).HasMaxLength(100);
-            entity.Property(e => e.SecondaryContactEmail).HasMaxLength(255);
-            entity.Property(e => e.SecondaryContactPhone).HasMaxLength(50);
-            entity.Property(e => e.SecondaryContactPosition).HasMaxLength(100);
-
-            entity.Property(e => e.AddressStreet).HasMaxLength(500);
-            entity.Property(e => e.AddressCity).HasMaxLength(100);
-            entity.Property(e => e.AddressState).HasMaxLength(100);
-            entity.Property(e => e.AddressPostalCode).HasMaxLength(20);
-            entity.Property(e => e.AddressCountry).HasMaxLength(100);
-            entity.Property(e => e.Notes).HasMaxLength(2000);
-            entity.Property(e => e.Status).HasConversion<string>();
-
-            // Audit fields
-            entity.Property(e => e.CreatedBy).HasMaxLength(100).IsRequired();
-            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
-
-            // Indexes
-            entity.HasIndex(e => e.PrimaryContactEmail).IsUnique();
-            entity.HasIndex(e => e.Status);
-            entity.HasIndex(e => e.IsActive);
-        });
-
-        modelBuilder.Entity<ProductConsumerEntity>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Id).IsRequired();
-            entity.Property(e => e.ProductId).HasMaxLength(50).IsRequired();
-            entity.Property(e => e.ConsumerId).HasMaxLength(50).IsRequired();
-            entity.Property(e => e.AccountManagerName).HasMaxLength(100);
-            entity.Property(e => e.AccountManagerEmail).HasMaxLength(255);
-            entity.Property(e => e.AccountManagerPhone).HasMaxLength(50);
-            entity.Property(e => e.AccountManagerPosition).HasMaxLength(100);
-
-            // Audit fields
-            entity.Property(e => e.CreatedBy).HasMaxLength(100).IsRequired();
-            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
-
-            // Relationships
-            entity.HasOne(e => e.Consumer)
-                  .WithMany(c => c.ProductConsumers)
-                  .HasForeignKey(e => e.ConsumerId)
-                  .OnDelete(DeleteBehavior.Cascade);
-
-            entity.HasOne(e => e.Product)
-                  .WithMany(p => p.ProductConsumers)
-                  .HasForeignKey(e => e.ProductId)
-                  .OnDelete(DeleteBehavior.Cascade);
-
-            // Indexes
-            entity.HasIndex(e => new { e.ConsumerId, e.ProductId }).IsUnique();
-        });
-    }
-
-
-    /// <summary>
-    /// Configure Product related entities
-    /// </summary>
-    private static void ConfigureProductEntities(ModelBuilder modelBuilder)
-    {
-        // ProductEntity configuration
-        modelBuilder.Entity<ProductEntity>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Id).IsRequired();
-            entity.Property(e => e.TenantId).IsRequired(); // Multi-tenant support
-            entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
-            entity.Property(e => e.Description).HasMaxLength(1000);
-            entity.Property(e => e.SupportEmail).HasMaxLength(255);
-            entity.Property(e => e.SupportPhone).HasMaxLength(50);
-
-            // Audit fields
-            entity.Property(e => e.CreatedBy).HasMaxLength(100).IsRequired();
-            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
-
-            // Indexes
-            entity.HasIndex(e => e.Name).IsUnique();
-            entity.HasIndex(e => e.Status);
-        });
-
-        // ProductVersionEntity configuration
-        modelBuilder.Entity<ProductVersionEntity>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Id).IsRequired();
-            entity.Property(e => e.ProductId).HasMaxLength(50).IsRequired();
-            entity.Property(e => e.Version).HasMaxLength(50).IsRequired();
-            entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
-            entity.Property(e => e.ReleaseDate).IsRequired();
-            entity.Property(e => e.EndOfLifeDate);
-            entity.Property(e => e.SupportEndDate);
-            entity.Property(e => e.ReleaseNotes).HasMaxLength(2000);
-            entity.Property(e => e.IsCurrent).IsRequired();
-
-            // Audit fields
-            entity.Property(e => e.CreatedBy).HasMaxLength(100).IsRequired();
-            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
-
-            // Relationships
-            entity.HasOne(e => e.Product)
-                  .WithMany(p => p.Versions)
-                  .HasForeignKey(e => e.ProductId)
-                  .OnDelete(DeleteBehavior.Cascade);
-
-            // Indexes
-            entity.HasIndex(e => new { e.ProductId, e.Version }).IsUnique();
-            entity.HasIndex(e => e.IsCurrent);
-        });
-
-        // ProductTierEntity configuration
-        modelBuilder.Entity<ProductTierEntity>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Id).IsRequired();
-            entity.Property(e => e.ProductId).HasMaxLength(50).IsRequired();
-            entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
-            entity.Property(e => e.Description).HasMaxLength(1000);
-            entity.Property(e => e.Price).HasMaxLength(10); // Assuming price is a string for currency formatting
-            entity.Property(e => e.DisplayOrder);
-            entity.Property(e => e.SupportSLAJson).HasMaxLength(1000);
-
-            // Audit fields
-            entity.Property(e => e.CreatedBy).HasMaxLength(100).IsRequired();
-            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
-
-            // Relationships
-            entity.HasOne(e => e.Product)
-                  .WithMany(p => p.Tiers)
-                  .HasForeignKey(e => e.ProductId)
-                  .OnDelete(DeleteBehavior.Cascade);
-
-            // Indexes
-            entity.HasIndex(e => new { e.ProductId, e.Name }).IsUnique();
-            entity.HasIndex(e => e.IsActive);
-        });
-
-        // ProductFeatureEntity configuration
-        modelBuilder.Entity<ProductFeatureEntity>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Id).IsRequired();
-            entity.Property(e => e.ProductId).IsRequired();
-            entity.Property(e => e.TierId).IsRequired();
-            entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
-            entity.Property(e => e.Description).HasMaxLength(1000);
-            entity.Property(e => e.Code).HasMaxLength(100).IsRequired();
-            entity.Property(e => e.IsEnabled).IsRequired();
-            entity.Property(e => e.DisplayOrder);
-            entity.Property(e => e.SupportFromVersion).HasMaxLength(20);
-            entity.Property(e => e.SupportToVersion).HasMaxLength(20);
-            entity.Property(e => e.FeatureUsageJson).HasMaxLength(1000);
-
-            // Audit fields
-            entity.Property(e => e.CreatedBy).HasMaxLength(100).IsRequired();
-            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
-
-            // Relationships
-            entity.HasOne(e => e.Tier)
-                  .WithMany(t => t.Features)
-                  .HasForeignKey(e => e.TierId)
-                  .OnDelete(DeleteBehavior.Cascade);
-
-            // Indexes
-            entity.HasIndex(e => new { e.TierId, e.Code }).IsUnique();
-            entity.HasIndex(e => e.IsEnabled);
-            entity.HasIndex(e => e.Code);
-        });
-    }
-
-    /// <summary>
-    /// Configure License related entities
-    /// </summary>
-    private static void ConfigureLicenseEntities(ModelBuilder modelBuilder)
-    {
-        // ProductLicenseEntity configuration
-        modelBuilder.Entity<ProductLicenseEntity>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Id).IsRequired();
-            entity.Property(e => e.ProductId).IsRequired();
-            entity.Property(e => e.ConsumerId).IsRequired();
-            entity.Property(e => e.Encryption).HasMaxLength(50).IsRequired();
-            entity.Property(e => e.Signature).HasMaxLength(50).IsRequired();
-            entity.Property(e => e.LicenseKey).HasMaxLength(2000).IsRequired();
-            entity.Property(e => e.PublicKey).HasMaxLength(2000);
-            entity.Property(e => e.LicenseSignature).HasMaxLength(2000);
-            entity.Property(e => e.Status).HasConversion<string>();
-            entity.Property(e => e.IssuedBy).HasMaxLength(100).IsRequired();
-            entity.Property(e => e.RevocationReason).HasMaxLength(500);
-            entity.Property(e => e.MetadataJson).HasMaxLength(2000);
-
-            // Audit fields
-            entity.Property(e => e.CreatedBy).HasMaxLength(100).IsRequired();
-            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
-
-            // Relationships
-            entity.HasOne(e => e.Product)
-                  .WithMany(p => p.Licenses)
-                  .HasForeignKey(e => e.ProductId)
-                  .OnDelete(DeleteBehavior.Restrict);
-
-            entity.HasOne(e => e.Consumer)
-                  .WithMany(c => c.Licenses)
-                  .HasForeignKey(e => e.ConsumerId)
-                  .OnDelete(DeleteBehavior.Restrict);
-
-
-            // Indexes
-            entity.HasIndex(e => e.LicenseKey).IsUnique();
-            entity.HasIndex(e => e.ProductId);
-            entity.HasIndex(e => e.ConsumerId);
-            entity.HasIndex(e => e.Status);
-            entity.HasIndex(e => e.ValidTo);
-            entity.HasIndex(e => new { e.ProductId, e.ConsumerId });
-        });
-    }
-
-
-
-
-
-    /// <summary>
-    /// Configure Notification related entities
-    /// </summary>
-    private static void ConfigureNotificationEntities(ModelBuilder modelBuilder)
-    {
-        // NotificationTemplateEntity configuration
-        modelBuilder.Entity<NotificationTemplateEntity>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Id).HasMaxLength(50).IsRequired();
-            entity.Property(e => e.TemplateName).HasMaxLength(200).IsRequired();
-            entity.Property(e => e.MessageTemplate).HasMaxLength(4000).IsRequired();
-            entity.Property(e => e.NotificationType).HasMaxLength(20);
-            entity.Property(e => e.Subject).HasMaxLength(500);
-            entity.Property(e => e.TemplateVariableJson).HasMaxLength(1000);
-            entity.Property(e => e.IsActive).IsRequired();
-            entity.Property(e => e.NotificationMode).HasConversion<string>();
-            entity.Property(e => e.CreatedBy).HasMaxLength(100).IsRequired();
-            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
-
-            // Audit fields
-            entity.Property(e => e.CreatedBy).HasMaxLength(100).IsRequired();
-            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
-
-            // Indexes
-            entity.HasIndex(e => e.TemplateName);
-            entity.HasIndex(e => e.IsActive);
-        });
-
-        // NotificationHistoryEntity configuration
-        modelBuilder.Entity<NotificationHistoryEntity>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Id).IsRequired();
-            entity.Property(e => e.EntityId);
-            entity.Property(e => e.EntityType).HasConversion<string>();
-            entity.Property(e => e.RecipientsJson).HasMaxLength(1000);
-            entity.Property(e => e.NotificationMode).HasMaxLength(20);
-            entity.Property(e => e.NotificationTemplateId).HasMaxLength(50);
-            entity.Property(e => e.NotificationType).HasMaxLength(20);
-            entity.Property(e => e.SentDate).IsRequired();
-            entity.Property(e => e.Status).HasConversion<string>();
-            entity.Property(e => e.DeliveryError).HasMaxLength(2000);
-
-            // Audit fields
-            entity.Property(e => e.CreatedBy).HasMaxLength(100).IsRequired();
-            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
-            entity.Property(e => e.CreatedOn).IsRequired();
-
-
-            // Relationships
-            entity.HasOne(e => e.Template)
-                  .WithMany(t => t.NotificationHistory)
-                  .HasForeignKey(e => e.NotificationTemplateId)
-                  .OnDelete(DeleteBehavior.SetNull);
-
-            // Indexes
-            entity.HasIndex(e => e.NotificationTemplateId);
-            entity.HasIndex(e => e.Status);
-            entity.HasIndex(e => e.NotificationType);
-            entity.HasIndex(e => e.SentDate);
-            entity.HasIndex(e => new { e.EntityType, e.EntityId });
-        });
-    }
-
+ 
     /// <summary>
     /// Configure additional indexes for performance
     /// </summary>
@@ -547,7 +143,7 @@ public partial class EfCoreLicensingDbContext : DbContext
         modelBuilder.Entity<NotificationHistoryEntity>().HasIndex(e => e.TenantId);
 
         // Settings related entities
-        modelBuilder.Entity<SettingEntity>().HasIndex(e => e.TenantId);
+        modelBuilder.Entity<SettingEntity>().HasIndex(e => e.TenantId); 
 
         // User related entities
         modelBuilder.Entity<UserProfileEntity>().HasIndex(e => e.TenantId);
@@ -563,52 +159,7 @@ public partial class EfCoreLicensingDbContext : DbContext
         modelBuilder.Entity<ProductLicenseEntity>().HasIndex(e => new { e.TenantId, e.Status });
         modelBuilder.Entity<UserProfileEntity>().HasIndex(e => new { e.TenantId, e.IsActive, e.IsLocked });
     }
-
-    /// <summary>
-    /// Configure Settings related entities
-    /// </summary>
-    /// <param name="modelBuilder">The model builder</param>
-    private static void ConfigureSettingsEntities(ModelBuilder modelBuilder)
-    {
-        // Configure SettingEntity
-        modelBuilder.Entity<SettingEntity>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-
-            entity.Property(e => e.Id).IsRequired();
-
-            entity.Property(e => e.Category).HasMaxLength(100).IsRequired();
-
-            entity.Property(e => e.Key).HasMaxLength(100).IsRequired();
-
-            entity.Property(e => e.Value).HasMaxLength(4000);
-
-            entity.Property(e => e.DefaultValue).HasMaxLength(4000);
-
-            entity.Property(e => e.DataType).HasMaxLength(50).IsRequired();
-
-            entity.Property(e => e.DisplayName).HasMaxLength(200).IsRequired();
-
-            entity.Property(e => e.Description).HasMaxLength(1000);
-
-            entity.Property(e => e.GroupName).HasMaxLength(100);
-
-            entity.Property(e => e.ValidationRules).HasMaxLength(2000);
-
-            entity.Property(e => e.PossibleValues).HasMaxLength(2000);
-
-            // Unique constraint on Category + Key combination
-            entity.HasIndex(e => new { e.Category, e.Key })
-                .IsUnique();
-
-            // Performance indexes
-            entity.HasIndex(e => e.Category);
-            entity.HasIndex(e => new { e.Category, e.DisplayOrder });
-
-            // Computed column for FullKey (ignored since it's a computed property)
-            entity.Ignore(e => e.FullKey);
-        });
-    }
+ 
 
     /// <summary>
     /// Override SaveChanges to update audit fields and convert DateTime values to UTC automatically
@@ -700,41 +251,6 @@ public partial class EfCoreLicensingDbContext : DbContext
     }
 
     /// <summary>
-    /// Bypasses the global query filters for administrative operations
-    /// Use with caution - only for system-level operations that need cross-tenant access
-    /// </summary>
-    /// <returns>DbContext with global filters ignored</returns>
-    public DbContext IgnoreQueryFilters()
-    {
-        return this.IgnoreQueryFilters();
-    }
-
-    /// <summary>
-    /// Execute a query with tenant filtering temporarily disabled
-    /// Use for administrative operations that need cross-tenant access
-    /// </summary>
-    /// <typeparam name="T">Return type</typeparam>
-    /// <param name="operation">Operation to execute</param>
-    /// <returns>Result of the operation</returns>
-    public T WithoutTenantFilter<T>(Func<T> operation)
-    {
-        using var scope = new TenantFilterScope();
-        return operation();
-    }
-
-    /// <summary>
-    /// Execute an async query with tenant filtering temporarily disabled
-    /// </summary>
-    /// <typeparam name="T">Return type</typeparam>
-    /// <param name="operation">Async operation to execute</param>
-    /// <returns>Result of the operation</returns>
-    public async Task<T> WithoutTenantFilterAsync<T>(Func<Task<T>> operation)
-    {
-        using var scope = new TenantFilterScope();
-        return await operation();
-    }
-
-    /// <summary>
     /// Create audit entries for all entity changes (add/update)
     /// </summary>
     private void CreateAuditEntries()
@@ -745,10 +261,6 @@ public partial class EfCoreLicensingDbContext : DbContext
 
         foreach (var entry in entries)
         {
-            // Skip creating audit entries for AuditEntryEntity itself to avoid recursion
-            if (entry.Entity is AuditEntryEntity)
-                continue;
-
             var auditEntry = CreateAuditEntry(entry);
             if (auditEntry != null)
             {
@@ -912,94 +424,10 @@ public partial class EfCoreLicensingDbContext : DbContext
     }
 
     /// <summary>
-    /// Configure User related entities
-    /// </summary>
-    private static void ConfigureUserEntities(ModelBuilder modelBuilder)
-    {
-        // UserProfileEntity configuration
-        modelBuilder.Entity<UserProfileEntity>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Id).IsRequired();
-            entity.Property(e => e.UserName).HasMaxLength(50).IsRequired();
-            entity.Property(e => e.PasswordHash).HasMaxLength(256).IsRequired();
-            entity.Property(e => e.PasswordSalt).HasMaxLength(128).IsRequired();
-            entity.Property(e => e.FullName).HasMaxLength(100).IsRequired();
-            entity.Property(e => e.Email).HasMaxLength(255).IsRequired();
-            entity.Property(e => e.Department).HasMaxLength(100);
-            entity.Property(e => e.CreatedBy).HasMaxLength(100).IsRequired();
-            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
-
-            // Unique constraints
-            entity.HasIndex(e => e.UserName).IsUnique();
-            entity.HasIndex(e => e.Email).IsUnique();
-
-            // Indexes
-            entity.HasIndex(e => e.FullName);
-            entity.HasIndex(e => e.Department);
-            entity.HasIndex(e => e.IsLocked);
-            entity.HasIndex(e => e.IsDeleted);
-            entity.HasIndex(e => e.IsAdmin);
-        });
-
-        // UserRoleEntity configuration
-        modelBuilder.Entity<UserRoleEntity>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Id).IsRequired();
-            entity.Property(e => e.RoleName).HasMaxLength(50).IsRequired();
-            entity.Property(e => e.RoleDescription).HasMaxLength(500);
-            entity.Property(e => e.CreatedBy).HasMaxLength(100).IsRequired();
-            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
-
-            // Unique constraint
-            entity.HasIndex(e => e.RoleName).IsUnique();
-
-            // Indexes
-            entity.HasIndex(e => e.IsAdmin);
-        });
-
-        // UserRoleMappingEntity configuration
-        modelBuilder.Entity<UserRoleMappingEntity>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Id).IsRequired();
-            entity.Property(e => e.UserId).IsRequired();
-            entity.Property(e => e.RoleId).IsRequired();
-            entity.Property(e => e.CreatedBy).HasMaxLength(100).IsRequired();
-            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
-
-            // Foreign key relationships
-            entity.HasOne(e => e.User)
-                  .WithMany(u => u.UserRoles)
-                  .HasForeignKey(e => e.UserId)
-                  .OnDelete(DeleteBehavior.Cascade);
-
-            entity.HasOne(e => e.Role)
-                  .WithMany(r => r.UserRoles)
-                  .HasForeignKey(e => e.RoleId)
-                  .OnDelete(DeleteBehavior.Cascade);
-
-            // Unique constraint - user can only have one active mapping to a specific role
-            entity.HasIndex(e => new { e.UserId, e.RoleId }).IsUnique();
-
-            // Indexes
-            entity.HasIndex(e => e.UserId);
-            entity.HasIndex(e => e.RoleId);
-            entity.HasIndex(e => e.AssignedDate);
-            entity.HasIndex(e => e.ExpiryDate);
-        });
-    }
-
-    /// <summary>
     /// Configure global query filters for multi-tenancy
     /// </summary>
     private void ConfigureGlobalQueryFilters(ModelBuilder modelBuilder)
     {
-        // Apply global query filter to all entities that inherit from BaseEntity
-        // This ensures all queries automatically filter by TenantId
-        // Note: The TenantId is evaluated at query execution time, not at model creation time
-        
         // Product related entities
         modelBuilder.Entity<ProductEntity>().HasQueryFilter(e => e.TenantId == GetCurrentTenantId());
         modelBuilder.Entity<ProductVersionEntity>().HasQueryFilter(e => e.TenantId == GetCurrentTenantId());
@@ -1029,5 +457,4 @@ public partial class EfCoreLicensingDbContext : DbContext
         modelBuilder.Entity<SeedingHistoryEntity>().HasQueryFilter(e => e.TenantId == GetCurrentTenantId());
     }
 
-   
 }

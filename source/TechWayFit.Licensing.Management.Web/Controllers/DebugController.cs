@@ -6,6 +6,7 @@ using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Models.Enti
 using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Models.Entities.Settings;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
+using TechWayFit.Licensing.Management.Core.Contracts;
 
 namespace TechWayFit.Licensing.Management.Web.Controllers;
 
@@ -18,12 +19,17 @@ public class DebugController : Controller
     private readonly IUnitOfWork _unitOfWork;
     private readonly EfCoreLicensingDbContext _context;
     private readonly IWebHostEnvironment _environment;
+    private readonly ITenantScope _tenantScope;
 
-    public DebugController(IUnitOfWork unitOfWork, EfCoreLicensingDbContext context, IWebHostEnvironment environment)
+    public DebugController(IUnitOfWork unitOfWork,
+    EfCoreLicensingDbContext context,
+    IWebHostEnvironment environment,
+    ITenantScope tenantScope)
     {
         _unitOfWork = unitOfWork;
         _context = context;
         _environment = environment;
+        _tenantScope = tenantScope;
     }
 
     /// <summary>
@@ -51,7 +57,8 @@ public class DebugController : Controller
 
         try
         {
-            var tenants = await _context.Set<TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Models.Entities.Tenants.TenantEntity>()
+            var tenants = await _context.Set<TenantEntity>()
+                .IgnoreQueryFilters()
                 .AsNoTracking()
                 .ToListAsync();
 
@@ -78,7 +85,9 @@ public class DebugController : Controller
 
         try
         {
+            // Use the correct EF Core IgnoreQueryFilters() method on the queryable
             var roles = await _context.Set<UserRoleEntity>()
+                .IgnoreQueryFilters()
                 .AsNoTracking()
                 .ToListAsync();
 
@@ -105,7 +114,9 @@ public class DebugController : Controller
 
         try
         {
+            // Use the correct EF Core IgnoreQueryFilters() method on the queryable
             var settings = await _context.Set<SettingEntity>()
+                .IgnoreQueryFilters()
                 .AsNoTracking()
                 .ToListAsync();
 
@@ -132,7 +143,9 @@ public class DebugController : Controller
 
         try
         {
+            // Use the correct EF Core IgnoreQueryFilters() method on the queryable
             var profiles = await _context.Set<UserProfileEntity>()
+                .IgnoreQueryFilters()
                 .AsNoTracking()
                 .ToListAsync();
 
@@ -162,12 +175,16 @@ public class DebugController : Controller
             var data = new
             {
                 Tenants = await _context.Set<TenantEntity>()
+                    .IgnoreQueryFilters()
                     .AsNoTracking().ToListAsync(),
                 UserRoles = await _context.Set<UserRoleEntity>()
+                    .IgnoreQueryFilters()
                     .AsNoTracking().ToListAsync(),
                 Settings = await _context.Set<SettingEntity>()
+                    .IgnoreQueryFilters()
                     .AsNoTracking().ToListAsync(),
                 UserProfiles = await _context.Set<UserProfileEntity>()
+                    .IgnoreQueryFilters()
                     .AsNoTracking().ToListAsync()
             };
 
@@ -201,10 +218,10 @@ public class DebugController : Controller
         {
             var stats = new Dictionary<string, int>
             {
-                ["Tenants"] = await _context.Set<TenantEntity>().CountAsync(),
-                ["UserRoles"] = await _context.Set<UserRoleEntity>().CountAsync(),
-                ["Settings"] = await _context.Set<SettingEntity>().CountAsync(),
-                ["UserProfiles"] = await _context.Set<UserProfileEntity>().CountAsync()
+                ["Tenants"] = await _context.Set<TenantEntity>().IgnoreQueryFilters().CountAsync(),
+                ["UserRoles"] = await _context.Set<UserRoleEntity>().IgnoreQueryFilters().CountAsync(),
+                ["Settings"] = await _context.Set<SettingEntity>().IgnoreQueryFilters().CountAsync(),
+                ["UserProfiles"] = await _context.Set<UserProfileEntity>().IgnoreQueryFilters().CountAsync()
             };
 
             ViewBag.Stats = stats;
@@ -230,17 +247,17 @@ public class DebugController : Controller
 
         try
         {
-            // Remove entities in reverse dependency order
-            var userProfiles = await _context.Set<UserProfileEntity>().ToListAsync();
+            // Remove entities in reverse dependency order - use bypass methods for cross-tenant deletion
+            var userProfiles = await _context.Set<UserProfileEntity>().IgnoreQueryFilters().ToListAsync();
             _context.Set<UserProfileEntity>().RemoveRange(userProfiles);
 
-            var settings = await _context.Set<SettingEntity>().ToListAsync();
+            var settings = await _context.Set<SettingEntity>().IgnoreQueryFilters().ToListAsync();
             _context.Set<SettingEntity>().RemoveRange(settings);
 
-            var userRoles = await _context.Set<UserRoleEntity>().ToListAsync();
+            var userRoles = await _context.Set<UserRoleEntity>().IgnoreQueryFilters().ToListAsync();
             _context.Set<UserRoleEntity>().RemoveRange(userRoles);
 
-            var tenants = await _context.Set<TenantEntity>().ToListAsync();
+            var tenants = await _context.Set<TenantEntity>().IgnoreQueryFilters().ToListAsync();
             _context.Set<TenantEntity>().RemoveRange(tenants);
 
             await _context.SaveChangesAsync();

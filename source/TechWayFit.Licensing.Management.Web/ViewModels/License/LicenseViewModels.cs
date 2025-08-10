@@ -14,15 +14,15 @@ namespace TechWayFit.Licensing.Management.Web.ViewModels.License
     {
         [Required]
         [Display(Name = "Product")]
-        public string ProductId { get; set; }
+        public string ProductId { get; set; } = string.Empty;
 
         [Required]
         [Display(Name = "Consumer")]
-        public string ConsumerId { get; set; }
+        public string ConsumerId { get; set; } = string.Empty;
 
         [Required]
         [Display(Name = "ProductTier")]
-        public string ProductTierId { get; set; }
+        public string ProductTierId { get; set; } = string.Empty;
 
         [Required]
         [Display(Name = "Licensed To")]

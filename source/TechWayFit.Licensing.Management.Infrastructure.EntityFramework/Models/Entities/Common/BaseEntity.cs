@@ -117,7 +117,7 @@ public abstract class BaseEntity : AuditEntity
     /// <summary>
     /// Tenant information for multi-tenancy support
     /// </summary>
-    public virtual TenantEntity Tenant { get; set; }
+    public virtual TenantEntity? Tenant { get; set; }
     
     
 }

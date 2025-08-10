@@ -97,12 +97,15 @@ public class ConsumerAccountService : IConsumerAccountService
         try
         {
             existingEntity.CompanyName = consumerAccount.CompanyName;
-            existingEntity.PrimaryContact.Name = consumerAccount.PrimaryContact.Name;
-            existingEntity.PrimaryContact.Email = consumerAccount.PrimaryContact.Email;
-            existingEntity.PrimaryContact.Phone = consumerAccount.PrimaryContact.Phone;
-            existingEntity.SecondaryContact.Name = consumerAccount.SecondaryContact.Name;
-            existingEntity.SecondaryContact.Email = consumerAccount.SecondaryContact.Email;
-            existingEntity.SecondaryContact.Phone = consumerAccount.SecondaryContact.Phone;
+            existingEntity.PrimaryContact!.Name = consumerAccount.PrimaryContact.Name;
+            existingEntity.PrimaryContact!.Email = consumerAccount.PrimaryContact.Email;
+            existingEntity.PrimaryContact!.Phone = consumerAccount.PrimaryContact.Phone;
+            if (existingEntity.SecondaryContact != null && consumerAccount.SecondaryContact != null)
+            {
+                existingEntity.SecondaryContact.Name = consumerAccount.SecondaryContact.Name;
+                existingEntity.SecondaryContact.Email = consumerAccount.SecondaryContact.Email;
+                existingEntity.SecondaryContact.Phone = consumerAccount.SecondaryContact.Phone;
+            }
             existingEntity.Address.Street = consumerAccount.Address.Street;
             existingEntity.Address.City = consumerAccount.Address.City;
             existingEntity.Address.State = consumerAccount.Address.State;

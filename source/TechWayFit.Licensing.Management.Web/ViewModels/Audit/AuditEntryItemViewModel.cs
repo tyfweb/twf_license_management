@@ -5,7 +5,7 @@ namespace TechWayFit.Licensing.Management.Web.ViewModels.Audit;
 /// </summary>
 public class AuditEntryItemViewModel
 {
-    public string EntryId { get; set; }
+    public string EntryId { get; set; } = string.Empty;
     public string EntityType { get; set; } = string.Empty;
     public string? EntityId { get; set; }
     public string ActionType { get; set; } = string.Empty;

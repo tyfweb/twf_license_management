@@ -60,7 +60,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                             CreatedAt = s.Audit.CreatedOn,
                             UpdatedAt = s.Audit.UpdatedOn ?? s.Audit.CreatedOn,
                             CreatedBy = s.Audit.CreatedBy,
-                            UpdatedBy = s.Audit.UpdatedBy
+                            UpdatedBy = s.Audit.UpdatedBy ?? string.Empty
                         }).OrderBy(s => s.SortOrder).ToList()
                     ),
                     ConfigurationSettings = configurationSettings,
@@ -105,7 +105,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                     CreatedAt = s.Audit.CreatedOn,
                     UpdatedAt = s.Audit.UpdatedOn ?? s.Audit.CreatedOn,
                     CreatedBy = s.Audit.CreatedBy,
-                    UpdatedBy = s.Audit.UpdatedBy
+                    UpdatedBy = s.Audit.UpdatedBy ?? string.Empty
                 }).OrderBy(s => s.SortOrder).ToList();
 
                 return Json(viewModels);
@@ -157,7 +157,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                         CreatedAt = updatedSetting.Audit.CreatedOn,
                         UpdatedAt = updatedSetting.Audit.UpdatedOn ?? updatedSetting.Audit.CreatedOn,
                         CreatedBy = updatedSetting.Audit.CreatedBy,
-                        UpdatedBy = updatedSetting.Audit.UpdatedBy
+                        UpdatedBy = updatedSetting.Audit.UpdatedBy ?? string.Empty
                     }
                 });
             }
@@ -209,7 +209,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                         CreatedAt = s.Audit.CreatedOn,
                         UpdatedAt = s.Audit.UpdatedOn ?? s.Audit.CreatedOn,
                         CreatedBy = s.Audit.CreatedBy,
-                        UpdatedBy = s.Audit.UpdatedBy
+                        UpdatedBy = s.Audit.UpdatedBy ?? string.Empty
                     }).ToList()
                 });
             }
@@ -260,7 +260,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                         CreatedAt = resetSetting.Audit.CreatedOn,
                         UpdatedAt = resetSetting.Audit.UpdatedOn ?? resetSetting.Audit.CreatedOn,
                         CreatedBy = resetSetting.Audit.CreatedBy,
-                        UpdatedBy = resetSetting.Audit.UpdatedBy
+                        UpdatedBy = resetSetting.Audit.UpdatedBy ?? string.Empty
                     }
                 });
             }
@@ -306,7 +306,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                         CreatedAt = s.Audit.CreatedOn,
                         UpdatedAt = s.Audit.UpdatedOn ?? s.Audit.CreatedOn,
                         CreatedBy = s.Audit.CreatedBy,
-                        UpdatedBy = s.Audit.UpdatedBy
+                        UpdatedBy = s.Audit.UpdatedBy ?? string.Empty
                     }).ToList()
                 });
             }
@@ -350,7 +350,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                     CreatedAt = s.Audit.CreatedOn,
                     UpdatedAt = s.Audit.UpdatedOn ?? s.Audit.CreatedOn,
                     CreatedBy = s.Audit.CreatedBy,
-                    UpdatedBy = s.Audit.UpdatedBy
+                    UpdatedBy = s.Audit.UpdatedBy ?? string.Empty
                 }).OrderBy(s => s.Category).ThenBy(s => s.SortOrder).ToList();
 
                 return Json(viewModels);
