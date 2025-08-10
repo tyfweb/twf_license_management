@@ -100,7 +100,7 @@ public class UserProfileEntity : BaseEntity, IEntityMapper<UserProfile, UserProf
     public UserProfile Map()
     {
 
-        return new UserProfile
+        var profile = new UserProfile
         {
             TenantId = this.TenantId,
             UserId = this.Id,
@@ -115,6 +115,12 @@ public class UserProfileEntity : BaseEntity, IEntityMapper<UserProfile, UserProf
             LockedDate = this.LockedDate,
             Audit = MapAuditInfo(),
         };
+        if (UserRoles != null)
+        {
+            profile.Roles = UserRoles.Select(ur => ur.Role.Map()).ToList();
+        }
+
+        return profile;
     }
     #endregion
 }

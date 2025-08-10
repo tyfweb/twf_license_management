@@ -15,6 +15,7 @@ using TechWayFit.Licensing.Management.Core.Contracts;
 using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Models.Entities.Tenants;
 using System.Reflection.Emit;
 using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Models.Entities.Seeding;
+using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Configuration.EntityConfigurations;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Configuration;
 
@@ -95,12 +96,28 @@ public partial class EfCoreLicensingDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
+        // Apply modular entity configurations
+        // Product-related entities
+        modelBuilder.ApplyConfiguration(new ProductEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new ProductVersionEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new ProductTierEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new ProductFeatureEntityConfiguration());
+
+        // User-related entities
+        modelBuilder.ApplyConfiguration(new UserProfileEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new UserRoleEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new UserRoleMappingEntityConfiguration());
+
+        // Consumer-related entities
+        modelBuilder.ApplyConfiguration(new ConsumerAccountEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new ProductConsumerEntityConfiguration());
+
         ConfigureAuditEntities(modelBuilder);
         ConfigureTenantEntities(modelBuilder);
-        ConfigureConsumerEntities(modelBuilder);
+        // ConfigureConsumerEntities(modelBuilder);
 
         // Configure entities
-        ConfigureProductEntities(modelBuilder);
+       // ConfigureProductEntities(modelBuilder);
         ConfigureLicenseEntities(modelBuilder);
 
         ConfigureNotificationEntities(modelBuilder);
@@ -700,41 +717,6 @@ public partial class EfCoreLicensingDbContext : DbContext
     }
 
     /// <summary>
-    /// Bypasses the global query filters for administrative operations
-    /// Use with caution - only for system-level operations that need cross-tenant access
-    /// </summary>
-    /// <returns>DbContext with global filters ignored</returns>
-    public DbContext IgnoreQueryFilters()
-    {
-        return this.IgnoreQueryFilters();
-    }
-
-    /// <summary>
-    /// Execute a query with tenant filtering temporarily disabled
-    /// Use for administrative operations that need cross-tenant access
-    /// </summary>
-    /// <typeparam name="T">Return type</typeparam>
-    /// <param name="operation">Operation to execute</param>
-    /// <returns>Result of the operation</returns>
-    public T WithoutTenantFilter<T>(Func<T> operation)
-    {
-        using var scope = new TenantFilterScope();
-        return operation();
-    }
-
-    /// <summary>
-    /// Execute an async query with tenant filtering temporarily disabled
-    /// </summary>
-    /// <typeparam name="T">Return type</typeparam>
-    /// <param name="operation">Async operation to execute</param>
-    /// <returns>Result of the operation</returns>
-    public async Task<T> WithoutTenantFilterAsync<T>(Func<Task<T>> operation)
-    {
-        using var scope = new TenantFilterScope();
-        return await operation();
-    }
-
-    /// <summary>
     /// Create audit entries for all entity changes (add/update)
     /// </summary>
     private void CreateAuditEntries()
@@ -745,10 +727,6 @@ public partial class EfCoreLicensingDbContext : DbContext
 
         foreach (var entry in entries)
         {
-            // Skip creating audit entries for AuditEntryEntity itself to avoid recursion
-            if (entry.Entity is AuditEntryEntity)
-                continue;
-
             var auditEntry = CreateAuditEntry(entry);
             if (auditEntry != null)
             {
@@ -996,10 +974,10 @@ public partial class EfCoreLicensingDbContext : DbContext
     /// </summary>
     private void ConfigureGlobalQueryFilters(ModelBuilder modelBuilder)
     {
-        // Apply global query filter to all entities that inherit from BaseEntity
-        // This ensures all queries automatically filter by TenantId
-        // Note: The TenantId is evaluated at query execution time, not at model creation time
-        
+        // Always apply global query filters - the GetCurrentTenantId() method will handle bypass logic
+        // The filters are evaluated at query execution time, not at model creation time
+        // This allows runtime control of tenant filtering through _tenantFilterEnabled
+
         // Product related entities
         modelBuilder.Entity<ProductEntity>().HasQueryFilter(e => e.TenantId == GetCurrentTenantId());
         modelBuilder.Entity<ProductVersionEntity>().HasQueryFilter(e => e.TenantId == GetCurrentTenantId());
