@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
+using TechWayFit.Licensing.Management.Core.Models.User;
 using TechWayFit.Licensing.Management.Web.ViewModels.User;
 using Microsoft.AspNetCore.Authorization;
 using TechWayFit.Licensing.Management.Web.Helpers;
@@ -117,12 +118,12 @@ public class UserController : BaseController
     {
         try
         {
-            var roles = await _userService.GetAllRolesAsync();
             var tenants = await _tenantService.GetAllTenantsAsync();
             
             var viewModel = new CreateUserViewModel
             {
-                AvailableRoles = roles.ToList(),
+                // Don't load roles by default - let JavaScript handle tenant-specific role loading
+                AvailableRoles = new List<UserRole>(),
                 AvailableTenants = tenants.Select(t => new SelectListItem 
                 { 
                     Value = t.TenantId.ToString(), 
@@ -189,6 +190,32 @@ public class UserController : BaseController
             ModelState.AddModelError("", "An error occurred while creating the user.");
             model.AvailableRoles = (await _userService.GetAllRolesAsync()).ToList();
             return View(model);
+        }
+    }
+
+    /// <summary>
+    /// API endpoint to get roles by tenant ID
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> GetRolesByTenant(Guid tenantId)
+    {
+        try
+        {
+            var roles = await _userService.GetRolesByTenantAsync(tenantId);
+            
+            var roleList = roles.Select(r => new 
+            {
+                roleId = r.RoleId,
+                roleName = r.RoleName,
+                roleDescription = r.RoleDescription
+            }).ToList();
+
+            return Json(new { success = true, roles = roleList });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting roles for tenant: {TenantId}", tenantId);
+            return Json(new { success = false, message = "Error loading roles for selected tenant" });
         }
     }
 

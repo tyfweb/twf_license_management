@@ -11,41 +11,14 @@
 }
 
 <div class="container-fluid py-3">
-    <!-- Header Section -->
-    <div class="header mb-3">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <h2 class="mb-1">Create New Tenant</h2>
-                <p class="text-muted mb-0">Add a new tenant organization to the system with detailed configuration.</p>
-            </div>
-            <div class="d-flex gap-3">
-                <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
-                    <i class="fas fa-arrow-left me-2"></i>Back to Tenants
-                </a>
-                
-                <div class="dropdown">
-                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-cog me-2"></i>Quick Actions
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="@Url.Action("Index", "User")">
-                            <i class="fas fa-users me-2"></i>Manage Users
-                        </a></li>
-                        <li><a class="dropdown-item" href="@Url.Action("Index", "Role")">
-                            <i class="fas fa-user-tag me-2"></i>Manage Roles
-                        </a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="@Url.Action("Create", "User")">
-                            <i class="fas fa-plus me-2"></i>Add User
-                        </a></li>
-                        <li><a class="dropdown-item" href="@Url.Action("Create", "Role")">
-                            <i class="fas fa-plus me-2"></i>Add Role
-                        </a></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
+    @await Html.PartialAsync("_PageHeaderPartial", new TechWayFit.Licensing.Management.Web.ViewModels.Shared.PageHeaderViewModel
+    {
+        Title = "Create New Tenant",
+        BackButtonText = "Back to Tenant Management",
+        BackButtonController = "Tenant",
+        BackButtonAction = "Index",
+        Icon = "fas fa-building"
+    })
 
     <!-- Create Tenant Form -->
     <div class="row">

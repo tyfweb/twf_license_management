@@ -99,7 +99,7 @@ public partial class AuditRepository<TModel, TEntity> : IDataRepository<TModel>
         {
             query = SearchQuery(query, request.Query);
         }
-
+        query = SearchIncludesQuery(query);
         if (request.Filters != null && request.Filters.Any())
         {
             foreach (var filter in request.Filters)
@@ -117,8 +117,9 @@ public partial class AuditRepository<TModel, TEntity> : IDataRepository<TModel>
     /// <returns></returns>
     public async virtual  Task<IEnumerable<TModel>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        return (await _dbSet.AsNoTracking()
-            .ToListAsync(cancellationToken))
+        var query = _dbSet.AsNoTracking();
+        query = ApplyIncludes(query);
+        return (await query.ToListAsync(cancellationToken))
             .Select(e => e.Map());
     }
     /// <summary>
@@ -165,8 +166,9 @@ public partial class AuditRepository<TModel, TEntity> : IDataRepository<TModel>
     /// <returns></returns>
     public async virtual  Task<TModel?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var entity = await _dbSet.AsNoTracking()
-            .FirstOrDefaultAsync(e => e.Id == id && !e.IsDeleted, cancellationToken);
+        var query = _dbSet.AsNoTracking();
+        query = ApplyIncludes(query);
+        var entity = await query.FirstOrDefaultAsync(e => e.Id == id && !e.IsDeleted, cancellationToken);
         return entity?.Map();
     }
     /// <summary>
@@ -211,7 +213,7 @@ public partial class AuditRepository<TModel, TEntity> : IDataRepository<TModel>
         {
             query = SearchQuery(query, request.Query);
         }
-
+        query = SearchIncludesQuery(query);
         if (request.Filters != null && request.Filters.Any())
         {
             foreach (var filter in request.Filters)

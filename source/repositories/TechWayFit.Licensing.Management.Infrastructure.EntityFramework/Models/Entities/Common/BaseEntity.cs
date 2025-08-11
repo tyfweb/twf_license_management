@@ -51,6 +51,10 @@ public abstract class AuditEntity
     /// </summary>
     [MaxLength(100)]
     public string? DeletedBy { get; set; }
+    /// <summary>
+    /// Indicates if the record can be deleted
+    /// </summary>
+    public bool CanDelete { get; set; } = true;
 
     /// <summary>
     /// Timestamp when the record was deleted
@@ -95,7 +99,7 @@ public abstract class AuditEntity
 /// </summary>
 public abstract class BaseEntity : AuditEntity
 {
-   
+
     /// <summary>
     /// Unique identifier for the tenant
     /// </summary>
@@ -107,18 +111,27 @@ public abstract class BaseEntity : AuditEntity
     public bool IsReadOnly { get; set; } = false;
 
     /// <summary>
-    /// Indicates if the record can be deleted
-    /// </summary>
-    public bool CanDelete { get; set; } = true;
-
-    
-
-
-    /// <summary>
     /// Tenant information for multi-tenancy support
     /// </summary>
     public virtual TenantEntity? Tenant { get; set; }
-    
-    
+
+    public override AuditInfo MapAuditInfo()
+    {
+        var auditInfo = base.MapAuditInfo();
+        auditInfo.TenantId = TenantId;
+        auditInfo.TenantName = Tenant?.TenantName ?? string.Empty;
+        return auditInfo;
+    }
+    public override void UpdateAuditInfo(AuditInfo auditInfo)
+    {
+        base.UpdateAuditInfo(auditInfo);
+        TenantId = auditInfo.TenantId;
+        if (Tenant != null)
+        {
+            Tenant.Id = auditInfo.TenantId;
+            Tenant.TenantName = auditInfo.TenantName;
+        }
+        // TenantName is not stored in the entity, so we don't set it here
+    }
 }
     

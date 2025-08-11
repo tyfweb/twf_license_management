@@ -74,6 +74,15 @@ try
     // Add memory cache for performance
     builder.Services.AddMemoryCache();
 
+    // Add session state for tenant switching
+    builder.Services.AddSession(options =>
+    {
+        options.IdleTimeout = TimeSpan.FromMinutes(30);
+        options.Cookie.HttpOnly = true;
+        options.Cookie.IsEssential = true;
+        options.Cookie.Name = "TwfSession";
+    });
+
     // Configure EF Core logging services
     builder.Services.ConfigureEfCoreLogging();
 
@@ -165,6 +174,9 @@ try
 
     app.UseStaticFiles();
     app.UseRouting();
+
+    // Add session middleware (must be before authentication)
+    app.UseSession();
 
     // Add authentication middleware
     app.UseAuthentication();

@@ -6,6 +6,14 @@ namespace TechWayFit.Licensing.Management.Core.Models.Common;
 public class AuditInfo
 {
     /// <summary>
+    /// Tenant name for multi-tenant isolation
+    /// </summary>
+    public string TenantName { get; set; } = string.Empty;
+    /// <summary>
+    /// Tenant identifier for multi-tenant isolation
+    /// </summary>
+    public Guid TenantId { get; set; } = Guid.Empty;
+    /// <summary>
     /// User who created the record
     /// </summary>
     public string CreatedBy { get; set; } = string.Empty;

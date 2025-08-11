@@ -226,7 +226,7 @@ public partial class EfCoreLicensingDbContext : DbContext
         {
             if (entry.State == EntityState.Added || entry.State == EntityState.Modified)
             {
-                if (entry.Entity.TenantId == Guid.Empty || entry.Entity.TenantId != currentTenantId)
+                if (entry.Entity.TenantId == Guid.Empty)
                 {
                     entry.Entity.TenantId = currentTenantId; // Set TenantId from user context  
                 }

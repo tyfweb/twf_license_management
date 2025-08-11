@@ -25,7 +25,7 @@
     </div>
 
     <!-- Create User Form -->
-    <div class="row">
+    <div class="row g-4">
         <div class="col-lg-8">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white border-bottom-0 py-3">
@@ -142,7 +142,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-6"></div>
+                                <div class="col-md-6">
                                     <div class="mb-3">
                                         <label asp-for="ConfirmPassword" class="form-label fw-semibold">Confirm Password <span class="text-danger">*</span></label>
                                         <div class="input-group">
@@ -158,7 +158,7 @@
                                     </div>
                                 </div>
                             </div>
-                         
+                        </div> 
 
                         <!-- Tenant Selection Section -->
                         <div class="form-section mb-4">
@@ -193,47 +193,13 @@
                                 <i class="fas fa-user-shield me-2"></i>User Roles <span class="text-danger">*</span>
                             </h6>
                             
-                            <div class="row">
-                                @if (Model.AvailableRoles != null && Model.AvailableRoles.Any())
-                                {
-                                    @foreach (var role in Model.AvailableRoles)
-                                    {
-                                        <div class="col-md-6 mb-3">
-                                            <div class="card border h-100 role-card" onclick="toggleRole('@role.RoleId')">
-                                                <div class="card-body p-3">
-                                                    <div class="form-check">
-                                                        <input type="checkbox" name="SelectedRoleIds" value="@role.RoleId" 
-                                                               class="form-check-input" id="role-@role.RoleId" 
-                                                               @(Model.SelectedRoleIds.Contains(role.RoleId) ? "checked" : "") />
-                                                        <label class="form-check-label w-100" for="role-@role.RoleId">
-                                                            <div class="d-flex align-items-center">
-                                                                <div class="avatar avatar-sm bg-@(role.RoleName.ToLower() == "administrator" ? "danger" : role.RoleName.ToLower() == "manager" ? "warning" : "primary")-soft rounded me-3">
-                                                                    <i class="fas fa-@(role.RoleName.ToLower() == "administrator" ? "crown" : role.RoleName.ToLower() == "manager" ? "user-tie" : "user") text-@(role.RoleName.ToLower() == "administrator" ? "danger" : role.RoleName.ToLower() == "manager" ? "warning" : "primary")"></i>
-                                                                </div>
-                                                                <div class="flex-grow-1">
-                                                                    <div class="fw-semibold">@role.RoleName</div>
-                                                                    @if (!string.IsNullOrEmpty(role.RoleDescription))
-                                                                    {
-                                                                        <div class="text-muted small">@role.RoleDescription</div>
-                                                                    }
-                                                                </div>
-                                                            </div>
-                                                        </label>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    }
-                                }
-                                else
-                                {
-                                    <div class="col-12">
-                                        <div class="alert alert-warning d-flex align-items-center">
-                                            <i class="fas fa-exclamation-triangle me-2"></i>
-                                            <div>No roles available. Please create roles first.</div>
-                                        </div>
+                            <div class="row" id="rolesContainer">
+                                <div class="col-12">
+                                    <div class="alert alert-info d-flex align-items-center">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        <div>Please select a tenant first to view available roles.</div>
                                     </div>
-                                }
+                                </div>
                             </div>
                             <span asp-validation-for="SelectedRoleIds" class="text-danger small"></span>
                         </div>
@@ -398,6 +364,7 @@
             </div>
         </div>
     </div>
+     
 </div>
 
 @section Scripts {
@@ -419,8 +386,99 @@
 
         function toggleRole(roleId) {
             const checkbox = document.getElementById('role-' + roleId);
-            checkbox.checked = !checkbox.checked;
+            if (checkbox) {
+                checkbox.checked = !checkbox.checked;
+                
+                // Update visual feedback for the card
+                const card = checkbox.closest('.card');
+                if (card) {
+                    if (checkbox.checked) {
+                        card.classList.add('border-primary', 'bg-primary', 'bg-opacity-10');
+                    } else {
+                        card.classList.remove('border-primary', 'bg-primary', 'bg-opacity-10');
+                    }
+                }
+            }
         }
+
+        // Load roles based on selected tenant
+        function loadRolesForTenant(tenantId) {
+            const rolesContainer = document.getElementById('rolesContainer');
+            
+            if (!rolesContainer) {
+                console.error('Could not find roles container');
+                return;
+            }
+            
+            if (!tenantId) {
+                // Clear roles if no tenant selected
+                rolesContainer.innerHTML = '<div class="col-12"><div class="alert alert-info d-flex align-items-center"><i class="fas fa-info-circle me-2"></i><div>Please select a tenant first to view available roles.</div></div></div>';
+                return;
+            }
+
+            // Show loading state
+            rolesContainer.innerHTML = '<div class="col-12"><div class="alert alert-info d-flex align-items-center"><i class="fas fa-spinner fa-spin me-2"></i><div>Loading roles for selected tenant...</div></div></div>';
+
+            fetch('@Url.Action("GetRolesByTenant", "User")?tenantId=' + tenantId)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.roles && data.roles.length > 0) {
+                        let rolesHtml = '';
+                        data.roles.forEach(role => {
+                            const roleClass = role.roleName.toLowerCase() === 'administrator' ? 'danger' : 
+                                            role.roleName.toLowerCase() === 'manager' ? 'warning' : 'primary';
+                            const roleIcon = role.roleName.toLowerCase() === 'administrator' ? 'crown' : 
+                                           role.roleName.toLowerCase() === 'manager' ? 'user-tie' : 'user';
+                            
+                            rolesHtml += `
+                                <div class="col-md-6 mb-3">
+                                    <div class="card border h-100 role-card" onclick="toggleRole('${role.roleId}')" style="cursor: pointer;">
+                                        <div class="card-body p-3">
+                                            <div class="form-check">
+                                                <input type="checkbox" name="SelectedRoleIds" value="${role.roleId}" 
+                                                       class="form-check-input" id="role-${role.roleId}" />
+                                                <label class="form-check-label w-100" for="role-${role.roleId}">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="avatar avatar-sm bg-${roleClass}-soft rounded me-3">
+                                                            <i class="fas fa-${roleIcon} text-${roleClass}"></i>
+                                                        </div>
+                                                        <div class="flex-grow-1">
+                                                            <div class="fw-semibold">${role.roleName}</div>
+                                                            ${role.roleDescription ? `<div class="text-muted small">${role.roleDescription}</div>` : ''}
+                                                        </div>
+                                                    </div>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>`;
+                        });
+                        rolesContainer.innerHTML = rolesHtml;
+                    } else {
+                        rolesContainer.innerHTML = '<div class="col-12"><div class="alert alert-warning d-flex align-items-center"><i class="fas fa-exclamation-triangle me-2"></i><div>No roles available for the selected tenant.</div></div></div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading roles:', error);
+                    rolesContainer.innerHTML = '<div class="col-12"><div class="alert alert-danger d-flex align-items-center"><i class="fas fa-exclamation-circle me-2"></i><div>Error loading roles. Please try again.</div></div></div>';
+                });
+        }
+
+        // Set up tenant change handler
+        document.addEventListener('DOMContentLoaded', function() {
+            const tenantSelect = document.querySelector('select[name="TenantId"]');
+            if (tenantSelect) {
+                tenantSelect.addEventListener('change', function() {
+                    loadRolesForTenant(this.value);
+                });
+                
+                // Don't load roles initially - let user select tenant first
+                // Only load if a tenant is already selected (like when there are validation errors)
+                if (tenantSelect.value) {
+                    loadRolesForTenant(tenantSelect.value);
+                }
+            }
+        });
 
         // Form validation
         document.getElementById('createUserForm').addEventListener('submit', function(e) {
@@ -431,5 +489,20 @@
                 return false;
             }
         });
+
+        // Add CSS for role card styling
+        const style = document.createElement('style');
+        style.textContent = `
+            .role-card:hover {
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                transform: translateY(-1px);
+                transition: all 0.2s ease;
+            }
+            .role-card.selected {
+                border-color: var(--bs-primary) !important;
+                background-color: rgba(var(--bs-primary-rgb), 0.1) !important;
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 }

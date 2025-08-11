@@ -38,6 +38,8 @@
     @await Component.InvokeAsync("ThemeLoader")
 </head>
 <body>
+    @Html.AntiForgeryToken()
+    
     <!-- Mobile Menu Toggle -->
     <button class="d-md-none btn btn-primary position-fixed shadow-sm" 
             style="top: 1rem; left: 1rem; z-index: 1051; border-radius: 8px;" 
@@ -197,6 +199,30 @@
                         <div class="licensehub-user-role text-white text-opacity-75 text-uppercase small">@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value</div>
                     </div>
                 </div>
+
+                @if (User.IsInRole("Administrator"))
+                {
+                    <!-- Tenant Switcher for Administrators -->
+                    <div class="licensehub-tenant-switcher mb-3 p-2 bg-white bg-opacity-10 rounded">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-white text-opacity-75 small fw-semibold">
+                                <i class="fas fa-building me-1"></i>Viewing as Tenant
+                            </span>
+                            <button type="button" class="btn btn-link btn-sm text-white text-opacity-75 p-0" 
+                                    onclick="clearTenantSelection()" title="Clear Selection">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <select class="form-select form-select-sm bg-white bg-opacity-25 text-white border-0" 
+                                id="tenantSwitcher" onchange="switchTenant(this.value)">
+                            <option value="">Loading tenants...</option>
+                        </select>
+                        <div class="text-white text-opacity-50 small mt-1" id="tenantSwitcherStatus">
+                            Select a tenant to view data from their perspective
+                        </div>
+                    </div>
+                }
+
                 <form asp-controller="Account" asp-action="Logout" method="post" class="licensehub-logout-form">
                     <button type="submit" class="btn btn-outline-light btn-sm w-100 d-flex align-items-center justify-content-center" title="Logout">
                         <i class="fas fa-sign-out-alt me-2"></i>
@@ -366,7 +392,160 @@
         // Load common functionality
         document.addEventListener('DOMContentLoaded', function() {
             initializeSearch();
+            loadAvailableTenants();
         });
+
+        // Tenant Switcher Functions
+        function loadAvailableTenants() {
+            const tenantSwitcher = document.getElementById('tenantSwitcher');
+            const statusDiv = document.getElementById('tenantSwitcherStatus');
+            
+            if (!tenantSwitcher) return; // Not an admin user
+
+            fetch('@Url.Action("GetAvailableTenants", "Account")')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Tenant data received:', data);
+                    
+                    if (data.success) {
+                        tenantSwitcher.innerHTML = '<option value="">All Tenants (Admin View)</option>';
+                        
+                        if (data.tenants && data.tenants.length > 0) {
+                            data.tenants.forEach(tenant => {
+                                const option = document.createElement('option');
+                                option.value = tenant.id || '';
+                                
+                                // Handle undefined/null tenant names gracefully
+                                const tenantName = tenant.name || 'Unknown Tenant';
+                                const tenantCode = tenant.code || 'N/A';
+                                option.textContent = `${tenantName} (${tenantCode})`;
+                                
+                                console.log('Adding tenant option:', option.textContent, 'with value:', option.value);
+                                
+                                // Select current tenant if it matches
+                                if (data.currentTenantId && tenant.id === data.currentTenantId) {
+                                    option.selected = true;
+                                    statusDiv.textContent = `Viewing as: ${tenantName}`;
+                                }
+                                
+                                tenantSwitcher.appendChild(option);
+                            });
+                        } else {
+                            tenantSwitcher.innerHTML += '<option value="" disabled>No tenants available</option>';
+                        }
+
+                        // Update status if no tenant is selected
+                        if (!data.currentTenantId) {
+                            statusDiv.textContent = 'Viewing all data (Admin perspective)';
+                        }
+                    } else {
+                        console.error('Failed to load tenants:', data.message);
+                        tenantSwitcher.innerHTML = '<option value="">Failed to load tenants</option>';
+                        statusDiv.textContent = 'Error loading tenant list';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading tenants:', error);
+                    tenantSwitcher.innerHTML = '<option value="">Error loading tenants</option>';
+                    statusDiv.textContent = 'Failed to load tenants';
+                });
+        }
+
+        function switchTenant(tenantId) {
+            const statusDiv = document.getElementById('tenantSwitcherStatus');
+            const tenantSwitcher = document.getElementById('tenantSwitcher');
+            
+            if (!tenantId) {
+                clearTenantSelection();
+                return;
+            }
+
+            statusDiv.textContent = 'Switching tenant...';
+
+            const requestData = { TenantId: tenantId };
+
+            fetch('@Url.Action("SwitchTenant", "Account")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const selectedOption = tenantSwitcher.options[tenantSwitcher.selectedIndex];
+                    statusDiv.textContent = `Viewing as: ${selectedOption.textContent}`;
+                    
+                    // Show success message briefly
+                    showNotification('Tenant switched successfully', 'success');
+                    
+                    // Refresh the current page to load data for the new tenant
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    statusDiv.textContent = 'Failed to switch tenant';
+                    showNotification(data.message || 'Failed to switch tenant', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error switching tenant:', error);
+                statusDiv.textContent = 'Error switching tenant';
+                showNotification('Error switching tenant', 'error');
+            });
+        }
+
+        function clearTenantSelection() {
+            const statusDiv = document.getElementById('tenantSwitcherStatus');
+            const tenantSwitcher = document.getElementById('tenantSwitcher');
+            
+            statusDiv.textContent = 'Clearing selection...';
+
+            fetch('@Url.Action("ClearTenantSelection", "Account")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    tenantSwitcher.value = '';
+                    statusDiv.textContent = 'Viewing all data (Admin perspective)';
+                    showNotification('Tenant selection cleared', 'success');
+                    
+                    // Refresh the current page to load all data
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    statusDiv.textContent = 'Failed to clear selection';
+                    showNotification(data.message || 'Failed to clear selection', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error clearing tenant selection:', error);
+                statusDiv.textContent = 'Error clearing selection';
+                showNotification('Error clearing tenant selection', 'error');
+            });
+        }
+
+        function showNotification(message, type) {
+            // Simple notification function - you can enhance this
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} position-fixed`;
+            notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)

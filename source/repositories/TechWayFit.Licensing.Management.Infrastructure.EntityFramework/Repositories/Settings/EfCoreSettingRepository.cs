@@ -110,8 +110,9 @@ public class EfCoreSettingRepository : BaseRepository<Setting,SettingEntity>, IS
         }
         else
         {
+            setting.Value = stringValue;
             // Update existing setting
-            await UpdateAsync(setting.SettingId,setting);
+            await UpdateAsync(setting.SettingId, setting);
         }
 
         await _context.SaveChangesAsync();

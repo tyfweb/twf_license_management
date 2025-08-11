@@ -16,38 +16,21 @@
                 <h2 class="mb-1">Tenant Management</h2>
                 <p class="text-muted mb-0">Manage tenant organizations and their configurations.</p>
             </div>
-            <div class="d-flex gap-3">
-                <a href="@Url.Action("Create")" class="btn btn-primary">
+            <div class="d-flex gap-2">
+                <a href="@Url.Action("Create")" class="btn btn-success">
                     <i class="fas fa-plus me-2"></i>Add New Tenant
                 </a>
-                
-                <div class="dropdown">
-                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-cog me-2"></i>Quick Actions
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="@Url.Action("Index", "User")">
-                            <i class="fas fa-users me-2"></i>Manage Users
-                        </a></li>
-                        <li><a class="dropdown-item" href="@Url.Action("Index", "Role")">
-                            <i class="fas fa-user-tag me-2"></i>Manage Roles
-                        </a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="@Url.Action("Create", "User")">
-                            <i class="fas fa-plus me-2"></i>Add User
-                        </a></li>
-                        <li><a class="dropdown-item" href="@Url.Action("Create", "Role")">
-                            <i class="fas fa-plus me-2"></i>Add Role
-                        </a></li>
-                    </ul>
+                <div class="btn-group" role="group">
+                    <a href="@Url.Action("Index", "User")" class="btn btn-outline-primary">
+                        <i class="fas fa-users me-2"></i>View Users
+                    </a>
+                    <a href="@Url.Action("Index", "Role")" class="btn btn-outline-info">
+                        <i class="fas fa-user-tag me-2"></i>View Roles
+                    </a>
                 </div>
-                
                 <div class="btn-group">
-                    <button type="button" class="btn btn-outline-secondary" onclick="refreshTenantList()" title="Refresh">
-                        <i class="fas fa-sync-alt"></i>
-                    </button>
-                    <button type="button" class="btn btn-outline-secondary" onclick="exportTenants()" title="Export">
-                        <i class="fas fa-download"></i>
+                    <button type="button" class="btn btn-outline-secondary" onclick="window.location.reload()">
+                        <i class="fas fa-sync-alt me-1"></i>Refresh
                     </button>
                 </div>
             </div>
@@ -209,7 +192,7 @@
                     </div>
                     <h5 class="text-muted">No tenants found</h5>
                     <p class="text-muted mb-4">There are no tenant organizations configured in the system yet.</p>
-                    <a href="@Url.Action("Create")" class="btn btn-primary">
+                    <a href="@Url.Action("Create")" class="btn btn-success">
                         <i class="fas fa-plus me-2"></i>Create First Tenant
                     </a>
                 </div>
@@ -217,15 +200,3 @@
         </div>
     </div>
 </div>
-
-@section Scripts {
-    <script>
-        function refreshTenantList() {
-            window.location.reload();
-        }
-
-        function exportTenants() {
-            window.location.href = '@Url.Action("Export")';
-        }
-    </script>
-}

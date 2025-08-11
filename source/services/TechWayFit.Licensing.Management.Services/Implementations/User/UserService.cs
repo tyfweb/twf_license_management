@@ -459,6 +459,24 @@ public class UserService : IUserService
         }
     }
 
+    public async Task<IEnumerable<UserRole>> GetRolesByTenantAsync(Guid tenantId)
+    {
+        try
+        {
+            var roles = await _unitOfWork.UserRoles.GetActiveRolesAsync();
+            
+            // Filter roles by tenant ID
+            var tenantRoles = roles.Where(r => r.TenantId == tenantId || r.TenantId == Guid.Empty);
+
+            return tenantRoles;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting roles for tenant: {TenantId}", tenantId);
+            return new List<UserRole>();
+        }
+    }
+
     public async Task<UserRole?> GetRoleByIdAsync(Guid roleId)
     {
         try
@@ -489,71 +507,56 @@ public class UserService : IUserService
     }
 
     public async Task<(bool Success, string Message, UserRole? Role)> CreateRoleAsync(
-        string roleName,
-        string? roleDescription,
-        bool isAdmin,
-        string createdBy)
+       UserRole role)
     {
         try
         {
             // Check if role name already exists
-            var existingRole = await GetRoleByNameAsync(roleName);
+            var existingRole = await GetRoleByNameAsync(role.RoleName);
             if (existingRole != null)
             {
                 return (false, "Role name already exists", null);
             }
 
-            var roleEntity = new UserRole
-            {
-                RoleName = roleName.Trim(),
-                RoleDescription = roleDescription?.Trim(),
-                IsAdmin = isAdmin
-            };
+            var roleEntity = role;
 
             var createdRole = await _unitOfWork.UserRoles.AddAsync(roleEntity); 
+            await _unitOfWork.SaveChangesAsync();
 
-            _logger.LogInformation("Role created successfully: {RoleName} by {CreatedBy}", roleName, createdBy);
+            _logger.LogInformation("Role created successfully: {RoleName} by {CreatedBy}", role.RoleName, role.CreatedBy);
 
             return (true, "Role created successfully", createdRole);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error creating role: {RoleName}", roleName);
+            _logger.LogError(ex, "Error creating role: {RoleName}", role.RoleName);
             return (false, "An error occurred while creating the role", null);
         }
     }
 
     public async Task<(bool Success, string Message)> UpdateRoleAsync(
         Guid roleId,
-        string roleName,
-        string? roleDescription,
-        bool isAdmin,
-        string updatedBy)
+        UserRole role)
     {
         try
         {
-            var role = await _unitOfWork.UserRoles.GetByIdAsync(roleId);
-            if (role == null || !role.IsActive)
+            var existingRole = await _unitOfWork.UserRoles.GetByIdAsync(roleId);
+            if (existingRole == null || !existingRole.IsActive)
             {
                 return (false, "Role not found");
             }
 
             // Check if role name already exists (excluding current role)
-            var existingRole = await _unitOfWork.UserRoles.GetByNameAsync(roleName);
-            if (existingRole != null && existingRole.RoleId != roleId)
+            var existingRoleByName = await _unitOfWork.UserRoles.GetByNameAsync(role.RoleName);
+            if (existingRoleByName != null && existingRoleByName.RoleId != roleId)
             {
                 return (false, "Role name already exists");
             }
-
-            role.RoleName = roleName.Trim();
-            role.RoleDescription = roleDescription?.Trim();
-            role.IsAdmin = isAdmin;
-            role.UpdatedBy = updatedBy;
-            role.UpdatedOn = DateTime.UtcNow;
+            await _unitOfWork.UserRoles.UpdateAsync(roleId, role);
 
             await _unitOfWork.SaveChangesAsync();
 
-            _logger.LogInformation("Role updated successfully: {RoleId} by {UpdatedBy}", roleId, updatedBy);
+            _logger.LogInformation("Role updated successfully: {RoleId} by {UpdatedBy}", roleId, role.UpdatedBy);
             return (true, "Role updated successfully");
         }
         catch (Exception ex)
@@ -598,28 +601,6 @@ public class UserService : IUserService
         }
     }
 
-    public async Task InitializeDefaultRolesAsync(string createdBy = "System")
-    {
-        try
-        {
-            var defaultRoles = PredefinedRoles.GetAllRoles();
-
-            foreach (var (name, description, isAdmin) in defaultRoles)
-            {
-                var existingRole = await GetRoleByNameAsync(name);
-                if (existingRole == null)
-                {
-                    await CreateRoleAsync(name, description, isAdmin, createdBy);
-                }
-            }
-
-            _logger.LogInformation("Default roles initialized by {CreatedBy}", createdBy);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error initializing default roles");
-        }
-    }
 
     #endregion
 

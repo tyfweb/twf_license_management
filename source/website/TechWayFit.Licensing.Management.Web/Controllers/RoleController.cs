@@ -36,8 +36,7 @@ public class RoleController : BaseController
     {
         try
         {
-            // Initialize default roles if none exist
-            await _userService.InitializeDefaultRolesAsync();
+            // Initialize default roles if none exist 
             
             var roles = await _userService.GetAllRolesAsync();
             
@@ -51,9 +50,11 @@ public class RoleController : BaseController
                         IsSystemRole = r.IsAdmin, // Using IsAdmin as system role indicator
                         IsActive = r.Audit.IsActive,
                         CreatedOn = r.Audit.CreatedOn,
+                        TenantName = r.Audit?.TenantName ?? "N/A",
                         UsersCount = 0 // TODO: Implement user count for each role
                     }).ToList()
-                };            return View(viewModel);
+                };
+            return View(viewModel);
         }
         catch (Exception ex)
         {
@@ -120,13 +121,18 @@ public class RoleController : BaseController
 
         try
         {
+            UserRole newRole = new UserRole
+            {
+                RoleId = Guid.NewGuid(),
+                RoleName = model.RoleName.Trim(),
+                RoleDescription = model.RoleDescription?.Trim(),
+                TenantId = model.TenantId,
+                CreatedBy = CurrentUserName,
+                CreatedOn = DateTime.UtcNow,
+                IsActive = true
+            };
             // Create the role using the user service
-            var result = await _userService.CreateRoleAsync(
-                model.RoleName,
-                model.RoleDescription,
-                model.IsAdminRole,
-                "System" // TODO: Get current user from context
-            );
+            var result = await _userService.CreateRoleAsync(newRole); 
 
             if (result.Success)
             {

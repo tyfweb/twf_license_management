@@ -56,22 +56,16 @@ public class UserRoleEntity : BaseEntity, IEntityMapper<UserRole, UserRoleEntity
     public UserRole Map()
     {
 
-        return new UserRole
+        var role = new UserRole
         {
             RoleId = this.Id,
             TenantId = this.TenantId,
             RoleName = this.RoleName,
             RoleDescription = this.RoleDescription,
-            IsAdmin = this.IsAdmin,
-            Audit = new AuditInfo
-            {
-                IsActive = this.IsActive,
-                CreatedBy = this.CreatedBy,
-                CreatedOn = this.CreatedOn,
-                UpdatedBy = this.UpdatedBy,
-                UpdatedOn = this.UpdatedOn
-            }
+            IsAdmin = this.IsAdmin
         };
+        role.Audit = MapAuditInfo();
+        return role;
     }
     #endregion
 }

@@ -23,9 +23,31 @@ public class TenantAwareUserContext : IUserContext
     public Guid? UserId => GetClaimValueAsGuid(ClaimTypes.NameIdentifier) ?? GetClaimValueAsGuid("sub");
 
     /// <summary>
-    /// Gets the tenant ID, respecting tenant scope overrides
+    /// Gets the tenant ID, respecting tenant scope overrides and admin tenant selection
     /// </summary>
-    public Guid? TenantId => _tenantScope.CurrentTenantId ?? GetClaimValueAsGuid(TenantClaims.TenantId) ?? GetClaimValueAsGuid(TenantClaims.TenantIdAlternative);
+    public Guid? TenantId 
+    { 
+        get 
+        {
+            // First check if tenant scope is overridden
+            if (_tenantScope.CurrentTenantId.HasValue)
+                return _tenantScope.CurrentTenantId;
+
+            // Check if admin has selected a specific tenant to view
+            if (IsAdministrator && _httpContextAccessor.HttpContext?.Session != null)
+            {
+                var session = _httpContextAccessor.HttpContext.Session;
+                var adminSelectedTenantId = session.GetString("AdminSelectedTenantId");
+                if (!string.IsNullOrEmpty(adminSelectedTenantId) && Guid.TryParse(adminSelectedTenantId, out var selectedTenantId))
+                {
+                    return selectedTenantId;
+                }
+            }
+
+            // Fall back to user's original tenant ID from claims
+            return GetClaimValueAsGuid(TenantClaims.TenantId) ?? GetClaimValueAsGuid(TenantClaims.TenantIdAlternative);
+        }
+    }
 
     /// <summary>
     /// Gets the original tenant ID from claims (ignoring scope)
@@ -52,6 +74,11 @@ public class TenantAwareUserContext : IUserContext
     public bool IsAuthenticated => CurrentUser?.Identity?.IsAuthenticated ?? false;
     
     public bool IsAdmin => GetClaimValue(ClaimTypes.Role) == "Admin" || _tenantScope.IsSystemScope;
+
+    /// <summary>
+    /// Check if current user is an Administrator (case-insensitive)
+    /// </summary>
+    public bool IsAdministrator => UserRoles.Any(role => string.Equals(role, "Administrator", StringComparison.OrdinalIgnoreCase)) || _tenantScope.IsSystemScope;
 
     public bool HasRole(string role)
     {

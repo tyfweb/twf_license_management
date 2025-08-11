@@ -107,6 +107,11 @@ public interface IUserService
     Task<IEnumerable<UserRole>> GetAllRolesAsync();
 
     /// <summary>
+    /// Get roles by tenant ID
+    /// </summary>
+    Task<IEnumerable<UserRole>> GetRolesByTenantAsync(Guid tenantId);
+
+    /// <summary>
     /// Get role by ID
     /// </summary>
     Task<UserRole?> GetRoleByIdAsync(Guid roleId);
@@ -120,30 +125,19 @@ public interface IUserService
     /// Create a new role
     /// </summary>
     Task<(bool Success, string Message, UserRole? Role)> CreateRoleAsync(
-        string roleName,
-        string? roleDescription,
-        bool isAdmin,
-        string createdBy);
+        UserRole role);
 
     /// <summary>
     /// Update an existing role
     /// </summary>
     Task<(bool Success, string Message)> UpdateRoleAsync(
         Guid roleId,
-        string roleName,
-        string? roleDescription,
-        bool isAdmin,
-        string updatedBy);
+        UserRole role);
 
     /// <summary>
     /// Delete a role
     /// </summary>
     Task<(bool Success, string Message)> DeleteRoleAsync(Guid roleId, string deletedBy);
-
-    /// <summary>
-    /// Initialize default roles if they don't exist
-    /// </summary>
-    Task InitializeDefaultRolesAsync(string createdBy = "System");
 
     #endregion
 
