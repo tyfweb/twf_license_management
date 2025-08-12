@@ -42,4 +42,10 @@ public interface IRolePermissionRepository : IDataRepository<RolePermission>
     /// Gets permissions for multiple roles
     /// </summary>
     Task<Dictionary<Guid, Dictionary<SystemModule, PermissionLevel>>> GetPermissionsForRolesAsync(IEnumerable<Guid> roleIds, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Cleanup method to remove duplicate inactive permissions that might cause unique constraint issues
+    /// This is a maintenance method to fix any data inconsistencies
+    /// </summary>
+    Task CleanupDuplicatePermissionsAsync(Guid roleId, CancellationToken cancellationToken = default);
 }

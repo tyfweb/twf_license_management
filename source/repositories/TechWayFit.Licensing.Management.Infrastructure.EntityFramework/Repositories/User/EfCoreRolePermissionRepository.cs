@@ -39,20 +39,21 @@ public class EfCoreRolePermissionRepository : BaseRepository<RolePermission, Rol
 
     public async Task<IEnumerable<RolePermission>> UpdateRolePermissionsAsync(Guid roleId, Dictionary<SystemModule, PermissionLevel> permissions, string updatedBy, CancellationToken cancellationToken = default)
     {
-        // Get existing permissions for the role
+        // Get ALL existing permissions for the role (both active and inactive) to avoid unique constraint violations
         var existingPermissions = await _dbSet
-            .Where(rp => rp.RoleId == roleId && rp.IsActive)
+            .Where(rp => rp.RoleId == roleId)
             .ToListAsync(cancellationToken);
 
         var updatedPermissions = new List<RolePermissionEntity>();
 
         foreach (var permission in permissions)
         {
+            // Find existing permission (active OR inactive) for this module
             var existing = existingPermissions.FirstOrDefault(ep => ep.SystemModule == (int)permission.Key);
             
             if (existing != null)
             {
-                // Update existing permission
+                // Update existing permission (whether active or inactive)
                 if (permission.Value == PermissionLevel.None)
                 {
                     // Remove permission by setting IsActive to false
@@ -62,8 +63,9 @@ public class EfCoreRolePermissionRepository : BaseRepository<RolePermission, Rol
                 }
                 else
                 {
-                    // Update permission level
+                    // Update permission level and ensure it's active
                     existing.PermissionLevel = (int)permission.Value;
+                    existing.IsActive = true; // Reactivate if it was inactive
                     existing.UpdatedBy = updatedBy;
                     existing.UpdatedOn = DateTime.UtcNow;
                     updatedPermissions.Add(existing);
@@ -71,7 +73,7 @@ public class EfCoreRolePermissionRepository : BaseRepository<RolePermission, Rol
             }
             else if (permission.Value != PermissionLevel.None)
             {
-                // Create new permission                
+                // Create new permission only if no existing record found
                 var newPermission = new RolePermissionEntity
                 {
                     Id = Guid.NewGuid(),
@@ -89,7 +91,17 @@ public class EfCoreRolePermissionRepository : BaseRepository<RolePermission, Rol
             }
         }
 
-        await _context.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            // Log the specific error and rethrow with more context
+            throw new InvalidOperationException($"Failed to update role permissions for RoleId: {roleId}. " +
+                $"This might be due to a unique constraint violation. Error: {ex.Message}", ex);
+        }
+        
         return updatedPermissions.Select(up => up.Map());
     }
 
@@ -106,6 +118,43 @@ public class EfCoreRolePermissionRepository : BaseRepository<RolePermission, Rol
         }
 
         await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// Cleanup method to remove duplicate inactive permissions that might cause unique constraint issues
+    /// This is a maintenance method to fix any data inconsistencies
+    /// </summary>
+    public async Task CleanupDuplicatePermissionsAsync(Guid roleId, CancellationToken cancellationToken = default)
+    {
+        // Find all permissions for the role grouped by module
+        var allPermissions = await _dbSet
+            .Where(rp => rp.RoleId == roleId)
+            .OrderBy(rp => rp.SystemModule)
+            .ThenByDescending(rp => rp.IsActive) // Active records first
+            .ThenByDescending(rp => rp.UpdatedOn ?? rp.CreatedOn) // Most recent first
+            .ToListAsync(cancellationToken);
+
+        var permissionsToDelete = new List<RolePermissionEntity>();
+
+        // Group by module and keep only the most recent record for each module
+        var groupedPermissions = allPermissions.GroupBy(p => p.SystemModule);
+        
+        foreach (var group in groupedPermissions)
+        {
+            var modulePermissions = group.ToList();
+            if (modulePermissions.Count > 1)
+            {
+                // Keep the first one (most recent active, or most recent if all inactive)
+                // Delete the rest
+                permissionsToDelete.AddRange(modulePermissions.Skip(1));
+            }
+        }
+
+        if (permissionsToDelete.Any())
+        {
+            _dbSet.RemoveRange(permissionsToDelete);
+            await _context.SaveChangesAsync(cancellationToken);
+        }
     }
 
     public async Task<bool> HasPermissionAsync(Guid roleId, SystemModule module, PermissionLevel requiredLevel, CancellationToken cancellationToken = default)

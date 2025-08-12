@@ -5,9 +5,87 @@
 }
 
 @section Styles {
-
     <link rel="stylesheet" href="~/css/product-management.css" />
     <link rel="stylesheet" href="~/css/form-styles.css" />
+    <style>
+        .permissions-list {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .permission-item {
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .permission-item:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            transform: translateY(-1px);
+        }
+        
+        .icon-circle {
+            width: 40px;
+            height: 40px;
+            font-size: 18px;
+        }
+        
+        .permission-controls .btn {
+            min-width: 90px;
+            font-size: 12px;
+            padding: 6px 12px;
+        }
+        
+        .permission-controls .btn-check:checked + .btn {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+            color: white;
+        }
+        
+        .permission-controls .btn-outline-secondary {
+            color: #6c757d;
+            border-color: #dee2e6;
+        }
+        
+        .permission-controls .btn-outline-secondary:hover {
+            background-color: #f8f9fa;
+            border-color: #dee2e6;
+            color: #495057;
+        }
+        
+        /* Right sidebar styling */
+        .help-section {
+            padding: 16px 0;
+        }
+        
+        .help-section:not(:last-child) {
+            border-bottom: 1px solid #f1f3f4;
+        }
+        
+        .help-section .fas {
+            font-size: 16px;
+        }
+        
+        .list-unstyled li {
+            position: relative;
+        }
+        
+        .card-header {
+            border-bottom: 1px solid #f1f3f4;
+        }
+        
+        .alert-info {
+            background-color: #f8f9fa !important;
+            border: 1px solid #e9ecef !important;
+        }
+        
+        .role-example {
+            padding: 8px 0;
+        }
+        
+        .role-example:not(:last-child) {
+            border-bottom: 1px dotted #e9ecef;
+        }
+    </style>
 }
 
 <div class="container-fluid py-3">
@@ -171,39 +249,38 @@
                                 </div>
                             </div>
                             
-                            <div class="row g-3" id="permissionsContainer">
+                            <div class="permissions-list" id="permissionsContainer">
                                 @foreach (var module in Enum.GetValues<TechWayFit.Licensing.Management.Core.Models.User.SystemModule>())
                                 {
-                                    <div class="col-md-6">
-                                        <div class="card border h-100">
-                                            <div class="card-body p-3">
-                                                <div class="d-flex align-items-start">
-                                                    <div class="flex-shrink-0">
-                                                        <div class="avatar avatar-sm bg-@(GetModuleBadgeColor(module))-soft rounded me-3">
-                                                            <i class="@(GetModuleIcon(module)) text-@(GetModuleBadgeColor(module))"></i>
-                                                        </div>
+                                    <div class="permission-item border rounded mb-3 p-3 bg-white">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-3">
+                                                    <div class="icon-circle bg-light rounded-circle d-flex align-items-center justify-content-center">
+                                                        <i class="@(GetModuleIcon(module)) text-primary"></i>
                                                     </div>
-                                                    <div class="flex-grow-1">
-                                                        <h6 class="mb-1">@(GetModuleName(module))</h6>
-                                                        <p class="small text-muted mb-2">@(GetModuleDescription(module))</p>
-                                                        
-                                                        <div class="btn-group-vertical w-100" role="group">
-                                                            @foreach (var level in Enum.GetValues<TechWayFit.Licensing.Management.Core.Models.User.PermissionLevel>())
-                                                            {
-                                                                var isSelected = Model.Permissions.GetValueOrDefault(module, TechWayFit.Licensing.Management.Core.Models.User.PermissionLevel.None) == level;
-                                                                <input type="radio" 
-                                                                       class="btn-check" 
-                                                                       name="Permissions[@((int)module)]" 
-                                                                       id="@(module)_@(level)" 
-                                                                       value="@((int)level)"
-                                                                       @(isSelected ? "checked" : "")>
-                                                                <label class="btn btn-outline-@(GetPermissionColor(level)) btn-sm text-start" for="@(module)_@(level)">
-                                                                    <i class="@(GetPermissionIcon(level)) me-2"></i>
-                                                                    @(GetPermissionName(level))
-                                                                </label>
-                                                            }
-                                                        </div>
-                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-1 text-dark">@(GetModuleName(module))</h6>
+                                                    <p class="small text-muted mb-0">@(GetModuleDescription(module))</p>
+                                                </div>
+                                            </div>
+                                            <div class="permission-controls">
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    @foreach (var level in Enum.GetValues<TechWayFit.Licensing.Management.Core.Models.User.PermissionLevel>())
+                                                    {
+                                                        var isSelected = Model.Permissions.GetValueOrDefault(module, TechWayFit.Licensing.Management.Core.Models.User.PermissionLevel.None) == level;
+                                                        <input type="radio" 
+                                                               class="btn-check" 
+                                                               name="Permissions[@((int)module)]" 
+                                                               id="@(module)_@(level)" 
+                                                               value="@((int)level)"
+                                                               @(isSelected ? "checked" : "")>
+                                                        <label class="btn @(isSelected ? "btn-primary" : "btn-outline-secondary")" for="@(module)_@(level)">
+                                                            <i class="@(GetPermissionIcon(level)) me-1"></i>
+                                                            @(GetPermissionName(level))
+                                                        </label>
+                                                    }
                                                 </div>
                                             </div>
                                         </div>
@@ -251,43 +328,80 @@
         <!-- Help Section -->
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-bottom-0 py-3">
-                    <h6 class="card-title mb-0">
-                        <i class="fas fa-info-circle text-info me-2"></i>Role Management
-                    </h6>
+                <div class="card-header bg-white py-3">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <div class="icon-circle bg-light rounded-circle d-flex align-items-center justify-content-center">
+                                <i class="fas fa-info-circle text-primary"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <h6 class="card-title mb-0 text-dark">Role Creation Guide</h6>
+                            <p class="text-muted small mb-0">Tips and best practices</p>
+                        </div>
+                    </div>
                 </div>
                 <div class="card-body">
-                    <div class="mb-3">
-                        <h6 class="text-primary mb-2">
-                            <i class="fas fa-lightbulb me-1"></i>Best Practices
-                        </h6>
-                        <ul class="small text-muted mb-0">
-                            <li>Use descriptive role names that clearly indicate the level of access</li>
-                            <li>Always assign roles to the appropriate tenant</li>
-                            <li>Provide clear descriptions for easy identification</li>
-                            <li>Follow the principle of least privilege</li>
+                    <div class="help-section mb-4">
+                        <div class="d-flex align-items-start mb-2">
+                            <div class="me-2">
+                                <i class="fas fa-lightbulb text-warning"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-2 text-dark">Best Practices</h6>
+                            </div>
+                        </div>
+                        <ul class="list-unstyled small text-muted mb-0 ps-3">
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Use descriptive role names that clearly indicate the level of access</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Always assign roles to the appropriate tenant</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Provide clear descriptions for easy identification</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Follow the principle of least privilege</li>
                         </ul>
                     </div>
 
-                    <div class="mb-3">
-                        <h6 class="text-primary mb-2">
-                            <i class="fas fa-shield-alt me-1"></i>Common Roles
-                        </h6>
-                        <ul class="small text-muted mb-0">
-                            <li><strong>Administrator:</strong> Full system access</li>
-                            <li><strong>Manager:</strong> Department management</li>
-                            <li><strong>User:</strong> Standard user access</li>
-                            <li><strong>Viewer:</strong> Read-only access</li>
-                        </ul>
+                    <div class="help-section mb-4">
+                        <div class="d-flex align-items-start mb-2">
+                            <div class="me-2">
+                                <i class="fas fa-shield-alt text-primary"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-2 text-dark">Common Role Types</h6>
+                            </div>
+                        </div>
+                        <div class="ps-3">
+                            <div class="role-example mb-2">
+                                <div class="fw-medium small text-dark">Administrator</div>
+                                <div class="small text-muted">Full system access and management</div>
+                            </div>
+                            <div class="role-example mb-2">
+                                <div class="fw-medium small text-dark">Manager</div>
+                                <div class="small text-muted">Department and team management</div>
+                            </div>
+                            <div class="role-example mb-2">
+                                <div class="fw-medium small text-dark">User</div>
+                                <div class="small text-muted">Standard operational access</div>
+                            </div>
+                            <div class="role-example">
+                                <div class="fw-medium small text-dark">Viewer</div>
+                                <div class="small text-muted">Read-only access to data</div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div>
-                        <h6 class="text-primary mb-2">
-                            <i class="fas fa-question-circle me-1"></i>Need Help?
-                        </h6>
-                        <p class="small text-muted mb-0">
-                            Roles define what users can do in the system. Each role is associated with a specific tenant to ensure proper data isolation.
-                        </p>
+                    <div class="help-section">
+                        <div class="alert alert-info border-0 bg-light mb-0">
+                            <div class="d-flex align-items-start">
+                                <div class="me-2">
+                                    <i class="fas fa-question-circle text-info"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1 text-dark">Need Help?</h6>
+                                    <p class="small text-muted mb-0">
+                                        Roles define what users can do in the system. Each role is associated with a specific tenant to ensure proper data isolation.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

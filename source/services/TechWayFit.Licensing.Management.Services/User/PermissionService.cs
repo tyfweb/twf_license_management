@@ -129,4 +129,13 @@ public class PermissionService : IPermissionService
         // Add more business rules as needed
         await Task.CompletedTask; // Placeholder for async business rules
     }
+
+    /// <summary>
+    /// Maintenance method to cleanup duplicate permissions that might cause constraint violations
+    /// Call this if you encounter unique constraint errors when updating role permissions
+    /// </summary>
+    public async Task CleanupDuplicatePermissionsAsync(Guid roleId, CancellationToken cancellationToken = default)
+    {
+        await _unitOfWork.RolePermissions.CleanupDuplicatePermissionsAsync(roleId, cancellationToken);
+    }
 }

@@ -1,0 +1,42 @@
+@model IEnumerable<TechWayFit.Licensing.Management.Web.ViewModels.Shared.StatsCardViewModel>
+
+@if (Model != null && Model.Any())
+{
+    <div class="row g-2 mb-3">
+        @foreach (var card in Model)
+        {
+            <div class="@card.ColumnClass">
+                @if (!string.IsNullOrEmpty(card.ActionUrl))
+                {
+                    <a href="@card.ActionUrl" class="text-decoration-none">
+                        <div class="stats-card @card.CardClass" @(string.IsNullOrEmpty(card.Tooltip) ? "" : $"title=\"{card.Tooltip}\"")>
+                            <div class="stats-row-1">
+                                <div class="stats-icon">
+                                    <i class="@card.IconClass"></i>
+                                </div>
+                                <div class="stats-number @card.NumberClass">@card.Value</div>
+                            </div>
+                            <div class="stats-row-2">
+                                <div class="stats-label">@card.Label</div>
+                            </div>
+                        </div>
+                    </a>
+                }
+                else
+                {
+                    <div class="stats-card @card.CardClass" @(string.IsNullOrEmpty(card.Tooltip) ? "" : $"title=\"{card.Tooltip}\"")>
+                        <div class="stats-row-1">
+                            <div class="stats-icon">
+                                <i class="@card.IconClass"></i>
+                            </div>
+                            <div class="stats-number @card.NumberClass">@card.Value</div>
+                        </div>
+                        <div class="stats-row-2">
+                            <div class="stats-label">@card.Label</div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+}

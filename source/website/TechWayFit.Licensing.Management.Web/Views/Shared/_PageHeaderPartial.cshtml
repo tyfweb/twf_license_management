@@ -32,11 +32,141 @@
                         </ol>
                     </nav>
                 }
-            </div>            <div class="header-actions">                @if (!string.IsNullOrEmpty(Model.BackButtonText) && !string.IsNullOrEmpty(Model.BackButtonAction))
+            </div>            <div class="header-actions">
+                @if (!string.IsNullOrEmpty(Model.BackButtonText) && !string.IsNullOrEmpty(Model.BackButtonAction))
                 {
-                    <a href="@Url.Action(Model.BackButtonAction, Model.BackButtonController, Model.BackButtonRouteValues)" class="btn btn-secondary">
+                    <a href="@Url.Action(Model.BackButtonAction, Model.BackButtonController, Model.BackButtonRouteValues)" class="btn btn-outline-secondary me-2">
                         <i class="fas fa-arrow-left me-2"></i>@Model.BackButtonText
                     </a>
+                }
+                
+                @* New structure: Primary Action + More Actions Dropdown *@
+                @if (Model.PrimaryAction != null || Model.DropdownActions?.Any() == true)
+                {
+                    <div class="d-flex gap-2 flex-wrap">
+                        @* Primary Action Button *@
+                        @if (Model.PrimaryAction != null)
+                        {
+                            @if (!string.IsNullOrEmpty(Model.PrimaryAction.OnClick))
+                            {
+                                <button type="button" class="@Model.PrimaryAction.ButtonClass" onclick="@Model.PrimaryAction.OnClick">
+                                    @if (!string.IsNullOrEmpty(Model.PrimaryAction.Icon))
+                                    {
+                                        <i class="@Model.PrimaryAction.Icon me-2"></i>
+                                    }
+                                    @Model.PrimaryAction.Text
+                                </button>
+                            }
+                            else if (!string.IsNullOrEmpty(Model.PrimaryAction.Url))
+                            {
+                                <a href="@Model.PrimaryAction.Url" class="@Model.PrimaryAction.ButtonClass">
+                                    @if (!string.IsNullOrEmpty(Model.PrimaryAction.Icon))
+                                    {
+                                        <i class="@Model.PrimaryAction.Icon me-2"></i>
+                                    }
+                                    @Model.PrimaryAction.Text
+                                </a>
+                            }
+                            else
+                            {
+                                <a asp-controller="@Model.PrimaryAction.Controller" asp-action="@Model.PrimaryAction.Action" asp-all-route-data="@(Model.PrimaryAction.RouteValues as IDictionary<string, string>)" class="@Model.PrimaryAction.ButtonClass">
+                                    @if (!string.IsNullOrEmpty(Model.PrimaryAction.Icon))
+                                    {
+                                        <i class="@Model.PrimaryAction.Icon me-2"></i>
+                                    }
+                                    @Model.PrimaryAction.Text
+                                </a>
+                            }
+                        }
+
+                        @* More Actions Dropdown *@
+                        @if (Model.DropdownActions?.Any() == true)
+                        {
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-ellipsis-h me-1"></i>
+                                    <span class="d-none d-md-inline">More Actions</span>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    @foreach (var dropdownAction in Model.DropdownActions)
+                                    {
+                                        <li>
+                                            @if (!string.IsNullOrEmpty(dropdownAction.OnClick))
+                                            {
+                                                <button type="button" class="dropdown-item" onclick="@dropdownAction.OnClick">
+                                                    @if (!string.IsNullOrEmpty(dropdownAction.Icon))
+                                                    {
+                                                        <i class="@dropdownAction.Icon me-2"></i>
+                                                    }
+                                                    @dropdownAction.Text
+                                                </button>
+                                            }
+                                            else if (!string.IsNullOrEmpty(dropdownAction.Url))
+                                            {
+                                                <a href="@dropdownAction.Url" class="dropdown-item">
+                                                    @if (!string.IsNullOrEmpty(dropdownAction.Icon))
+                                                    {
+                                                        <i class="@dropdownAction.Icon me-2"></i>
+                                                    }
+                                                    @dropdownAction.Text
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <a asp-controller="@dropdownAction.Controller" asp-action="@dropdownAction.Action" asp-all-route-data="@(dropdownAction.RouteValues as IDictionary<string, string>)" class="dropdown-item">
+                                                    @if (!string.IsNullOrEmpty(dropdownAction.Icon))
+                                                    {
+                                                        <i class="@dropdownAction.Icon me-2"></i>
+                                                    }
+                                                    @dropdownAction.Text
+                                                </a>
+                                            }
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        }
+                    </div>
+                }
+
+                @* Fallback: Legacy Action Buttons (for backward compatibility) *@
+                @if ((Model.PrimaryAction == null && !Model.DropdownActions?.Any() == true) && Model.ActionButtons?.Any() == true)
+                {
+                    <div class="d-flex gap-1 flex-wrap">
+                        @foreach (var actionButton in Model.ActionButtons)
+                        {
+                            @if (!string.IsNullOrEmpty(actionButton.OnClick))
+                            {
+                                <button type="button" class="@actionButton.ButtonClass" onclick="@actionButton.OnClick">
+                                    @if (!string.IsNullOrEmpty(actionButton.Icon))
+                                    {
+                                        <i class="@actionButton.Icon me-1"></i>
+                                    }
+                                    <span class="d-none d-md-inline">@actionButton.Text</span>
+                                </button>
+                            }
+                            else if (!string.IsNullOrEmpty(actionButton.Url))
+                            {
+                                <a href="@actionButton.Url" class="@actionButton.ButtonClass">
+                                    @if (!string.IsNullOrEmpty(actionButton.Icon))
+                                    {
+                                        <i class="@actionButton.Icon me-1"></i>
+                                    }
+                                    <span class="d-none d-md-inline">@actionButton.Text</span>
+                                </a>
+                            }
+                            else
+                            {
+                                <a asp-controller="@actionButton.Controller" asp-action="@actionButton.Action" asp-all-route-data="@(actionButton.RouteValues as IDictionary<string, string>)" class="@actionButton.ButtonClass">
+                                    @if (!string.IsNullOrEmpty(actionButton.Icon))
+                                    {
+                                        <i class="@actionButton.Icon me-1"></i>
+                                    }
+                                    <span class="d-none d-md-inline">@actionButton.Text</span>
+                                </a>
+                            }
+                        }
+                    </div>
                 }
             </div>
         </div>

@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
-using TechWayFit.Licensing.Management.Core.Models.User;
 using TechWayFit.Licensing.Management.Web.ViewModels.User;
 using Microsoft.AspNetCore.Authorization;
 using TechWayFit.Licensing.Management.Web.Helpers;
@@ -119,16 +118,33 @@ public class UserController : BaseController
         try
         {
             var tenants = await _tenantService.GetAllTenantsAsync();
+            var availableTenants = tenants.Select(t => new SelectListItem 
+            { 
+                Value = t.TenantId.ToString(), 
+                Text = $"{t.TenantName} ({t.TenantCode})" 
+            }).ToList();
+
+            // Check if administrator has selected a specific tenant context
+            var selectedTenantId = Guid.Empty;
+            if (User.IsInRole("Administrator") && HttpContext.Session.Keys.Contains("AdminSelectedTenantId"))
+            {
+                var sessionTenantId = HttpContext.Session.GetString("AdminSelectedTenantId");
+                if (!string.IsNullOrEmpty(sessionTenantId) && Guid.TryParse(sessionTenantId, out var tenantId))
+                {
+                    selectedTenantId = tenantId;
+                }
+            }
+
+            // Load roles based on selected tenant context (if any)
+            var roles = selectedTenantId != Guid.Empty 
+                ? await _userService.GetRolesByTenantAsync(selectedTenantId)
+                : await _userService.GetAllRolesAsync();
             
             var viewModel = new CreateUserViewModel
             {
-                // Don't load roles by default - let JavaScript handle tenant-specific role loading
-                AvailableRoles = new List<UserRole>(),
-                AvailableTenants = tenants.Select(t => new SelectListItem 
-                { 
-                    Value = t.TenantId.ToString(), 
-                    Text = $"{t.TenantName} ({t.TenantCode})" 
-                }).ToList()
+                AvailableRoles = roles.ToList(),
+                AvailableTenants = availableTenants,
+                TenantId = selectedTenantId
             };
 
             return View(viewModel);

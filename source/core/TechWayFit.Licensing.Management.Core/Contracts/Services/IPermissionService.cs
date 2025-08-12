@@ -47,4 +47,10 @@ public interface IPermissionService
     /// Validates permission configuration for a role
     /// </summary>
     Task<ValidationResult> ValidateRolePermissionsAsync(Guid roleId, Dictionary<SystemModule, PermissionLevel> permissions, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Maintenance method to cleanup duplicate permissions that might cause constraint violations
+    /// Call this if you encounter unique constraint errors when updating role permissions
+    /// </summary>
+    Task CleanupDuplicatePermissionsAsync(Guid roleId, CancellationToken cancellationToken = default);
 }

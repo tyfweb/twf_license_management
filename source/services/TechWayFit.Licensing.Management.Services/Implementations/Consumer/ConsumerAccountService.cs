@@ -53,7 +53,7 @@ public class ConsumerAccountService : IConsumerAccountService
             
             // Map back to model
             var result = createdEntity;
-            
+            await _unitOfWork.SaveChangesAsync();
             _logger.LogInformation("Successfully created consumer account with ID: {ConsumerId}", result.ConsumerId);
             return result;
         }
