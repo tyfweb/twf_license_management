@@ -32,11 +32,9 @@
                         </ol>
                     </nav>
                 }
-            </div>
-            <div class="header-actions">
-                @if (!string.IsNullOrEmpty(Model.BackButtonText) && !string.IsNullOrEmpty(Model.BackButtonAction))
+            </div>            <div class="header-actions">                @if (!string.IsNullOrEmpty(Model.BackButtonText) && !string.IsNullOrEmpty(Model.BackButtonAction))
                 {
-                    <a asp-controller="@Model.BackButtonController" asp-action="@Model.BackButtonAction" class="btn btn-secondary">
+                    <a href="@Url.Action(Model.BackButtonAction, Model.BackButtonController, Model.BackButtonRouteValues)" class="btn btn-secondary">
                         <i class="fas fa-arrow-left me-2"></i>@Model.BackButtonText
                     </a>
                 }

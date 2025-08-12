@@ -1,0 +1,419 @@
+@model TechWayFit.Licensing.Management.Web.ViewModels.Role.RoleDetailsViewModel
+@{
+    ViewData["Title"] = "Role Details";
+    ViewData["Description"] = "View role information and assigned users";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/product-management.css" />
+}
+
+@Html.AntiForgeryToken()
+
+<div class="container-fluid py-3">
+    @await Html.PartialAsync("_PageHeaderPartial", new TechWayFit.Licensing.Management.Web.ViewModels.Shared.PageHeaderViewModel
+    {
+        Title = $"Role Details - {Model.RoleName}",
+        BackButtonText = "Back to Role Management",
+        BackButtonController = "Role",
+        BackButtonAction = "Index",
+        Icon = "fas fa-user-tag"
+    })
+
+    <div class="row g-4">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Role Information -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-bottom-0 py-3">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar avatar-sm bg-info-soft rounded me-3">
+                            <i class="fas fa-user-tag text-info"></i>
+                        </div>
+                        <div>
+                            <h5 class="card-title mb-0">Role Information</h5>
+                            <p class="text-muted small mb-0">Basic details and configuration</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="info-label">Role Name</label>
+                                <div class="info-value">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar avatar-xs bg-@(Model.IsSystemRole ? "danger" : "primary")-soft rounded me-2">
+                                            <i class="fas fa-@(Model.IsSystemRole ? "crown" : "user-tag") text-@(Model.IsSystemRole ? "danger" : "primary")"></i>
+                                        </div>
+                                        <span class="fw-semibold">@Model.RoleName</span>
+                                        @if (Model.IsSystemRole)
+                                        {
+                                            <span class="badge bg-danger-soft text-danger ms-2">
+                                                <i class="fas fa-shield-alt me-1"></i>System Role
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="info-label">Tenant</label>
+                                <div class="info-value">
+                                    <span class="text-muted">@(Model.TenantName ?? "System")</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="info-label">Status</label>
+                                <div class="info-value">
+                                    @if (Model.IsActive)
+                                    {
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check me-1"></i>Active
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">
+                                            <i class="fas fa-pause me-1"></i>Inactive
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="info-label">Users Assigned</label>
+                                <div class="info-value">
+                                    <span class="fw-semibold text-primary">@Model.UsersCount</span>
+                                    <span class="text-muted">user@(Model.UsersCount == 1 ? "" : "s")</span>
+                                </div>
+                            </div>
+                        </div>
+                        @if (!string.IsNullOrEmpty(Model.RoleDescription))
+                        {
+                            <div class="col-12">
+                                <div class="info-item">
+                                    <label class="info-label">Description</label>
+                                    <div class="info-value">
+                                        <p class="text-muted mb-0">@Model.RoleDescription</p>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>            </div>
+
+            <!-- Module Permissions -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-bottom-0 py-3">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar avatar-sm bg-success-soft rounded me-3">
+                            <i class="fas fa-shield-alt text-success"></i>
+                        </div>
+                        <div>
+                            <h5 class="card-title mb-0">Module Permissions</h5>
+                            <p class="text-muted small mb-0">Access levels for system modules</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        @foreach (var module in Enum.GetValues<TechWayFit.Licensing.Management.Core.Models.User.SystemModule>())
+                        {
+                            var permission = Model.Permissions.GetValueOrDefault(module, TechWayFit.Licensing.Management.Core.Models.User.PermissionLevel.None);
+                            <div class="col-lg-6">
+                                <div class="d-flex align-items-center p-3 border rounded">
+                                    <div class="flex-shrink-0">
+                                        <div class="avatar avatar-sm bg-@(GetModuleBadgeColor(module))-soft rounded me-3">
+                                            <i class="@(GetModuleIcon(module)) text-@(GetModuleBadgeColor(module))"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">@(GetModuleName(module))</h6>
+                                        <span class="badge @(GetPermissionBadgeClass(permission)) small">
+                                            <i class="@(GetPermissionIcon(permission)) me-1"></i>
+                                            @(GetPermissionName(permission))
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    
+                    <!-- Permission Summary -->
+                    <div class="mt-4 p-3 bg-light rounded">
+                        <div class="row text-center">
+                            <div class="col-3">
+                                <div class="fw-semibold text-success">@Model.Permissions.Count(p => p.Value == TechWayFit.Licensing.Management.Core.Models.User.PermissionLevel.Approver)</div>
+                                <div class="small text-muted">Approver</div>
+                            </div>
+                            <div class="col-3">
+                                <div class="fw-semibold text-warning">@Model.Permissions.Count(p => p.Value == TechWayFit.Licensing.Management.Core.Models.User.PermissionLevel.ReadWrite)</div>
+                                <div class="small text-muted">Read/Write</div>
+                            </div>
+                            <div class="col-3">
+                                <div class="fw-semibold text-info">@Model.Permissions.Count(p => p.Value == TechWayFit.Licensing.Management.Core.Models.User.PermissionLevel.ReadOnly)</div>
+                                <div class="small text-muted">Read Only</div>
+                            </div>
+                            <div class="col-3">
+                                <div class="fw-semibold text-muted">@(Enum.GetValues<TechWayFit.Licensing.Management.Core.Models.User.SystemModule>().Length - Model.Permissions.Count)</div>
+                                <div class="small text-muted">No Access</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Assigned Users -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom-0 py-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar avatar-sm bg-primary-soft rounded me-3">
+                                <i class="fas fa-users text-primary"></i>
+                            </div>
+                            <div>
+                                <h5 class="card-title mb-0">Assigned Users</h5>
+                                <p class="text-muted small mb-0">Users with this role</p>
+                            </div>
+                        </div>
+                        <div class="badge bg-primary-soft text-primary">@Model.UsersCount</div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (Model.AssignedUsers.Any())
+                    {
+                        <div class="row">
+                            @foreach (var user in Model.AssignedUsers)
+                            {
+                                <div class="col-md-6 mb-3">
+                                    <div class="card border h-100">
+                                        <div class="card-body p-3">
+                                            <div class="d-flex align-items-start">
+                                                <div class="avatar avatar-sm bg-@(user.IsActive ? "success" : "secondary")-soft rounded me-3">
+                                                    <i class="fas fa-user text-@(user.IsActive ? "success" : "secondary")"></i>
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <h6 class="mb-1">
+                                                        <a href="@Url.Action("Details", "User", new { id = user.UserId })" class="text-decoration-none">
+                                                            @user.FullName
+                                                        </a>
+                                                    </h6>
+                                                    <p class="text-muted small mb-1">@user.UserName</p>
+                                                    <p class="text-muted small mb-2">@user.Email</p>
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        @if (user.IsActive)
+                                                        {
+                                                            <span class="badge bg-success-soft text-success">Active</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="badge bg-secondary-soft text-secondary">Inactive</span>
+                                                        }
+                                                        @if (user.LastLoginDate > DateTime.MinValue)
+                                                        {
+                                                            <span class="text-muted small">Last login: @user.LastLoginDate.ToString("MMM dd, yyyy")</span>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <div class="avatar avatar-lg bg-light rounded-circle mx-auto mb-3">
+                                <i class="fas fa-users text-muted"></i>
+                            </div>
+                            <h6 class="text-muted">No Users Assigned</h6>
+                            <p class="text-muted small mb-0">This role hasn't been assigned to any users yet.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Quick Actions -->
+            <div class="sidebar-section mb-3">
+                <div class="section-header">
+                    <h6><i class="fas fa-bolt me-2"></i>Quick Actions</h6>
+                </div>
+                <div class="section-content">
+                    <div class="d-grid gap-2">
+                        <a href="@Url.Action("Edit", new { id = Model.RoleId })" class="btn btn-primary">
+                            <i class="fas fa-edit me-2"></i>Edit Role
+                        </a>
+                        @if (Model.UsersCount == 0)
+                        {
+                            <button type="button" class="btn btn-outline-danger" onclick="deleteRole('@Model.RoleId', '@Model.RoleName')">
+                                <i class="fas fa-trash me-2"></i>Delete Role
+                            </button>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-outline-secondary" disabled title="Cannot delete role with assigned users">
+                                <i class="fas fa-lock me-2"></i>Delete Restricted
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Audit Information -->
+            <div class="sidebar-section mb-3">
+                <div class="section-header">
+                    <h6><i class="fas fa-history me-2"></i>Audit Information</h6>
+                </div>
+                <div class="section-content">
+                    <div class="audit-info">
+                        <div class="audit-item">
+                            <div class="audit-label">Created On</div>
+                            <div class="audit-value">@Model.CreatedOn.ToString("MMM dd, yyyy 'at' hh:mm tt")</div>
+                        </div>
+                        <div class="audit-item">
+                            <div class="audit-label">Created By</div>
+                            <div class="audit-value">@Model.CreatedBy</div>
+                        </div>
+                        @if (Model.UpdatedOn.HasValue)
+                        {
+                            <div class="audit-item">
+                                <div class="audit-label">Last Updated</div>
+                                <div class="audit-value">@Model.UpdatedOn.Value.ToString("MMM dd, yyyy 'at' hh:mm tt")</div>
+                            </div>
+                            <div class="audit-item">
+                                <div class="audit-label">Updated By</div>
+                                <div class="audit-value">@(Model.UpdatedBy ?? "Unknown")</div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Help Section -->
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <h6><i class="fas fa-info-circle me-2"></i>Role Information</h6>
+                </div>
+                <div class="section-content">
+                    <div class="help-item">
+                        <h6 class="text-primary mb-2">
+                            <i class="fas fa-shield-alt me-1"></i>System Roles
+                        </h6>
+                        <p class="small text-muted mb-0">
+                            System roles have elevated privileges and are typically used for administrative purposes.
+                        </p>
+                    </div>
+                    
+                    <div class="help-item">
+                        <h6 class="text-primary mb-2">
+                            <i class="fas fa-users me-1"></i>User Assignment
+                        </h6>
+                        <p class="small text-muted mb-0">
+                            Users can be assigned multiple roles to combine different permission sets.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function deleteRole(roleId, roleName) {
+            if (confirm(`Are you sure you want to delete the role "${roleName}"? This action cannot be undone.`)) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '@Url.Action("Delete")';
+                
+                const tokenInput = document.createElement('input');
+                tokenInput.type = 'hidden';
+                tokenInput.name = '__RequestVerificationToken';
+                tokenInput.value = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                
+                const idInput = document.createElement('input');
+                idInput.type = 'hidden';
+                idInput.name = 'id';
+                idInput.value = roleId;
+                
+                form.appendChild(tokenInput);
+                form.appendChild(idInput);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }    </script>
+}
+
+@functions {
+    private string GetModuleName(TechWayFit.Licensing.Management.Core.Models.User.SystemModule module)
+    {
+        return TechWayFit.Licensing.Management.Core.Models.User.ModuleInfo.ModuleNames.GetValueOrDefault(module, module.ToString());
+    }
+    
+    private string GetModuleDescription(TechWayFit.Licensing.Management.Core.Models.User.SystemModule module)
+    {
+        return TechWayFit.Licensing.Management.Core.Models.User.ModuleInfo.ModuleDescriptions.GetValueOrDefault(module, "");
+    }
+    
+    private string GetModuleIcon(TechWayFit.Licensing.Management.Core.Models.User.SystemModule module)
+    {
+        return TechWayFit.Licensing.Management.Core.Models.User.ModuleInfo.ModuleIcons.GetValueOrDefault(module, "fas fa-cog");
+    }
+    
+    private string GetModuleBadgeColor(TechWayFit.Licensing.Management.Core.Models.User.SystemModule module)
+    {
+        return module switch
+        {
+            TechWayFit.Licensing.Management.Core.Models.User.SystemModule.Products => "primary",
+            TechWayFit.Licensing.Management.Core.Models.User.SystemModule.Consumers => "success",
+            TechWayFit.Licensing.Management.Core.Models.User.SystemModule.Licenses => "warning",
+            TechWayFit.Licensing.Management.Core.Models.User.SystemModule.Users => "info",
+            TechWayFit.Licensing.Management.Core.Models.User.SystemModule.Roles => "secondary",
+            TechWayFit.Licensing.Management.Core.Models.User.SystemModule.Tenants => "dark",
+            TechWayFit.Licensing.Management.Core.Models.User.SystemModule.Approvals => "success",
+            TechWayFit.Licensing.Management.Core.Models.User.SystemModule.Reports => "info",
+            TechWayFit.Licensing.Management.Core.Models.User.SystemModule.Audit => "danger",
+            TechWayFit.Licensing.Management.Core.Models.User.SystemModule.System => "warning",
+            _ => "secondary"
+        };
+    }
+    
+    private string GetPermissionName(TechWayFit.Licensing.Management.Core.Models.User.PermissionLevel level)
+    {
+        return TechWayFit.Licensing.Management.Core.Models.User.ModuleInfo.PermissionNames.GetValueOrDefault(level, level.ToString());
+    }
+    
+    private string GetPermissionIcon(TechWayFit.Licensing.Management.Core.Models.User.PermissionLevel level)
+    {
+        return level switch
+        {
+            TechWayFit.Licensing.Management.Core.Models.User.PermissionLevel.None => "fas fa-ban",
+            TechWayFit.Licensing.Management.Core.Models.User.PermissionLevel.ReadOnly => "fas fa-eye",
+            TechWayFit.Licensing.Management.Core.Models.User.PermissionLevel.ReadWrite => "fas fa-edit",
+            TechWayFit.Licensing.Management.Core.Models.User.PermissionLevel.Approver => "fas fa-check-circle",
+            _ => "fas fa-question"
+        };
+    }
+    
+    private string GetPermissionBadgeClass(TechWayFit.Licensing.Management.Core.Models.User.PermissionLevel level)
+    {
+        return level switch
+        {
+            TechWayFit.Licensing.Management.Core.Models.User.PermissionLevel.None => "bg-secondary text-white",
+            TechWayFit.Licensing.Management.Core.Models.User.PermissionLevel.ReadOnly => "bg-info text-white",
+            TechWayFit.Licensing.Management.Core.Models.User.PermissionLevel.ReadWrite => "bg-warning text-dark",
+            TechWayFit.Licensing.Management.Core.Models.User.PermissionLevel.Approver => "bg-success text-white",
+            _ => "bg-secondary text-white"
+        };
+    }
+}

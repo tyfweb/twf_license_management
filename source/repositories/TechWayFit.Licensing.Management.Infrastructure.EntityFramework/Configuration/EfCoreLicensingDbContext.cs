@@ -52,13 +52,13 @@ public partial class EfCoreLicensingDbContext : DbContext
     public DbSet<NotificationTemplateEntity> NotificationTemplates { get; set; }
     public DbSet<NotificationHistoryEntity> NotificationHistory { get; set; }
 
-    // Settings related entities
-    public DbSet<SettingEntity> Settings { get; set; }
+    // Settings related entities    public DbSet<SettingEntity> Settings { get; set; }
 
     // User related entities
     public DbSet<UserProfileEntity> UserProfiles { get; set; }
     public DbSet<UserRoleEntity> UserRoles { get; set; }
     public DbSet<UserRoleMappingEntity> UserRoleMappings { get; set; }
+    public DbSet<RolePermissionEntity> RolePermissions { get; set; }
     
     public DbSet<TenantEntity> Tenants { get; set; }
     public DbSet<SeedingHistoryEntity> SeedingHistories { get; set; }
@@ -72,14 +72,14 @@ public partial class EfCoreLicensingDbContext : DbContext
         // Apply modular entity configurations
         // Product-related entities
         modelBuilder.ApplyConfiguration(new ProductEntityConfiguration());
-        modelBuilder.ApplyConfiguration(new ProductVersionEntityConfiguration());
-        modelBuilder.ApplyConfiguration(new ProductTierEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new ProductVersionEntityConfiguration());        modelBuilder.ApplyConfiguration(new ProductTierEntityConfiguration());
         modelBuilder.ApplyConfiguration(new ProductFeatureEntityConfiguration());
 
         // User-related entities
         modelBuilder.ApplyConfiguration(new UserProfileEntityConfiguration());
         modelBuilder.ApplyConfiguration(new UserRoleEntityConfiguration());
         modelBuilder.ApplyConfiguration(new UserRoleMappingEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new RolePermissionEntityConfiguration());
 
         // Consumer-related entities
         modelBuilder.ApplyConfiguration(new ConsumerAccountEntityConfiguration());
@@ -147,9 +147,9 @@ public partial class EfCoreLicensingDbContext : DbContext
         modelBuilder.Entity<SettingEntity>().HasIndex(e => e.TenantId); 
 
         // User related entities
-        modelBuilder.Entity<UserProfileEntity>().HasIndex(e => e.TenantId);
-        modelBuilder.Entity<UserRoleEntity>().HasIndex(e => e.TenantId);
+        modelBuilder.Entity<UserProfileEntity>().HasIndex(e => e.TenantId);        modelBuilder.Entity<UserRoleEntity>().HasIndex(e => e.TenantId);
         modelBuilder.Entity<UserRoleMappingEntity>().HasIndex(e => e.TenantId);
+        modelBuilder.Entity<RolePermissionEntity>().HasIndex(e => e.TenantId);
 
         // Seeding related entities
         modelBuilder.Entity<SeedingHistoryEntity>().HasIndex(e => e.TenantId);
@@ -450,9 +450,9 @@ public partial class EfCoreLicensingDbContext : DbContext
         modelBuilder.Entity<SettingEntity>().HasQueryFilter(e =>GetCurrentTenantId()==IdConstants.SystemTenantId ||  e.TenantId == GetCurrentTenantId());
 
         // User related entities
-        modelBuilder.Entity<UserProfileEntity>().HasQueryFilter(e =>GetCurrentTenantId()==IdConstants.SystemTenantId ||  e.TenantId == GetCurrentTenantId());
-        modelBuilder.Entity<UserRoleEntity>().HasQueryFilter(e =>GetCurrentTenantId()==IdConstants.SystemTenantId ||  e.TenantId == GetCurrentTenantId());
+        modelBuilder.Entity<UserProfileEntity>().HasQueryFilter(e =>GetCurrentTenantId()==IdConstants.SystemTenantId ||  e.TenantId == GetCurrentTenantId());        modelBuilder.Entity<UserRoleEntity>().HasQueryFilter(e =>GetCurrentTenantId()==IdConstants.SystemTenantId ||  e.TenantId == GetCurrentTenantId());
         modelBuilder.Entity<UserRoleMappingEntity>().HasQueryFilter(e =>GetCurrentTenantId()==IdConstants.SystemTenantId ||  e.TenantId == GetCurrentTenantId());
+        modelBuilder.Entity<RolePermissionEntity>().HasQueryFilter(e =>GetCurrentTenantId()==IdConstants.SystemTenantId ||  e.TenantId == GetCurrentTenantId());
 
         // Seeding related entities
         modelBuilder.Entity<SeedingHistoryEntity>().HasQueryFilter(e =>GetCurrentTenantId()==IdConstants.SystemTenantId ||  e.TenantId == GetCurrentTenantId());

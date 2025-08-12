@@ -51,6 +51,8 @@ namespace TechWayFit.Licensing.Management.Web.Services
             {
                 Name = user.FullName,
                 Username = user.UserName,
+                UserId = user.UserId,
+                TenantId = user.TenantId,
                 Roles = user.Roles.Select(r => r.RoleName)
             };
         }
@@ -85,6 +87,7 @@ namespace TechWayFit.Licensing.Management.Web.Services
                 IsPersistent = rememberMe,
                 ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8)
             };
+            await _authenticationService.SignInAsync(new Core.Models.User.UserProfile {UserId=user.UserId }, true);
 
             await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal, authProperties);
             _logger.LogInformation("User {Username} signed in successfully", user.Username);

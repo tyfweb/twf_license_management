@@ -80,12 +80,15 @@ public interface IUnitOfWork : IDisposable
     /// <summary>
     /// User Role repository
     /// </summary>
-    IUserRoleRepository UserRoles { get; }
-
-    /// <summary>
+    IUserRoleRepository UserRoles { get; }    /// <summary>
     /// User Role Mapping repository
     /// </summary>
     IUserRoleMappingRepository UserRoleMappings { get; }
+
+    /// <summary>
+    /// Role Permission repository
+    /// </summary>
+    IRolePermissionRepository RolePermissions { get; }
 
     #endregion
 

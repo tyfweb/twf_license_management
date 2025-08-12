@@ -25,12 +25,15 @@ public class UserRoleEntity : BaseEntity, IEntityMapper<UserRole, UserRoleEntity
     /// <summary>
     /// Indicates if this role has administrative privileges
     /// </summary>
-    public bool IsAdmin { get; set; } = false;
-
-    /// <summary>
+    public bool IsAdmin { get; set; } = false;    /// <summary>
     /// Navigation property for user role mappings
     /// </summary>
     public virtual ICollection<UserRoleMappingEntity> UserRoles { get; set; } = new List<UserRoleMappingEntity>();
+
+    /// <summary>
+    /// Navigation property for role permissions
+    /// </summary>
+    public virtual ICollection<RolePermissionEntity> RolePermissions { get; set; } = new List<RolePermissionEntity>();
 
     #region IEntityMapper Implementation
     public UserRoleEntity Map(UserRole model)

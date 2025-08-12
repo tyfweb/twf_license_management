@@ -48,9 +48,9 @@ public class EfCoreUnitOfWork : IUnitOfWork
     private IAuditEntryRepository? _auditEntries;
     private INotificationTemplateRepository? _notificationTemplates;
     private INotificationHistoryRepository? _notificationHistory;
-    private ISettingRepository? _settings;
-    private IUserRoleRepository? _userRoles;
+    private ISettingRepository? _settings;    private IUserRoleRepository? _userRoles;
     private IUserRoleMappingRepository? _userRoleMappings;
+    private IRolePermissionRepository? _rolePermissions;
     
     // Workflow repositories
     private IWorkflowHistoryRepository? _workflowHistory;
@@ -109,10 +109,11 @@ public class EfCoreUnitOfWork : IUnitOfWork
         _settings ??= new EfCoreSettingRepository(_context,_userContext);
 
     public IUserRoleRepository UserRoles => 
-        _userRoles ??= new EfCoreUserRoleRepository(_context,_userContext);
-
-    public IUserRoleMappingRepository UserRoleMappings => 
+        _userRoles ??= new EfCoreUserRoleRepository(_context,_userContext);    public IUserRoleMappingRepository UserRoleMappings => 
         _userRoleMappings ??= new EfCoreUserRoleMappingRepository(_context,_userContext);
+
+    public IRolePermissionRepository RolePermissions => 
+        _rolePermissions ??= new EfCoreRolePermissionRepository(_context,_userContext);
 
     #endregion
 

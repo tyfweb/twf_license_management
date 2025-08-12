@@ -8,6 +8,7 @@ namespace TechWayFit.Licensing.Management.Web.ViewModels.Shared
         public string? BackButtonText { get; set; }
         public string? BackButtonController { get; set; }
         public string? BackButtonAction { get; set; }
+        public object? BackButtonRouteValues { get; set; }
     }
 
     public class BreadcrumbItem

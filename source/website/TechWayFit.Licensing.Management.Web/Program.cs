@@ -226,10 +226,9 @@ static void RegisterServices(WebApplicationBuilder builder)
     builder.Services.AddScoped<IAuditService, TechWayFit.Licensing.Management.Services.Implementations.Audit.AuditService>();
 
     // Step 8: Notification management services
-    builder.Services.AddScoped<INotificationService, NotificationService>();
-
-    // Step 9: User management services
+    builder.Services.AddScoped<INotificationService, NotificationService>();    // Step 9: User management services
     builder.Services.AddScoped<IUserService, UserService>();
+    builder.Services.AddScoped<IPermissionService, TechWayFit.Licensing.Management.Services.User.PermissionService>();
 
     // Step 10: Tenant management services
     builder.Services.AddScoped<ITenantService, TechWayFit.Licensing.Management.Services.Implementations.Tenant.TenantService>();

@@ -80,13 +80,38 @@ public class UserRoleMappingEntityConfiguration : IEntityTypeConfiguration<UserR
               .OnDelete(DeleteBehavior.Cascade);
 
         // Unique constraint - user can only have one active mapping to a specific role
-        builder.HasIndex(e => new { e.UserId, e.RoleId }).IsUnique();
-
-        // Indexes
+        builder.HasIndex(e => new { e.UserId, e.RoleId }).IsUnique();        // Indexes
         builder.HasIndex(e => e.UserId);
         builder.HasIndex(e => e.RoleId);
         builder.HasIndex(e => e.AssignedDate);
         builder.HasIndex(e => e.ExpiryDate);
+        builder.HasIndex(e => e.TenantId);
+    }
+}
+
+public class RolePermissionEntityConfiguration : IEntityTypeConfiguration<RolePermissionEntity>
+{
+    public void Configure(EntityTypeBuilder<RolePermissionEntity> builder)
+    {
+        builder.HasKey(e => e.Id);
+        builder.Property(e => e.Id).IsRequired();        builder.Property(e => e.RoleId).IsRequired();
+        builder.Property(e => e.SystemModule).IsRequired();
+        builder.Property(e => e.PermissionLevel).IsRequired();
+        builder.Property(e => e.CreatedBy).HasMaxLength(100).IsRequired();
+        builder.Property(e => e.UpdatedBy).HasMaxLength(100);
+
+        // Foreign key relationships
+        builder.HasOne(e => e.Role)
+              .WithMany(r => r.RolePermissions)
+              .HasForeignKey(e => e.RoleId)
+              .OnDelete(DeleteBehavior.Cascade);
+
+        // Unique constraint - each role can have only one permission level per module
+        builder.HasIndex(e => new { e.RoleId, e.SystemModule }).IsUnique();
+
+        // Indexes        builder.HasIndex(e => e.RoleId);
+        builder.HasIndex(e => e.SystemModule);
+        builder.HasIndex(e => e.PermissionLevel);
         builder.HasIndex(e => e.TenantId);
     }
 }
