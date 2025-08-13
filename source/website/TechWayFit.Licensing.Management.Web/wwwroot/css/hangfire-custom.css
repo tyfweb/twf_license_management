@@ -1,0 +1,203 @@
+/* Custom Hangfire Dashboard Styling */
+/* This CSS can be injected into the Hangfire dashboard to match your application theme */
+
+/* Override Hangfire's default colors to match TechWayFit branding */
+.navbar-fixed-top {
+    background-color: #2c3e50 !important;
+    border-bottom: 2px solid #3498db !important;
+}
+
+.navbar-brand {
+    color: #ecf0f1 !important;
+    font-weight: 600 !important;
+}
+
+.navbar-brand:hover {
+    color: #3498db !important;
+}
+
+/* Sidebar styling */
+.sidebar {
+    background-color: #34495e !important;
+}
+
+.sidebar .nav > li > a {
+    color: #bdc3c7 !important;
+}
+
+.sidebar .nav > li > a:hover {
+    background-color: #2c3e50 !important;
+    color: #3498db !important;
+}
+
+.sidebar .nav > li.active > a {
+    background-color: #3498db !important;
+    color: #fff !important;
+}
+
+/* Main content area */
+.content-wrapper {
+    background-color: #ecf0f1 !important;
+}
+
+/* Cards and panels */
+.panel-default > .panel-heading {
+    background-color: #3498db !important;
+    color: #fff !important;
+    border-color: #2980b9 !important;
+}
+
+.panel-primary > .panel-heading {
+    background-color: #2c3e50 !important;
+    border-color: #34495e !important;
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: #3498db !important;
+    border-color: #2980b9 !important;
+}
+
+.btn-primary:hover {
+    background-color: #2980b9 !important;
+    border-color: #21618c !important;
+}
+
+.btn-success {
+    background-color: #27ae60 !important;
+    border-color: #229954 !important;
+}
+
+.btn-warning {
+    background-color: #f39c12 !important;
+    border-color: #e67e22 !important;
+}
+
+.btn-danger {
+    background-color: #e74c3c !important;
+    border-color: #c0392b !important;
+}
+
+/* Tables */
+.table-striped > tbody > tr:nth-of-type(odd) {
+    background-color: #f8f9fa !important;
+}
+
+.table > thead > tr > th {
+    background-color: #34495e !important;
+    color: #ecf0f1 !important;
+    border-bottom: 2px solid #2c3e50 !important;
+}
+
+/* Statistics cards */
+.metric {
+    background-color: #fff !important;
+    border: 1px solid #dee2e6 !important;
+    border-radius: 0.375rem !important;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+}
+
+.metric-value {
+    color: #2c3e50 !important;
+    font-weight: 700 !important;
+}
+
+/* Progress bars */
+.progress {
+    background-color: #e9ecef !important;
+}
+
+.progress-bar {
+    background-color: #3498db !important;
+}
+
+.progress-bar-success {
+    background-color: #27ae60 !important;
+}
+
+.progress-bar-warning {
+    background-color: #f39c12 !important;
+}
+
+.progress-bar-danger {
+    background-color: #e74c3c !important;
+}
+
+/* Job status badges */
+.label-default {
+    background-color: #6c757d !important;
+}
+
+.label-primary {
+    background-color: #3498db !important;
+}
+
+.label-success {
+    background-color: #27ae60 !important;
+}
+
+.label-info {
+    background-color: #17a2b8 !important;
+}
+
+.label-warning {
+    background-color: #f39c12 !important;
+}
+
+.label-danger {
+    background-color: #e74c3c !important;
+}
+
+/* Custom TechWayFit branding */
+.navbar-brand::before {
+    content: "🔧 ";
+    margin-right: 5px;
+}
+
+/* Add custom header message */
+.content-wrapper::before {
+    content: "TechWayFit Licensing Management - Job Dashboard";
+    display: block;
+    background-color: #3498db;
+    color: #fff;
+    padding: 10px 15px;
+    margin: -15px -15px 15px -15px;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .navbar-brand {
+        font-size: 1rem !important;
+    }
+    
+    .content-wrapper::before {
+        font-size: 0.875rem !important;
+        padding: 8px 10px !important;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .content-wrapper {
+        background-color: #1a1a1a !important;
+        color: #e0e0e0 !important;
+    }
+    
+    .panel-default {
+        background-color: #2d2d2d !important;
+        border-color: #404040 !important;
+    }
+    
+    .table {
+        background-color: #2d2d2d !important;
+        color: #e0e0e0 !important;
+    }
+    
+    .metric {
+        background-color: #2d2d2d !important;
+        border-color: #404040 !important;
+        color: #e0e0e0 !important;
+    }
+}

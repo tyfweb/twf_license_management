@@ -1,0 +1,190 @@
+@{
+    ViewData["Title"] = "Embedded Job Dashboard";
+    Layout = "_LicenseHubLayout";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/hangfire-custom.css" asp-append-version="true" />
+    <style>
+        /* Enhanced theme integration for embedded dashboard */
+        .embedded-dashboard-container {
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+        
+        .embedded-header {
+            background: linear-gradient(135deg, var(--gray-50) 0%, var(--gray-100) 100%);
+            border-bottom: 1px solid var(--border-color);
+            padding: var(--spacing-lg);
+        }
+        
+        .embedded-iframe-container {
+            position: relative;
+            height: 80vh;
+            min-height: 600px;
+        }
+        
+        .embedded-controls {
+            background: var(--gray-50);
+            border-top: 1px solid var(--border-color);
+            padding: var(--spacing-md) var(--spacing-lg);
+        }
+        
+        .refresh-btn {
+            background: var(--success-color);
+            border: none;
+            color: white;
+            transition: var(--transition-fast);
+        }
+        
+        .refresh-btn:hover {
+            background: var(--success-color);
+            filter: brightness(110%);
+            transform: scale(1.02);
+        }
+    </style>
+}
+
+<!-- Page Header with TechWayFit Theme Integration -->
+<div class="container-fluid px-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="embedded-dashboard-container">
+                <div class="embedded-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="mb-1 text-dark fw-bold">
+                                <i class="fas fa-window-restore me-2" style="color: var(--primary-color);"></i>
+                                Embedded Hangfire Dashboard
+                            </h4>
+                            <p class="text-muted mb-0">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Hangfire dashboard integrated within the application layout
+                            </p>
+                        </div>
+                        <div class="btn-group">
+                            <a href="@Url.Action("Index", "HangfireDashboard")" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-th-large me-1"></i> Tabbed View
+                            </a>
+                            <a href="@Url.Action("FullScreen", "HangfireDashboard")" class="btn btn-outline-secondary btn-sm" target="_blank">
+                                <i class="fas fa-external-link-alt me-1"></i> Full Screen
+                            </a>
+                            <button type="button" class="btn refresh-btn btn-sm" onclick="refreshEmbedded()">
+                                <i class="fas fa-sync-alt me-1"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Embedded Dashboard iframe -->
+                <div class="embedded-iframe-container">
+                    <iframe id="hangfireFrame" 
+                            src="/hangfire" 
+                            style="width: 100%; height: 100%; border: none;"
+                            title="Hangfire Dashboard">
+                    </iframe>
+                </div>
+
+    </div>
+
+                <!-- Navigation shortcuts in controls footer -->
+                <div class="embedded-controls">
+                    <div class="row text-center align-items-center">
+                        <div class="col-auto">
+                            <small class="text-muted fw-semibold">Quick Navigation:</small>
+                        </div>
+                        <div class="col-auto">
+                            <button type="button" class="btn btn-link btn-sm p-1 text-decoration-none" onclick="navigateTo('')">
+                                <i class="fas fa-home me-1" style="color: var(--primary-color);"></i>Dashboard
+                            </button>
+                        </div>
+                        <div class="col-auto">
+                            <button type="button" class="btn btn-link btn-sm p-1 text-decoration-none" onclick="navigateTo('/jobs/enqueued')">
+                                <i class="fas fa-clock me-1" style="color: var(--warning-color);"></i>Enqueued
+                            </button>
+                        </div>
+                        <div class="col-auto">
+                            <button type="button" class="btn btn-link btn-sm p-1 text-decoration-none" onclick="navigateTo('/jobs/processing')">
+                                <i class="fas fa-play me-1" style="color: var(--info-color);"></i>Processing
+                            </button>
+                        </div>
+                        <div class="col-auto">
+                            <button type="button" class="btn btn-link btn-sm p-1 text-decoration-none" onclick="navigateTo('/jobs/succeeded')">
+                                <i class="fas fa-check me-1" style="color: var(--success-color);"></i>Succeeded
+                            </button>
+                        </div>
+                        <div class="col-auto">
+                            <button type="button" class="btn btn-link btn-sm p-1 text-decoration-none" onclick="navigateTo('/jobs/failed')">
+                                <i class="fas fa-times me-1" style="color: var(--danger-color);"></i>Failed
+                            </button>
+                        </div>
+                        <div class="col-auto">
+                            <button type="button" class="btn btn-link btn-sm p-1 text-decoration-none" onclick="navigateTo('/recurring')">
+                                <i class="fas fa-redo me-1" style="color: var(--purple);"></i>Recurring
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+</div>
+
+@section Scripts {
+    <script>
+        function navigateTo(path) {
+            const iframe = document.getElementById('hangfireFrame');
+            iframe.src = '/hangfire' + path;
+        }
+
+        function refreshEmbedded() {
+            const iframe = document.getElementById('hangfireFrame');
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+            btn.disabled = true;
+            
+            iframe.src = iframe.src;
+            
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }, 2000);
+        }
+
+        // Auto-refresh every 2 minutes
+        setInterval(() => {
+            const iframe = document.getElementById('hangfireFrame');
+            iframe.src = iframe.src;
+        }, 120000);
+    </script>
+}
+
+<!-- Enhanced theme-aware styles embedded inline -->
+<style>
+    iframe {
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-inner);
+    }
+    
+    .btn-link {
+        color: var(--text-muted);
+        text-decoration: none !important;
+        font-size: 0.875rem;
+        transition: var(--transition-fast);
+    }
+    
+    .btn-link:hover {
+        color: var(--text-dark);
+        transform: translateY(-1px);
+    }
+    
+    .btn-link:focus {
+        box-shadow: 0 0 0 0.2rem rgba(var(--primary-rgb), 0.25);
+    }
+</style>

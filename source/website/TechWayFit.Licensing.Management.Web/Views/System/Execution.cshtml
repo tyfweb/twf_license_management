@@ -1,0 +1,667 @@
+@{
+    ViewData["Title"] = "Job Execution Monitor"; 
+}
+
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0">
+                                <i class="fas fa-chart-line text-primary me-2"></i>
+                                Job Execution Monitor
+                            </h5>
+                            <small class="text-muted">Real-time monitoring of job executions and performance metrics</small>
+                        </div>
+                        <div class="btn-group">
+                            <a href="@Url.Action("Jobs", "System")" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to Jobs
+                            </a>
+                            <a href="@Url.Action("Dashboard", "System")" class="btn btn-outline-info" target="_blank">
+                                <i class="fas fa-external-link-alt"></i> Hangfire Dashboard
+                            </a>
+                            <button type="button" class="btn btn-outline-success" onclick="refreshExecutionData()">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Execution Statistics -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card stats-card-success">
+                <div class="stats-card-body">
+                    <div class="d-flex">
+                        <div class="stats-content flex-grow-1">
+                            <div class="stats-number" id="successfulJobs">245</div>
+                            <div class="stats-label">Successful</div>
+                        </div>
+                        <div class="stats-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                    <div class="stats-footer text-success">
+                        <i class="fas fa-arrow-up"></i> 12% from last week
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card stats-card-danger">
+                <div class="stats-card-body">
+                    <div class="d-flex">
+                        <div class="stats-content flex-grow-1">
+                            <div class="stats-number" id="failedJobs">8</div>
+                            <div class="stats-label">Failed</div>
+                        </div>
+                        <div class="stats-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                    </div>
+                    <div class="stats-footer text-danger">
+                        <i class="fas fa-arrow-up"></i> 2 since yesterday
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card stats-card-warning">
+                <div class="stats-card-body">
+                    <div class="d-flex">
+                        <div class="stats-content flex-grow-1">
+                            <div class="stats-number" id="runningJobs">3</div>
+                            <div class="stats-label">Running</div>
+                        </div>
+                        <div class="stats-icon">
+                            <i class="fas fa-play-circle"></i>
+                        </div>
+                    </div>
+                    <div class="stats-footer text-warning">
+                        <i class="fas fa-clock"></i> 2 scheduled next
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card stats-card-info">
+                <div class="stats-card-body">
+                    <div class="d-flex">
+                        <div class="stats-content flex-grow-1">
+                            <div class="stats-number" id="avgDuration">2.3s</div>
+                            <div class="stats-label">Avg Duration</div>
+                        </div>
+                        <div class="stats-icon">
+                            <i class="fas fa-stopwatch"></i>
+                        </div>
+                    </div>
+                    <div class="stats-footer text-info">
+                        <i class="fas fa-arrow-down"></i> 0.5s faster
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Controls -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row align-items-end">
+                        <div class="col-lg-3 col-md-4 mb-2">
+                            <label for="jobFilter" class="form-label">Filter by Job</label>
+                            <select class="form-select" id="jobFilter" onchange="applyFilters()">
+                                <option value="">All Jobs</option>
+                                <option value="license">License Management</option>
+                                <option value="audit">Audit & Cleanup</option>
+                                <option value="maintenance">System Maintenance</option>
+                            </select>
+                        </div>
+                        <div class="col-lg-3 col-md-4 mb-2">
+                            <label for="statusFilter" class="form-label">Filter by Status</label>
+                            <select class="form-select" id="statusFilter" onchange="applyFilters()">
+                                <option value="">All Status</option>
+                                <option value="succeeded">Succeeded</option>
+                                <option value="failed">Failed</option>
+                                <option value="running">Running</option>
+                                <option value="enqueued">Enqueued</option>
+                            </select>
+                        </div>
+                        <div class="col-lg-3 col-md-4 mb-2">
+                            <label for="timeFilter" class="form-label">Time Range</label>
+                            <select class="form-select" id="timeFilter" onchange="applyFilters()">
+                                <option value="24h">Last 24 hours</option>
+                                <option value="7d">Last 7 days</option>
+                                <option value="30d">Last 30 days</option>
+                                <option value="all">All time</option>
+                            </select>
+                        </div>
+                        <div class="col-lg-3 col-md-4 mb-2">
+                            <button type="button" class="btn btn-outline-secondary w-100" onclick="clearFilters()">
+                                <i class="fas fa-times"></i> Clear Filters
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Execution History -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">
+                        <i class="fas fa-history text-primary me-2"></i>
+                        Recent Job Executions
+                    </h6>
+                    <div class="d-flex align-items-center">
+                        <small class="text-muted me-3">Auto-refresh: 30s</small>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="autoRefresh" checked onchange="toggleAutoRefresh()">
+                            <label class="form-check-label" for="autoRefresh">Auto Refresh</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0" id="executionTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Job Name</th>
+                                    <th>Trigger</th>
+                                    <th>Status</th>
+                                    <th>Started</th>
+                                    <th>Duration</th>
+                                    <th>Progress</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="executionTableBody">
+                                <!-- Running Jobs -->
+                                <tr class="table-warning">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-heartbeat text-success me-2"></i>
+                                            <div>
+                                                <div class="fw-semibold">System Health Check</div>
+                                                <small class="text-muted">system-health-check</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">Scheduled</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-warning">
+                                            <i class="fas fa-spinner fa-spin me-1"></i>Running
+                                        </span>
+                                    </td>
+                                    <td>2 minutes ago</td>
+                                    <td>
+                                        <span class="text-muted">Running...</span>
+                                    </td>
+                                    <td>
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                                 role="progressbar" style="width: 65%">65%</div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-outline-secondary btn-sm" onclick="viewJobDetails('running-1')" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Completed Jobs -->
+                                <tr class="table-success">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                                            <div>
+                                                <div class="fw-semibold">License Expiry Check</div>
+                                                <small class="text-muted">license-expiry-check</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">Scheduled</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check me-1"></i>Succeeded
+                                        </span>
+                                    </td>
+                                    <td>1 hour ago</td>
+                                    <td>2.3s</td>
+                                    <td>
+                                        <span class="text-success">
+                                            <i class="fas fa-check-circle me-1"></i>Complete
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" onclick="viewJobDetails('job-1')" title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-secondary" onclick="viewJobLogs('job-1')" title="View Logs">
+                                                <i class="fas fa-file-alt"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr class="table-success">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-broom text-warning me-2"></i>
+                                            <div>
+                                                <div class="fw-semibold">Audit Cleanup</div>
+                                                <small class="text-muted">audit-cleanup</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">Scheduled</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check me-1"></i>Succeeded
+                                        </span>
+                                    </td>
+                                    <td>3 hours ago</td>
+                                    <td>15.7s</td>
+                                    <td>
+                                        <span class="text-success">
+                                            <i class="fas fa-check-circle me-1"></i>Complete
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" onclick="viewJobDetails('job-2')" title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-secondary" onclick="viewJobLogs('job-2')" title="View Logs">
+                                                <i class="fas fa-file-alt"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <!-- Failed Job -->
+                                <tr class="table-danger">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-database text-primary me-2"></i>
+                                            <div>
+                                                <div class="fw-semibold">Database Maintenance</div>
+                                                <small class="text-muted">database-maintenance</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">Manual</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-times me-1"></i>Failed
+                                        </span>
+                                    </td>
+                                    <td>6 hours ago</td>
+                                    <td>0.8s</td>
+                                    <td>
+                                        <span class="text-danger">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>Error
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-danger" onclick="viewJobDetails('job-3')" title="View Error Details">
+                                                <i class="fas fa-exclamation-triangle"></i>
+                                            </button>
+                                            <button class="btn btn-outline-secondary" onclick="viewJobLogs('job-3')" title="View Logs">
+                                                <i class="fas fa-file-alt"></i>
+                                            </button>
+                                            <button class="btn btn-outline-primary" onclick="retryJob('job-3')" title="Retry Job">
+                                                <i class="fas fa-redo"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <!-- More completed jobs... -->
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-times-circle text-danger me-2"></i>
+                                            <div>
+                                                <div class="fw-semibold">Deactivate Expired Licenses</div>
+                                                <small class="text-muted">deactivate-expired-licenses</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">Scheduled</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check me-1"></i>Succeeded
+                                        </span>
+                                    </td>
+                                    <td>12 hours ago</td>
+                                    <td>4.1s</td>
+                                    <td>
+                                        <span class="text-success">
+                                            <i class="fas fa-check-circle me-1"></i>Complete
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" onclick="viewJobDetails('job-4')" title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-secondary" onclick="viewJobLogs('job-4')" title="View Logs">
+                                                <i class="fas fa-file-alt"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <nav aria-label="Execution history pagination">
+                        <ul class="pagination pagination-sm justify-content-center mb-0">
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+                            </li>
+                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item">
+                                <a class="page-link" href="#">Next</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Job Details Modal -->
+<div class="modal fade" id="jobDetailsModal" tabindex="-1" aria-labelledby="jobDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="jobDetailsModalLabel">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Job Execution Details
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="jobDetailsContent">
+                <!-- Dynamic content will be loaded here -->
+                <div class="text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let autoRefreshInterval;
+        let autoRefreshEnabled = true;
+
+        function refreshExecutionData() {
+            const refreshBtn = document.querySelector('[onclick="refreshExecutionData()"]');
+            const originalText = refreshBtn.innerHTML;
+            refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+            refreshBtn.disabled = true;
+
+            // Simulate API call
+            setTimeout(() => {
+                // Update statistics (in real implementation, fetch from API)
+                updateStatistics();
+                
+                // Refresh table data
+                // loadExecutionHistory();
+                
+                refreshBtn.innerHTML = originalText;
+                refreshBtn.disabled = false;
+                
+                showToast('success', 'Execution data refreshed');
+            }, 1000);
+        }
+
+        function updateStatistics() {
+            // Mock data update - in real implementation, fetch from API
+            const stats = {
+                successful: Math.floor(Math.random() * 50) + 200,
+                failed: Math.floor(Math.random() * 10) + 5,
+                running: Math.floor(Math.random() * 5) + 1,
+                avgDuration: (Math.random() * 5 + 1).toFixed(1) + 's'
+            };
+
+            document.getElementById('successfulJobs').textContent = stats.successful;
+            document.getElementById('failedJobs').textContent = stats.failed;
+            document.getElementById('runningJobs').textContent = stats.running;
+            document.getElementById('avgDuration').textContent = stats.avgDuration;
+        }
+
+        function applyFilters() {
+            const jobFilter = document.getElementById('jobFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            const timeFilter = document.getElementById('timeFilter').value;
+
+            console.log('Applying filters:', { jobFilter, statusFilter, timeFilter });
+            // In real implementation, filter the table or make API call
+        }
+
+        function clearFilters() {
+            document.getElementById('jobFilter').value = '';
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('timeFilter').value = '24h';
+            applyFilters();
+        }
+
+        function viewJobDetails(jobId) {
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('jobDetailsModal'));
+            modal.show();
+
+            // Load job details (mock data)
+            setTimeout(() => {
+                const mockDetails = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Job Information</h6>
+                            <table class="table table-sm">
+                                <tr><td><strong>Job ID:</strong></td><td>${jobId}</td></tr>
+                                <tr><td><strong>Job Name:</strong></td><td>License Expiry Check</td></tr>
+                                <tr><td><strong>Queue:</strong></td><td>default</td></tr>
+                                <tr><td><strong>Started:</strong></td><td>2024-01-15 09:00:15</td></tr>
+                                <tr><td><strong>Completed:</strong></td><td>2024-01-15 09:00:18</td></tr>
+                                <tr><td><strong>Duration:</strong></td><td>2.35 seconds</td></tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Execution Results</h6>
+                            <table class="table table-sm">
+                                <tr><td><strong>Status:</strong></td><td><span class="badge bg-success">Succeeded</span></td></tr>
+                                <tr><td><strong>Records Processed:</strong></td><td>1,247</td></tr>
+                                <tr><td><strong>Licenses Checked:</strong></td><td>1,247</td></tr>
+                                <tr><td><strong>Expiring Soon:</strong></td><td>12</td></tr>
+                                <tr><td><strong>Notifications Sent:</strong></td><td>12</td></tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <h6>Job Output</h6>
+                            <pre class="bg-light p-3 rounded"><code>Starting license expiry check...
+Found 1,247 active licenses
+Checking expiration dates...
+Found 12 licenses expiring within 30 days
+Sending notifications to license owners...
+All notifications sent successfully
+Job completed successfully in 2.35 seconds</code></pre>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('jobDetailsContent').innerHTML = mockDetails;
+            }, 500);
+        }
+
+        function viewJobLogs(jobId) {
+            // In real implementation, open logs in new window or modal
+            window.open(`/hangfire/jobs/details/${jobId}`, '_blank');
+        }
+
+        function retryJob(jobId) {
+            if (confirm('Are you sure you want to retry this failed job?')) {
+                console.log('Retrying job:', jobId);
+                showToast('info', `Job ${jobId} has been queued for retry`);
+            }
+        }
+
+        function toggleAutoRefresh() {
+            autoRefreshEnabled = document.getElementById('autoRefresh').checked;
+            
+            if (autoRefreshEnabled) {
+                startAutoRefresh();
+                showToast('info', 'Auto-refresh enabled');
+            } else {
+                stopAutoRefresh();
+                showToast('info', 'Auto-refresh disabled');
+            }
+        }
+
+        function startAutoRefresh() {
+            if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+            
+            autoRefreshInterval = setInterval(() => {
+                if (autoRefreshEnabled) {
+                    updateStatistics();
+                    // In real implementation, also update the table
+                }
+            }, 30000); // 30 seconds
+        }
+
+        function stopAutoRefresh() {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+                autoRefreshInterval = null;
+            }
+        }
+
+        function showToast(type, message) {
+            // Simple toast notification
+            const toast = document.createElement('div');
+            toast.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            toast.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 5000);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            startAutoRefresh();
+        });
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            stopAutoRefresh();
+        });
+    </script>
+}
+
+<style>
+    .stats-card {
+        border: 1px solid #e3e6f0;
+        border-radius: 0.35rem;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        margin-bottom: 1.5rem;
+    }
+
+    .stats-card-body {
+        padding: 1.25rem;
+    }
+
+    .stats-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #5a5c69;
+    }
+
+    .stats-label {
+        font-size: 0.8rem;
+        font-weight: 400;
+        text-transform: uppercase;
+        color: #858796;
+    }
+
+    .stats-icon {
+        font-size: 2rem;
+        color: #dddfeb;
+    }
+
+    .stats-footer {
+        margin-top: 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    .stats-card-success { border-left: 0.25rem solid #1cc88a; }
+    .stats-card-danger { border-left: 0.25rem solid #e74a3b; }
+    .stats-card-warning { border-left: 0.25rem solid #f6c23e; }
+    .stats-card-info { border-left: 0.25rem solid #36b9cc; }
+
+    .progress {
+        background-color: #f8f9fc;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.025);
+    }
+
+    .fw-semibold {
+        font-weight: 600;
+    }
+
+    pre code {
+        font-size: 0.8rem;
+        line-height: 1.4;
+    }
+
+    .btn-group-sm .btn {
+        padding: 0.25rem 0.4rem;
+        font-size: 0.75rem;
+    }
+</style>

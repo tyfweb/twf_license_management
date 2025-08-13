@@ -815,16 +815,90 @@ h6, .h6 { font-size: var(--font-size-sm); }
     border-color: var(--success-color);
 }
 
+.btn-outline-success {
+    color: var(--success-color);
+    border-color: var(--success-color);
+    background: transparent;
+}
+
+.btn-outline-success:hover {
+    background: var(--success-color);
+    border-color: var(--success-color);
+    color: var(--white);
+}
+
 .btn-warning {
     background: var(--warning-color);
     color: white;
     border-color: var(--warning-color);
 }
 
+.btn-outline-warning {
+    color: var(--warning-color);
+    border-color: var(--warning-color);
+    background: transparent;
+}
+
+.btn-outline-warning:hover {
+    background: var(--warning-color);
+    border-color: var(--warning-color);
+    color: var(--white);
+}
+
 .btn-danger {
     background: var(--danger-color);
     color: white;
     border-color: var(--danger-color);
+}
+
+.btn-outline-danger {
+    color: var(--danger-color);
+    border-color: var(--danger-color);
+    background: transparent;
+}
+
+.btn-outline-danger:hover {
+    background: var(--danger-color);
+    border-color: var(--danger-color);
+    color: var(--white);
+}
+
+.btn-info {
+    background: var(--info-color);
+    color: white;
+    border-color: var(--info-color);
+}
+
+.btn-outline-info {
+    color: var(--info-color);
+    border-color: var(--info-color);
+    background: transparent;
+}
+
+.btn-outline-info:hover {
+    background: var(--info-color);
+    border-color: var(--info-color);
+    color: var(--white);
+}
+
+/* ===== BUTTON ICON STYLING ===== */
+.btn i {
+    margin-right: 0.5rem;
+    font-style: normal !important;
+    display: inline-block;
+    width: auto;
+    text-align: center;
+    font-family: "Font Awesome 6 Free", "Font Awesome 6 Pro", "Font Awesome 6 Brands" !important;
+    font-weight: 900 !important;
+}
+
+.btn i:last-child {
+    margin-right: 0;
+    margin-left: 0.5rem;
+}
+
+.btn i:only-child {
+    margin: 0;
 }
 
 /* ===== BADGE STYLING ===== */

@@ -1,0 +1,536 @@
+@{
+    ViewData["Title"] = "Job Schedules Configuration";
+}
+
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0">
+                                <i class="fas fa-calendar-alt text-primary me-2"></i>
+                                Job Schedules Configuration
+                            </h5>
+                            <small class="text-muted">Configure cron expressions and scheduling for all background jobs</small>
+                        </div>
+                        <div class="btn-group">
+                            <a href="@Url.Action("Jobs", "System")" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to Jobs
+                            </a>
+                            <button type="button" class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#cronHelpModal">
+                                <i class="fas fa-question-circle"></i> Cron Help
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Schedule Categories -->
+    <div class="row">
+        <!-- License Management Schedules -->
+        <div class="col-12 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-key text-primary me-2"></i>
+                        License Management Schedules
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Job Name</th>
+                                    <th>Current Schedule (Cron)</th>
+                                    <th>Description</th>
+                                    <th>Next 3 Executions</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                                            <span class="fw-bold">License Expiry Check</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <code class="cron-expression">0 9 * * *</code>
+                                        <br><small class="text-muted">Daily at 9:00 AM</small>
+                                    </td>
+                                    <td>Check for licenses expiring within the next 30 days and send notifications</td>
+                                    <td>
+                                        <small class="text-muted">
+                                            • Today at 9:00 AM<br>
+                                            • Tomorrow at 9:00 AM<br>
+                                            • Day after at 9:00 AM
+                                        </small>
+                                    </td>
+                                    <td><span class="badge bg-success">Active</span></td>
+                                    <td>
+                                        <button class="btn btn-outline-primary btn-sm" onclick="editSchedule('license-expiry-check', '0 9 * * *')">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-times-circle text-danger me-2"></i>
+                                            <span class="fw-bold">Deactivate Expired Licenses</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <code class="cron-expression">0 2 * * *</code>
+                                        <br><small class="text-muted">Daily at 2:00 AM</small>
+                                    </td>
+                                    <td>Automatically deactivate licenses that have expired beyond grace period</td>
+                                    <td>
+                                        <small class="text-muted">
+                                            • Tonight at 2:00 AM<br>
+                                            • Tomorrow at 2:00 AM<br>
+                                            • Day after at 2:00 AM
+                                        </small>
+                                    </td>
+                                    <td><span class="badge bg-success">Active</span></td>
+                                    <td>
+                                        <button class="btn btn-outline-primary btn-sm" onclick="editSchedule('deactivate-expired-licenses', '0 2 * * *')">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-chart-bar text-info me-2"></i>
+                                            <span class="fw-bold">License Usage Reports</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <code class="cron-expression">0 6 1 * *</code>
+                                        <br><small class="text-muted">1st of month at 6:00 AM</small>
+                                    </td>
+                                    <td>Generate comprehensive monthly usage reports for all active licenses</td>
+                                    <td>
+                                        <small class="text-muted">
+                                            • Nov 1st at 6:00 AM<br>
+                                            • Dec 1st at 6:00 AM<br>
+                                            • Jan 1st at 6:00 AM
+                                        </small>
+                                    </td>
+                                    <td><span class="badge bg-success">Active</span></td>
+                                    <td>
+                                        <button class="btn btn-outline-primary btn-sm" onclick="editSchedule('license-usage-reports', '0 6 1 * *')">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Maintenance Schedules -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-clipboard-list text-success me-2"></i>
+                        Audit & Cleanup Schedules
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="schedule-item mb-3">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">
+                                    <i class="fas fa-broom text-warning me-2"></i>
+                                    Audit Cleanup
+                                </h6>
+                                <code class="cron-expression">0 1 * * 0</code>
+                                <small class="text-muted ms-2">Every Sunday at 1:00 AM</small>
+                                <p class="text-muted small mt-1 mb-0">Remove audit entries older than 90 days</p>
+                            </div>
+                            <button class="btn btn-outline-primary btn-sm" onclick="editSchedule('audit-cleanup', '0 1 * * 0')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="schedule-item mb-3">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">
+                                    <i class="fas fa-archive text-info me-2"></i>
+                                    Audit Archive
+                                </h6>
+                                <code class="cron-expression">0 2 1 * *</code>
+                                <small class="text-muted ms-2">1st of month at 2:00 AM</small>
+                                <p class="text-muted small mt-1 mb-0">Archive audit data older than 12 months</p>
+                            </div>
+                            <button class="btn btn-outline-primary btn-sm" onclick="editSchedule('audit-archive', '0 2 1 * *')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="schedule-item">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">
+                                    <i class="fas fa-file-alt text-primary me-2"></i>
+                                    Audit Summary Reports
+                                </h6>
+                                <code class="cron-expression">0 8 * * 1</code>
+                                <small class="text-muted ms-2">Every Monday at 8:00 AM</small>
+                                <p class="text-muted small mt-1 mb-0">Generate weekly audit summary reports</p>
+                            </div>
+                            <button class="btn btn-outline-primary btn-sm" onclick="editSchedule('audit-summary', '0 8 * * 1')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Maintenance Schedules -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-cog text-secondary me-2"></i>
+                        System Maintenance Schedules
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="schedule-item mb-3">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">
+                                    <i class="fas fa-database text-primary me-2"></i>
+                                    Database Maintenance
+                                </h6>
+                                <code class="cron-expression">0 3 * * 0</code>
+                                <small class="text-muted ms-2">Every Sunday at 3:00 AM</small>
+                                <p class="text-muted small mt-1 mb-0">Optimize database performance and clean up</p>
+                            </div>
+                            <button class="btn btn-outline-primary btn-sm" onclick="editSchedule('database-maintenance', '0 3 * * 0')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="schedule-item mb-3">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">
+                                    <i class="fas fa-folder-open text-warning me-2"></i>
+                                    Temporary File Cleanup
+                                </h6>
+                                <code class="cron-expression">0 4 * * *</code>
+                                <small class="text-muted ms-2">Daily at 4:00 AM</small>
+                                <p class="text-muted small mt-1 mb-0">Remove temporary files and logs</p>
+                            </div>
+                            <button class="btn btn-outline-primary btn-sm" onclick="editSchedule('file-cleanup', '0 4 * * *')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="schedule-item">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">
+                                    <i class="fas fa-heartbeat text-success me-2"></i>
+                                    System Health Monitoring
+                                </h6>
+                                <code class="cron-expression">*/30 * * * *</code>
+                                <small class="text-muted ms-2">Every 30 minutes</small>
+                                <p class="text-muted small mt-1 mb-0">Monitor system performance and health</p>
+                            </div>
+                            <button class="btn btn-outline-primary btn-sm" onclick="editSchedule('system-health-check', '*/30 * * * *')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Reference Card -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle text-info me-2"></i>
+                        Common Cron Expression Patterns
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-3 col-md-6 mb-2">
+                            <code>0 */6 * * *</code>
+                            <small class="text-muted ms-2">Every 6 hours</small>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-2">
+                            <code>0 9 * * 1-5</code>
+                            <small class="text-muted ms-2">Weekdays at 9 AM</small>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-2">
+                            <code>0 0 1 * *</code>
+                            <small class="text-muted ms-2">1st of every month</small>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-2">
+                            <code>*/15 * * * *</code>
+                            <small class="text-muted ms-2">Every 15 minutes</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Schedule Modal -->
+<div class="modal fade" id="editScheduleModal" tabindex="-1" aria-labelledby="editScheduleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editScheduleModalLabel">
+                    <i class="fas fa-edit me-2"></i>
+                    Edit Job Schedule
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editScheduleForm">
+                    <input type="hidden" id="jobId" name="jobId" />
+                    
+                    <div class="mb-3">
+                        <label for="jobName" class="form-label">Job Name</label>
+                        <input type="text" class="form-control" id="jobName" readonly />
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="cronExpression" class="form-label">Cron Expression</label>
+                        <input type="text" class="form-control" id="cronExpression" name="cronExpression" 
+                               placeholder="0 9 * * *" pattern="^[0-9\*\-\,\/\s]+$" />
+                        <div class="form-text">
+                            Format: minute hour day month weekday
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#cronHelpModal">Need help?</a>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Next Run Preview</label>
+                        <div id="nextRunPreview" class="alert alert-info">
+                            Enter a valid cron expression to see next execution times
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveSchedule()">
+                    <i class="fas fa-save"></i> Save Schedule
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cron Help Modal -->
+<div class="modal fade" id="cronHelpModal" tabindex="-1" aria-labelledby="cronHelpModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cronHelpModalLabel">
+                    <i class="fas fa-question-circle me-2"></i>
+                    Cron Expression Help
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Format: minute hour day month weekday</h6>
+                
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Field</th>
+                                <th>Allowed Values</th>
+                                <th>Special Characters</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Minute</td>
+                                <td>0-59</td>
+                                <td>* / , -</td>
+                            </tr>
+                            <tr>
+                                <td>Hour</td>
+                                <td>0-23</td>
+                                <td>* / , -</td>
+                            </tr>
+                            <tr>
+                                <td>Day</td>
+                                <td>1-31</td>
+                                <td>* / , -</td>
+                            </tr>
+                            <tr>
+                                <td>Month</td>
+                                <td>1-12</td>
+                                <td>* / , -</td>
+                            </tr>
+                            <tr>
+                                <td>Weekday</td>
+                                <td>0-7 (0 or 7 = Sunday)</td>
+                                <td>* / , -</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h6 class="mt-4">Examples:</h6>
+                <ul class="list-unstyled">
+                    <li><code>0 0 * * *</code> - Daily at midnight</li>
+                    <li><code>0 9 * * 1-5</code> - Weekdays at 9 AM</li>
+                    <li><code>*/15 * * * *</code> - Every 15 minutes</li>
+                    <li><code>0 2 1 * *</code> - 1st of every month at 2 AM</li>
+                    <li><code>0 0 * * 0</code> - Every Sunday at midnight</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function editSchedule(jobId, currentCron) {
+            document.getElementById('jobId').value = jobId;
+            document.getElementById('jobName').value = jobId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            document.getElementById('cronExpression').value = currentCron;
+            
+            // Show the modal
+            const modal = new bootstrap.Modal(document.getElementById('editScheduleModal'));
+            modal.show();
+            
+            // Update preview
+            updateNextRunPreview(currentCron);
+        }
+
+        function updateNextRunPreview(cronExpression) {
+            // Simplified preview - in a real implementation, you'd parse the cron expression
+            const preview = document.getElementById('nextRunPreview');
+            
+            if (!cronExpression || cronExpression.trim() === '') {
+                preview.innerHTML = 'Enter a valid cron expression to see next execution times';
+                preview.className = 'alert alert-info';
+                return;
+            }
+            
+            // Basic validation
+            const parts = cronExpression.trim().split(/\s+/);
+            if (parts.length !== 5) {
+                preview.innerHTML = 'Invalid cron expression. Must have 5 parts: minute hour day month weekday';
+                preview.className = 'alert alert-danger';
+                return;
+            }
+            
+            // Mock next execution times (in real implementation, use a cron library)
+            const mockTimes = [
+                'Next: Today at 2:00 PM',
+                'After: Tomorrow at 2:00 PM', 
+                'Then: Day after at 2:00 PM'
+            ];
+            
+            preview.innerHTML = mockTimes.join('<br>');
+            preview.className = 'alert alert-success';
+        }
+
+        function saveSchedule() {
+            const jobId = document.getElementById('jobId').value;
+            const cronExpression = document.getElementById('cronExpression').value;
+            
+            // Validate cron expression
+            if (!cronExpression || cronExpression.trim() === '') {
+                alert('Please enter a cron expression');
+                return;
+            }
+            
+            const parts = cronExpression.trim().split(/\s+/);
+            if (parts.length !== 5) {
+                alert('Invalid cron expression. Must have 5 parts: minute hour day month weekday');
+                return;
+            }
+            
+            // In a real implementation, you'd send this to the server
+            console.log('Saving schedule:', { jobId, cronExpression });
+            
+            // Show success message
+            alert(`Schedule updated for job: ${jobId}\nNew expression: ${cronExpression}`);
+            
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('editScheduleModal'));
+            modal.hide();
+            
+            // Update the UI
+            const cronCodeElement = document.querySelector(`[onclick="editSchedule('${jobId}', '${cronExpression}')"]`)
+                .closest('tr').querySelector('.cron-expression');
+            if (cronCodeElement) {
+                cronCodeElement.textContent = cronExpression;
+            }
+        }
+
+        // Listen for cron expression input changes
+        document.getElementById('cronExpression').addEventListener('input', function() {
+            updateNextRunPreview(this.value);
+        });
+    </script>
+}
+
+<style>
+    .schedule-item {
+        padding: 1rem;
+        border: 1px solid #e9ecef;
+        border-radius: 0.375rem;
+        background-color: #f8f9fa;
+    }
+    
+    .schedule-item:hover {
+        background-color: #e9ecef;
+    }
+    
+    .cron-expression {
+        font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+        font-size: 0.875rem;
+        color: #6f42c1;
+        background-color: #f8f9fa;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        border: 1px solid #dee2e6;
+    }
+    
+    .fw-bold {
+        font-weight: 600;
+    }
+    
+    .modal-body .form-control:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+</style>

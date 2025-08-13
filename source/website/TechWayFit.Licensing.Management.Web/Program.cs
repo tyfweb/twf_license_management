@@ -20,6 +20,9 @@ using TechWayFit.Licensing.Management.Web.Extensions;
 using TechWayFit.Licensing.Management.Web.Middleware;
 using TechWayFit.Licensing.Management.Core.Contracts;
 using TechWayFit.Licensing.Management.Infrastructure.SqlServer.Extensions;
+using Hangfire;
+using Hangfire.MemoryStorage;
+using TechWayFit.Licensing.Management.Web.Services.Jobs;
 // OPERATIONS DASHBOARD MIDDLEWARE - DISABLED FOR CORE FOCUS
 // using TechWayFit.Licensing.Management.Web.Middleware;
 
@@ -90,6 +93,16 @@ try
     // This will create a local licensing.db file that you can open with any SQLite browser
     builder.Services.AddSqliteInfrastructure("licensing.db");
     builder.Services.AddHttpContextAccessor();
+
+    // Configure Hangfire for job scheduling
+    builder.Services.AddHangfire(configuration => configuration
+        .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+        .UseSimpleAssemblyNameTypeSerializer()
+        .UseRecommendedSerializerSettings()
+        .UseMemoryStorage());
+    
+    // Add Hangfire server
+    builder.Services.AddHangfireServer();
 
         // Register tenant scope infrastructure for system operations
     builder.Services.AddSingleton<ITenantScope, TenantScope>();
@@ -175,6 +188,18 @@ try
     app.UseStaticFiles();
     app.UseRouting();
 
+    // Add Hangfire Dashboard (only in development or for admin users)
+    app.UseHangfireDashboard("/hangfire", new DashboardOptions
+    {
+        Authorization = new[] { new DashboardAuthorizationFilter() },
+        AppPath = "/System", // Custom app path - links back to your System dashboard
+        DashboardTitle = "TechWayFit Licensing - Job Dashboard",
+        DisplayStorageConnectionString = false,
+        DarkModeEnabled = false,
+        DefaultRecordsPerPage = 20,
+        StatsPollingInterval = 5000 // 5 second refresh
+    });
+
     // Add session middleware (must be before authentication)
     app.UseSession();
 
@@ -185,6 +210,9 @@ try
     app.MapControllerRoute(
         name: "default",
         pattern: "{controller=Home}/{action=Index}/{id?}");
+
+    // Configure recurring jobs
+    ConfigureRecurringJobs();
 
     Log.Information("TechWayFit Licensing Management Web Application started successfully");
 
@@ -198,6 +226,69 @@ finally
 {
     Log.Information("TechWayFit Licensing Management Web Application shutting down");
     Log.CloseAndFlush();
+}
+
+/// <summary>
+/// Configure Hangfire recurring jobs
+/// </summary>
+static void ConfigureRecurringJobs()
+{
+    Log.Information("Configuring Hangfire recurring jobs");
+    
+    // License management jobs
+    RecurringJob.AddOrUpdate<LicenseJobService>(
+        "license-expiry-check",
+        service => service.CheckExpiringLicensesAsync(),
+        Cron.Daily(9)); // Run daily at 9 AM
+    
+    RecurringJob.AddOrUpdate<LicenseJobService>(
+        "deactivate-expired-licenses",
+        service => service.DeactivateExpiredLicensesAsync(),
+        Cron.Daily(2)); // Run daily at 2 AM
+    
+    RecurringJob.AddOrUpdate<LicenseJobService>(
+        "license-usage-reports",
+        service => service.GenerateLicenseUsageReportsAsync(),
+        Cron.Weekly(DayOfWeek.Monday, 8)); // Run weekly on Monday at 8 AM
+    
+    // Audit management jobs
+    RecurringJob.AddOrUpdate<AuditJobService>(
+        "audit-cleanup",
+        service => service.CleanupOldAuditEntriesAsync(),
+        Cron.Weekly(DayOfWeek.Sunday, 3)); // Run weekly on Sunday at 3 AM
+    
+    RecurringJob.AddOrUpdate<AuditJobService>(
+        "audit-archival",
+        service => service.ArchiveOldAuditEntriesAsync(),
+        Cron.Monthly(1, 1)); // Run monthly on the 1st at 1 AM
+    
+    RecurringJob.AddOrUpdate<AuditJobService>(
+        "audit-summary-report",
+        service => service.GenerateAuditSummaryReportAsync(),
+        Cron.Weekly(DayOfWeek.Monday, 10)); // Run weekly on Monday at 10 AM
+    
+    // System maintenance jobs
+    RecurringJob.AddOrUpdate<SystemMaintenanceJobService>(
+        "database-maintenance",
+        service => service.PerformDatabaseMaintenanceAsync(),
+        Cron.Weekly(DayOfWeek.Saturday, 1)); // Run weekly on Saturday at 1 AM
+    
+    RecurringJob.AddOrUpdate<SystemMaintenanceJobService>(
+        "cleanup-temp-files",
+        service => service.CleanupTemporaryFilesAsync(),
+        Cron.Daily(4)); // Run daily at 4 AM
+    
+    RecurringJob.AddOrUpdate<SystemMaintenanceJobService>(
+        "system-health-monitoring",
+        service => service.MonitorSystemHealthAsync(),
+        Cron.Hourly()); // Run every hour
+    
+    RecurringJob.AddOrUpdate<SystemMaintenanceJobService>(
+        "performance-reports",
+        service => service.GeneratePerformanceReportAsync(),
+        Cron.Daily(7)); // Run daily at 7 AM
+    
+    Log.Information("Hangfire recurring jobs configured successfully");
 }
 
 static void RegisterServices(WebApplicationBuilder builder)
@@ -247,4 +338,9 @@ static void RegisterServices(WebApplicationBuilder builder)
     builder.Services.AddScoped<IConsumerAccountWorkflowService, ConsumerAccountWorkflowService>();
     builder.Services.AddScoped<IEnterpriseProductWorkflowService, EnterpriseProductWorkflowService>();
     builder.Services.AddScoped<IProductLicenseWorkflowService, ProductLicenseWorkflowService>();
+    
+    // Register Hangfire job services
+    builder.Services.AddScoped<LicenseJobService>();
+    builder.Services.AddScoped<AuditJobService>();
+    builder.Services.AddScoped<SystemMaintenanceJobService>();
 }

@@ -80,52 +80,27 @@
             </div>
         </div>
     </div>
-
-    <!-- Quick Actions -->
-    <div class="row mb-3">
-        <div class="col-12">
-            <div class="sidebar-section">
-                <div class="section-header">
-                    <h5><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
-                </div>
-                <div class="section-content">
-                    <div class="row g-2">
-                        <div class="col-sm-6 col-lg-3">
-                            <button type="button" class="btn btn-outline-primary w-100" onclick="exportProducts()">
-                                <i class="fas fa-download me-2"></i>Export Products
-                            </button>
-                        </div>
-                        <div class="col-sm-6 col-lg-3">
-                            <button type="button" class="btn btn-outline-secondary w-100" onclick="importProducts()">
-                                <i class="fas fa-upload me-2"></i>Import Products
-                            </button>
-                        </div>
-                        <div class="col-sm-6 col-lg-3">
-                            <button type="button" class="btn btn-outline-info w-100" onclick="bulkUpdate()">
-                                <i class="fas fa-edit me-2"></i>Bulk Update
-                            </button>
-                        </div>
-                        <div class="col-sm-6 col-lg-3">
-                            <button type="button" class="btn btn-outline-success w-100" onclick="generateReport()">
-                                <i class="fas fa-chart-bar me-2"></i>Generate Report
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    
 
     <!-- Search and Filter Section -->
     <div class="row g-2 mb-3">
         <div class="col-12">
+
+        </div>
+    </div>
+
+    <!-- Product Directory -->
+    <div class="row">
+        <div class="col-8">
             <div class="search-section">
                 <form method="get" class="d-flex gap-2 align-items-end">
                     <div class="flex-grow-1">
-                        <input type="text" name="searchTerm" class="form-control" placeholder="Search products..." value="@Model.SearchTerm">
+                        <input type="text" name="searchTerm" class="form-control" placeholder="Search products..."
+                            value="@Model.SearchTerm">
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="showInactive" id="showInactive" value="true" @(Model.ShowInactiveProducts ? "checked" : "")>
+                        <input class="form-check-input" type="checkbox" name="showInactive" id="showInactive"
+                            value="true" @(Model.ShowInactiveProducts ? "checked" : "")>
                         <label class="form-check-label" for="showInactive">
                             Include inactive products
                         </label>
@@ -137,21 +112,17 @@
                     </div>
                 </form>
             </div>
-        </div>
-    </div>
-
-    <!-- Product Directory -->
-    <div class="row">
-        <div class="col-12">
-            <div class="edit-section">
+            <div class="edit-section my-3">
                 <div class="section-header">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5><i class="fas fa-cube me-2"></i>Product Directory</h5>
                         <div class="btn-group" role="group" aria-label="View toggle">
-                            <button type="button" class="btn btn-outline-secondary btn-sm active" id="gridViewBtn" onclick="switchView('grid')">
+                            <button type="button" class="btn btn-outline-secondary btn-sm active" id="gridViewBtn"
+                                onclick="switchView('grid')">
                                 <i class="fas fa-th-large me-1"></i>Grid
                             </button>
-                            <button type="button" class="btn btn-outline-secondary btn-sm" id="listViewBtn" onclick="switchView('list')">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="listViewBtn"
+                                onclick="switchView('list')">
                                 <i class="fas fa-list me-1"></i>List
                             </button>
                         </div>
@@ -165,7 +136,7 @@
                             <div class="row g-2">
                                 @foreach (var product in Model.Products)
                                 {
-                                    <div class="col-sm-6 col-lg-4 col-xl-3">
+                                    <div class="col-sm-6 col-lg-6 col-xl-4">
                                         <div class="product-card">
                                             <div class="product-card-header">
                                                 <div class="product-info">
@@ -175,7 +146,7 @@
                                                 </div>
                                                 @if (!string.IsNullOrEmpty(product.Version))
                                                 {
-                                                    <span class="badge bg-primary">v@product.Version</span>
+                                                    <span class="badge bg-primary">@string.Format("v{0}", product.Version)</span>
                                                 }
                                                 else
                                                 {
@@ -186,7 +157,8 @@
                                                 <div class="product-detail">
                                                     <label class="detail-label">Product Type</label>
                                                     <div class="detail-value">
-                                                        <i class="fas fa-tag me-1"></i>@(product.ProductType != default(ProductType) ? product.ProductType.ToString() : "Standard")
+                                                        <i class="fas fa-tag me-1"></i>
+                                                        @(product.ProductType != default(ProductType) ? product.ProductType.ToString() : "Standard")
                                                     </div>
                                                 </div>
                                                 <div class="product-detail">
@@ -204,23 +176,24 @@
                                             </div>
                                             <div class="product-card-actions">
                                                 <div class="d-flex justify-content-between gap-1">
-                                                    <a href="@Url.Action("Details", "Product", new { id = product.ProductId })" class="btn btn-sm btn-outline-primary flex-fill text-center">
+                                                    <a href="@Url.Action("Details", "Product", new { id = product.ProductId })"
+                                                        class="btn btn-sm btn-outline-primary flex-fill text-center">
                                                         <i class="fas fa-eye"></i>
                                                         <span class="d-none d-lg-inline ms-1">View</span>
                                                     </a>
-                                                    <a href="@Url.Action("Edit", "Product", new { id = product.ProductId })" class="btn btn-sm btn-outline-secondary flex-fill text-center">
+                                                    <a href="@Url.Action("Edit", "Product", new { id = product.ProductId })"
+                                                        class="btn btn-sm btn-outline-secondary flex-fill text-center">
                                                         <i class="fas fa-edit"></i>
                                                         <span class="d-none d-lg-inline ms-1">Edit</span>
-                                                    </a>
-                                                    <a href="@Url.Action("EditEnhanced", "Product", new { id = product.ProductId })" class="btn btn-sm btn-outline-warning flex-fill text-center" title="Enhanced Management">
-                                                        <i class="fas fa-cogs"></i>
-                                                        <span class="d-none d-lg-inline ms-1">Manage</span>
-                                                    </a>
-                                                    <button type="button" class="btn btn-sm btn-outline-info flex-fill text-center" onclick="viewVersions('@product.ProductId')">
+                                                    </a> 
+                                                    <a href="@Url.Action("Versions", "Product", new { id = product.ProductId })"
+                                                        class="btn btn-sm btn-outline-info flex-fill text-center">
                                                         <i class="fas fa-code-branch"></i>
                                                         <span class="d-none d-lg-inline ms-1">Versions</span>
-                                                    </button>
-                                                    <button type="button" class="btn btn-sm btn-outline-danger flex-fill text-center" onclick="confirmDelete('@product.ProductId', '@product.ProductName')">
+                                                    </a>
+                                                    <button type="button"
+                                                        class="btn btn-sm btn-outline-danger flex-fill text-center"
+                                                        onclick="confirmDelete('@product.ProductId', '@product.ProductName')">
                                                         <i class="fas fa-trash"></i>
                                                         <span class="d-none d-lg-inline ms-1">Delete</span>
                                                     </button>
@@ -238,9 +211,7 @@
                                 <table class="table table-hover">
                                     <thead class="table-light">
                                         <tr>
-                                            <th>Product Name</th>
-                                            <th>Version</th>
-                                            <th>Type</th>
+                                            <th>Product Name</th> 
                                             <th>Tiers</th>
                                             <th>Licenses</th>
                                             <th>Features</th>
@@ -256,32 +227,28 @@
                                                     <div class="d-flex align-items-center">
                                                         <i class="fas fa-cube me-2 text-muted"></i>
                                                         <div>
-                                                            <div class="fw-semibold">@product.ProductName</div>
-                                                            <small class="text-muted">ID: @product.ProductId</small>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td>
+                                                            <div class="fw-semibold">@product.ProductName
                                                     @if (!string.IsNullOrEmpty(product.Version))
                                                     {
-                                                        <span class="badge bg-primary">v@product.Version</span>
+                                                        <small class="badge rounded-pill bg-primary float-end">@string.Format("v{0}", product.Version)</small>
                                                     }
                                                     else
                                                     {
                                                         <span class="text-muted">-</span>
                                                     }
+                                                            </div>
+                                                            <small class="text-muted">ID: @product.ProductId</small>
+                                                        </div>
+                                                    </div>
+                                                </td>                                                
+                                                <td>
+                                                     @product.TierCount
                                                 </td>
                                                 <td>
-                                                    <span class="badge bg-info">@(product.ProductType != default(ProductType) ? product.ProductType.ToString() : "Standard")</span>
+                                                     @product.LicenseCount 
                                                 </td>
                                                 <td>
-                                                    <span class="badge bg-secondary rounded-pill">@product.TierCount</span>
-                                                </td>
-                                                <td>
-                                                    <span class="badge bg-primary rounded-pill">@product.LicenseCount</span>
-                                                </td>
-                                                <td>
-                                                    <span class="badge bg-success rounded-pill">@product.FeatureCount</span>
+                                                    @product.FeatureCount 
                                                 </td>
                                                 <td>
                                                     @if (product.IsActive)
@@ -295,19 +262,22 @@
                                                 </td>
                                                 <td>
                                                     <div class="btn-group" role="group">
-                                                        <a href="@Url.Action("Details", "Product", new { id = product.ProductId })" class="btn btn-outline-primary btn-sm" title="View Details">
+                                                        <a href="@Url.Action("Details", "Product", new { id = product.ProductId })"
+                                                            class="btn btn-outline-primary btn-sm" title="View Details">
                                                             <i class="fas fa-eye"></i>
                                                         </a>
-                                                        <a href="@Url.Action("Edit", "Product", new { id = product.ProductId })" class="btn btn-outline-secondary btn-sm" title="Edit">
+                                                        <a href="@Url.Action("Edit", "Product", new { id = product.ProductId })"
+                                                            class="btn btn-outline-secondary btn-sm" title="Edit">
                                                             <i class="fas fa-edit"></i>
                                                         </a>
-                                                        <a href="@Url.Action("EditEnhanced", "Product", new { id = product.ProductId })" class="btn btn-outline-warning btn-sm" title="Enhanced Management">
-                                                            <i class="fas fa-cogs"></i>
-                                                        </a>
-                                                        <button type="button" class="btn btn-outline-info btn-sm" title="View Versions" onclick="viewVersions('@product.ProductId')">
+                                                        <a href="@Url.Action("Versions", "Product", new { id = product.ProductId })"
+                                                            class="btn btn-outline-info btn-sm"
+                                                            title="View Versions">
                                                             <i class="fas fa-code-branch"></i>
-                                                        </button>
-                                                        <button type="button" class="btn btn-outline-danger btn-sm" title="Delete" onclick="confirmDelete('@product.ProductId', '@product.ProductName')">
+                                                        </a>
+                                                        <button type="button" class="btn btn-outline-danger btn-sm"
+                                                            title="Delete"
+                                                            onclick="confirmDelete('@product.ProductId', '@product.ProductName')">
                                                             <i class="fas fa-trash"></i>
                                                         </button>
                                                     </div>
@@ -342,6 +312,39 @@
                 </div>
             </div>
         </div>
+
+        <div class="col-4">
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <h5><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+                </div>
+                <div class="section-content">
+                    <div class="row g-2">
+                        <div class="row my-2">
+                            <button type="button" class="btn btn-outline-primary w-100" onclick="exportProducts()">
+                                <i class="fas fa-download me-2"></i>Export Products
+                            </button>
+                        </div>
+                        <div class="row my-2">
+                            <button type="button" class="btn btn-outline-secondary w-100" onclick="importProducts()">
+                                <i class="fas fa-upload me-2"></i>Import Products
+                            </button>
+                        </div>
+                        <div class="row my-2">
+                            <button type="button" class="btn btn-outline-info w-100" onclick="bulkUpdate()">
+                                <i class="fas fa-edit me-2"></i>Bulk Update
+                            </button>
+                        </div>
+                        <div class="row my-2">
+                            <button type="button" class="btn btn-outline-success w-100" onclick="generateReport()">
+                                <i class="fas fa-chart-bar me-2"></i>Generate Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </div>
 </div>
 
@@ -359,7 +362,8 @@
                 <p>Are you sure you want to delete the product "<strong id="deleteProductName"></strong>"?</p>
                 <div class="alert alert-warning">
                     <i class="fas fa-exclamation-triangle me-2"></i>
-                    <strong>Warning:</strong> This action cannot be undone and will affect all associated licenses and consumers.
+                    <strong>Warning:</strong> This action cannot be undone and will affect all associated licenses and
+                    consumers.
                 </div>
             </div>
             <div class="modal-footer">
@@ -400,7 +404,7 @@
         }
 
         // Initialize view based on saved preference
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const savedView = localStorage.getItem('productViewType') || 'grid';
             switchView(savedView);
         });
@@ -411,9 +415,7 @@
             new bootstrap.Modal(document.getElementById('deleteModal')).show();
         }
 
-        function viewVersions(productId) {
-            window.location.href = '@Url.Action("Details", "Product")/' + productId;
-        }
+         
 
         function exportProducts() {
             alert('Export functionality will be implemented in future updates.');
@@ -432,4 +434,3 @@
         }
     </script>
 }
-

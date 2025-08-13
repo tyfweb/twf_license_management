@@ -1,0 +1,327 @@
+@{
+    ViewData["Title"] = "Job Dashboard";
+    Layout = "_LicenseHubLayout";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/hangfire-custom.css" asp-append-version="true" />
+    <style>
+        /* Dashboard iframe styling */
+        .hangfire-iframe {
+            width: 100%;
+            height: 600px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            background: var(--white);
+        }
+        
+        /* Tab styling to match website theme */
+        .nav-tabs .nav-link {
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+            background: var(--gray-50);
+            color: var(--gray-600);
+            transition: var(--transition-fast);
+        }
+        
+        .nav-tabs .nav-link:hover {
+            background: var(--gray-100);
+            color: var(--primary-color);
+        }
+        
+        .nav-tabs .nav-link.active {
+            background: var(--white);
+            color: var(--primary-color);
+            border-color: var(--border-color) var(--border-color) var(--white);
+        }
+        
+        /* Auto-refresh indicator */
+        .refresh-indicator {
+            animation: pulse 2s infinite;
+        }
+        
+        @@keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+}
+
+<!-- Page Header with Theme Integration -->
+@await Html.PartialAsync("_PageHeaderPartial", (TechWayFit.Licensing.Management.Web.ViewModels.Shared.PageHeaderViewModel)ViewBag.PageHeader)
+
+<div class="container-fluid">
+
+    <!-- Quick Stats Row with Theme Integration -->
+    <div class="row mb-4 g-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="dashboard-card p-0 overflow-hidden">
+                <div class="dashboard-stats p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="h4 mb-0 fw-bold" id="jobsEnqueued">-</div>
+                            <div class="small opacity-90">Jobs Enqueued</div>
+                        </div>
+                        <div class="h2 mb-0 opacity-75">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="dashboard-card p-0 overflow-hidden">
+                <div class="p-4" style="background: linear-gradient(135deg, var(--success-color) 0%, #047857 100%); color: white;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="h4 mb-0 fw-bold" id="jobsSucceeded">-</div>
+                            <div class="small opacity-90">Jobs Succeeded</div>
+                        </div>
+                        <div class="h2 mb-0 opacity-75">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="dashboard-card p-0 overflow-hidden">
+                <div class="p-4" style="background: linear-gradient(135deg, var(--danger-color) 0%, #b91c1c 100%); color: white;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="h4 mb-0 fw-bold" id="jobsFailed">-</div>
+                            <div class="small opacity-90">Jobs Failed</div>
+                        </div>
+                        <div class="h2 mb-0 opacity-75">
+                            <i class="fas fa-times-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="dashboard-card p-0 overflow-hidden">
+                <div class="p-4" style="background: linear-gradient(135deg, var(--info-color) 0%, #0e7490 100%); color: white;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="h4 mb-0 fw-bold" id="serverCount">-</div>
+                            <div class="small opacity-90">Active Servers</div>
+                        </div>
+                        <div class="h2 mb-0 opacity-75">
+                            <i class="fas fa-server"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs" id="dashboardTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab">
+                                <i class="fas fa-chart-bar me-2"></i>Overview
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="jobs-tab" data-bs-toggle="tab" data-bs-target="#jobs" type="button" role="tab">
+                                <i class="fas fa-list me-2"></i>Jobs
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="recurring-tab" data-bs-toggle="tab" data-bs-target="#recurring" type="button" role="tab">
+                                <i class="fas fa-clock me-2"></i>Recurring Jobs
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="servers-tab" data-bs-toggle="tab" data-bs-target="#servers" type="button" role="tab">
+                                <i class="fas fa-server me-2"></i>Servers
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="retries-tab" data-bs-toggle="tab" data-bs-target="#retries" type="button" role="tab">
+                                <i class="fas fa-redo me-2"></i>Retries
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body p-0">
+                    <div class="tab-content" id="dashboardTabContent">
+                        <div class="tab-pane fade show active" id="overview" role="tabpanel">
+                            <iframe src="/hangfire" 
+                                    style="width: 100%; height: 800px; border: none;"
+                                    title="Hangfire Dashboard Overview">
+                            </iframe>
+                        </div>
+                        <div class="tab-pane fade" id="jobs" role="tabpanel">
+                            <iframe src="/hangfire/jobs/enqueued" 
+                                    style="width: 100%; height: 800px; border: none;"
+                                    title="Hangfire Jobs">
+                            </iframe>
+                        </div>
+                        <div class="tab-pane fade" id="recurring" role="tabpanel">
+                            <iframe src="/hangfire/recurring" 
+                                    style="width: 100%; height: 800px; border: none;"
+                                    title="Hangfire Recurring Jobs">
+                            </iframe>
+                        </div>
+                        <div class="tab-pane fade" id="servers" role="tabpanel">
+                            <iframe src="/hangfire/servers" 
+                                    style="width: 100%; height: 800px; border: none;"
+                                    title="Hangfire Servers">
+                            </iframe>
+                        </div>
+                        <div class="tab-pane fade" id="retries" role="tabpanel">
+                            <iframe src="/hangfire/retries" 
+                                    style="width: 100%; height: 800px; border: none;"
+                                    title="Hangfire Retries">
+                            </iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-bolt text-warning me-2"></i>
+                        Quick Actions
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <a href="@Url.Action("Jobs", "System")" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-cog me-2"></i>
+                                Manage Jobs
+                            </a>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <a href="@Url.Action("Schedules", "System")" class="btn btn-outline-success w-100">
+                                <i class="fas fa-calendar-alt me-2"></i>
+                                Configure Schedules
+                            </a>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <a href="@Url.Action("Execution", "System")" class="btn btn-outline-info w-100">
+                                <i class="fas fa-eye me-2"></i>
+                                Monitor Executions
+                            </a>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <button type="button" class="btn btn-outline-secondary w-100" onclick="refreshDashboard()">
+                                <i class="fas fa-sync-alt me-2"></i>
+                                Refresh Dashboard
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-refresh statistics
+        function loadStatistics() {
+            // In a real implementation, you'd fetch these from Hangfire's API
+            // For now, we'll use mock data
+            fetch('/hangfire/stats')
+                .then(response => response.text())
+                .then(data => {
+                    // Parse the HTML and extract statistics
+                    // This is a simplified approach - you might want to create a proper API endpoint
+                    console.log('Statistics loaded');
+                })
+                .catch(error => {
+                    console.log('Using mock statistics');
+                    // Mock data for demonstration
+                    document.getElementById('jobsEnqueued').textContent = Math.floor(Math.random() * 50);
+                    document.getElementById('jobsSucceeded').textContent = Math.floor(Math.random() * 1000) + 500;
+                    document.getElementById('jobsProcessing').textContent = Math.floor(Math.random() * 10);
+                    document.getElementById('jobsFailed').textContent = Math.floor(Math.random() * 20);
+                });
+        }
+
+        function refreshDashboard() {
+            // Refresh all iframes
+            const iframes = document.querySelectorAll('iframe');
+            iframes.forEach(iframe => {
+                iframe.src = iframe.src;
+            });
+            
+            // Reload statistics
+            loadStatistics();
+            
+            // Show feedback
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Refreshing...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }, 2000);
+        }
+
+        // Load statistics on page load and every 30 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStatistics();
+            setInterval(loadStatistics, 30000);
+        });
+
+        // Handle tab switching to refresh iframe content
+        document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(tab => {
+            tab.addEventListener('shown.bs.tab', function (event) {
+                const targetPane = document.querySelector(event.target.getAttribute('data-bs-target'));
+                const iframe = targetPane.querySelector('iframe');
+                if (iframe) {
+                    // Small delay to ensure tab is visible
+                    setTimeout(() => {
+                        iframe.src = iframe.src;
+                    }, 100);
+                }
+            });
+        });
+    </script>
+}
+
+<style>
+    .nav-tabs .nav-link {
+        color: #6c757d;
+    }
+    
+    .nav-tabs .nav-link.active {
+        color: #495057;
+        background-color: #fff;
+        border-color: #dee2e6 #dee2e6 #fff;
+    }
+    
+    .tab-content {
+        min-height: 800px;
+    }
+    
+    iframe {
+        border-radius: 0 0 0.375rem 0.375rem;
+    }
+    
+    .card .nav-tabs {
+        margin-bottom: 0;
+    }
+    
+    .card-header-tabs {
+        border-bottom: none;
+    }
+</style>

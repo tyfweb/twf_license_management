@@ -1,0 +1,429 @@
+@{
+    ViewData["Title"] = "Scheduled Jobs Management"; 
+}
+
+<div class="container-fluid">
+    <!-- Action Bar -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0">
+                                <i class="fas fa-clock text-primary me-2"></i>
+                                Scheduled Jobs Management
+                            </h5>
+                            <small class="text-muted">Monitor and control all scheduled background jobs</small>
+                        </div>
+                        <div class="btn-group">
+                            <a href="@Url.Action("Dashboard", "System")" class="btn btn-outline-primary" target="_blank">
+                                <i class="fas fa-tachometer-alt"></i> Hangfire Dashboard
+                            </a>
+                            <button type="button" class="btn btn-outline-success" onclick="refreshJobStatus()">
+                                <i class="fas fa-sync-alt"></i> Refresh Status
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- License Management Jobs -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-key text-primary me-2"></i>
+                        License Management Jobs
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Job Name</th>
+                                    <th>Description</th>
+                                    <th>Schedule</th>
+                                    <th>Last Run</th>
+                                    <th>Next Run</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                                            <span class="fw-semibold">License Expiry Check</span>
+                                        </div>
+                                    </td>
+                                    <td>Check for licenses expiring within the next 30 days</td>
+                                    <td><code>0 9 * * *</code><br><small class="text-muted">Daily at 9:00 AM</small></td>
+                                    <td>2 hours ago</td>
+                                    <td>In 22 hours</td>
+                                    <td><span class="badge bg-success">Active</span></td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" onclick="triggerJob('license-expiry-check')" title="Run Now">
+                                                <i class="fas fa-play"></i>
+                                            </button>
+                                            <button class="btn btn-outline-warning" onclick="toggleJob('license-expiry-check', false)" title="Disable">
+                                                <i class="fas fa-pause"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-times-circle text-danger me-2"></i>
+                                            <span class="fw-semibold">Deactivate Expired Licenses</span>
+                                        </div>
+                                    </td>
+                                    <td>Automatically deactivate licenses that have expired</td>
+                                    <td><code>0 2 * * *</code><br><small class="text-muted">Daily at 2:00 AM</small></td>
+                                    <td>6 hours ago</td>
+                                    <td>In 18 hours</td>
+                                    <td><span class="badge bg-success">Active</span></td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" onclick="triggerJob('deactivate-expired-licenses')" title="Run Now">
+                                                <i class="fas fa-play"></i>
+                                            </button>
+                                            <button class="btn btn-outline-warning" onclick="toggleJob('deactivate-expired-licenses', false)" title="Disable">
+                                                <i class="fas fa-pause"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-chart-bar text-info me-2"></i>
+                                            <span class="fw-semibold">License Usage Reports</span>
+                                        </div>
+                                    </td>
+                                    <td>Generate monthly usage reports for all licenses</td>
+                                    <td><code>0 6 1 * *</code><br><small class="text-muted">1st of month at 6:00 AM</small></td>
+                                    <td>15 days ago</td>
+                                    <td>In 15 days</td>
+                                    <td><span class="badge bg-success">Active</span></td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" onclick="triggerJob('license-usage-reports')" title="Run Now">
+                                                <i class="fas fa-play"></i>
+                                            </button>
+                                            <button class="btn btn-outline-warning" onclick="toggleJob('license-usage-reports', false)" title="Disable">
+                                                <i class="fas fa-pause"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audit & System Maintenance Jobs -->
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-clipboard-list text-success me-2"></i>
+                        Audit & Cleanup Jobs
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Job</th>
+                                    <th>Schedule</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-broom text-warning me-2"></i>
+                                            <span class="fw-semibold">Audit Cleanup</span>
+                                        </div>
+                                        <small class="text-muted d-block">Remove old audit entries</small>
+                                    </td>
+                                    <td><code>0 1 * * 0</code><br><small class="text-muted">Weekly</small></td>
+                                    <td><span class="badge bg-success">Active</span></td>
+                                    <td>
+                                        <button class="btn btn-outline-primary btn-sm" onclick="triggerJob('audit-cleanup')" title="Run Now">
+                                            <i class="fas fa-play"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-archive text-info me-2"></i>
+                                            <span class="fw-semibold">Audit Archive</span>
+                                        </div>
+                                        <small class="text-muted d-block">Archive old audit data</small>
+                                    </td>
+                                    <td><code>0 2 1 * *</code><br><small class="text-muted">Monthly</small></td>
+                                    <td><span class="badge bg-success">Active</span></td>
+                                    <td>
+                                        <button class="btn btn-outline-primary btn-sm" onclick="triggerJob('audit-archive')" title="Run Now">
+                                            <i class="fas fa-play"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-file-alt text-primary me-2"></i>
+                                            <span class="fw-semibold">Audit Summary</span>
+                                        </div>
+                                        <small class="text-muted d-block">Generate audit reports</small>
+                                    </td>
+                                    <td><code>0 8 * * 1</code><br><small class="text-muted">Monday</small></td>
+                                    <td><span class="badge bg-success">Active</span></td>
+                                    <td>
+                                        <button class="btn btn-outline-primary btn-sm" onclick="triggerJob('audit-summary')" title="Run Now">
+                                            <i class="fas fa-play"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-cog text-secondary me-2"></i>
+                        System Maintenance Jobs
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Job</th>
+                                    <th>Schedule</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-database text-primary me-2"></i>
+                                            <span class="fw-semibold">Database Maintenance</span>
+                                        </div>
+                                        <small class="text-muted d-block">Optimize database performance</small>
+                                    </td>
+                                    <td><code>0 3 * * 0</code><br><small class="text-muted">Weekly</small></td>
+                                    <td><span class="badge bg-success">Active</span></td>
+                                    <td>
+                                        <button class="btn btn-outline-primary btn-sm" onclick="triggerJob('database-maintenance')" title="Run Now">
+                                            <i class="fas fa-play"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-folder-open text-warning me-2"></i>
+                                            <span class="fw-semibold">File Cleanup</span>
+                                        </div>
+                                        <small class="text-muted d-block">Remove temporary files</small>
+                                    </td>
+                                    <td><code>0 4 * * *</code><br><small class="text-muted">Daily</small></td>
+                                    <td><span class="badge bg-success">Active</span></td>
+                                    <td>
+                                        <button class="btn btn-outline-primary btn-sm" onclick="triggerJob('file-cleanup')" title="Run Now">
+                                            <i class="fas fa-play"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-heartbeat text-success me-2"></i>
+                                            <span class="fw-semibold">Health Check</span>
+                                        </div>
+                                        <small class="text-muted d-block">Monitor system health</small>
+                                    </td>
+                                    <td><code>*/30 * * * *</code><br><small class="text-muted">Every 30 min</small></td>
+                                    <td><span class="badge bg-success">Active</span></td>
+                                    <td>
+                                        <button class="btn btn-outline-primary btn-sm" onclick="triggerJob('system-health-check')" title="Run Now">
+                                            <i class="fas fa-play"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Job Action Forms -->
+<form id="triggerJobForm" method="post" action="@Url.Action("TriggerJob", "System")" style="display: none;">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="jobName" id="triggerJobName" />
+</form>
+
+<form id="toggleJobForm" method="post" action="@Url.Action("ToggleJob", "System")" style="display: none;">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="jobId" id="toggleJobId" />
+    <input type="hidden" name="enable" id="toggleJobEnable" />
+</form>
+
+@section Scripts {
+    <script>
+        function triggerJob(jobName) {
+            if (confirm(`Are you sure you want to trigger the job: ${jobName}?`)) {
+                document.getElementById('triggerJobName').value = jobName;
+                document.getElementById('triggerJobForm').submit();
+            }
+        }
+
+        function toggleJob(jobId, enable) {
+            const action = enable ? 'enable' : 'disable';
+            if (confirm(`Are you sure you want to ${action} the job: ${jobId}?`)) {
+                document.getElementById('toggleJobId').value = jobId;
+                document.getElementById('toggleJobEnable').value = enable;
+                document.getElementById('toggleJobForm').submit();
+            }
+        }
+
+        function refreshJobStatus() {
+            // Show loading indicator
+            const refreshBtn = document.querySelector('[onclick="refreshJobStatus()"]');
+            const originalText = refreshBtn.innerHTML;
+            refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+            refreshBtn.disabled = true;
+
+            // Simulate API call to get job status
+            fetch('@Url.Action("GetJobStats", "System")')
+                .then(response => response.json())
+                .then(data => {
+                    // Update the UI with fresh data
+                    console.log('Job stats refreshed:', data);
+                    
+                    // Show success message
+                    showAlert('success', 'Job status refreshed successfully!');
+                })
+                .catch(error => {
+                    console.error('Error refreshing job status:', error);
+                    showAlert('danger', 'Error refreshing job status. Please try again.');
+                })
+                .finally(() => {
+                    // Restore button
+                    refreshBtn.innerHTML = originalText;
+                    refreshBtn.disabled = false;
+                });
+        }
+
+        function showAlert(type, message) {
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            
+            // Insert alert at the top of the content
+            const container = document.querySelector('.container-fluid');
+            const firstCard = container.querySelector('.card');
+            firstCard.insertAdjacentHTML('beforebegin', alertHtml);
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                const alert = container.querySelector('.alert');
+                if (alert) {
+                    alert.remove();
+                }
+            }, 5000);
+        }
+
+        // Auto-refresh every 30 seconds
+        setInterval(() => {
+            fetch('@Url.Action("GetJobStats", "System")')
+                .then(response => response.json())
+                .then(data => {
+                    // Silently update job status indicators
+                    console.log('Background refresh:', data);
+                })
+                .catch(error => {
+                    console.log('Background refresh failed:', error);
+                });
+        }, 30000);
+    </script>
+}
+
+<style>
+    .btn-group-sm .btn {
+        padding: 0.25rem 0.4rem;
+        font-size: 0.75rem;
+    }
+    
+    .table-sm th, .table-sm td {
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .fw-semibold {
+        font-weight: 600;
+    }
+    
+    .badge {
+        font-size: 0.7em;
+    }
+    
+    code {
+        font-size: 0.8em;
+        color: #6f42c1;
+        background-color: #f8f9fa;
+        padding: 0.125rem 0.25rem;
+        border-radius: 0.25rem;
+    }
+</style>

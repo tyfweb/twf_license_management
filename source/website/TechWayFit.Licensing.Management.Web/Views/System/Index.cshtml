@@ -1,0 +1,284 @@
+@{
+    ViewData["Title"] = "System Administration"; 
+}
+
+<div class="container-fluid">
+    <!-- System Overview Stats -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card stats-card-success">
+                <div class="stats-card-body">
+                    <div class="d-flex">
+                        <div class="stats-content flex-grow-1">
+                            <div class="stats-number">12</div>
+                            <div class="stats-label">Active Jobs</div>
+                        </div>
+                        <div class="stats-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card stats-card-info">
+                <div class="stats-card-body">
+                    <div class="d-flex">
+                        <div class="stats-content flex-grow-1">
+                            <div class="stats-number">8</div>
+                            <div class="stats-label">Running Jobs</div>
+                        </div>
+                        <div class="stats-icon">
+                            <i class="fas fa-play-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card stats-card-warning">
+                <div class="stats-card-body">
+                    <div class="d-flex">
+                        <div class="stats-content flex-grow-1">
+                            <div class="stats-number">3</div>
+                            <div class="stats-label">Failed Jobs</div>
+                        </div>
+                        <div class="stats-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card stats-card-primary">
+                <div class="stats-card-body">
+                    <div class="d-flex">
+                        <div class="stats-content flex-grow-1">
+                            <div class="stats-number">147</div>
+                            <div class="stats-label">Total Executions</div>
+                        </div>
+                        <div class="stats-icon">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Access Cards -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="icon-circle icon-circle-lg bg-primary text-white mb-3">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h5 class="card-title">Scheduled Jobs</h5>
+                    <p class="card-text">Manage and monitor all scheduled background jobs, configure execution parameters, and view job status.</p>
+                    <a href="@Url.Action("Jobs", "System")" class="btn btn-outline-primary">
+                        <i class="fas fa-cog"></i> Manage Jobs
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="icon-circle icon-circle-lg bg-success text-white mb-3">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <h5 class="card-title">Job Schedules</h5>
+                    <p class="card-text">Configure job schedules, set up recurring tasks, and manage cron expressions for automated execution.</p>
+                    <a href="@Url.Action("Schedules", "System")" class="btn btn-outline-success">
+                        <i class="fas fa-calendar-plus"></i> Configure Schedules
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="icon-circle icon-circle-lg bg-info text-white mb-3">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h5 class="card-title">Execution Monitor</h5>
+                    <p class="card-text">Real-time monitoring of job executions, view logs, performance metrics, and execution history.</p>
+                    <a href="@Url.Action("Execution", "System")" class="btn btn-outline-info">
+                        <i class="fas fa-eye"></i> View Executions
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="icon-circle icon-circle-lg bg-warning text-white mb-3">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </div>
+                    <h5 class="card-title">Hangfire Dashboard</h5>
+                    <p class="card-text">Access the complete Hangfire dashboard with custom layout integration and advanced monitoring features.</p>
+                    <div class="btn-group w-100">
+                        <a href="@Url.Action("Index", "HangfireDashboard")" class="btn btn-outline-warning btn-sm">
+                            <i class="fas fa-th-large"></i> Custom
+                        </a>
+                        <a href="@Url.Action("Dashboard", "System")" class="btn btn-outline-warning btn-sm" target="_blank">
+                            <i class="fas fa-external-link-alt"></i> Full
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity and System Status -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history text-primary me-2"></i>
+                        Recent Job Activity
+                    </h5>
+                    <a href="@Url.Action("Execution", "System")" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-external-link-alt"></i> View All
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Job Name</th>
+                                    <th>Status</th>
+                                    <th>Duration</th>
+                                    <th>Last Run</th>
+                                    <th>Next Run</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-sync text-primary me-2"></i>
+                                            License Cleanup
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-success">Completed</span></td>
+                                    <td>2.5s</td>
+                                    <td>2 minutes ago</td>
+                                    <td>In 58 minutes</td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-database text-info me-2"></i>
+                                            Database Backup
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-success">Completed</span></td>
+                                    <td>45.2s</td>
+                                    <td>1 hour ago</td>
+                                    <td>In 23 hours</td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-envelope text-warning me-2"></i>
+                                            Email Notifications
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-warning">Running</span></td>
+                                    <td>-</td>
+                                    <td>Running</td>
+                                    <td>Continuous</td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-chart-bar text-success me-2"></i>
+                                            Usage Analytics
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-danger">Failed</span></td>
+                                    <td>0.8s</td>
+                                    <td>3 hours ago</td>
+                                    <td>In 21 hours</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-server text-success me-2"></i>
+                        System Status
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span>Job Scheduler</span>
+                        <span class="badge bg-success">Active</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span>Database Connection</span>
+                        <span class="badge bg-success">Connected</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span>Background Services</span>
+                        <span class="badge bg-success">Running</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span>Memory Usage</span>
+                        <span class="badge bg-warning">68%</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span>CPU Usage</span>
+                        <span class="badge bg-success">12%</span>
+                    </div>
+                    <hr>
+                    <div class="text-center">
+                        <a href="@Url.Action("Monitoring", "System")" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-desktop"></i> System Monitor
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.icon-circle {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+.icon-circle-lg {
+    width: 4rem;
+    height: 4rem;
+}
+
+.bg-primary { background-color: var(--primary-color) !important; }
+.bg-success { background-color: var(--success-color) !important; }
+.bg-info { background-color: var(--info-color) !important; }
+.bg-warning { background-color: var(--warning-color) !important; }
+.bg-danger { background-color: var(--danger-color) !important; }
+</style>
