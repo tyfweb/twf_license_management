@@ -29,6 +29,7 @@ public class ProductTierService : IProductTierService
 
 
         await _unitOfWork.ProductTiers.AddAsync(tier);
+        await _unitOfWork.SaveChangesAsync();
 
         return tier;
     }

@@ -56,6 +56,7 @@ public class ProductTierEntity : AuditWorkflowEntity, IEntityMapper<ProductTier,
         ProductId = model.ProductId;
         Name = model.Name;
         Description = model.Description;
+        Price = model.Price;
         DisplayOrder = model.DisplayOrder;
         IsActive = model.Audit.IsActive;
         IsDeleted = model.Audit.IsDeleted;
@@ -89,6 +90,7 @@ public class ProductTierEntity : AuditWorkflowEntity, IEntityMapper<ProductTier,
             Name = this.Name,
             Description = this.Description,
             DisplayOrder = this.DisplayOrder,
+            Price = this.Price,
             Audit = new AuditInfo
             {
                 IsActive = this.IsActive,

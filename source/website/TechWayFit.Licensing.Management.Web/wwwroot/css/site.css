@@ -17,8 +17,6 @@
   --tw-danger-light: #f8d7da;
   --tw-info: #17a2b8;
   --tw-info-light: #d1ecf1;
-  --tw-light: #f8f9fa;
-  --tw-dark: #343a40;
   
   /* Background Colors */
   --tw-bg-primary: #ffffff;
@@ -28,32 +26,269 @@
   /* Text Colors */
   --tw-text-primary: #212529;
   --tw-text-secondary: #6c757d;
-  --tw-text-muted: #adb5bd;
-  
-  /* Spacing System */
-  --tw-spacing-xs: 0.25rem;  /* 4px */
-  --tw-spacing-sm: 0.5rem;   /* 8px */
-  --tw-spacing-md: 1rem;     /* 16px */
-  --tw-spacing-lg: 1.5rem;   /* 24px */
-  --tw-spacing-xl: 2rem;     /* 32px */
-  --tw-spacing-xxl: 3rem;    /* 48px */
+  --tw-text-muted: #8e9297;
   
   /* Border Radius */
-  --tw-radius-sm: 0.375rem;  /* 6px */
-  --tw-radius-md: 0.5rem;    /* 8px */
-  --tw-radius-lg: 0.75rem;   /* 12px */
-  --tw-radius-xl: 1rem;      /* 16px */
+  --tw-radius-sm: 0.25rem;
+  --tw-radius-md: 0.375rem;
+  --tw-radius-lg: 0.5rem;
+  
+  /* Spacing */
+  --tw-spacing-sm: 0.5rem;
+  --tw-spacing-md: 1rem;
+  --tw-spacing-lg: 1.5rem;
+  --tw-spacing-xl: 2rem;
   
   /* Shadows */
-  --tw-shadow-sm: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-  --tw-shadow-md: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
-  --tw-shadow-lg: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
-  --tw-shadow-xl: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+  --tw-shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --tw-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --tw-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
   
-  /* Transitions */
-  --tw-transition-fast: 0.15s ease;
-  --tw-transition-base: 0.3s ease;
-  --tw-transition-slow: 0.5s ease;
+/* Dashboard/Home Page Styles
+   ===================================================== */
+
+/* Stats Cards */
+.stats-card {
+    background: var(--tw-bg-primary);
+    border: 1px solid var(--tw-bg-tertiary);
+    border-radius: var(--tw-radius-md);
+    padding: var(--tw-spacing-md);
+    transition: all 0.3s ease;
+    box-shadow: var(--tw-shadow-sm);
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+    min-height: 90px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.stats-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--tw-secondary);
+    transition: all 0.3s ease;
+}
+
+.stats-card:hover {
+    box-shadow: var(--tw-shadow-md);
+    transform: translateY(-2px);
+    border-color: var(--tw-primary-light);
+}
+
+.stats-card.stats-card-success::before {
+    background: var(--tw-success);
+}
+
+.stats-card.stats-card-warning::before {
+    background: var(--tw-warning);
+}
+
+.stats-card.stats-card-danger::before {
+    background: var(--tw-danger);
+}
+
+.stats-card.stats-card-info::before {
+    background: var(--tw-info);
+}
+
+/* Stats Card Layout */
+.stats-row-1 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--tw-spacing-sm);
+    flex-wrap: wrap;
+    gap: var(--tw-spacing-sm);
+}
+
+.stats-row-2 {
+    display: flex;
+    align-items: center;
+    margin-top: auto;
+}
+
+.stats-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--tw-bg-secondary);
+    border-radius: var(--tw-radius-md);
+    color: var(--tw-primary);
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+.stats-card:hover .stats-icon {
+    transform: scale(1.05);
+}
+
+.stats-card-success .stats-icon {
+    background: var(--tw-success-light);
+    color: var(--tw-success);
+}
+
+.stats-card-warning .stats-icon {
+    background: var(--tw-warning-light);
+    color: var(--tw-warning);
+}
+
+.stats-card-danger .stats-icon {
+    background: var(--tw-danger-light);
+    color: var(--tw-danger);
+}
+
+.stats-card-info .stats-icon {
+    background: var(--tw-info-light);
+    color: var(--tw-info);
+}
+
+.stats-number {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--tw-text-primary);
+    line-height: 1;
+    margin-left: auto;
+    text-align: right;
+    min-width: 50px;
+    transition: color 0.3s ease;
+}
+
+.stats-card:hover .stats-number {
+    color: var(--tw-primary);
+}
+
+.stats-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--tw-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    line-height: 1.2;
+}
+
+/* Responsive improvements for stats cards */
+@media (max-width: 576px) {
+    .stats-card {
+        min-height: 80px;
+        padding: var(--tw-spacing-sm);
+    }
+    
+    .stats-number {
+        font-size: 1.5rem;
+        min-width: 45px;
+    }
+    
+    .stats-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
+    
+    .stats-row-1 {
+        margin-bottom: calc(var(--tw-spacing-sm) * 0.75);
+    }
+}
+
+/* Compact mode for medium screens */
+@media (min-width: 577px) and (max-width: 992px) {
+    .stats-card {
+        min-height: 85px;
+    }
+    
+    .stats-number {
+        font-size: 1.65rem;
+        min-width: 48px;
+    }
+}
+
+/* Health Status Items */
+.health-status-item {
+    margin-bottom: 1rem;
+}
+
+.health-status-item .health-label {
+    font-weight: 500;
+    color: var(--tw-text-primary);
+}
+
+.health-status-item .progress {
+    height: 4px !important;
+    background-color: var(--tw-bg-tertiary);
+}
+
+.health-status-item .progress-bar {
+    transition: width 0.3s ease;
+}
+
+/* Progress bars with consistent styling */
+.progress {
+    height: 4px;
+    background-color: var(--tw-bg-tertiary);
+    border-radius: var(--tw-radius-sm);
+}
+
+.progress-bar {
+    background-color: var(--tw-success);
+    border-radius: var(--tw-radius-sm);
+    transition: width 0.3s ease;
+}
+
+.progress-bar.bg-success {
+    background-color: var(--tw-success) !important;
+}
+
+/* Dashboard header styling */
+.header {
+    margin-bottom: var(--tw-spacing-lg);
+}
+
+.header h2 {
+    color: var(--tw-text-primary);
+    font-weight: 600;
+}
+
+.header .text-muted {
+    color: var(--tw-text-secondary) !important;
+}
+
+/* Quick actions and sidebar sections */
+.sidebar-section {
+    background: var(--tw-bg-primary);
+    border: 1px solid var(--tw-bg-tertiary);
+    border-radius: var(--tw-radius-md);
+    overflow: hidden;
+}
+
+.section-header {
+    background: var(--tw-bg-secondary);
+    padding: var(--tw-spacing-md);
+    border-bottom: 1px solid var(--tw-bg-tertiary);
+}
+
+.section-header h5 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--tw-text-primary);
+}
+
+.section-content {
+    padding: var(--tw-spacing-md);
+}
+
+/* Last updated timestamp styling */
+.border-top {
+    border-top: 1px solid var(--tw-bg-tertiary) !important;
 }
 
 /* =====================================================
@@ -243,16 +478,7 @@ h1, h2, h3, h4, h5, h6 {
   letter-spacing: 0.025em;
 }
 
-/* Custom background gradients - commented out to allow Bootstrap bg-* classes to work */
-/*
-.bg-success {
-  background: linear-gradient(135deg, var(--tw-success) 0%, #1e7e34 100%) !important;
-}
 
-.bg-primary {
-  background: linear-gradient(135deg, var(--tw-primary) 0%, var(--tw-primary-dark) 100%) !important;
-}
-*/
 
 /* =====================================================
    Custom Component Classes
@@ -431,24 +657,7 @@ h1, h2, h3, h4, h5, h6 {
     font-weight: 600;
 }
 
-/* Stats display - commented out to allow Bootstrap bg-* classes to work */
-/*
-.bg-primary, .bg-success, .bg-info, .bg-warning {
-    background: linear-gradient(135deg, var(--bs-primary) 0%, var(--bs-primary-dark) 100%) !important;
-}
 
-.bg-success {
-    background: linear-gradient(135deg, var(--bs-success) 0%, var(--bs-success-dark) 100%) !important;
-}
-
-.bg-info {
-    background: linear-gradient(135deg, var(--bs-info) 0%, var(--bs-info-dark) 100%) !important;
-}
-
-.bg-warning {
-    background: linear-gradient(135deg, var(--bs-warning) 0%, var(--bs-warning-dark) 100%) !important;
-}
-*/
 
 /* Optional: Custom gradient versions (use bg-gradient-* classes instead of bg-*) */
 .bg-gradient-primary {
@@ -524,4 +733,168 @@ h1, h2, h3, h4, h5, h6 {
     .feature-card .card-body {
         padding: 0.75rem;
     }
+}
+
+
+/* Health Status Items */
+.health-status-item {
+    margin-bottom: 1rem;
+}
+
+.health-status-item .health-label {
+    font-weight: 500;
+    color: var(--tw-text-primary);
+}
+
+.health-status-item .progress {
+    height: 4px !important;
+    background-color: var(--tw-bg-tertiary);
+}
+
+.health-status-item .progress-bar {
+    transition: width 0.3s ease;
+}
+
+/* Progress bars with consistent styling */
+.progress {
+    height: 4px;
+    background-color: var(--tw-bg-tertiary);
+    border-radius: var(--tw-radius-sm);
+}
+
+.progress-bar {
+    background-color: var(--tw-success);
+    border-radius: var(--tw-radius-sm);
+    transition: width 0.3s ease;
+}
+
+.progress-bar.bg-success {
+    background-color: var(--tw-success) !important;
+}
+
+/* Dashboard header styling */
+.header {
+    margin-bottom: var(--tw-spacing-lg);
+}
+
+.header h2 {
+    color: var(--tw-text-primary);
+    font-weight: 600;
+}
+
+.header .text-muted {
+    color: var(--tw-text-secondary) !important;
+}
+
+/* Quick actions and sidebar sections */
+.sidebar-section {
+    background: var(--tw-bg-primary);
+    border: 1px solid var(--tw-bg-tertiary);
+    border-radius: var(--tw-radius-md);
+    overflow: hidden;
+}
+
+.section-header {
+    background: var(--tw-bg-secondary);
+    padding: var(--tw-spacing-md);
+    border-bottom: 1px solid var(--tw-bg-tertiary);
+}
+
+.section-header h5 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--tw-text-primary);
+}
+
+.section-content {
+    padding: var(--tw-spacing-md);
+}
+
+/* Last updated timestamp styling */
+.border-top {
+    border-top: 1px solid var(--tw-bg-tertiary) !important;
+}
+/* Additional dashboard utilities */
+.dashboard-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--tw-spacing-md);
+    margin-bottom: var(--tw-spacing-lg);
+}
+
+.dashboard-col {
+    flex: 1;
+    min-width: 250px;
+}
+
+/* Improved card spacing for dashboard */
+.g-3 > * {
+    padding: calc(var(--tw-spacing-sm) * 0.75);
+}
+
+/* Animation for stats cards */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.stats-card {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.stats-card:nth-child(1) { animation-delay: 0.1s; }
+.stats-card:nth-child(2) { animation-delay: 0.2s; }
+.stats-card:nth-child(3) { animation-delay: 0.3s; }
+.stats-card:nth-child(4) { animation-delay: 0.4s; }
+
+/* Ensure proper spacing in container-fluid */
+.container-fluid.py-4 {
+    padding-top: var(--tw-spacing-lg) !important;
+    padding-bottom: var(--tw-spacing-lg) !important;
+}
+
+/* Fix animation selectors for proper column targeting */
+.col-sm-6:nth-child(1) .stats-card { animation-delay: 0.1s; }
+.col-sm-6:nth-child(2) .stats-card { animation-delay: 0.2s; }
+.col-sm-6:nth-child(3) .stats-card { animation-delay: 0.3s; }
+.col-sm-6:nth-child(4) .stats-card { animation-delay: 0.4s; }
+
+/* Override the previous animation delays */
+.stats-card:nth-child(1) { animation-delay: 0s; }
+.stats-card:nth-child(2) { animation-delay: 0s; }
+.stats-card:nth-child(3) { animation-delay: 0s; }
+.stats-card:nth-child(4) { animation-delay: 0s; }
+
+/* Force overrides for stats cards - higher specificity */
+.container-fluid .stats-card {
+    min-height: 90px !important;
+    padding: var(--tw-spacing-md) !important;
+}
+
+.container-fluid .stats-card .stats-icon {
+    width: 40px !important;
+    height: 40px !important;
+    font-size: 1.1rem !important;
+}
+
+.container-fluid .stats-card .stats-number {
+    font-size: 1.75rem !important;
+    min-width: 50px !important;
+}
+
+.container-fluid .stats-card .stats-row-1 {
+    margin-bottom: var(--tw-spacing-sm) !important;
+}
+
+/* Ensure Bootstrap grid doesn't add excessive padding */
+.row.g-3 > .col-sm-6,
+.row.g-3 > .col-lg-3 {
+    padding: 0.5rem !important;
 }

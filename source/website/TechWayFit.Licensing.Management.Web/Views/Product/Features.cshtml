@@ -39,118 +39,6 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
-        .feature-icon {
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(248, 249, 250, 0.8);
-            border-radius: 8px;
-            font-size: 1.2rem;
-        }
-
-        .feature-badges {
-            margin-top: 0.75rem;
-        }
-
-        .feature-badges .badge {
-            font-size: 0.7rem;
-        }
-
-        .sidebar-section {
-            background-color: #fff;
-            border-radius: 0.375rem;
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-            margin-bottom: 1.5rem;
-            overflow: hidden;
-        }
-
-        .section-header {
-            background-color: #f8f9fa;
-            border-bottom: 1px solid #e9ecef;
-            padding: 0.75rem 1rem;
-        }
-
-        .section-header h5 {
-            margin-bottom: 0;
-            font-weight: 600;
-        }
-
-        .section-content {
-            padding: 1rem;
-        }
-
-        .stats-card {
-            background-color: #fff;
-            border-radius: 0.375rem;
-            padding: 1rem;
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-            border-left: 4px solid #6c757d;
-        }
-
-        .stats-card-success {
-            border-left-color: #198754;
-        }
-
-        .stats-card-info {
-            border-left-color: #0dcaf0;
-        }
-
-        .stats-card-warning {
-            border-left-color: #ffc107;
-        }
-
-        .stats-row-1 {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
-        }
-
-        .stats-icon {
-            width: 40px;
-            height: 40px;
-            background-color: rgba(108, 117, 125, 0.1);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #6c757d;
-        }
-
-        .stats-card-success .stats-icon {
-            background-color: rgba(25, 135, 84, 0.1);
-            color: #198754;
-        }
-
-        .stats-card-info .stats-icon {
-            background-color: rgba(13, 202, 240, 0.1);
-            color: #0dcaf0;
-        }
-
-        .stats-card-warning .stats-icon {
-            background-color: rgba(255, 193, 7, 0.1);
-            color: #ffc107;
-        }
-
-        .stats-number {
-            font-size: 1.5rem;
-            font-weight: 600;
-        }
-
-        .stats-label {
-            color: #6c757d;
-            font-weight: 500;
-            font-size: 0.875rem;
-        }        .edit-section {
-            background-color: #fff;
-            border-radius: 0.375rem;
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-            margin-bottom: 1.5rem;
-            overflow: hidden;
-        }
-
         /* Modal Enhancements */
         .modal-xl {
             max-width: 900px;
@@ -378,7 +266,6 @@
                 <div class="modal-body">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="ProductId" value="@Model.ProductId" />
-                    <input type="hidden" name="FeatureId" id="featureId" />
 
                     <div class="row g-3">
                         <!-- Feature Name -->
@@ -437,7 +324,7 @@
                         <!-- Status Checkboxes -->
                         <div class="col-md-6">
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="isEnabled" name="IsEnabled" checked>
+                                <input class="form-check-input" type="checkbox" id="isEnabled" name="IsEnabled" value="true" checked>
                                 <label class="form-check-label" for="isEnabled">
                                     Enabled by Default
                                 </label>
@@ -447,7 +334,7 @@
                         
                         <div class="col-md-6">
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="isActive" name="IsActive" checked>
+                                <input class="form-check-input" type="checkbox" id="isActive" name="IsActive" value="true" checked>
                                 <label class="form-check-label" for="isActive">
                                     Active
                                 </label>
@@ -499,4 +386,33 @@
 
 @section Scripts {
     <script src="~/js/product-features.js"></script>
+    <script>
+        // Handle checkbox form submission to ensure proper boolean values
+        $(document).ready(function() {
+            // Intercept form submission to handle checkbox values
+            $('#featureForm').on('submit', function(e) {
+                // Handle IsEnabled checkbox
+                var isEnabledCheckbox = $('#isEnabled');
+                if (!isEnabledCheckbox.is(':checked')) {
+                    // Add hidden field for false value if checkbox is unchecked
+                    $('<input>').attr({
+                        type: 'hidden',
+                        name: 'IsEnabled',
+                        value: 'false'
+                    }).appendTo(this);
+                }
+                
+                // Handle IsActive checkbox
+                var isActiveCheckbox = $('#isActive');
+                if (!isActiveCheckbox.is(':checked')) {
+                    // Add hidden field for false value if checkbox is unchecked
+                    $('<input>').attr({
+                        type: 'hidden',
+                        name: 'IsActive',
+                        value: 'false'
+                    }).appendTo(this);
+                }
+            });
+        });
+    </script>
 }

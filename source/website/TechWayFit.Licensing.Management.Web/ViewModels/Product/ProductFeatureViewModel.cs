@@ -25,7 +25,7 @@ namespace TechWayFit.Licensing.Management.Web.ViewModels.Product
         public int? MaxUsage { get; set; }
 
         public string? ConfigurationSchema { get; set; }
-        public LicenseTier MinimumTier { get; set; } = LicenseTier.Community;
+        public Guid MinimumTier { get; set; }
 
         public bool IsActive { get; set; } = true;
         public bool IsDeleted { get; set; } = false;

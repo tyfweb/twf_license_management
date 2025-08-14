@@ -1,0 +1,186 @@
+<!-- Sticky Top Bar -->
+<div class="licensehub-topbar sticky-top" style="z-index: 1030;">
+    <div class="container-fluid px-0">
+        <div class="d-flex align-items-center justify-content-between py-2 px-4">
+            <!-- Left side - Brand/Logo -->
+            <div class="d-flex align-items-center">
+                <h4 class="text-white mb-0 fw-bold d-flex align-items-center">
+                    <i class="fas fa-shield-alt me-2 text-white"></i>
+                    <span class="d-none d-sm-inline text-white">LicenseHub</span>
+                </h4>
+            </div>
+
+            <!-- Center - Font Accessibility Controls -->
+            <div class="flex-fill d-flex justify-content-center">
+                <div class="d-flex align-items-center gap-2" id="fontSizeControls">
+                    <span class="text-white small me-2">
+                        <i class="fas fa-font me-1"></i>
+                        <span class="d-none d-md-inline">Font Size:</span>
+                    </span>
+                    <button class="btn btn-sm text-white border-0 bg-transparent font-size-btn" 
+                            data-size="small" title="Small Font">
+                        <i class="fas fa-font" style="font-size: 0.8rem;"></i>
+                    </button>
+                    <button class="btn btn-sm text-white border-0 bg-transparent font-size-btn" 
+                            data-size="normal" title="Normal Font">
+                        <i class="fas fa-font" style="font-size: 1rem;"></i>
+                    </button>
+                    <button class="btn btn-sm text-white border-0 bg-transparent font-size-btn active" 
+                            data-size="large" title="Large Font">
+                        <i class="fas fa-font" style="font-size: 1.2rem;"></i>
+                    </button>
+                    <button class="btn btn-sm text-white border-0 bg-transparent font-size-btn" 
+                            data-size="extra-large" title="Extra Large Font">
+                        <i class="fas fa-font" style="font-size: 1.4rem;"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right side - User Controls -->
+            <div class="d-flex align-items-center gap-3">
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <!-- Tenant Switcher (for administrators) -->
+                    @if (User.IsInRole("Administrator"))
+                    {
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-building text-white me-2"></i>
+                            <select class="form-select form-select-sm border rounded bg-white text-dark" 
+                                    id="topbarTenantSwitcher" onchange="switchTenant(this.value)"
+                                    style="min-width: 180px; max-width: 250px;">
+                                <option value="">All Tenants</option>
+                            </select>
+                        </div>
+                    }
+
+                    <!-- Simple User Profile Dropdown -->
+                    <div class="dropdown">
+                        <button class="btn text-white text-decoration-none p-2 border-0 bg-transparent d-flex align-items-center" 
+                                type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false"
+                                data-bs-auto-close="outside">
+                            <i class="fas fa-user-circle me-2 text-white fs-5"></i>
+                            <span class="d-none d-md-inline me-1 text-white">@User.Identity.Name</span>
+                            <i class="fas fa-chevron-down small text-white"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="userDropdown">
+                            <li>
+                                <h6 class="dropdown-header">
+                                    <i class="fas fa-user-circle me-2 text-primary"></i>
+                                    @User.Identity.Name
+                                </h6>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="#">
+                                    <i class="fas fa-user me-2"></i>Profile
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" asp-controller="Settings" asp-action="Index">
+                                    <i class="fas fa-cog me-2"></i>Settings
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                }
+                else
+                {
+                    <!-- Login Button for Non-authenticated Users -->
+                    <a href="@Url.Action("Login", "Account")" class="btn btn-primary btn-sm d-flex align-items-center">
+                        <i class="fas fa-sign-in-alt me-2"></i>
+                        <span class="d-none d-sm-inline">Login</span>
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .licensehub-topbar {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+        height: 60px;
+    }
+    
+    .licensehub-topbar .form-select {
+        background-color: rgba(255,255,255,0.15) !important;
+        color: white !important;
+        border: 1px solid rgba(255,255,255,0.2) !important;
+    }
+    
+    .licensehub-topbar .form-select:focus {
+        border-color: rgba(255,255,255,0.4) !important;
+        box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25) !important;
+        background-color: rgba(255,255,255,0.2) !important;
+    }
+    
+    .licensehub-topbar .form-select option {
+        background-color: #2c3e50 !important;
+        color: white !important;
+    }
+    
+    .licensehub-topbar .dropdown-toggle::after {
+        margin-left: 0.5rem;
+        border-top-color: rgba(255,255,255,0.75);
+    }
+    
+    .licensehub-topbar .dropdown-menu {
+        border: none;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.25);
+        min-width: 200px;
+        background-color: white;
+    }
+    
+    .licensehub-topbar .dropdown-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .licensehub-topbar .dropdown-item.text-danger:hover {
+        background-color: #f8d7da;
+        color: #721c24 !important;
+    }
+    
+    .licensehub-topbar .btn-outline-light:hover {
+        background-color: rgba(255,255,255,0.2);
+        border-color: rgba(255,255,255,0.4);
+    }
+    
+    /* Font Size Controls */
+    .font-size-btn {
+        transition: all 0.2s ease;
+        border-radius: 4px !important;
+        padding: 0.375rem 0.5rem !important;
+        opacity: 0.7;
+    }
+    
+    .font-size-btn:hover {
+        background-color: rgba(255,255,255,0.15) !important;
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    
+    .font-size-btn.active {
+        background-color: rgba(255,255,255,0.2) !important;
+        opacity: 1;
+        border: 1px solid rgba(255,255,255,0.3) !important;
+    }
+    
+    .font-size-btn:focus {
+        box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25) !important;
+        background-color: rgba(255,255,255,0.2) !important;
+    }
+</style>

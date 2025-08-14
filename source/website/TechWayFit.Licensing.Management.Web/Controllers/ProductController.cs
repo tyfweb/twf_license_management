@@ -1504,20 +1504,24 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 }
 
                 // Simulate adding a product feature
-                await Task.CompletedTask; // For now, as this is mock implementation
-                
-                var newFeature = new 
+                var newFeature = new ProductFeature
                 {
-                    Id = Guid.NewGuid(),
+                    FeatureId = Guid.NewGuid(),
+                    ProductId = productId,
                     Name = model.Name,
                     Description = model.Description,
-                    Category = model.Category,
                     IsEnabled = model.IsEnabled,
-                    MaxUsage = model.MaxUsage,
-                    MinimumTier = model.MinimumTier,
-                    IsActive = model.IsActive,
-                    CanDelete = true
+                    TierId = model.MinimumTier,
+                    
                 };
+                newFeature.Code = string.Join("", newFeature.FeatureId.ToString().Split('-').Select(part => part.First().ToString().ToUpper()));
+                newFeature.Usage = new ProductFeatureUsage
+                {
+                    MaxUsage = model.MaxUsage.Value,
+                    IsUnlimited = model.MaxUsage.Value <= 0,
+                    ExpirationDate = DateTime.Now.AddYears(10)
+                };
+                await _productFeatureService.CreateFeatureAsync(newFeature, CurrentUserName);
 
                 _logger.LogInformation("Product feature '{FeatureName}' added to product {ProductId}", model.Name, productId);
 
@@ -1619,7 +1623,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                     Category = FeatureCategory.BusinessIntelligence,
                     IsEnabled = true,
                     MaxUsage = null,
-                    MinimumTier = LicenseTier.Professional,
+                   // MinimumTier = LicenseTier.Professional,
                     IsActive = true
                 };
 
@@ -1698,7 +1702,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 Description = f.Description,
                 IsEnabled = f.IsEnabled,
                 MaxUsage = f.Usage.MaxConcurrentUsage,
-                MinimumTier = LicenseTier.Community,// Simplified, in real app get from feature
+              // MinimumTier = LicenseTier.Community,// Simplified, in real app get from feature
                 IsActive = f.IsEnabled,
                 CanDelete = true // Simplified, in real app check if feature can be deleted
             }).ToList();

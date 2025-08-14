@@ -526,7 +526,7 @@ function loadProductTiers(selectedTier = null) {
                     // Use camelCase property names as returned by the API
                     const tierName = tier.name || tier.Name; // Support both camelCase and PascalCase
                     const selected = selectedTier && selectedTier === tierName ? 'selected' : '';
-                    html += `<option value="${tierName}" ${selected}>${tierName}</option>`;
+                    html += `<option value="${tier.id}" ${selected}>${tierName}</option>`;
                 });
                 
                 $('#minimumTier').html(html);

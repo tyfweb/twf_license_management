@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+    <head>
+    
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - LicenseHub</title>
@@ -22,16 +23,174 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
    
     <style>
+        /* Font Accessibility Variables */
+        :root {
+            --bs-font-size-base: 1rem;
+            --font-size-multiplier: 1;
+        }
+        
+        /* Apply font size scaling to common elements */
+        body {
+            font-size: var(--bs-font-size-base) !important;
+        }
+        
+        .card-body, .table, .btn, .form-control, .form-select, 
+        .dropdown-item, .nav-link, .breadcrumb, .alert {
+            font-size: calc(1rem * var(--font-size-multiplier)) !important;
+        }
+        
+        h1 { font-size: calc(2.5rem * var(--font-size-multiplier)) !important; }
+        h2 { font-size: calc(2rem * var(--font-size-multiplier)) !important; }
+        h3 { font-size: calc(1.75rem * var(--font-size-multiplier)) !important; }
+        h4 { font-size: calc(1.5rem * var(--font-size-multiplier)) !important; }
+        h5 { font-size: calc(1.25rem * var(--font-size-multiplier)) !important; }
+        h6 { font-size: calc(1rem * var(--font-size-multiplier)) !important; }
+        
+        .small, small { font-size: calc(0.875rem * var(--font-size-multiplier)) !important; }
+        .fs-6 { font-size: calc(1rem * var(--font-size-multiplier)) !important; }
+        .fs-5 { font-size: calc(1.25rem * var(--font-size-multiplier)) !important; }
+        .fs-4 { font-size: calc(1.5rem * var(--font-size-multiplier)) !important; }
+        .fs-3 { font-size: calc(1.75rem * var(--font-size-multiplier)) !important; }
+        .fs-2 { font-size: calc(2rem * var(--font-size-multiplier)) !important; }
+        .fs-1 { font-size: calc(2.5rem * var(--font-size-multiplier)) !important; }
+        
+        /* Top Bar Styling */
+        .licensehub-topbar {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            border-bottom: 1px solid #1a252f;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            height: 60px;
+        }
+
+        .licensehub-topbar h4 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ffffff !important;
+        }
+
+        .licensehub-topbar .form-select {
+            border: 1px solid #ced4da;
+            color: #495057;
+            background-color: #fff;
+        }
+
+        .licensehub-topbar .form-select:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+        }
+
+        .licensehub-topbar .dropdown-menu {
+            margin-top: 5px;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .licensehub-topbar .dropdown-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .licensehub-topbar .btn-outline-light {
+            border-color: rgba(255, 255, 255, 0.5);
+            color: #ffffff;
+        }
+
+        .licensehub-topbar .btn-outline-light:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-color: #ffffff;
+            color: #ffffff;
+        }
+
+        .licensehub-topbar .btn-link {
+            color: #ffffff !important;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        .licensehub-topbar .btn-link:hover {
+            color: rgba(255, 255, 255, 0.8) !important;
+            background: transparent !important;
+        }
+
+        .licensehub-topbar .btn-link:focus {
+            color: #ffffff !important;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        .licensehub-topbar .btn {
+            background: transparent !important;
+            border: none !important;
+        }
+
+        .licensehub-topbar .btn:hover,
+        .licensehub-topbar .btn:focus,
+        .licensehub-topbar .btn:active {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        /* Top bar styling and layout adjustments */
+        .licensehub-sidebar {
+            top: 60px !important; /* Account for top bar height */
+            height: calc(100vh - 60px) !important; /* Adjust height for top bar */
+        }
+        
+        /* Main content adjustment for top bar */
+        .licensehub-main-content {
+            padding-top: 60px; /* Account for fixed top bar */
+            margin-left: 260px; /* Account for sidebar width */
+        }
+        
         /* Sidebar responsive enhancements */
         @@media (max-width: 767.98px) {
             .licensehub-sidebar {
                 transform: translateX(-100%);
                 transition: transform 0.3s ease;
+                top: 60px; /* Account for top bar height */
+                height: calc(100vh - 60px); /* Adjust height for top bar */
             }
             
             .licensehub-sidebar.show {
                 transform: translateX(0);
             }
+            
+            .licensehub-main-content {
+                margin-left: 0; /* Full width on mobile */
+                padding-top: 60px; /* Account for top bar */
+            }
+        }
+        
+        @@media (min-width: 768px) {
+            .licensehub-main-content {
+                margin-left: 260px; /* Account for sidebar width */
+                padding-top: 60px; /* Account for top bar */
+            }
+        }
+
+        /* Animation improvements */
+        .dropdown-menu {
+            animation: fadeInDown 0.2s ease-out;
+        }
+
+        @@keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translate3d(0, -10px, 0);
+            }
+            to {
+                opacity: 1;
+                transform: translate3d(0, 0, 0);
+            }
+        }
+
+        /* Focus states for accessibility */
+        .licensehub-topbar .btn:focus,
+        .licensehub-topbar .form-select:focus {
+            outline: 2px solid #0d6efd;
+            outline-offset: 2px;
         }
     </style>
     
@@ -41,24 +200,22 @@
 <body>
     @Html.AntiForgeryToken()
     
+    <!-- Top Bar -->
+    @await Html.PartialAsync("_TopBar")
+    
     <!-- Mobile Menu Toggle -->
-    <button class="d-md-none btn btn-primary position-fixed shadow-sm" 
-            style="top: 1rem; left: 1rem; z-index: 1051; border-radius: 8px;" 
+    <button class="d-md-none btn btn-light position-fixed shadow-sm" 
+            style="top: 70px; left: 1rem; z-index: 1051; border-radius: 8px; border: 1px solid #dee2e6;" 
             onclick="toggleSidebar()"
             data-bs-toggle="tooltip" 
             data-bs-placement="right" 
             title="Toggle Menu">
-        <i class="fas fa-bars"></i>
+        <i class="fas fa-bars text-primary"></i>
     </button>
 
     <!-- Sidebar Navigation -->
     <div class="licensehub-sidebar d-flex flex-column" id="sidebar">
-        <div class="licensehub-sidebar-brand p-3 border-bottom border-light border-opacity-25">
-            <h4 class="text-white mb-0 fw-bold">
-                <i class="fas fa-shield-alt me-2"></i>LicenseHub
-            </h4>
-        </div>
-        <nav class="licensehub-sidebar-nav flex-fill">
+        <nav class="licensehub-sidebar-nav flex-fill p-3">
             <ul class="nav nav-pills flex-column gap-1">
                 <li class="nav-item">
                     <a class="nav-link licensehub-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")" 
@@ -180,70 +337,11 @@
                 </li>
             </ul>
         </nav>
-        
-        <!-- User Authentication Section -->
-        <div class="licensehub-sidebar-user mt-auto p-3 border-top border-light border-opacity-25">
-            @if (User.Identity?.IsAuthenticated == true)
-            {
-                <div class="licensehub-user-info d-flex align-items-center mb-3 p-2 bg-white bg-opacity-10 rounded">
-                    <div class="licensehub-user-avatar me-2">
-                        <i class="fas fa-user-circle fs-2 text-white text-opacity-75"></i>
-                    </div>
-                    <div class="licensehub-user-details flex-fill">
-                        <div class="licensehub-user-name text-white fw-semibold small text-truncate">@User.Identity.Name</div>
-                        <div class="licensehub-user-role text-white text-opacity-75 text-uppercase small">@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value</div>
-                    </div>
-                </div>
-
-                @if (User.IsInRole("Administrator"))
-                {
-                    <!-- Tenant Switcher for Administrators -->
-                    <div class="licensehub-tenant-switcher mb-3 p-2 bg-white bg-opacity-10 rounded">
-                        <div class="d-flex align-items-center justify-content-between mb-2">
-                            <span class="text-white text-opacity-75 small fw-semibold">
-                                <i class="fas fa-building me-1"></i>Viewing as Tenant
-                            </span>
-                            <button type="button" class="btn btn-link btn-sm text-white text-opacity-75 p-0" 
-                                    onclick="clearTenantSelection()" title="Clear Selection">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                        <select class="form-select form-select-sm bg-white bg-opacity-25 text-white border-0" 
-                                id="tenantSwitcher" onchange="switchTenant(this.value)">
-                            <option value="">Loading tenants...</option>
-                        </select>
-                        <div class="text-white text-opacity-50 small mt-1" id="tenantSwitcherStatus">
-                            Select a tenant to view data from their perspective
-                        </div>
-                    </div>
-                }
-
-                <form asp-controller="Account" asp-action="Logout" method="post" class="licensehub-logout-form">
-                    <button type="submit" class="btn btn-outline-light btn-sm w-100 d-flex align-items-center justify-content-center" title="Logout">
-                        <i class="fas fa-sign-out-alt me-2"></i>
-                        <span>Logout</span>
-                    </button>
-                </form>
-            }
-            else
-            {
-                <div class="licensehub-login-section text-center">
-                    <div class="licensehub-login-prompt mb-3 text-white text-opacity-75 small">
-                        <i class="fas fa-lock me-1"></i>
-                        <span>Not logged in</span>
-                    </div>
-                    <a href="@Url.Action("Login", "Account")" class="btn btn-primary btn-sm w-100 d-flex align-items-center justify-content-center">
-                        <i class="fas fa-sign-in-alt me-2"></i>
-                        <span>Login</span>
-                    </a>
-                </div>
-            }
-        </div>
     </div>
 
     <!-- Main Content Area -->
     <div class="licensehub-main-content">
-        <div class="container-fluid p-4">
+        <div class="container-fluid p-3" style="padding-top: 1rem !important;">
         <!-- Success/Error Messages -->
         @if (TempData["SuccessMessage"] != null)
         {
@@ -386,19 +484,34 @@
 
         // Load common functionality
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('Layout DOM Content Loaded - initializing tenant functionality...');
+            
+            // Initialize search and tenant functionality
             initializeSearch();
-            loadAvailableTenants();
+            
+            // Add a delay to ensure the page is fully loaded
+            setTimeout(function() {
+                console.log('Loading tenants after delay...');
+                loadAvailableTenants();
+            }, 500);
         });
 
         // Tenant Switcher Functions
         function loadAvailableTenants() {
-            const tenantSwitcher = document.getElementById('tenantSwitcher');
-            const statusDiv = document.getElementById('tenantSwitcherStatus');
+            console.log('loadAvailableTenants function called');
+            const tenantSwitcher = document.getElementById('topbarTenantSwitcher');
             
-            if (!tenantSwitcher) return; // Not an admin user
+            if (!tenantSwitcher) {
+                console.log('Tenant switcher element not found - user might not be admin');
+                return; // Not an admin user
+            }
 
+            console.log('Tenant switcher found, making fetch request...');
             fetch('@Url.Action("GetAvailableTenants", "Account")')
-                .then(response => response.json())
+                .then(response => {
+                    console.log('Response received:', response.status);
+                    return response.json();
+                })
                 .then(data => {
                     console.log('Tenant data received:', data);
                     
@@ -406,6 +519,7 @@
                         tenantSwitcher.innerHTML = '<option value="">All Tenants (Admin View)</option>';
                         
                         if (data.tenants && data.tenants.length > 0) {
+                            console.log('Processing', data.tenants.length, 'tenants');
                             data.tenants.forEach(tenant => {
                                 const option = document.createElement('option');
                                 option.value = tenant.id || '';
@@ -420,42 +534,34 @@
                                 // Select current tenant if it matches
                                 if (data.currentTenantId && tenant.id === data.currentTenantId) {
                                     option.selected = true;
-                                    statusDiv.textContent = `Viewing as: ${tenantName}`;
+                                    console.log('Selected current tenant:', tenantName);
                                 }
                                 
                                 tenantSwitcher.appendChild(option);
                             });
                         } else {
+                            console.log('No tenants found');
                             tenantSwitcher.innerHTML += '<option value="" disabled>No tenants available</option>';
-                        }
-
-                        // Update status if no tenant is selected
-                        if (!data.currentTenantId) {
-                            statusDiv.textContent = 'Viewing all data (Admin perspective)';
                         }
                     } else {
                         console.error('Failed to load tenants:', data.message);
                         tenantSwitcher.innerHTML = '<option value="">Failed to load tenants</option>';
-                        statusDiv.textContent = 'Error loading tenant list';
                     }
                 })
                 .catch(error => {
                     console.error('Error loading tenants:', error);
                     tenantSwitcher.innerHTML = '<option value="">Error loading tenants</option>';
-                    statusDiv.textContent = 'Failed to load tenants';
                 });
         }
 
         function switchTenant(tenantId) {
-            const statusDiv = document.getElementById('tenantSwitcherStatus');
-            const tenantSwitcher = document.getElementById('tenantSwitcher');
+            const tenantSwitcher = document.getElementById('topbarTenantSwitcher');
             
+            // If no tenant selected, clear selection
             if (!tenantId) {
                 clearTenantSelection();
                 return;
             }
-
-            statusDiv.textContent = 'Switching tenant...';
 
             const requestData = { TenantId: tenantId };
 
@@ -470,9 +576,6 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    const selectedOption = tenantSwitcher.options[tenantSwitcher.selectedIndex];
-                    statusDiv.textContent = `Viewing as: ${selectedOption.textContent}`;
-                    
                     // Show success message briefly
                     showNotification('Tenant switched successfully', 'success');
                     
@@ -481,22 +584,17 @@
                         window.location.reload();
                     }, 1000);
                 } else {
-                    statusDiv.textContent = 'Failed to switch tenant';
                     showNotification(data.message || 'Failed to switch tenant', 'error');
                 }
             })
             .catch(error => {
                 console.error('Error switching tenant:', error);
-                statusDiv.textContent = 'Error switching tenant';
                 showNotification('Error switching tenant', 'error');
             });
         }
 
         function clearTenantSelection() {
-            const statusDiv = document.getElementById('tenantSwitcherStatus');
-            const tenantSwitcher = document.getElementById('tenantSwitcher');
-            
-            statusDiv.textContent = 'Clearing selection...';
+            const tenantSwitcher = document.getElementById('topbarTenantSwitcher');
 
             fetch('@Url.Action("ClearTenantSelection", "Account")', {
                 method: 'POST',
@@ -509,7 +607,6 @@
             .then(data => {
                 if (data.success) {
                     tenantSwitcher.value = '';
-                    statusDiv.textContent = 'Viewing all data (Admin perspective)';
                     showNotification('Tenant selection cleared', 'success');
                     
                     // Refresh the current page to load all data
@@ -517,13 +614,11 @@
                         window.location.reload();
                     }, 1000);
                 } else {
-                    statusDiv.textContent = 'Failed to clear selection';
                     showNotification(data.message || 'Failed to clear selection', 'error');
                 }
             })
             .catch(error => {
                 console.error('Error clearing tenant selection:', error);
-                statusDiv.textContent = 'Error clearing selection';
                 showNotification('Error clearing tenant selection', 'error');
             });
         }

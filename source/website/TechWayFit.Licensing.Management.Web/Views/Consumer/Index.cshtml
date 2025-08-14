@@ -98,7 +98,8 @@
                         <input type="text" name="SearchTerm" class="form-control" placeholder="Search consumers..." value="@Model?.SearchTerm">
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="IncludeInactive" id="includeInactive">
+                        <input type="hidden" name="IncludeInactive" value="false">
+                        <input class="form-check-input" type="checkbox" name="IncludeInactive" id="includeInactive" value="true">
                         <label class="form-check-label" for="includeInactive">
                             Include inactive consumers
                         </label>

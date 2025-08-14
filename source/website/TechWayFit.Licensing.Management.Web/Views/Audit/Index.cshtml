@@ -392,7 +392,8 @@
                                value="@Model.DateRangeEnd?.ToString("yyyy-MM-dd")" />
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="includeMetadata" name="IncludeMetadata" checked>
+                        <input type="hidden" name="IncludeMetadata" value="false">
+                        <input class="form-check-input" type="checkbox" id="includeMetadata" name="IncludeMetadata" value="true" checked>
                         <label class="form-check-label" for="includeMetadata">
                             Include metadata
                         </label>

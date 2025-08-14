@@ -50,7 +50,7 @@ public class ProductFeatureService : IProductFeatureService
             
             // Save to repository
             var createdEntity = await _unitOfWork.ProductFeatures.AddAsync(feature);             
-            
+            await _unitOfWork.SaveChangesAsync();
             _logger.LogInformation("Successfully created product feature with ID: {FeatureId}", createdEntity.FeatureId);
             return createdEntity;
         }
