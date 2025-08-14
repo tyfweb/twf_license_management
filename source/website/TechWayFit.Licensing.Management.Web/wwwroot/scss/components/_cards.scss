@@ -1,0 +1,67 @@
+// ===================================================
+// CUSTOM CARDS - Additional card variants (extends Bootstrap)
+// ===================================================
+
+// Custom card variants that extend Bootstrap cards
+.card-gradient {
+    background: linear-gradient(135deg, $white 0%, $gray-50 100%);
+    border: 1px solid $gray-200;
+}
+
+.card-elevated {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    
+    &:hover {
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        transform: translateY(-2px);
+        transition: all 0.2s ease;
+    }
+}
+
+.card-flat {
+    box-shadow: none;
+    border: 1px solid $gray-200;
+}
+
+// Status cards (custom)
+.card-status {
+    border-left: 4px solid $gray-300;
+    
+    &.card-status-success {
+        border-left-color: $success;
+    }
+    
+    &.card-status-warning {
+        border-left-color: $warning;
+    }
+    
+    &.card-status-danger {
+        border-left-color: $danger;
+    }
+    
+    &.card-status-info {
+        border-left-color: $info;
+    }
+}
+
+// Compact card variant (custom)
+.card-compact {
+    .card-header {
+        padding: 0.75rem 1rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+}
+
+// Interactive card (custom)
+.card-interactive {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+}

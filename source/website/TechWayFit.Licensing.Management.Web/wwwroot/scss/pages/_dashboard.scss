@@ -1,0 +1,419 @@
+// ===================================================
+// DASHBOARD - Dashboard specific styles
+// ===================================================
+
+.dashboard {
+    .dashboard-header {
+        margin-bottom: $spacing-lg;
+        
+        .welcome-message {
+            .welcome-title {
+                font-size: $font-size-2xl;
+                font-weight: $font-weight-semibold;
+                color: $text-primary;
+                margin: 0 0 $spacing-xs 0;
+            }
+            
+            .welcome-subtitle {
+                color: $text-secondary;
+                margin: 0;
+            }
+        }
+    }
+    
+    .dashboard-stats {
+        margin-bottom: $spacing-xl;
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: $spacing-md;
+            
+            @include mobile-only {
+                grid-template-columns: 1fr;
+                gap: $spacing-sm;
+            }
+            
+            @include tablet {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    }
+    
+    .dashboard-content {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: $spacing-lg;
+        
+        @include mobile-only {
+            grid-template-columns: 1fr;
+            gap: $spacing-md;
+        }
+        
+        @include tablet {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    .dashboard-main {
+        .section {
+            margin-bottom: $spacing-lg;
+            
+            &:last-child {
+                margin-bottom: 0;
+            }
+        }
+    }
+    
+    .dashboard-sidebar {
+        .section {
+            margin-bottom: $spacing-lg;
+            
+            &:last-child {
+                margin-bottom: 0;
+            }
+        }
+    }
+}
+
+// Dashboard sections
+.dashboard-section {
+    @include card-base;
+    
+    .section-header {
+        background: $bg-secondary;
+        padding: $spacing-md;
+        border-bottom: 1px solid $bg-tertiary;
+        border-radius: $radius-md $radius-md 0 0;
+        @include flex-between;
+        
+        .section-title {
+            font-size: $font-size-lg;
+            font-weight: $font-weight-semibold;
+            margin: 0;
+            color: $text-primary;
+            @include flex-center;
+            
+            i {
+                margin-right: $spacing-sm;
+                color: $primary;
+            }
+        }
+        
+        .section-actions {
+            display: flex;
+            gap: $spacing-sm;
+            align-items: center;
+        }
+    }
+    
+    .section-content {
+        padding: $spacing-md;
+        
+        &.section-content-sm {
+            padding: $spacing-sm;
+        }
+        
+        &.section-content-lg {
+            padding: $spacing-lg;
+        }
+        
+        // Empty state
+        &.empty-state {
+            text-align: center;
+            padding: $spacing-xl;
+            color: $text-secondary;
+            
+            .empty-icon {
+                font-size: $font-size-3xl;
+                color: $text-muted;
+                margin-bottom: $spacing-md;
+            }
+            
+            .empty-title {
+                font-size: $font-size-lg;
+                font-weight: $font-weight-medium;
+                margin: 0 0 $spacing-sm 0;
+            }
+            
+            .empty-description {
+                margin: 0 0 $spacing-md 0;
+            }
+        }
+    }
+}
+
+// Recent activity
+.recent-activity {
+    .activity-list {
+        @include reset-list;
+        
+        .activity-item {
+            padding: $spacing-md 0;
+            border-bottom: 1px solid $bg-tertiary;
+            @include flex-center;
+            align-items: flex-start;
+            gap: $spacing-sm;
+            
+            &:last-child {
+                border-bottom: none;
+                padding-bottom: 0;
+            }
+            
+            &:first-child {
+                padding-top: 0;
+            }
+            
+            .activity-icon {
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                @include flex-center;
+                background: $bg-secondary;
+                color: $primary;
+                flex-shrink: 0;
+                font-size: $font-size-sm;
+                
+                &.activity-success {
+                    background: $success-light;
+                    color: $success;
+                }
+                
+                &.activity-warning {
+                    background: $warning-light;
+                    color: $warning;
+                }
+                
+                &.activity-danger {
+                    background: $danger-light;
+                    color: $danger;
+                }
+            }
+            
+            .activity-content {
+                flex: 1;
+                min-width: 0;
+                
+                .activity-title {
+                    font-weight: $font-weight-medium;
+                    color: $text-primary;
+                    margin: 0 0 $spacing-xs 0;
+                    font-size: $font-size-sm;
+                    line-height: $line-height-tight;
+                }
+                
+                .activity-description {
+                    color: $text-secondary;
+                    font-size: $font-size-sm;
+                    margin: 0 0 $spacing-xs 0;
+                    line-height: $line-height-normal;
+                }
+                
+                .activity-time {
+                    color: $text-muted;
+                    font-size: $font-size-xs;
+                }
+            }
+            
+            .activity-action {
+                flex-shrink: 0;
+            }
+        }
+    }
+}
+
+// Quick actions
+.quick-actions {
+    .actions-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: $spacing-sm;
+        
+        .action-item {
+            @include flex-center;
+            padding: $spacing-md;
+            background: $bg-secondary;
+            border: 1px solid $bg-tertiary;
+            border-radius: $radius-md;
+            text-decoration: none;
+            color: $text-primary;
+            transition: all $transition-fast;
+            
+            &:hover {
+                background: $primary-light;
+                border-color: $primary;
+                color: $primary;
+                text-decoration: none;
+                transform: translateY(-1px);
+            }
+            
+            .action-icon {
+                margin-right: $spacing-sm;
+                font-size: $font-size-lg;
+            }
+            
+            .action-text {
+                font-weight: $font-weight-medium;
+                font-size: $font-size-sm;
+            }
+        }
+    }
+}
+
+// System health
+.system-health {
+    .health-items {
+        .health-item {
+            margin-bottom: $spacing-md;
+            
+            &:last-child {
+                margin-bottom: 0;
+            }
+            
+            .health-header {
+                @include flex-between;
+                margin-bottom: $spacing-xs;
+                
+                .health-label {
+                    font-weight: $font-weight-medium;
+                    color: $text-primary;
+                    font-size: $font-size-sm;
+                }
+                
+                .health-value {
+                    font-size: $font-size-sm;
+                    color: $text-secondary;
+                }
+            }
+            
+            .health-progress {
+                height: 4px;
+                background: $bg-tertiary;
+                border-radius: $radius-sm;
+                overflow: hidden;
+                
+                .health-progress-bar {
+                    height: 100%;
+                    background: $success;
+                    border-radius: $radius-sm;
+                    transition: width $transition-normal;
+                    
+                    &.progress-warning {
+                        background: $warning;
+                    }
+                    
+                    &.progress-danger {
+                        background: $danger;
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Dashboard utilities
+.dashboard-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-md;
+    margin-bottom: $spacing-lg;
+    
+    &:last-child {
+        margin-bottom: 0;
+    }
+}
+
+.dashboard-col {
+    flex: 1;
+    min-width: 250px;
+    
+    @include mobile-only {
+        min-width: 100%;
+    }
+}
+
+// Chart containers
+.chart-container {
+    position: relative;
+    height: 300px;
+    
+    &.chart-sm {
+        height: 200px;
+    }
+    
+    &.chart-lg {
+        height: 400px;
+    }
+    
+    canvas {
+        max-width: 100%;
+        height: auto;
+    }
+}
+
+// Data tables in dashboard
+.dashboard-table {
+    .table {
+        margin: 0;
+        
+        th {
+            background: transparent;
+            border-bottom: 2px solid $bg-tertiary;
+            font-size: $font-size-sm;
+            font-weight: $font-weight-semibold;
+            color: $text-primary;
+            padding: $spacing-sm $spacing-md;
+        }
+        
+        td {
+            padding: $spacing-sm $spacing-md;
+            font-size: $font-size-sm;
+            border-bottom: 1px solid $bg-tertiary;
+        }
+        
+        tr:hover {
+            background: $bg-secondary;
+        }
+    }
+}
+
+// Loading states for dashboard
+.dashboard-loading {
+    .stats-grid {
+        .stats-card {
+            @include loading-skeleton;
+            height: 120px;
+        }
+    }
+    
+    .section-content {
+        @include loading-skeleton;
+        height: 200px;
+    }
+}
+
+// Mobile specific dashboard adjustments
+@include mobile-only {
+    .dashboard {
+        .dashboard-header {
+            margin-bottom: $spacing-md;
+        }
+        
+        .dashboard-stats {
+            margin-bottom: $spacing-lg;
+        }
+    }
+    
+    .dashboard-section {
+        .section-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: $spacing-sm;
+            
+            .section-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+    }
+}

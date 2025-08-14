@@ -1,0 +1,247 @@
+// ===================================================
+// PRODUCT CARDS - Product and consumer card components
+// ===================================================
+
+.product-card,
+.consumer-card {
+    background: $white;
+    border-radius: $radius-md;
+    border: 1px solid $gray-200;
+    box-shadow: $shadow-sm;
+    transition: all $transition-normal;
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    
+    &:hover {
+        box-shadow: $shadow-md;
+        transform: translateY(-2px);
+    }
+}
+
+// Product/Consumer Card Header
+.product-card-header,
+.consumer-card-header {
+    background: linear-gradient(135deg, $gray-100 0%, $gray-200 100%);
+    padding: $spacing-md $spacing-lg;
+    border-bottom: 1px solid $gray-200;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.product-info,
+.consumer-info {
+    flex: 1;
+}
+
+.product-name,
+.consumer-name {
+    font-size: $font-size-base;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+    letter-spacing: -0.025em;
+}
+
+// Product/Consumer Card Body
+.product-card-body,
+.consumer-card-body {
+    padding: $spacing-lg;
+    flex: 1;
+}
+
+.product-detail,
+.consumer-detail {
+    margin-bottom: calc($spacing-sm + $spacing-xs);
+    
+    &:last-child {
+        margin-bottom: 0;
+    }
+}
+
+.detail-label {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    color: $gray-600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: calc($spacing-xs / 2);
+    display: block;
+}
+
+.detail-value {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-normal;
+    color: $text-primary;
+    display: flex;
+    align-items: center;
+    line-height: 1.4;
+    
+    i {
+        color: $gray-600;
+        margin-right: $spacing-sm;
+    }
+}
+
+// Product/Consumer Card Actions
+.product-card-actions,
+.consumer-card-actions {
+    padding: $spacing-md $spacing-lg;
+    background: $gray-50;
+    border-top: 1px solid $gray-200;
+    margin-top: auto;
+    
+    .btn {
+        font-size: $font-size-xs;
+        padding: calc($spacing-xs + $spacing-xs) $spacing-sm;
+        border-radius: $radius-sm;
+    }
+}
+
+// Custom card header/body variants
+.card-header-custom {
+    background: linear-gradient(135deg, $gray-100 0%, $gray-200 100%);
+    padding: $spacing-md $spacing-lg;
+    border-bottom: 1px solid $gray-200;
+}
+
+.card-body-custom {
+    padding: $spacing-lg;
+}
+
+// Product card status indicators
+.product-status,
+.consumer-status {
+    display: inline-flex;
+    align-items: center;
+    padding: calc($spacing-xs / 2) $spacing-xs;
+    border-radius: $radius-sm;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-medium;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    
+    &.status-active {
+        background: rgba($success, 0.1);
+        color: $success;
+        border: 1px solid rgba($success, 0.2);
+    }
+    
+    &.status-inactive {
+        background: rgba($gray-500, 0.1);
+        color: $gray-700;
+        border: 1px solid rgba($gray-500, 0.2);
+    }
+    
+    &.status-pending {
+        background: rgba($warning, 0.1);
+        color: $warning;
+        border: 1px solid rgba($warning, 0.2);
+    }
+    
+    &.status-error {
+        background: rgba($danger, 0.1);
+        color: $danger;
+        border: 1px solid rgba($danger, 0.2);
+    }
+}
+
+// Product card grid responsiveness
+.product-grid,
+.consumer-grid {
+    display: grid;
+    gap: $spacing-lg;
+    
+    // Grid columns based on screen size
+    grid-template-columns: 1fr;
+    
+    @include tablet {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    @include desktop {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    @include large-desktop {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+// Responsive behavior for product cards
+@include mobile-only {
+    .product-card,
+    .consumer-card {
+        .product-card-header,
+        .consumer-card-header {
+            padding: $spacing-sm $spacing-md;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: $spacing-xs;
+        }
+        
+        .product-card-body,
+        .consumer-card-body {
+            padding: $spacing-md;
+        }
+        
+        .product-card-actions,
+        .consumer-card-actions {
+            padding: $spacing-sm $spacing-md;
+            
+            .btn {
+                font-size: $font-size-xs;
+                padding: $spacing-xs;
+                width: 100%;
+                margin-bottom: $spacing-xs;
+                
+                &:last-child {
+                    margin-bottom: 0;
+                }
+            }
+        }
+    }
+}
+
+// Enhanced product card variants
+.product-card {
+    &.featured {
+        border: 2px solid $primary;
+        box-shadow: 0 4px 12px rgba($primary, 0.15);
+        
+        .product-card-header {
+            background: linear-gradient(135deg, rgba($primary, 0.05) 0%, rgba($primary, 0.1) 100%);
+        }
+    }
+    
+    &.compact {
+        .product-card-header,
+        .product-card-body,
+        .product-card-actions {
+            padding: $spacing-sm $spacing-md;
+        }
+    }
+}
+
+.consumer-card {
+    &.featured {
+        border: 2px solid $info;
+        box-shadow: 0 4px 12px rgba($info, 0.15);
+        
+        .consumer-card-header {
+            background: linear-gradient(135deg, rgba($info, 0.05) 0%, rgba($info, 0.1) 100%);
+        }
+    }
+    
+    &.compact {
+        .consumer-card-header,
+        .consumer-card-body,
+        .consumer-card-actions {
+            padding: $spacing-sm $spacing-md;
+        }
+    }
+}

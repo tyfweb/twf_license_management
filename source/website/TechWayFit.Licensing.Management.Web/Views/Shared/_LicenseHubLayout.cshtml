@@ -17,178 +17,48 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     
-    <!-- LicenseHub Custom CSS -->
-    <link rel="stylesheet" href="~/css/licensehub.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/product-management.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <!-- Compiled SCSS CSS (includes all custom styles) -->
+    <link rel="stylesheet" href="~/css/compiled.css" asp-append-version="true" />
+    
+    <!-- Product Management CSS (Bootstrap grid fixes) -->
+    @* <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/licensehub.css" asp-append-version="true" /> 
+    <link rel="stylesheet" href="~/css/product-management.css" asp-append-version="true" />  *@
    
     <style>
-        /* Font Accessibility Variables */
+        /* Font Accessibility Variables - Keep only essential overrides */
         :root {
             --bs-font-size-base: 1rem;
             --font-size-multiplier: 1;
         }
         
-        /* Apply font size scaling to common elements */
+        /* Apply font size scaling to common elements - EXCLUDE buttons to preserve Bootstrap sizing */
         body {
             font-size: var(--bs-font-size-base) !important;
         }
         
-        .card-body, .table, .btn, .form-control, .form-select, 
+        .card-body, .table, .form-control, .form-select, 
         .dropdown-item, .nav-link, .breadcrumb, .alert {
             font-size: calc(1rem * var(--font-size-multiplier)) !important;
         }
         
-        h1 { font-size: calc(2.5rem * var(--font-size-multiplier)) !important; }
-        h2 { font-size: calc(2rem * var(--font-size-multiplier)) !important; }
-        h3 { font-size: calc(1.75rem * var(--font-size-multiplier)) !important; }
-        h4 { font-size: calc(1.5rem * var(--font-size-multiplier)) !important; }
-        h5 { font-size: calc(1.25rem * var(--font-size-multiplier)) !important; }
-        h6 { font-size: calc(1rem * var(--font-size-multiplier)) !important; }
+        /* Only scale regular buttons, preserve Bootstrap btn-sm, btn-lg sizing */
+        .btn:not(.btn-sm):not(.btn-lg) {
+            font-size: calc(1rem * var(--font-size-multiplier)) !important;
+        }
+        
+        /* Use Bootstrap's proportional heading sizes for consistency */
+        h1 { font-size: calc(1.875rem * var(--font-size-multiplier)) !important; }
+        h2 { font-size: calc(1.5rem * var(--font-size-multiplier)) !important; }
+        h3 { font-size: calc(1.25rem * var(--font-size-multiplier)) !important; }
+        h4 { font-size: calc(1.125rem * var(--font-size-multiplier)) !important; }
+        h5 { font-size: calc(1rem * var(--font-size-multiplier)) !important; }
+        h6 { font-size: calc(0.875rem * var(--font-size-multiplier)) !important; }
         
         .small, small { font-size: calc(0.875rem * var(--font-size-multiplier)) !important; }
-        .fs-6 { font-size: calc(1rem * var(--font-size-multiplier)) !important; }
-        .fs-5 { font-size: calc(1.25rem * var(--font-size-multiplier)) !important; }
-        .fs-4 { font-size: calc(1.5rem * var(--font-size-multiplier)) !important; }
-        .fs-3 { font-size: calc(1.75rem * var(--font-size-multiplier)) !important; }
-        .fs-2 { font-size: calc(2rem * var(--font-size-multiplier)) !important; }
-        .fs-1 { font-size: calc(2.5rem * var(--font-size-multiplier)) !important; }
         
-        /* Top Bar Styling */
-        .licensehub-topbar {
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-            border-bottom: 1px solid #1a252f;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            height: 60px;
-        }
-
-        .licensehub-topbar h4 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #ffffff !important;
-        }
-
-        .licensehub-topbar .form-select {
-            border: 1px solid #ced4da;
-            color: #495057;
-            background-color: #fff;
-        }
-
-        .licensehub-topbar .form-select:focus {
-            border-color: #0d6efd;
-            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
-        }
-
-        .licensehub-topbar .dropdown-menu {
-            margin-top: 5px;
-            border: 1px solid #e9ecef;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .licensehub-topbar .dropdown-item:hover {
-            background-color: #f8f9fa;
-        }
-
-        .licensehub-topbar .btn-outline-light {
-            border-color: rgba(255, 255, 255, 0.5);
-            color: #ffffff;
-        }
-
-        .licensehub-topbar .btn-outline-light:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-            border-color: #ffffff;
-            color: #ffffff;
-        }
-
-        .licensehub-topbar .btn-link {
-            color: #ffffff !important;
-            background: transparent !important;
-            border: none !important;
-            box-shadow: none !important;
-        }
-
-        .licensehub-topbar .btn-link:hover {
-            color: rgba(255, 255, 255, 0.8) !important;
-            background: transparent !important;
-        }
-
-        .licensehub-topbar .btn-link:focus {
-            color: #ffffff !important;
-            background: transparent !important;
-            border: none !important;
-            box-shadow: none !important;
-        }
-
-        .licensehub-topbar .btn {
-            background: transparent !important;
-            border: none !important;
-        }
-
-        .licensehub-topbar .btn:hover,
-        .licensehub-topbar .btn:focus,
-        .licensehub-topbar .btn:active {
-            background: transparent !important;
-            border: none !important;
-            box-shadow: none !important;
-        }
-
-        /* Top bar styling and layout adjustments */
-        .licensehub-sidebar {
-            top: 60px !important; /* Account for top bar height */
-            height: calc(100vh - 60px) !important; /* Adjust height for top bar */
-        }
-        
-        /* Main content adjustment for top bar */
-        .licensehub-main-content {
-            padding-top: 60px; /* Account for fixed top bar */
-            margin-left: 260px; /* Account for sidebar width */
-        }
-        
-        /* Sidebar responsive enhancements */
-        @@media (max-width: 767.98px) {
-            .licensehub-sidebar {
-                transform: translateX(-100%);
-                transition: transform 0.3s ease;
-                top: 60px; /* Account for top bar height */
-                height: calc(100vh - 60px); /* Adjust height for top bar */
-            }
-            
-            .licensehub-sidebar.show {
-                transform: translateX(0);
-            }
-            
-            .licensehub-main-content {
-                margin-left: 0; /* Full width on mobile */
-                padding-top: 60px; /* Account for top bar */
-            }
-        }
-        
-        @@media (min-width: 768px) {
-            .licensehub-main-content {
-                margin-left: 260px; /* Account for sidebar width */
-                padding-top: 60px; /* Account for top bar */
-            }
-        }
-
-        /* Animation improvements */
-        .dropdown-menu {
-            animation: fadeInDown 0.2s ease-out;
-        }
-
-        @@keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translate3d(0, -10px, 0);
-            }
-            to {
-                opacity: 1;
-                transform: translate3d(0, 0, 0);
-            }
-        }
-
-        /* Focus states for accessibility */
-        .licensehub-topbar .btn:focus,
-        .licensehub-topbar .form-select:focus {
+        /* Focus indicators for accessibility */
+        .btn:focus, .form-control:focus, .form-select:focus {
             outline: 2px solid #0d6efd;
             outline-offset: 2px;
         }
@@ -197,7 +67,7 @@
     @await RenderSectionAsync("Styles", required: false)
     @await Component.InvokeAsync("ThemeLoader")
 </head>
-<body>
+<body >
     @Html.AntiForgeryToken()
     
     <!-- Top Bar -->

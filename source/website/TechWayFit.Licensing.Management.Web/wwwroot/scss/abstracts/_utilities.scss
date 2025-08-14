@@ -1,0 +1,57 @@
+// ===================================================
+// CUSTOM UTILITIES - Only utilities that Bootstrap doesn't provide
+// ===================================================
+
+// Custom spacing utilities that extend Bootstrap's scale
+.p-xs { padding: 0.25rem !important; }
+.p-xl { padding: 2.5rem !important; }
+.p-xxl { padding: 3rem !important; }
+
+.m-xs { margin: 0.25rem !important; }
+.m-xl { margin: 2.5rem !important; }
+.m-xxl { margin: 3rem !important; }
+
+// Custom text utilities
+.text-gradient {
+    background: linear-gradient(135deg, var(--bs-primary) 0%, var(--bs-info) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+// Screen reader utilities (if not using Bootstrap's)
+.visually-hidden-focusable:not(:focus):not(:focus-within) {
+    @include visually-hidden;
+}
+
+// Custom transform utilities
+.transform-center {
+    transform: translate(-50%, -50%) !important;
+}
+
+.transform-center-x {
+    transform: translateX(-50%) !important;
+}
+
+.transform-center-y {
+    transform: translateY(-50%) !important;
+}
+
+// Custom animation utilities
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+}

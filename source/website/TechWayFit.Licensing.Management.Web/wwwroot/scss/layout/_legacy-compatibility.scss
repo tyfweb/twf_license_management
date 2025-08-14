@@ -1,0 +1,184 @@
+// ===================================================
+// LEGACY COMPATIBILITY - Support for old LicenseHub classes
+// ===================================================
+
+// LicenseHub Body Layout
+.licensehub-layout {
+    margin: 0;
+    padding: 0;
+    font-family: $font-family-base;
+    background: $bg-secondary;
+    overflow-x: hidden;
+    min-height: 100vh;
+}
+
+// Legacy LicenseHub Sidebar
+.licensehub-sidebar {
+    @extend .sidebar;
+    
+    // Legacy specific positioning for LicenseHub layout
+    position: fixed;
+    top: 60px; // Account for top bar
+    left: 0;
+    width: 260px;
+    height: calc(100vh - 60px);
+    background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: $z-sticky;
+    overflow-y: auto;
+    
+    @include mobile-only {
+        transform: translateX(-100%);
+        transition: transform $transition-normal;
+        
+        &.show {
+            transform: translateX(0);
+        }
+    }
+}
+
+// Legacy LicenseHub Navigation
+.licensehub-sidebar-nav {
+    padding: $spacing-md;
+    
+    .nav-pills {
+        --bs-nav-pills-border-radius: #{$radius-lg};
+        --bs-nav-pills-link-active-color: #{$sidebar-text-active};
+        --bs-nav-pills-link-active-bg: #{rgba($primary, 0.2)};
+        
+        .nav-link {
+            @include sidebar-item;
+            margin-bottom: $spacing-xs;
+            border-radius: $radius-lg;
+            
+            i {
+                width: 20px;
+                text-align: center;
+            }
+            
+            &:hover {
+                background: $sidebar-hover;
+                color: $sidebar-text-active;
+            }
+            
+            &.active {
+                background: rgba($primary, 0.2);
+                color: $sidebar-text-active;
+                border-left: 3px solid $primary;
+            }
+        }
+    }
+}
+
+// Legacy LicenseHub Navigation Link
+.licensehub-nav-link {
+    @include sidebar-item;
+    margin-bottom: $spacing-xs;
+    border-radius: $radius-lg;
+    
+    i {
+        width: 20px;
+        text-align: center;
+    }
+    
+    &:hover {
+        background: $sidebar-hover;
+        color: $sidebar-text-active;
+    }
+    
+    &.active {
+        background: rgba($primary, 0.2);
+        color: $sidebar-text-active;
+        border-left: 3px solid $primary;
+    }
+}
+
+// Legacy LicenseHub Main Content
+.licensehub-main-content {
+    margin-left: 260px; // Account for sidebar width
+    padding-top: 60px; // Account for top bar
+    min-height: calc(100vh - 60px);
+    background: $bg-secondary;
+    
+    @include mobile-only {
+        margin-left: 0;
+        padding: 60px $spacing-sm $spacing-sm;
+    }
+    
+    .container-fluid {
+        padding: $spacing-sm $spacing-md;
+        
+        @include mobile-only {
+            padding: $spacing-sm;
+        }
+    }
+}
+
+// Legacy LicenseHub Topbar (if needed)
+.licensehub-topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    border-bottom: 1px solid #1a252f;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: $z-fixed;
+    
+    @include flex-between;
+    align-items: center;
+    padding: 0 $spacing-lg;
+    
+    h4 {
+        color: $white;
+        margin: 0;
+        font-weight: $font-weight-semibold;
+    }
+    
+    .btn {
+        color: $white;
+        border-color: rgba(255, 255, 255, 0.3);
+        
+        &:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+    }
+}
+
+// App wrapper for proper layout
+.app {
+    display: flex;
+    min-height: 100vh;
+    background: $bg-secondary;
+}
+
+// Mobile sidebar toggle
+.mobile-sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: $z-modal - 1;
+    
+    @include mobile-only {
+        &.show {
+            display: block;
+        }
+    }
+}
+
+// Helper utility for legacy layouts
+.legacy-layout-fix {
+    .licensehub-sidebar.show {
+        transform: translateX(0);
+    }
+    
+    .licensehub-main-content {
+        transition: margin-left $transition-normal;
+    }
+}

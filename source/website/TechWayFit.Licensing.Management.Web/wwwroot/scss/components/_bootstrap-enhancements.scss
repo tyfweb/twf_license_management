@@ -1,0 +1,74 @@
+// ===================================================
+// BOOTSTRAP ENHANCEMENTS - True enhancements that don't override Bootstrap
+// ===================================================
+
+// Enhanced spacing utilities
+.p-xs { padding: 0.25rem !important; }
+.p-xl { padding: 2.5rem !important; }
+.p-xxl { padding: 3rem !important; }
+
+.m-xs { margin: 0.25rem !important; }
+.m-xl { margin: 2.5rem !important; }
+.m-xxl { margin: 3rem !important; }
+
+// Custom display utilities
+.d-flex-center {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.d-flex-between {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+}
+
+// Custom text utilities
+.text-gradient {
+    background: linear-gradient(135deg, $primary 0%, $info 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+// Enhanced shadows
+.shadow-xs {
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+}
+
+.shadow-xl {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+}
+
+.shadow-2xl {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+}
+
+// Enhanced borders
+.border-xs {
+    border-width: 1px !important;
+}
+
+.border-thick {
+    border-width: 3px !important;
+}
+
+// Custom animations
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+}

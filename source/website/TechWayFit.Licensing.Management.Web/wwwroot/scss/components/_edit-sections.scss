@@ -1,0 +1,207 @@
+// ===================================================
+// EDIT SECTIONS - Content editing and form sections
+// ===================================================
+
+.edit-section {
+    background: $white;
+    border-radius: $radius-md;
+    border: 1px solid $gray-200;
+    box-shadow: $shadow-sm;
+    margin-bottom: $spacing-xl;
+    padding: 0;
+    overflow: hidden;
+    
+    // Alternative styling with enhanced shadows
+    &.enhanced {
+        background: $white;
+        border-radius: $radius-lg;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    // Compact variant with less spacing
+    &.compact {
+        margin-bottom: $spacing-lg;
+        
+        .section-header {
+            padding: $spacing-sm $spacing-md;
+        }
+        
+        .section-content {
+            padding: $spacing-md;
+        }
+    }
+}
+
+// Section headers for edit sections
+.edit-section .section-header,
+.section-header {
+    background: $gray-100;
+    border-bottom: 1px solid $gray-300;
+    padding: $spacing-md $spacing-xl;
+    margin: 0;
+    
+    // Alternative styling
+    &.alt-style {
+        background: $gray-100;
+        border-bottom: 1px solid $gray-300;
+        padding: $spacing-md $spacing-xl;
+    }
+    
+    h5 {
+        margin: 0;
+        font-weight: $font-weight-semibold;
+        color: $gray-700;
+        display: flex;
+        align-items: center;
+        font-size: $font-size-base;
+        
+        i {
+            margin-right: $spacing-sm;
+            color: $primary;
+        }
+    }
+    
+    h4, h6 {
+        margin: 0;
+        font-weight: $font-weight-semibold;
+        color: $gray-700;
+        display: flex;
+        align-items: center;
+    }
+}
+
+// Section content for edit sections
+.edit-section .section-content,
+.section-content {
+    padding: $spacing-xl;
+    
+    // Form-specific content styling
+    &.form-content {
+        .form-group {
+            margin-bottom: $spacing-lg;
+            
+            &:last-child {
+                margin-bottom: 0;
+            }
+        }
+        
+        .form-row {
+            display: flex;
+            gap: $spacing-md;
+            margin-bottom: $spacing-lg;
+            
+            .form-group {
+                flex: 1;
+                margin-bottom: 0;
+            }
+        }
+    }
+    
+    // Compact content variant
+    &.compact {
+        padding: $spacing-md;
+    }
+}
+
+// Action sections within edit sections
+.edit-section-actions {
+    background: $gray-50;
+    border-top: 1px solid $gray-200;
+    padding: $spacing-md $spacing-xl;
+    display: flex;
+    justify-content: flex-end;
+    gap: $spacing-sm;
+    
+    &.justify-between {
+        justify-content: space-between;
+    }
+    
+    &.justify-start {
+        justify-content: flex-start;
+    }
+    
+    &.center {
+        justify-content: center;
+    }
+}
+
+// Form field groups within edit sections
+.edit-field-group {
+    margin-bottom: $spacing-lg;
+    
+    &:last-child {
+        margin-bottom: 0;
+    }
+    
+    .field-label {
+        font-weight: $font-weight-medium;
+        color: $text-primary;
+        margin-bottom: $spacing-sm;
+        display: block;
+        
+        &.required::after {
+            content: " *";
+            color: $danger;
+        }
+    }
+    
+    .field-help {
+        font-size: $font-size-sm;
+        color: $gray-600;
+        margin-top: $spacing-xs;
+    }
+}
+
+// Responsive behavior for edit sections
+@include tablet {
+    .edit-section {
+        .section-header {
+            padding: $spacing-sm $spacing-lg;
+        }
+        
+        .section-content {
+            padding: $spacing-lg;
+        }
+        
+        .edit-section-actions {
+            padding: $spacing-sm $spacing-lg;
+            flex-direction: column;
+            gap: $spacing-xs;
+            
+            &.justify-between,
+            &.justify-start {
+                justify-content: stretch;
+            }
+        }
+    }
+}
+
+@include mobile-only {
+    .edit-section {
+        margin-bottom: $spacing-lg;
+        border-radius: $radius-sm;
+        
+        .section-header {
+            padding: $spacing-sm $spacing-md;
+            
+            h5 {
+                font-size: $font-size-sm;
+            }
+        }
+        
+        .section-content {
+            padding: $spacing-md;
+            
+            &.form-content {
+                .form-row {
+                    flex-direction: column;
+                    gap: $spacing-sm;
+                }
+            }
+        }
+        
+        .edit-section-actions {
+            padding: $spacing-sm $spacing-md;
+        }
+    }
+}

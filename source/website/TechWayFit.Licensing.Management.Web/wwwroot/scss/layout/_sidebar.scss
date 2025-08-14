@@ -1,0 +1,444 @@
+// ===================================================
+// SIDEBAR - Navigation sidebar component
+// ===================================================
+
+.sidebar {
+    @include sidebar-gradient;
+    width: 250px;
+    min-height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: $z-fixed;
+    overflow-y: auto;
+    transition: transform $transition-normal;
+    
+    // Mobile: hidden by default
+    @include mobile-only {
+        transform: translateX(-100%);
+        
+        &.sidebar-open {
+            transform: translateX(0);
+        }
+    }
+    
+    // Sidebar header
+    .sidebar-header {
+        padding: $spacing-lg $spacing-md;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        
+        .sidebar-brand {
+            color: $sidebar-text-active;
+            font-size: $font-size-xl;
+            font-weight: $font-weight-bold;
+            text-decoration: none;
+            @include flex-center;
+            
+            i {
+                margin-right: $spacing-sm;
+                font-size: $font-size-2xl;
+            }
+            
+            &:hover {
+                color: $sidebar-text-active;
+                text-decoration: none;
+            }
+        }
+    }
+    
+    // Sidebar navigation
+    .sidebar-nav {
+        padding: $spacing-md 0;
+        
+        .nav-section {
+            margin-bottom: $spacing-lg;
+            
+            .nav-section-title {
+                padding: 0 $spacing-md $spacing-sm;
+                font-size: $font-size-xs;
+                font-weight: $font-weight-semibold;
+                color: rgba(255, 255, 255, 0.6);
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+            }
+            
+            .nav-list {
+                @include reset-list;
+                
+                .nav-item {
+                    margin-bottom: $spacing-xs;
+                    
+                    .nav-link {
+                        @include sidebar-item;
+                        @include flex-between;
+                        margin: 0 $spacing-sm;
+                        
+                        .nav-icon {
+                            width: 20px;
+                            text-align: center;
+                            margin-right: $spacing-sm;
+                        }
+                        
+                        .nav-text {
+                            flex: 1;
+                        }
+                        
+                        .nav-badge {
+                            background: rgba(255, 255, 255, 0.2);
+                            color: $sidebar-text-active;
+                            font-size: $font-size-xs;
+                            padding: 0.125rem 0.375rem;
+                            border-radius: $radius-full;
+                            font-weight: $font-weight-medium;
+                        }
+                        
+                        .nav-arrow {
+                            margin-left: auto;
+                            transition: transform $transition-fast;
+                        }
+                        
+                        // Submenu states
+                        &[aria-expanded="true"] {
+                            .nav-arrow {
+                                transform: rotate(90deg);
+                            }
+                        }
+                    }
+                    
+                    // Submenu
+                    .nav-submenu {
+                        @include reset-list;
+                        max-height: 0;
+                        overflow: hidden;
+                        transition: max-height $transition-normal;
+                        
+                        &.show {
+                            max-height: 500px;
+                        }
+                        
+                        .nav-item {
+                            .nav-link {
+                                padding-left: calc($spacing-md + 20px + $spacing-sm);
+                                font-size: $font-size-sm;
+                                
+                                &::before {
+                                    content: '•';
+                                    margin-right: $spacing-sm;
+                                    color: rgba(255, 255, 255, 0.4);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    // Sidebar footer
+    .sidebar-footer {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: $spacing-md;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        
+        .user-info {
+            @include flex-center;
+            color: $sidebar-text;
+            
+            .user-avatar {
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                margin-right: $spacing-sm;
+                background: rgba(255, 255, 255, 0.1);
+                @include flex-center;
+                
+                img {
+                    width: 100%;
+                    height: 100%;
+                    border-radius: 50%;
+                    object-fit: cover;
+                }
+            }
+            
+            .user-details {
+                flex: 1;
+                min-width: 0;
+                
+                .user-name {
+                    font-size: $font-size-sm;
+                    font-weight: $font-weight-medium;
+                    color: $sidebar-text-active;
+                    @include text-truncate;
+                }
+                
+                .user-role {
+                    font-size: $font-size-xs;
+                    color: rgba(255, 255, 255, 0.6);
+                    @include text-truncate;
+                }
+            }
+        }
+    }
+}
+
+// Sidebar overlay for mobile
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: $z-fixed - 1;
+    opacity: 0;
+    visibility: hidden;
+    transition: all $transition-normal;
+    
+    &.show {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    @include desktop {
+        display: none;
+    }
+}
+
+// Main content adjustment when sidebar is present
+.main-content {
+    margin-left: 250px;
+    min-height: 100vh;
+    transition: margin-left $transition-normal;
+    
+    @include mobile-only {
+        margin-left: 0;
+    }
+}
+
+// Sidebar toggle button
+.sidebar-toggle {
+    display: none;
+    
+    @include mobile-only {
+        display: flex;
+        position: fixed;
+        top: $spacing-md;
+        left: $spacing-md;
+        z-index: $z-fixed + 1;
+        width: 40px;
+        height: 40px;
+        background: $primary;
+        color: $white;
+        border: none;
+        border-radius: $radius-md;
+        @include flex-center;
+        box-shadow: $shadow-md;
+        
+        &:hover {
+            background: $primary-dark;
+        }
+    }
+}
+
+// Compact sidebar variant
+.sidebar-compact {
+    width: 60px;
+    
+    .sidebar-header {
+        .sidebar-brand {
+            justify-content: center;
+            
+            .brand-text {
+                display: none;
+            }
+        }
+    }
+    
+    .sidebar-nav {
+        .nav-section-title {
+            display: none;
+        }
+        
+        .nav-link {
+            justify-content: center;
+            padding: $spacing-sm;
+            
+            .nav-text,
+            .nav-badge,
+            .nav-arrow {
+                display: none;
+            }
+            
+            .nav-icon {
+                margin: 0;
+            }
+        }
+        
+        .nav-submenu {
+            display: none;
+        }
+    }
+    
+    .sidebar-footer {
+        .user-info {
+            justify-content: center;
+            
+            .user-details {
+                display: none;
+            }
+        }
+    }
+    
+    ~ .main-content {
+        margin-left: 60px;
+    }
+}
+
+// ===================================================
+// SIDEBAR SECTIONS - Content sections within sidebars
+// ===================================================
+
+.sidebar-section {
+    background: $white;
+    border-radius: $radius-md;
+    border: 1px solid $gray-200;
+    box-shadow: $shadow-sm;
+    margin-bottom: $spacing-xl;
+    overflow: hidden;
+    transition: all $transition-normal;
+    
+    &:hover {
+        box-shadow: $shadow-md;
+    }
+}
+
+.sidebar-section-title {
+    padding: $spacing-md $spacing-lg;
+    border-bottom: 1px solid $gray-200;
+    background: linear-gradient(135deg, $gray-50 0%, #f1f5f9 100%);
+    font-weight: $font-weight-semibold;
+    font-size: $font-size-sm;
+    color: $text-primary;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.sidebar-section-content {
+    padding: $spacing-lg;
+}
+
+.section-header {
+    padding: $spacing-md $spacing-lg;
+    border-bottom: 1px solid $gray-200;
+    background: $gray-50;
+    border-radius: $radius-md $radius-md 0 0;
+    
+    h5,
+    h6 {
+        margin: 0;
+        font-weight: $font-weight-semibold;
+        color: $text-primary;
+    }
+}
+
+.section-content {
+    padding: $spacing-lg;
+}
+
+// Additional sidebar section variants and enhancements
+.sidebar-section {
+    // Position and layout enhancements
+    &.enhanced {
+        position: relative;
+        min-height: auto;
+        contain: layout;
+    }
+    
+    // Alternative styling variant
+    &.card-style {
+        background: $white;
+        border-radius: $radius-lg;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+}
+
+// Enhanced section content with z-index layering
+.sidebar-section-content {
+    &.layered {
+        position: relative;
+        z-index: 1;
+        
+        .alert {
+            position: relative;
+            z-index: 2;
+            opacity: 1;
+            visibility: visible;
+            display: block;
+        }
+    }
+}
+
+// Alternative section header styling
+.section-header {
+    &.alt-style {
+        background: $gray-100;
+        border-bottom: 1px solid $gray-300;
+        padding: calc($spacing-sm + $spacing-xs) $spacing-md;
+        
+        h5 {
+            font-size: $font-size-sm;
+            font-weight: $font-weight-semibold;
+            color: $gray-700;
+            margin: 0;
+        }
+    }
+}
+
+// Detail groups for structured content
+.detail-group {
+    margin-bottom: $spacing-md;
+    
+    &:last-child {
+        margin-bottom: 0;
+    }
+}
+
+.detail-label {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    color: $gray-600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: calc($spacing-xs / 2);
+    display: block;
+}
+
+.detail-value {
+    font-size: $font-size-sm;
+    color: $text-primary;
+    margin: 0;
+}
+
+// Border variants for visual emphasis
+.border-left-info {
+    border-left: 4px solid $info;
+}
+
+.border-left-success {
+    border-left: 4px solid $success;
+}
+
+.border-left-warning {
+    border-left: 4px solid $warning;
+}
+
+.border-left-danger {
+    border-left: 4px solid $danger;
+}

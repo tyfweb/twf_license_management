@@ -1,0 +1,159 @@
+// ===================================================
+// STATS CARDS - Dashboard statistics components
+// ===================================================
+
+.stats-card {
+    background: $white;
+    border-radius: $radius-md;
+    border: 1px solid $gray-200;
+    box-shadow: $shadow-sm;
+    padding: $spacing-md;  // Reduced from $spacing-lg
+    transition: all $transition-normal;
+    display: flex;
+    flex-direction: column;
+    gap: calc($spacing-sm * 0.75);  // Reduced gap
+    min-height: 100px;  // Fixed height for consistency
+    // Removed width/max-width overrides to allow Bootstrap grid to work properly
+    
+    &:hover {
+        transform: translateY(-1px);  // Reduced transform
+        box-shadow: $shadow-md;
+    }
+    
+    // Card variants with left border accent
+    &.stats-card-success {
+        border-left: 4px solid $success;
+        
+        .stats-icon {
+            background: $success-light;
+            
+            i {
+                color: $success;
+            }
+        }
+    }
+    
+    &.stats-card-warning {
+        border-left: 4px solid $warning;
+        
+        .stats-icon {
+            background: $warning-light;
+            
+            i {
+                color: $warning;
+            }
+        }
+    }
+    
+    &.stats-card-danger {
+        border-left: 4px solid $danger;
+        
+        .stats-icon {
+            background: $danger-light;
+            
+            i {
+                color: $danger;
+            }
+        }
+    }
+    
+    &.stats-card-info {
+        border-left: 4px solid $info;
+        
+        .stats-icon {
+            background: $info-light;
+            
+            i {
+                color: $info;
+            }
+        }
+    }
+    
+    &.stats-card-primary {
+        border-left: 4px solid $primary;
+        
+        .stats-icon {
+            background: $primary-light;
+            
+            i {
+                color: $primary;
+            }
+        }
+    }
+    
+    // Responsive adjustments
+    @include mobile-only {
+        padding: $spacing-sm;  // Even smaller on mobile
+        gap: calc($spacing-sm * 0.5);
+        min-height: 85px;
+    }
+}
+
+// Stats Card Layout Rows
+.stats-row-1 {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;  // Reduced gap
+}
+
+.stats-row-2 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+// Stats Icon Styling
+.stats-icon {
+    width: 2.25rem;  // Reduced from 2.75rem
+    height: 2.25rem;  // Reduced from 2.75rem
+    border-radius: $radius-sm;  // Smaller radius
+    background: $gray-100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    
+    i {
+        font-size: $font-size-base;  // Reduced from $font-size-lg
+        color: $gray-600;
+    }
+}
+
+// Stats Content
+.stats-content {
+    flex: 1;
+    min-width: 0;
+}
+
+// Stats Number Styling
+.stats-number {
+    font-size: $font-size-lg;  // Reduced from xl
+    font-weight: 600;
+    color: $primary;
+    margin: 0;
+    line-height: 1.2;
+    transition: all $transition-normal;
+    
+    // Enhanced visual hierarchy
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+// Stats Label Styling  
+.stats-label {
+    font-size: $font-size-sm;
+    color: $gray-600;
+    margin: 0;
+    font-weight: 500;
+    line-height: 1.3;
+    text-align: center;
+    transition: color $transition-normal;
+}
+
+// Stats Value (alternative to stats-number)
+.stats-value {
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
+    color: $text-primary;
+    margin: 0;
+    line-height: $line-height-tight;
+}

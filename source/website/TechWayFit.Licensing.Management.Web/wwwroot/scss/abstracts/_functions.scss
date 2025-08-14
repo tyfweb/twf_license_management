@@ -1,0 +1,108 @@
+// ===================================================
+// FUNCTIONS - Utility functions for calculations
+// ===================================================
+
+// Convert px to rem
+@function rem($pixels, $base: 16px) {
+    @return ($pixels / $base) * 1rem;
+}
+
+// Convert px to em
+@function em($pixels, $base: 16px) {
+    @return ($pixels / $base) * 1em;
+}
+
+// Color manipulation functions
+@function tint($color, $percentage) {
+    @return mix(white, $color, $percentage);
+}
+
+@function shade($color, $percentage) {
+    @return mix(black, $color, $percentage);
+}
+
+// Get spacing value
+@function spacing($key) {
+    $spacing-map: (
+        'xs': $spacing-xs,
+        'sm': $spacing-sm,
+        'md': $spacing-md,
+        'lg': $spacing-lg,
+        'xl': $spacing-xl,
+        '2xl': $spacing-2xl,
+        '3xl': $spacing-3xl
+    );
+    
+    @return map-get($spacing-map, $key);
+}
+
+// Get font size
+@function font-size($key) {
+    $font-size-map: (
+        'xs': $font-size-xs,
+        'sm': $font-size-sm,
+        'base': $font-size-base,
+        'lg': $font-size-lg,
+        'xl': $font-size-xl,
+        '2xl': $font-size-2xl,
+        '3xl': $font-size-3xl
+    );
+    
+    @return map-get($font-size-map, $key);
+}
+
+// Get border radius
+@function radius($key) {
+    $radius-map: (
+        'none': $radius-none,
+        'sm': $radius-sm,
+        'md': $radius-md,
+        'lg': $radius-lg,
+        'xl': $radius-xl,
+        'full': $radius-full
+    );
+    
+    @return map-get($radius-map, $key);
+}
+
+// Get shadow
+@function shadow($key) {
+    $shadow-map: (
+        'sm': $shadow-sm,
+        'md': $shadow-md,
+        'lg': $shadow-lg,
+        'xl': $shadow-xl
+    );
+    
+    @return map-get($shadow-map, $key);
+}
+
+// Strip units from a number
+@function strip-unit($number) {
+    @if type-of($number) == 'number' and not unitless($number) {
+        @return $number / ($number * 0 + 1);
+    }
+    
+    @return $number;
+}
+
+// Power function
+@function pow($number, $exponent) {
+    $result: 1;
+    
+    @if $exponent > 0 {
+        @for $i from 1 through $exponent {
+            $result: $result * $number;
+        }
+    }
+    
+    @return $result;
+}
+
+// Fluid typography calculator
+@function fluid-size($min-size, $max-size, $min-width: 320px, $max-width: 1200px) {
+    $min-vw: strip-unit($min-width) / 100 * 1vw;
+    $max-vw: strip-unit($max-width) / 100 * 1vw;
+    
+    @return calc(#{$min-size} + #{strip-unit($max-size - $min-size)} * ((100vw - #{$min-width}) / #{strip-unit($max-width - $min-width)}));
+}

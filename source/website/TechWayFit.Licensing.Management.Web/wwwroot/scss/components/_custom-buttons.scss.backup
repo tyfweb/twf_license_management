@@ -1,0 +1,247 @@
+// ===================================================
+// BUTTONS - Button components and variations
+// ===================================================
+
+.btn {
+    @include button-base;
+    
+    // Size variants
+    &.btn-sm {
+        padding: $spacing-xs $spacing-sm;
+        font-size: $font-size-sm;
+    }
+    
+    &.btn-lg {
+        padding: $spacing-md $spacing-lg;
+        font-size: $font-size-lg;
+    }
+    
+    // Style variants
+    &.btn-primary {
+        @include button-variant($primary);
+    }
+    
+    &.btn-secondary {
+        @include button-variant($secondary);
+    }
+    
+    &.btn-success {
+        @include button-variant($success);
+    }
+    
+    &.btn-warning {
+        @include button-variant($warning, $text-primary);
+    }
+    
+    &.btn-danger {
+        @include button-variant($danger);
+    }
+    
+    &.btn-info {
+        @include button-variant($info);
+    }
+    
+    // Outline variants
+    &.btn-outline-primary {
+        @include button-base;
+        background: transparent;
+        color: $primary;
+        border: 1px solid $primary;
+        
+        &:hover:not(:disabled) {
+            background: $primary;
+            color: $white;
+        }
+    }
+    
+    &.btn-outline-secondary {
+        @include button-base;
+        background: transparent;
+        color: $secondary;
+        border: 1px solid $secondary;
+        
+        &:hover:not(:disabled) {
+            background: $secondary;
+            color: $white;
+        }
+    }
+    
+    &.btn-outline-success {
+        @include button-base;
+        background: transparent;
+        color: $success;
+        border: 1px solid $success;
+        
+        &:hover:not(:disabled) {
+            background: $success;
+            color: $white;
+        }
+    }
+    
+    &.btn-outline-warning {
+        @include button-base;
+        background: transparent;
+        color: $warning;
+        border: 1px solid $warning;
+        
+        &:hover:not(:disabled) {
+            background: $warning;
+            color: $text-primary;
+        }
+    }
+    
+    &.btn-outline-danger {
+        @include button-base;
+        background: transparent;
+        color: $danger;
+        border: 1px solid $danger;
+        
+        &:hover:not(:disabled) {
+            background: $danger;
+            color: $white;
+        }
+    }
+    
+    &.btn-outline-info {
+        @include button-base;
+        background: transparent;
+        color: $info;
+        border: 1px solid $info;
+        
+        &:hover:not(:disabled) {
+            background: $info;
+            color: $white;
+        }
+    }
+    
+    // Ghost variant
+    &.btn-ghost {
+        @include button-base;
+        background: transparent;
+        color: $text-primary;
+        
+        &:hover:not(:disabled) {
+            background: $bg-secondary;
+        }
+    }
+    
+    // Loading state
+    &.btn-loading {
+        position: relative;
+        pointer-events: none;
+        
+        &::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 50%;
+            left: 50%;
+            margin-left: -8px;
+            margin-top: -8px;
+            border: 2px solid transparent;
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        .btn-text {
+            opacity: 0;
+        }
+    }
+    
+    // Icon buttons
+    &.btn-icon {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        @include flex-center;
+        
+        &.btn-sm {
+            width: 32px;
+            height: 32px;
+        }
+        
+        &.btn-lg {
+            width: 48px;
+            height: 48px;
+        }
+    }
+    
+    // Block button
+    &.btn-block {
+        width: 100%;
+        display: block;
+    }
+    
+    // Floating action button
+    &.btn-fab {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        @include flex-center;
+        position: fixed;
+        bottom: $spacing-lg;
+        right: $spacing-lg;
+        box-shadow: $shadow-lg;
+        z-index: $z-sticky;
+        
+        &:hover {
+            box-shadow: $shadow-xl;
+            transform: scale(1.05);
+        }
+    }
+}
+
+// Button groups
+.btn-group {
+    display: inline-flex;
+    vertical-align: middle;
+    
+    .btn {
+        position: relative;
+        flex: 1 1 auto;
+        
+        &:not(:first-child) {
+            margin-left: -1px;
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+        
+        &:not(:last-child) {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+        
+        &:hover,
+        &:focus,
+        &:active {
+            z-index: 1;
+        }
+    }
+}
+
+// Link buttons
+.btn-link {
+    font-weight: $font-weight-normal;
+    color: $primary;
+    text-decoration: none;
+    background: transparent;
+    border: none;
+    padding: 0;
+    
+    &:hover {
+        color: $primary-dark;
+        text-decoration: underline;
+    }
+    
+    &:focus {
+        text-decoration: underline;
+        outline: none;
+    }
+    
+    &:disabled {
+        color: $text-muted;
+        text-decoration: none;
+    }
+}

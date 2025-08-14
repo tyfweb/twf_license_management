@@ -1,0 +1,84 @@
+// ===================================================
+// CUSTOM FORMS - Additional form utilities (extends Bootstrap)
+// ===================================================
+
+// Custom form group spacing
+.form-group-tight {
+    margin-bottom: 1rem;
+}
+
+.form-group-loose {
+    margin-bottom: 2rem;
+}
+
+// Enhanced form labels
+.form-label-required::after {
+    content: ' *';
+    color: $danger;
+}
+
+.form-label-optional::after {
+    content: ' (optional)';
+    color: $text-muted;
+    font-size: 0.875em;
+    font-weight: normal;
+}
+
+// Form validation helpers (extends Bootstrap validation)
+.form-control-enhanced {
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    
+    &:focus {
+        border-color: lighten($primary, 25%);
+        box-shadow: 0 0 0 0.2rem rgba($primary, 0.25);
+    }
+}
+
+// Input groups with icons
+.input-group-icon {
+    position: relative;
+    
+    .form-control {
+        padding-left: 2.5rem;
+    }
+    
+    .input-icon {
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: $text-muted;
+        z-index: 3;
+    }
+}
+
+// Custom checkbox/radio styling (extends Bootstrap)
+.form-check-custom {
+    .form-check-input {
+        border-radius: 0.25rem;
+        
+        &:checked {
+            background-color: $primary;
+            border-color: $primary;
+        }
+    }
+}
+
+// Form sections
+.form-section {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid $gray-200;
+    
+    &:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+    
+    .form-section-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: $text-primary;
+    }
+}

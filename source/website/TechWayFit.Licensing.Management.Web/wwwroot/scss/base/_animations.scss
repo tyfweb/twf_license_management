@@ -1,0 +1,230 @@
+// ===================================================
+// ANIMATIONS - Keyframes and animation utilities
+// ===================================================
+
+// Keyframe Animations
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideLeft {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideRight {
+    from {
+        transform: translateX(-100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+        animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+    }
+    50% {
+        transform: translateY(-25%);
+        animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+    }
+}
+
+// Animation Classes
+.animate-fade-in {
+    @include fade-in;
+}
+
+.animate-slide-up {
+    @include slide-up;
+}
+
+.animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+.animate-bounce {
+    animation: bounce 1s infinite;
+}
+
+// Staggered Animations
+.stagger-children {
+    > * {
+        @for $i from 1 through 10 {
+            &:nth-child(#{$i}) {
+                animation-delay: #{$i * 0.1}s;
+            }
+        }
+    }
+}
+
+// Hover Animations
+.hover-lift {
+    transition: transform $transition-normal;
+    
+    &:hover {
+        transform: translateY(-2px);
+    }
+}
+
+.hover-scale {
+    transition: transform $transition-normal;
+    
+    &:hover {
+        transform: scale(1.05);
+    }
+}
+
+.hover-glow {
+    transition: box-shadow $transition-normal;
+    
+    &:hover {
+        box-shadow: 0 0 20px rgba($primary, 0.3);
+    }
+}
+
+// Loading States
+.loading-skeleton {
+    @include loading-skeleton;
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid $gray-200;
+    border-radius: 50%;
+    border-top-color: $primary;
+    animation: spin 1s ease-in-out infinite;
+}
+
+// Entrance Animations for Components
+.stats-card {
+    animation: fadeInUp 0.6s ease-out both;
+}
+
+.modal {
+    animation: scaleIn 0.3s ease-out both;
+}
+
+.toast {
+    animation: slideLeft 0.3s ease-out both;
+}
+
+.dropdown-menu {
+    animation: slideDown 0.2s ease-out both;
+}
+
+// Animation Delays for Staggered Effects
+@for $i from 1 through 10 {
+    .delay-#{$i} {
+        animation-delay: #{$i * 0.1}s;
+    }
+}
+
+// Animation Durations
+.duration-fast {
+    animation-duration: $transition-fast;
+}
+
+.duration-normal {
+    animation-duration: $transition-normal;
+}
+
+.duration-slow {
+    animation-duration: $transition-slow;
+}
+
+// Reduced Motion Support
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

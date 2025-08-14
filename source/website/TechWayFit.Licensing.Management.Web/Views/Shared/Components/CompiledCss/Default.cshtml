@@ -1,0 +1,17 @@
+@{
+    string cssFile = ViewBag.CssFile ?? "~/css/compiled.css";
+    bool isMinified = ViewBag.IsMinified ?? false;
+    string environment = ViewBag.Environment ?? "Unknown";
+}
+
+<!-- Compiled SCSS CSS (@environment) -->
+<link href="@cssFile" rel="stylesheet" asp-append-version="true" />
+
+@if (isMinified)
+{
+    <!-- Using minified CSS for production -->
+}
+else
+{
+    <!-- Using expanded CSS for development -->
+}

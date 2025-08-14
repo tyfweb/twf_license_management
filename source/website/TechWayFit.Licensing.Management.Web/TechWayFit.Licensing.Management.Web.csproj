@@ -57,4 +57,67 @@
     <Content Remove="Views/ProductLicense/**" />
   </ItemGroup>
 
+  <!-- SCSS Build Configuration -->
+  <PropertyGroup>
+    <ScssInputFile>wwwroot/scss/main.scss</ScssInputFile>
+    <ScssOutputFile>wwwroot/css/compiled.css</ScssOutputFile>
+    <ScssOutputFileMin>wwwroot/css/compiled.min.css</ScssOutputFileMin>
+    <ScssOutputDir>wwwroot/css</ScssOutputDir>
+  </PropertyGroup>
+
+  <!-- Include SCSS files in project -->
+  <ItemGroup>
+    <None Include="wwwroot/scss/**/*.scss" />
+    <None Include="package.json" />
+    <None Include="build-scss.sh" />
+    <None Include="SCSS_MIGRATION_GUIDE.md" />
+  </ItemGroup>
+
+  <!-- Ensure npm packages are installed before build -->
+  <Target Name="EnsureNodeModules" BeforeTargets="BeforeBuild">
+    <Message Text="Checking for npm dependencies..." Importance="high" />
+    <Exec Command="npm install" 
+          Condition="!Exists('node_modules')" 
+          ContinueOnError="false" 
+          WorkingDirectory="$(MSBuildProjectDirectory)" />
+  </Target>
+
+  <!-- Build SCSS during development builds -->
+  <Target Name="BuildScss" BeforeTargets="BeforeBuild" DependsOnTargets="EnsureNodeModules">
+    <Message Text="Compiling SCSS files..." Importance="high" />
+    
+    <!-- Create output directory if it doesn't exist -->
+    <MakeDir Directories="$(ScssOutputDir)" Condition="!Exists('$(ScssOutputDir)')" />
+    
+    <!-- Compile SCSS for development (expanded with source maps) -->
+    <Exec Command="npm run scss:dev" 
+          ContinueOnError="false" 
+          WorkingDirectory="$(MSBuildProjectDirectory)"
+          Condition="'$(Configuration)' == 'Debug'" />
+    
+    <!-- Compile SCSS for production (both expanded and minified) -->
+    <Exec Command="npm run scss:prod" 
+          ContinueOnError="false" 
+          WorkingDirectory="$(MSBuildProjectDirectory)"
+          Condition="'$(Configuration)' == 'Release'" />
+          
+    <Message Text="SCSS compilation completed successfully!" Importance="high" />
+    <Message Text="Output files: $(ScssOutputFile)" Importance="high" Condition="'$(Configuration)' == 'Debug'" />
+    <Message Text="Output files: $(ScssOutputFile), $(ScssOutputFileMin)" Importance="high" Condition="'$(Configuration)' == 'Release'" />
+  </Target>
+
+  <!-- Clean compiled CSS files during clean -->
+  <Target Name="CleanScss" BeforeTargets="BeforeClean">
+    <Message Text="Cleaning compiled SCSS files..." Importance="high" />
+    <Delete Files="$(ScssOutputFile);$(ScssOutputFile).map;$(ScssOutputFileMin)" ContinueOnError="true" />
+  </Target>
+
+  <!-- Watch SCSS files for changes in development -->
+  <Target Name="WatchScss" Condition="'$(Configuration)' == 'Debug' AND '$(DOTNET_WATCH)' == '1'">
+    <Message Text="Starting SCSS watch mode..." Importance="high" />
+    <Exec Command="npm run scss:watch" 
+          ContinueOnError="true" 
+          WorkingDirectory="$(MSBuildProjectDirectory)" />
+  </Target>
+
 </Project>

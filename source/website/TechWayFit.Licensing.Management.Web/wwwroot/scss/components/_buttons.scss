@@ -1,0 +1,64 @@
+// ===================================================
+// CUSTOM BUTTONS - Additional button variants (extends Bootstrap)
+// ===================================================
+
+// Custom button variants that don't exist in Bootstrap
+.btn-gradient-primary {
+    background: linear-gradient(135deg, $primary 0%, lighten($primary, 10%) 100%);
+    border: none;
+    color: $white;
+    
+    &:hover {
+        background: linear-gradient(135deg, darken($primary, 5%) 0%, $primary 100%);
+        color: $white;
+    }
+}
+
+.btn-gradient-success {
+    background: linear-gradient(135deg, $success 0%, lighten($success, 10%) 100%);
+    border: none;
+    color: $white;
+    
+    &:hover {
+        background: linear-gradient(135deg, darken($success, 5%) 0%, $success 100%);
+        color: $white;
+    }
+}
+
+// Icon button helpers (custom utility)
+.btn-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    
+    i {
+        font-size: 0.875em;
+    }
+}
+
+// Loading state (custom utility)
+.btn-loading {
+    position: relative;
+    color: transparent !important;
+    
+    &::after {
+        content: '';
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        top: 50%;
+        left: 50%;
+        margin-left: -8px;
+        margin-top: -8px;
+        border: 2px solid transparent;
+        border-top-color: currentColor;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

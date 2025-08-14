@@ -1,0 +1,66 @@
+// ===================================================
+// MAIN SCSS - TechWayFit License Management System
+// ===================================================
+// 
+// This is the main SCSS file that imports all other files.
+// It follows the 7-1 architecture pattern for better organization.
+//
+// 7-1 Architecture:
+// - abstracts/    → Sass tools and helpers
+// - base/        → Boilerplate code
+// - components/  → UI components
+// - layout/      → Layout-related sections
+// - pages/       → Page-specific styles
+// - themes/      → Themes and variations
+// - vendors/     → Third-party libraries
+// 
+// ===================================================
+
+// ABSTRACTS
+// ----------
+// Variables, functions, mixins, placeholders...
+@import 'abstracts/variables';
+@import 'abstracts/functions';
+@import 'abstracts/mixins';
+@import 'abstracts/utilities';
+
+// BASE
+// ----
+// Reset/normalize, typography, base styles...
+@import 'base/reset';
+@import 'base/animations';
+
+// COMPONENTS
+// ----------
+// Custom components that extend Bootstrap (no overrides)
+@import 'components/buttons';
+@import 'components/cards';
+@import 'components/forms';
+@import 'components/stats-cards';
+@import 'components/product-cards';
+@import 'components/edit-sections';
+@import 'components/bootstrap-enhancements';
+
+// LAYOUT
+// ------
+// Header, footer, sidebar, navigation...
+@import 'layout/header';
+@import 'layout/sidebar';
+@import 'layout/legacy-compatibility';
+
+// PAGES
+// -----
+// Page-specific styles
+@import 'pages/dashboard';
+
+// ADDITIONAL COMPONENTS
+// --------------------
+// Additional component styles that weren't captured above
+
+// Global improvements
+
+// Custom grid system removed - using Bootstrap's native grid system instead
+// This prevents conflicts with Bootstrap's .row and .col-* classes
+
+// Bootstrap gap utilities removed - using Bootstrap's native .g-* classes instead
+// Bootstrap provides: .g-0, .g-1, .g-2, .g-3, .g-4, .g-5 with proper responsive behavior

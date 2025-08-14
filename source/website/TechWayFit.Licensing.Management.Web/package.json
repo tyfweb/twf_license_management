@@ -1,0 +1,25 @@
+{
+  "name": "techway-fit-licensing-web",
+  "version": "1.0.0",
+  "description": "TechWayFit License Management Web Application",
+  "scripts": {
+    "scss:watch": "sass --watch wwwroot/scss/main.scss:wwwroot/css/compiled.css --style expanded --source-map",
+    "scss:dev": "sass wwwroot/scss/main.scss:wwwroot/css/compiled.css --style expanded --source-map",
+    "scss:prod": "npm run scss:prod:regular && npm run scss:prod:min",
+    "scss:prod:regular": "sass wwwroot/scss/main.scss:wwwroot/css/compiled.css --style expanded --no-source-map",
+    "scss:prod:min": "sass wwwroot/scss/main.scss:wwwroot/css/compiled.min.css --style compressed --no-source-map",
+    "scss:build": "npm run scss:prod",
+    "build": "npm run scss:prod"
+  },
+  "devDependencies": {
+    "sass": "^1.69.5"
+  },
+  "keywords": [
+    "scss",
+    "css",
+    "license-management",
+    "aspnet-core"
+  ],
+  "author": "TechWayFit",
+  "private": true
+}

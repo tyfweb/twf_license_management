@@ -1,0 +1,346 @@
+// ===================================================
+// FORMS - Form controls and layouts
+// ===================================================
+
+// Form groups
+.form-group {
+    margin-bottom: $spacing-md;
+    
+    &:last-child {
+        margin-bottom: 0;
+    }
+}
+
+// Labels
+.form-label {
+    display: block;
+    margin-bottom: $spacing-xs;
+    font-weight: $font-weight-medium;
+    color: $text-primary;
+    font-size: $font-size-sm;
+    
+    &.required::after {
+        content: ' *';
+        color: $danger;
+    }
+}
+
+// Form controls
+.form-control {
+    @include form-control;
+    display: block;
+    width: 100%;
+    
+    &.form-control-sm {
+        padding: $spacing-xs $spacing-sm;
+        font-size: $font-size-sm;
+    }
+    
+    &.form-control-lg {
+        padding: $spacing-md $spacing-lg;
+        font-size: $font-size-lg;
+    }
+    
+    // States
+    &:invalid,
+    &.is-invalid {
+        border-color: $danger;
+        
+        &:focus {
+            border-color: $danger;
+            box-shadow: 0 0 0 2px rgba($danger, 0.2);
+        }
+    }
+    
+    &:valid,
+    &.is-valid {
+        border-color: $success;
+        
+        &:focus {
+            border-color: $success;
+            box-shadow: 0 0 0 2px rgba($success, 0.2);
+        }
+    }
+    
+    &:disabled {
+        background-color: $bg-secondary;
+        color: $text-muted;
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+}
+
+// Textarea specific
+textarea.form-control {
+    min-height: 100px;
+    resize: vertical;
+}
+
+// Select specific
+select.form-control {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right $spacing-sm center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+    appearance: none;
+}
+
+// Input groups
+.input-group {
+    display: flex;
+    width: 100%;
+    
+    .form-control {
+        flex: 1;
+        min-width: 0;
+        
+        &:not(:first-child) {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+            border-left: 0;
+        }
+        
+        &:not(:last-child) {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+    }
+    
+    .input-group-text {
+        display: flex;
+        align-items: center;
+        padding: $spacing-sm $spacing-md;
+        font-size: $font-size-base;
+        font-weight: $font-weight-normal;
+        color: $text-secondary;
+        background-color: $bg-secondary;
+        border: 1px solid $gray-300;
+        border-radius: $radius-md;
+        
+        &:first-child {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+            border-right: 0;
+        }
+        
+        &:last-child {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+            border-left: 0;
+        }
+    }
+}
+
+// Checkboxes and radios
+.form-check {
+    display: block;
+    min-height: 1.5rem;
+    padding-left: 1.5em;
+    margin-bottom: $spacing-xs;
+    
+    .form-check-input {
+        float: left;
+        margin-left: -1.5em;
+        margin-top: 0.125em;
+        
+        &[type="checkbox"] {
+            border-radius: $radius-sm;
+        }
+        
+        &[type="radio"] {
+            border-radius: 50%;
+        }
+        
+        &:checked {
+            background-color: $primary;
+            border-color: $primary;
+        }
+        
+        &:focus {
+            box-shadow: 0 0 0 2px rgba($primary, 0.25);
+        }
+    }
+    
+    .form-check-label {
+        color: $text-primary;
+        cursor: pointer;
+    }
+    
+    &.form-check-inline {
+        display: inline-block;
+        margin-right: $spacing-md;
+        margin-bottom: 0;
+    }
+}
+
+// Switch
+.form-switch {
+    .form-check-input {
+        width: 2em;
+        margin-left: -2.5em;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba%28255,255,255,1%29'/%3e%3c/svg%3e");
+        background-position: left center;
+        background-repeat: no-repeat;
+        background-size: contain;
+        border-radius: 2em;
+        transition: background-position $transition-fast ease-in-out;
+        
+        &:checked {
+            background-position: right center;
+            background-color: $primary;
+            border-color: $primary;
+        }
+        
+        &:focus {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba%28255,255,255,1%29'/%3e%3c/svg%3e");
+        }
+    }
+}
+
+// Form validation
+.valid-feedback {
+    display: none;
+    width: 100%;
+    margin-top: $spacing-xs;
+    font-size: $font-size-sm;
+    color: $success;
+    
+    .is-valid ~ & {
+        display: block;
+    }
+}
+
+.invalid-feedback {
+    display: none;
+    width: 100%;
+    margin-top: $spacing-xs;
+    font-size: $font-size-sm;
+    color: $danger;
+    
+    .is-invalid ~ & {
+        display: block;
+    }
+}
+
+// Form layouts
+.form-horizontal {
+    .form-group {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-bottom: $spacing-md;
+        
+        .form-label {
+            flex: 0 0 25%;
+            max-width: 25%;
+            margin-bottom: 0;
+            text-align: right;
+            padding-right: $spacing-md;
+        }
+        
+        .form-control-wrapper {
+            flex: 0 0 75%;
+            max-width: 75%;
+        }
+    }
+    
+    @include mobile-only {
+        .form-group {
+            flex-direction: column;
+            
+            .form-label {
+                flex: 1;
+                max-width: none;
+                text-align: left;
+                padding-right: 0;
+                margin-bottom: $spacing-xs;
+            }
+            
+            .form-control-wrapper {
+                flex: 1;
+                max-width: none;
+            }
+        }
+    }
+}
+
+.form-inline {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $spacing-sm;
+    
+    .form-group {
+        margin-bottom: 0;
+    }
+    
+    .form-label {
+        margin-bottom: 0;
+        margin-right: $spacing-xs;
+    }
+    
+    @include mobile-only {
+        flex-direction: column;
+        align-items: stretch;
+        
+        .form-group {
+            width: 100%;
+        }
+    }
+}
+
+// File input
+.form-file {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    
+    .form-file-input {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+        height: auto;
+        margin: 0;
+        opacity: 0;
+        
+        &:focus ~ .form-file-label {
+            border-color: $primary;
+            box-shadow: 0 0 0 2px rgba($primary, 0.25);
+        }
+    }
+    
+    .form-file-label {
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 0;
+        z-index: 1;
+        height: calc(1.5em + 0.75rem + 2px);
+        padding: $spacing-sm $spacing-md;
+        font-weight: $font-weight-normal;
+        line-height: 1.5;
+        color: $text-secondary;
+        background-color: $bg-primary;
+        border: 1px solid $gray-300;
+        border-radius: $radius-md;
+        cursor: pointer;
+        
+        &::after {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 3;
+            display: block;
+            height: calc(1.5em + 0.75rem);
+            padding: $spacing-sm $spacing-md;
+            line-height: 1.5;
+            color: $text-secondary;
+            content: "Browse";
+            background-color: $bg-secondary;
+            border-left: inherit;
+            border-radius: 0 $radius-md $radius-md 0;
+        }
+    }
+}
