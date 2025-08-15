@@ -1,0 +1,346 @@
+@model TechWayFit.Licensing.Management.Web.ViewModels.Product.ProductVersionCreateEditViewModel
+
+@{
+    ViewData["Title"] = "Create Product Version";
+    var productName = ViewData["ProductName"]?.ToString() ?? "";
+    var productId = (Guid)(ViewData["ProductId"] ?? Guid.Empty);
+    
+    // Prepare header data
+    var headerModel = new TechWayFit.Licensing.Management.Web.ViewModels.Shared.PageHeaderViewModel
+    {
+        Title = "Create Version",
+        Icon = "fas fa-code-branch",
+        BreadcrumbItems = new List<TechWayFit.Licensing.Management.Web.ViewModels.Shared.BreadcrumbItem>
+        {
+            new() { Text = "Products", Controller = "Product", Action = "Index" },
+            new() { Text = productName, Controller = "Product", Action = "Details", RouteValues = new { id = productId } },
+            new() { Text = "Versions", Controller = "ProductVersion", Action = "Index", RouteValues = new { productId = productId } },
+            new() { Text = "Create", IsActive = true }
+        },
+        BackButtonText = "Back to Versions",
+        BackButtonController = "ProductVersion",
+        BackButtonAction = "Index",
+        BackButtonRouteValues = new { productId = productId }
+    };
+}
+
+@section styles {
+    <style>
+        .version-form {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .form-section {
+            margin-bottom: 24px;
+        }
+        
+        .form-section h4 {
+            color: #495057;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+        
+        .form-row {
+            margin-bottom: 16px;
+        }
+        
+        .btn-group {
+            gap: 12px;
+        }
+        
+        .required-field {
+            color: #dc3545;
+        }
+        
+        .form-label {
+            font-weight: 500;
+            color: #495057;
+        }
+        
+        .breadcrumb {
+            background-color: transparent;
+            padding: 0;
+            margin-bottom: 24px;
+        }
+        
+        .version-input {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .sidebar-section {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .sidebar-section .card-header {
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            padding: 16px 20px;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .sidebar-section .card-body {
+            padding: 20px;
+        }
+    </style>
+}
+
+@await Html.PartialAsync("_PageHeaderPartial", headerModel)
+
+<div class="container-fluid py-3">
+    <!-- Header Section -->
+
+
+    <!-- Product Info Card -->
+    <div class="row g-2 mb-3">
+        <div class="col-12">
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <div class="d-flex align-items-center">
+                        <div class="product-icon me-3" style="width: 40px; height: 40px;">
+                            <i class="fas fa-cube text-primary"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">@productName</h6>
+                            <small class="text-muted">Creating new version release</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<div class="container-fluid">
+  
+
+    <!-- Alert Messages -->
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle"></i>
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i>
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-lg-8 col-md-10">
+            <div class="version-form">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h4 class="mb-1">Create Product Version</h4>
+                        <p class="text-muted mb-0">Add a new version to @productName</p>
+                    </div>
+                    <div>
+                        <i class="fas fa-tags text-primary" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger">
+                        <h6>Please correct the following errors:</h6>
+                        <ul class="mb-0">
+                            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                            {
+                                <li>@error.ErrorMessage</li>
+                            }
+                        </ul>
+                    </div>
+                }
+
+                <form method="post" action="@Url.Action("Create", new { productId = productId })">
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.ProductId)
+
+                    <!-- Basic Information -->
+                    <div class="form-section">
+                        <h4>Basic Information</h4>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-row">
+                                    <label asp-for="Version" class="form-label">
+                                        Version Number <span class="required-field">*</span>
+                                    </label>
+                                    <input asp-for="Version" class="form-control version-input" 
+                                           placeholder="e.g., 1.0.0" />
+                                    <span asp-validation-for="Version" class="text-danger"></span>
+                                    <small class="form-text text-muted">Use semantic versioning (Major.Minor.Patch)</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-row">
+                                    <label asp-for="Name" class="form-label">
+                                        Version Name <span class="required-field">*</span>
+                                    </label>
+                                    <input asp-for="Name" class="form-control" placeholder="e.g., Initial Release" />
+                                    <span asp-validation-for="Name" class="text-danger"></span>
+                                    <small class="form-text text-muted">Friendly name for this version</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <label asp-for="ReleaseNotes" class="form-label">Release Notes</label>
+                            <textarea asp-for="ReleaseNotes" class="form-control" rows="4" 
+                                      placeholder="Describe what's new in this version..."></textarea>
+                            <span asp-validation-for="ReleaseNotes" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <!-- Release Information -->
+                    <div class="form-section">
+                        <h4>Release Information</h4>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-row">
+                                    <label asp-for="ReleaseDate" class="form-label">Release Date</label>
+                                    <input asp-for="ReleaseDate" type="date" class="form-control" />
+                                    <span asp-validation-for="ReleaseDate" class="text-danger"></span>
+                                    <small class="form-text text-muted">When this version was or will be released</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-row">
+                                    <div class="form-check mt-4">
+                                        <input asp-for="IsCurrent" class="form-check-input" type="checkbox" />
+                                        <label asp-for="IsCurrent" class="form-check-label">
+                                            Set as current version
+                                        </label>
+                                    </div>
+                                    <small class="form-text text-muted">Mark this as the current active version</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lifecycle Information -->
+                    <div class="form-section">
+                        <h4>Lifecycle Information</h4>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-row">
+                                    <label asp-for="SupportEndDate" class="form-label">Support End Date</label>
+                                    <input asp-for="SupportEndDate" type="date" class="form-control" />
+                                    <span asp-validation-for="SupportEndDate" class="text-danger"></span>
+                                    <small class="form-text text-muted">When support for this version ends</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-row">
+                                    <label asp-for="EndOfLifeDate" class="form-label">End of Life Date</label>
+                                    <input asp-for="EndOfLifeDate" type="date" class="form-control" />
+                                    <span asp-validation-for="EndOfLifeDate" class="text-danger"></span>
+                                    <small class="form-text text-muted">When this version reaches end of life</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="d-flex justify-content-between">
+                        <a href="@Url.Action("Index", new { productId = productId })" 
+                           class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Create Version
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Help Panel -->
+        <div class="col-lg-4">
+            <div class="sidebar-section">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle"></i> Versioning Guidelines
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <h6>Semantic Versioning</h6>
+                    <ul class="small mb-3">
+                        <li><strong>Major (X.0.0):</strong> Breaking changes</li>
+                        <li><strong>Minor (0.X.0):</strong> New features</li>
+                        <li><strong>Patch (0.0.X):</strong> Bug fixes</li>
+                    </ul>
+                    
+                    <h6>Version Naming</h6>
+                    <ul class="small mb-3">
+                        <li>Use descriptive names like "Initial Release"</li>
+                        <li>Include major feature highlights</li>
+                        <li>Keep names concise but meaningful</li>
+                    </ul>
+                    
+                    <h6>Release Planning</h6>
+                    <ul class="small mb-3">
+                        <li>Set realistic release dates</li>
+                        <li>Plan support lifecycle in advance</li>
+                        <li>Document all changes thoroughly</li>
+                        <li>Test before marking as current</li>
+                    </ul>
+                    
+                    <h6>Best Practices</h6>
+                    <ul class="small">
+                        <li>Only one version should be current</li>
+                        <li>Communicate EOL dates clearly</li>
+                        <li>Maintain backwards compatibility</li>
+                        <li>Archive old versions properly</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function() {
+            // Auto-generate version name from version number
+            $('#Version').on('input', function() {
+                var version = $(this).val();
+                if (version && $('#Name').val() === '') {
+                    var name = '';
+                    if (version.startsWith('1.0')) {
+                        name = 'Initial Release';
+                    } else if (version.endsWith('.0.0')) {
+                        name = 'Major Release ' + version;
+                    } else if (version.endsWith('.0')) {
+                        name = 'Feature Release ' + version;
+                    } else {
+                        name = 'Update ' + version;
+                    }
+                    $('#Name').val(name);
+                }
+            });
+            
+            // Set default release date to today
+            if ($('#ReleaseDate').val() === '') {
+                var today = new Date().toISOString().split('T')[0];
+                $('#ReleaseDate').val(today);
+            }
+        });
+    </script>
+}

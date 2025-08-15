@@ -1,0 +1,456 @@
+@model TechWayFit.Licensing.Management.Web.ViewModels.Product.ProductFeatureCreateEditViewModel
+
+@{
+    ViewData["Title"] = "Edit Product Feature";
+    ViewData["PageTitle"] = "Edit Product Feature";
+    var productName = ViewData["ProductName"]?.ToString() ?? "";
+    var productId = (Guid)(ViewData["ProductId"] ?? Guid.Empty);
+    var featureId = (Guid)(ViewData["FeatureId"] ?? Guid.Empty);
+    var tiers = ViewData["Tiers"] as List<TechWayFit.Licensing.Management.Web.ViewModels.Product.TierInfoViewModel> ?? new List<TechWayFit.Licensing.Management.Web.ViewModels.Product.TierInfoViewModel>();
+}
+
+@section styles {
+    <style>
+        .feature-form {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .form-section {
+            margin-bottom: 24px;
+        }
+        
+        .form-section h4 {
+            color: #495057;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+        
+        .form-row {
+            margin-bottom: 16px;
+        }
+        
+        .btn-group {
+            gap: 12px;
+        }
+        
+        .required-field {
+            color: #dc3545;
+        }
+        
+        .form-label {
+            font-weight: 500;
+            color: #495057;
+        }
+        
+        .breadcrumb {
+            background-color: transparent;
+            padding: 0;
+            margin-bottom: 24px;
+        }
+        
+        .version-input {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .tier-info {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .feature-info-badge {
+            background-color: #e9ecef;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            color: #495057;
+        }
+    </style>
+}
+
+<div class="container-fluid">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="@Url.Action("Index", "Product")">Products</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="@Url.Action("Details", "Product", new { id = productId })">@productName</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="@Url.Action("Index", "ProductFeature", new { productId = productId })">Features</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">Edit: @Model.Name</li>
+        </ol>
+    </nav>
+
+    <!-- Alert Messages -->
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle"></i>
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i>
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-lg-8 col-md-10">
+            <div class="feature-form">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h4 class="mb-1">Edit Product Feature</h4>
+                        <p class="text-muted mb-0">Modify feature settings for @productName</p>
+                    </div>
+                    <div>
+                        <i class="fas fa-puzzle-piece text-primary" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+
+                <!-- Feature Info -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="feature-info-badge">
+                            <strong>Feature ID:</strong> @Model.FeatureId
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="feature-info-badge">
+                            <strong>Current Status:</strong> 
+                            <span class="badge @(Model.IsEnabled ? "bg-success" : "bg-secondary")">
+                                @(Model.IsEnabled ? "Enabled" : "Disabled")
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger">
+                        <h6>Please correct the following errors:</h6>
+                        <ul class="mb-0">
+                            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                            {
+                                <li>@error.ErrorMessage</li>
+                            }
+                        </ul>
+                    </div>
+                }
+
+                <form method="post" action="@Url.Action("Edit", new { productId = productId, featureId = featureId })">
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.FeatureId)
+                    @Html.HiddenFor(m => m.ProductId)
+
+                    <!-- Basic Information -->
+                    <div class="form-section">
+                        <h4>Basic Information</h4>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-row">
+                                    <label asp-for="Name" class="form-label">
+                                        Feature Name <span class="required-field">*</span>
+                                    </label>
+                                    <input asp-for="Name" class="form-control" placeholder="Enter feature name" />
+                                    <span asp-validation-for="Name" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-row">
+                                    <label asp-for="Code" class="form-label">
+                                        Feature Code <span class="required-field">*</span>
+                                    </label>
+                                    <input asp-for="Code" class="form-control" placeholder="e.g., ADVANCED_REPORTING" />
+                                    <span asp-validation-for="Code" class="text-danger"></span>
+                                    <small class="form-text text-muted">Unique identifier for the feature</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <label asp-for="Description" class="form-label">Description</label>
+                            <textarea asp-for="Description" class="form-control" rows="3" 
+                                      placeholder="Describe what this feature provides"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <!-- Tier Assignment -->
+                    <div class="form-section">
+                        <h4>Tier Assignment</h4>
+                        
+                        @if (tiers.Any())
+                        {
+                            <div class="tier-info">
+                                <h6>Available Product Tiers</h6>
+                                <div class="row">
+                                    @foreach (var tier in tiers.OrderBy(t => t.DisplayOrder))
+                                    {
+                                        <div class="col-md-6 mb-2">
+                                            <div class="d-flex align-items-center">
+                                                <span class="badge @(tier.Id == Model.TierId ? "bg-primary" : "bg-secondary") me-2">
+                                                    @tier.Name
+                                                    @if (tier.Id == Model.TierId)
+                                                    {
+                                                        <text>(Current)</text>
+                                                    }
+                                                </span>
+                                                @if (!string.IsNullOrEmpty(tier.Description))
+                                                {
+                                                    <small class="text-muted">@tier.Description</small>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <label asp-for="TierId" class="form-label">
+                                    Product Tier <span class="required-field">*</span>
+                                </label>
+                                <select asp-for="TierId" class="form-select">
+                                    <option value="">Select a tier...</option>
+                                    @foreach (var tier in tiers.OrderBy(t => t.DisplayOrder))
+                                    {
+                                        <option value="@tier.Id" selected="@(tier.Id == Model.TierId)">
+                                            @tier.Name
+                                        </option>
+                                    }
+                                </select>
+                                <span asp-validation-for="TierId" class="text-danger"></span>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                No product tiers are available. You need to create product tiers first.
+                                <a href="@Url.Action("Index", "ProductTier", new { productId = productId })" class="alert-link">
+                                    Manage Product Tiers
+                                </a>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Configuration -->
+                    <div class="form-section">
+                        <h4>Configuration</h4>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-row">
+                                    <label asp-for="DisplayOrder" class="form-label">Display Order</label>
+                                    <input asp-for="DisplayOrder" type="number" class="form-control" min="0" />
+                                    <span asp-validation-for="DisplayOrder" class="text-danger"></span>
+                                    <small class="form-text text-muted">Order in which this feature appears in lists</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-row">
+                                    <div class="form-check mt-4">
+                                        <input asp-for="IsEnabled" class="form-check-input" type="checkbox" />
+                                        <label asp-for="IsEnabled" class="form-check-label">
+                                            Feature is enabled
+                                        </label>
+                                    </div>
+                                    <small class="form-text text-muted">Disabled features won't be available to users</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Version Support -->
+                    <div class="form-section">
+                        <h4>Version Support</h4>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-row">
+                                    <label asp-for="SupportFromVersion" class="form-label">Support From Version</label>
+                                    <input asp-for="SupportFromVersion" class="form-control version-input" 
+                                           placeholder="e.g., 1.0.0" />
+                                    <span asp-validation-for="SupportFromVersion" class="text-danger"></span>
+                                    <small class="form-text text-muted">First version that supports this feature</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-row">
+                                    <label asp-for="SupportToVersion" class="form-label">Support To Version</label>
+                                    <input asp-for="SupportToVersion" class="form-control version-input" 
+                                           placeholder="e.g., 2.0.0" />
+                                    <span asp-validation-for="SupportToVersion" class="text-danger"></span>
+                                    <small class="form-text text-muted">Last version that supports this feature (optional)</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <a href="@Url.Action("Index", new { productId = productId })" 
+                               class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Cancel
+                            </a>
+                        </div>
+                        <div class="btn-group">
+                            @if (Model.CanDelete)
+                            {
+                                <button type="button" 
+                                        class="btn btn-outline-danger" 
+                                        onclick="deleteFeature()">
+                                    <i class="fas fa-trash"></i> Delete Feature
+                                </button>
+                            }
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Update Feature
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Hidden Delete Form -->
+                @if (Model.CanDelete)
+                {
+                    <form id="deleteForm" method="post" 
+                          action="@Url.Action("Delete", new { productId = productId, featureId = featureId })" 
+                          style="display: none;">
+                        @Html.AntiForgeryToken()
+                    </form>
+                }
+            </div>
+        </div>
+        
+        <!-- Information Panel -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle"></i> Feature Information
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <h6>Feature Details</h6>
+                    <ul class="list-unstyled small mb-3">
+                        <li><strong>Created:</strong> @(Model.FeatureId != Guid.Empty ? "Existing Feature" : "New Feature")</li>
+                        <li><strong>Status:</strong> 
+                            <span class="badge @(Model.IsEnabled ? "bg-success" : "bg-secondary")">
+                                @(Model.IsEnabled ? "Enabled" : "Disabled")
+                            </span>
+                        </li>
+                        @if (Model.DisplayOrder > 0)
+                        {
+                            <li><strong>Display Order:</strong> @Model.DisplayOrder</li>
+                        }
+                    </ul>
+                    
+                    <h6>Modification Guidelines</h6>
+                    <ul class="small mb-3">
+                        <li>Changing the feature code may affect existing licenses</li>
+                        <li>Disabling a feature will hide it from new licenses</li>
+                        <li>Version support changes affect feature availability</li>
+                    </ul>
+                    
+                    <h6>Version Format</h6>
+                    <ul class="small mb-3">
+                        <li>Use semantic versioning (Major.Minor.Patch)</li>
+                        <li>Examples: "1.0.0", "2.1.3"</li>
+                        <li>Leave empty if not version-specific</li>
+                    </ul>
+                    
+                    <h6>Impact Assessment</h6>
+                    <ul class="small">
+                        <li>Test changes in a staging environment</li>
+                        <li>Review existing licenses using this feature</li>
+                        <li>Consider backwards compatibility</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-bolt"></i> Quick Actions
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form method="post" 
+                          action="@Url.Action("ToggleEnabled", new { productId = productId, featureId = featureId })" 
+                          style="display: inline;">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-sm @(Model.IsEnabled ? "btn-warning" : "btn-success") w-100 mb-2">
+                            @if (Model.IsEnabled)
+                            {
+                                <i class="fas fa-toggle-off"></i> <text>Disable Feature</text>
+                            }
+                            else
+                            {
+                                <i class="fas fa-toggle-on"></i> <text>Enable Feature</text>
+                            }
+                        </button>
+                    </form>
+                    
+                    <a href="@Url.Action("Create", new { productId = productId })" 
+                       class="btn btn-sm btn-outline-primary w-100">
+                        <i class="fas fa-plus"></i> Add New Feature
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        function deleteFeature() {
+            if (confirm('Are you sure you want to delete this feature?\n\nThis action cannot be undone and may affect existing licenses.')) {
+                document.getElementById('deleteForm').submit();
+            }
+        }
+        
+        $(document).ready(function() {
+            // Highlight current tier selection
+            $('.tier-info .badge').each(function() {
+                var tierId = $(this).data('tier-id');
+                var selectedTierId = $('#TierId').val();
+                if (tierId == selectedTierId) {
+                    $(this).removeClass('bg-secondary').addClass('bg-primary');
+                }
+            });
+            
+            // Update tier highlighting when selection changes
+            $('#TierId').on('change', function() {
+                var selectedTierId = $(this).val();
+                $('.tier-info .badge').each(function() {
+                    var tierId = $(this).data('tier-id');
+                    if (tierId == selectedTierId) {
+                        $(this).removeClass('bg-secondary').addClass('bg-primary');
+                    } else {
+                        $(this).removeClass('bg-primary').addClass('bg-secondary');
+                    }
+                });
+            });
+        });
+    </script>
+}

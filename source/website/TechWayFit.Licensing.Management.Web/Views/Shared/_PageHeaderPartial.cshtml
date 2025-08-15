@@ -25,7 +25,14 @@
                                 else
                                 {
                                     <li class="breadcrumb-item">
-                                        <a asp-controller="@item.Controller" asp-action="@item.Action">@item.Text</a>
+                                        @if (item.RouteValues != null)
+                                        {
+                                            <a href="@Url.Action(item.Action, item.Controller, item.RouteValues)">@item.Text</a>
+                                        }
+                                        else
+                                        {
+                                            <a asp-controller="@item.Controller" asp-action="@item.Action">@item.Text</a>
+                                        }
                                     </li>
                                 }
                             }

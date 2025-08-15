@@ -1,0 +1,351 @@
+@model TechWayFit.Licensing.Management.Web.ViewModels.Product.ProductFeatureCreateEditViewModel
+
+@{
+    ViewData["Title"] = "Create Product Feature";
+    ViewData["PageTitle"] = "Create Product Feature";
+    var productName = ViewData["ProductName"]?.ToString() ?? "";
+    var productId = (Guid)(ViewData["ProductId"] ?? Guid.Empty);
+    var tiers = ViewData["Tiers"] as List<TechWayFit.Licensing.Management.Web.ViewModels.Product.TierInfoViewModel> ?? new List<TechWayFit.Licensing.Management.Web.ViewModels.Product.TierInfoViewModel>();
+}
+
+@section styles {
+    <style>
+        .feature-form {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .form-section {
+            margin-bottom: 24px;
+        }
+        
+        .form-section h4 {
+            color: #495057;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+        
+        .form-row {
+            margin-bottom: 16px;
+        }
+        
+        .btn-group {
+            gap: 12px;
+        }
+        
+        .required-field {
+            color: #dc3545;
+        }
+        
+        .form-label {
+            font-weight: 500;
+            color: #495057;
+        }
+        
+        .breadcrumb {
+            background-color: transparent;
+            padding: 0;
+            margin-bottom: 24px;
+        }
+        
+        .version-input {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .tier-info {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 12px;
+            margin-bottom: 16px;
+        }
+    </style>
+}
+
+<div class="container-fluid">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="@Url.Action("Index", "Product")">Products</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="@Url.Action("Details", "Product", new { id = productId })">@productName</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="@Url.Action("Index", "ProductFeature", new { productId = productId })">Features</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">Create</li>
+        </ol>
+    </nav>
+
+    <!-- Alert Messages -->
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle"></i>
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i>
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-lg-8 col-md-10">
+            <div class="feature-form">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h4 class="mb-1">Create Product Feature</h4>
+                        <p class="text-muted mb-0">Add a new feature to @productName</p>
+                    </div>
+                    <div>
+                        <i class="fas fa-puzzle-piece text-primary" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger">
+                        <h6>Please correct the following errors:</h6>
+                        <ul class="mb-0">
+                            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                            {
+                                <li>@error.ErrorMessage</li>
+                            }
+                        </ul>
+                    </div>
+                }
+
+                <form method="post" action="@Url.Action("Create", new { productId = productId })">
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.ProductId)
+
+                    <!-- Basic Information -->
+                    <div class="form-section">
+                        <h4>Basic Information</h4>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-row">
+                                    <label asp-for="Name" class="form-label">
+                                        Feature Name <span class="required-field">*</span>
+                                    </label>
+                                    <input asp-for="Name" class="form-control" placeholder="Enter feature name" />
+                                    <span asp-validation-for="Name" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-row">
+                                    <label asp-for="Code" class="form-label">
+                                        Feature Code <span class="required-field">*</span>
+                                    </label>
+                                    <input asp-for="Code" class="form-control" placeholder="e.g., ADVANCED_REPORTING" />
+                                    <span asp-validation-for="Code" class="text-danger"></span>
+                                    <small class="form-text text-muted">Unique identifier for the feature</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <label asp-for="Description" class="form-label">Description</label>
+                            <textarea asp-for="Description" class="form-control" rows="3" 
+                                      placeholder="Describe what this feature provides"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <!-- Tier Assignment -->
+                    <div class="form-section">
+                        <h4>Tier Assignment</h4>
+                        
+                        @if (tiers.Any())
+                        {
+                            <div class="tier-info">
+                                <h6>Available Product Tiers</h6>
+                                <div class="row">
+                                    @foreach (var tier in tiers.OrderBy(t => t.DisplayOrder))
+                                    {
+                                        <div class="col-md-6 mb-2">
+                                            <div class="d-flex align-items-center">
+                                                <span class="badge bg-secondary me-2">@tier.Name</span>
+                                                @if (!string.IsNullOrEmpty(tier.Description))
+                                                {
+                                                    <small class="text-muted">@tier.Description</small>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <label asp-for="TierId" class="form-label">
+                                    Product Tier <span class="required-field">*</span>
+                                </label>
+                                <select asp-for="TierId" class="form-select">
+                                    <option value="">Select a tier...</option>
+                                    @foreach (var tier in tiers.OrderBy(t => t.DisplayOrder))
+                                    {
+                                        <option value="@tier.Id">@tier.Name</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="TierId" class="text-danger"></span>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                No product tiers are available. You need to create product tiers first.
+                                <a href="@Url.Action("Index", "ProductTier", new { productId = productId })" class="alert-link">
+                                    Manage Product Tiers
+                                </a>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Configuration -->
+                    <div class="form-section">
+                        <h4>Configuration</h4>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-row">
+                                    <label asp-for="DisplayOrder" class="form-label">Display Order</label>
+                                    <input asp-for="DisplayOrder" type="number" class="form-control" min="0" />
+                                    <span asp-validation-for="DisplayOrder" class="text-danger"></span>
+                                    <small class="form-text text-muted">Order in which this feature appears in lists</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-row">
+                                    <div class="form-check mt-4">
+                                        <input asp-for="IsEnabled" class="form-check-input" type="checkbox" />
+                                        <label asp-for="IsEnabled" class="form-check-label">
+                                            Feature is enabled
+                                        </label>
+                                    </div>
+                                    <small class="form-text text-muted">Disabled features won't be available to users</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Version Support -->
+                    <div class="form-section">
+                        <h4>Version Support</h4>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-row">
+                                    <label asp-for="SupportFromVersion" class="form-label">Support From Version</label>
+                                    <input asp-for="SupportFromVersion" class="form-control version-input" 
+                                           placeholder="e.g., 1.0.0" />
+                                    <span asp-validation-for="SupportFromVersion" class="text-danger"></span>
+                                    <small class="form-text text-muted">First version that supports this feature</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-row">
+                                    <label asp-for="SupportToVersion" class="form-label">Support To Version</label>
+                                    <input asp-for="SupportToVersion" class="form-control version-input" 
+                                           placeholder="e.g., 2.0.0" />
+                                    <span asp-validation-for="SupportToVersion" class="text-danger"></span>
+                                    <small class="form-text text-muted">Last version that supports this feature (optional)</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="d-flex justify-content-between">
+                        <a href="@Url.Action("Index", new { productId = productId })" 
+                           class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Create Feature
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Help Panel -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle"></i> Feature Guidelines
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <h6>Feature Naming</h6>
+                    <ul class="small mb-3">
+                        <li>Use descriptive, user-friendly names</li>
+                        <li>Keep names concise but clear</li>
+                        <li>Examples: "Advanced Reports", "API Access"</li>
+                    </ul>
+                    
+                    <h6>Feature Codes</h6>
+                    <ul class="small mb-3">
+                        <li>Use UPPER_CASE with underscores</li>
+                        <li>Make them unique and meaningful</li>
+                        <li>Examples: "ADVANCED_REPORTING", "API_ACCESS"</li>
+                    </ul>
+                    
+                    <h6>Version Format</h6>
+                    <ul class="small mb-3">
+                        <li>Use semantic versioning (Major.Minor.Patch)</li>
+                        <li>Examples: "1.0.0", "2.1.3"</li>
+                        <li>Leave empty if not version-specific</li>
+                    </ul>
+                    
+                    <h6>Best Practices</h6>
+                    <ul class="small">
+                        <li>Group related features in the same tier</li>
+                        <li>Use display order for logical grouping</li>
+                        <li>Test features before enabling them</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function() {
+            // Auto-generate feature code from name
+            $('#Name').on('input', function() {
+                var name = $(this).val();
+                var code = name.toUpperCase()
+                    .replace(/[^A-Z0-9\s]/g, '')
+                    .replace(/\s+/g, '_')
+                    .substring(0, 50);
+                
+                if ($('#Code').val() === '' || $('#Code').data('auto-generated')) {
+                    $('#Code').val(code).data('auto-generated', true);
+                }
+            });
+            
+            // Mark code as manually edited if user types
+            $('#Code').on('input', function() {
+                $(this).data('auto-generated', false);
+            });
+        });
+    </script>
+}

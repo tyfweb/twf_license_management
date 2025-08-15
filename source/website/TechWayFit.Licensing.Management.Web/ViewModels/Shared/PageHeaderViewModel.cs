@@ -19,6 +19,7 @@ namespace TechWayFit.Licensing.Management.Web.ViewModels.Shared
         public string Text { get; set; } = string.Empty;
         public string? Controller { get; set; }
         public string? Action { get; set; }
+        public object? RouteValues { get; set; }
         public bool IsActive { get; set; }
     }
 

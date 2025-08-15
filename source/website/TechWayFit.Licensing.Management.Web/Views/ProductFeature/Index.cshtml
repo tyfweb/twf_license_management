@@ -1,0 +1,353 @@
+@model TechWayFit.Licensing.Management.Web.ViewModels.Product.ProductFeatureIndexViewModel
+
+@{
+    ViewData["Title"] = "Product Features - " + Model.ProductName;
+    ViewData["Description"] = "Manage product features and their tier assignments";
+    var features = ViewData["Features"] as List<TechWayFit.Licensing.Management.Web.ViewModels.Product.FeatureInfoViewModel> ?? new List<TechWayFit.Licensing.Management.Web.ViewModels.Product.FeatureInfoViewModel>();
+    var tiers = ViewData["Tiers"] as List<TechWayFit.Licensing.Management.Web.ViewModels.Product.TierInfoViewModel> ?? new List<TechWayFit.Licensing.Management.Web.ViewModels.Product.TierInfoViewModel>();
+}
+
+@section Styles {
+    <style>
+        .product-icon {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(13, 110, 253, 0.1);
+            border-radius: 10px;
+        }
+
+        .feature-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            border: 1px solid #e9ecef;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(248, 249, 250, 0.8);
+            border-radius: 8px;
+            font-size: 1.2rem;
+        }
+
+        .feature-status {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-enabled {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .status-disabled {
+            background-color: #f8d7da;
+            color: #842029;
+        }
+
+        .action-buttons {
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+        }
+
+        .feature-card:hover .action-buttons {
+            opacity: 1;
+        }
+
+        .dropdown-toggle::after {
+            margin-left: 0.5em;
+        }
+
+        .version-badge {
+            background-color: #e9ecef;
+            color: #495057;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            margin: 0 2px;
+        }
+    </style>
+}
+
+<div class="container-fluid py-3">
+    <!-- Header Section -->
+    <div class="header mb-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="mb-1">Product Features</h2>
+                <p class="text-muted mb-0">Manage features, capabilities and tier assignments for @Model.ProductName.</p>
+            </div>
+            <div class="btn-group" role="group">
+                <a href="@Url.Action("Details", "Product", new { id = Model.ProductId })" class="btn btn-outline-primary">
+                    <i class="fas fa-info-circle me-1"></i>Basic Details
+                </a>
+                <a href="@Url.Action("Tiers", "Product", new { id = Model.ProductId })" class="btn btn-outline-primary">
+                    <i class="fas fa-layer-group me-1"></i>Tiers
+                </a>
+                <a href="@Url.Action("Index", "ProductVersion", new { productId = Model.ProductId })" class="btn btn-outline-primary">
+                    <i class="fas fa-code-branch me-1"></i>Versions
+                </a>
+                <a href="@Url.Action("Index", "ProductFeature", new { productId = Model.ProductId })" class="btn btn-primary">
+                    <i class="fas fa-star me-1"></i>Features
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Info Card -->
+    <div class="row g-2 mb-3">
+        <div class="col-12">
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <div class="d-flex align-items-center">
+                        <div class="product-icon me-3" style="width: 40px; height: 40px;">
+                            <i class="fas fa-cube text-primary"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0">@Model.ProductName</h5>
+                            <small class="text-muted">@Model.ProductDescription</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Messages -->
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle"></i>
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i>
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row g-2">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Features Management -->
+            <div class="edit-section">
+                <div class="section-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-star me-2"></i>Product Features
+                        </h5>
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-outline-secondary btn-sm active" id="cardViewBtn">
+                                <i class="fas fa-th-large me-1"></i>Cards
+                            </button>
+                        </div>
+                    </div>
+                </div>
+             
+                <div class="section-content">
+                    @if (features.Any())
+                    {
+                        <div class="row">
+                            @foreach (var feature in features.OrderBy(f => f.DisplayOrder).ThenBy(f => f.Name))
+                            {
+                                var tier = tiers.FirstOrDefault(t => t.Id == feature.TierId);
+                                <div class="col-lg-6 col-xl-4 mb-3">
+                                    <div class="card feature-card h-100">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <div class="feature-icon">
+                                                    <i class="fas fa-cog text-secondary"></i>
+                                                </div>
+                                                <div class="action-buttons">
+                                                    <div class="dropdown">
+                                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                                                                type="button" 
+                                                                data-bs-toggle="dropdown" 
+                                                                aria-expanded="false">
+                                                            <i class="fas fa-ellipsis-v"></i>
+                                                        </button>
+                                                        <ul class="dropdown-menu dropdown-menu-end">
+                                                            <li>
+                                                                <a class="dropdown-item" 
+                                                                   href="@Url.Action("Edit", new { productId = Model.ProductId, featureId = feature.Id })">
+                                                                    <i class="fas fa-edit"></i> Edit
+                                                                </a>
+                                                            </li>
+                                                            <li>
+                                                                <form method="post" 
+                                                                      action="@Url.Action("ToggleEnabled", new { productId = Model.ProductId, featureId = feature.Id })" 
+                                                                      style="display: inline;">
+                                                                    @Html.AntiForgeryToken()
+                                                                    <button type="submit" class="dropdown-item">
+                                                                        @if (feature.IsEnabled)
+                                                                        {
+                                                                            <i class="fas fa-toggle-off"></i> <text>Disable</text>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <i class="fas fa-toggle-on"></i> <text>Enable</text>
+                                                                        }
+                                                                    </button>
+                                                                </form>
+                                                            </li>
+                                                            @if (feature.CanDelete)
+                                                            {
+                                                                <li><hr class="dropdown-divider"></li>
+                                                                <li>
+                                                                    <form method="post" 
+                                                                          action="@Url.Action("Delete", new { productId = Model.ProductId, featureId = feature.Id })" 
+                                                                          style="display: inline;"
+                                                                          onsubmit="return confirm('Are you sure you want to delete this feature?');">
+                                                                        @Html.AntiForgeryToken()
+                                                                        <button type="submit" class="dropdown-item text-danger">
+                                                                            <i class="fas fa-trash"></i> Delete
+                                                                        </button>
+                                                                    </form>
+                                                                </li>
+                                                            }
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <h6 class="card-title mb-1">@feature.Name</h6>
+                                            <small class="text-muted">Code: @feature.Code</small>
+                                            
+                                            @if (!string.IsNullOrEmpty(feature.Description))
+                                            {
+                                                <p class="card-text mt-2 mb-2">@feature.Description</p>
+                                            }
+                                            
+                                            <div class="mt-2">
+                                                <span class="feature-status @(feature.IsEnabled ? "status-enabled" : "status-disabled")">
+                                                    @(feature.IsEnabled ? "Enabled" : "Disabled")
+                                                </span>
+                                                
+                                                @if (tier != null)
+                                                {
+                                                    <span class="badge bg-secondary ms-2">@tier.Name</span>
+                                                }
+                                            </div>
+                                            
+                                            @if (!string.IsNullOrEmpty(feature.SupportFromVersion) || !string.IsNullOrEmpty(feature.SupportToVersion))
+                                            {
+                                                <div class="mt-2">
+                                                    <small class="text-muted">
+                                                        Version Support: 
+                                                        @if (!string.IsNullOrEmpty(feature.SupportFromVersion))
+                                                        {
+                                                            <span class="version-badge">@feature.SupportFromVersion</span>
+                                                        }
+                                                        @if (!string.IsNullOrEmpty(feature.SupportFromVersion) && !string.IsNullOrEmpty(feature.SupportToVersion))
+                                                        {
+                                                            <text>to</text>
+                                                        }
+                                                        @if (!string.IsNullOrEmpty(feature.SupportToVersion))
+                                                        {
+                                                            <span class="version-badge">@feature.SupportToVersion</span>
+                                                        }
+                                                    </small>
+                                                </div>
+                                            }
+                                            
+                                            @if (feature.DisplayOrder > 0)
+                                            {
+                                                <div class="mt-1">
+                                                    <small class="text-muted">Display Order: @feature.DisplayOrder</small>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <div class="mb-3">
+                                <i class="fas fa-puzzle-piece text-muted" style="font-size: 3rem;"></i>
+                            </div>
+                            <h5 class="text-muted mb-3">No Features Found</h5>
+                            <p class="text-muted mb-4">
+                                This product doesn't have any features yet. 
+                                Features define the functionality available in different product tiers.
+                            </p>
+                            <a href="@Url.Action("Create", new { productId = Model.ProductId })" 
+                               class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Add First Feature
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Quick Actions -->
+            <div class="sidebar-section">
+                <div class="section-header">
+                        <h6><i class="fas fa-bolt me-2"></i>Quick Actions</h6>
+                </div>
+                <div class="section-content">
+                    <div class="d-grid gap-2">
+                        <a href="@Url.Action("Create", new { productId = Model.ProductId })" 
+                            class="btn btn-outline-primary">
+                            <i class="fas fa-plus me-2"></i>Add Feature
+                        </a>
+                        <a href="@Url.Action("Details", "Product", new { id = Model.ProductId })" 
+                            class="btn btn-outline-warning">
+                            <i class="fas fa-info-circle me-2"></i>Product Details
+                        </a>
+                        <a href="@Url.Action("Index", "ProductTier", new { productId = Model.ProductId })" 
+                            class="btn btn-outline-info">
+                            <i class="fas fa-layer-group me-2"></i>Manage Tiers
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Available Tiers Info -->
+            @if (tiers.Any())
+            {
+                <div class="sidebar-section">
+                    <div class="section-header">
+                        <h6><i class="fas fa-layer-group me-2"></i>Available Product Tiers</h6>
+                    </div>
+                    <div class="section-content">
+                        @foreach (var tier in tiers.OrderBy(t => t.DisplayOrder))
+                        {
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="badge bg-secondary me-2">@tier.Name</span>
+                                @if (!string.IsNullOrEmpty(tier.Description))
+                                {
+                                    <small class="text-muted">@tier.Description</small>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
