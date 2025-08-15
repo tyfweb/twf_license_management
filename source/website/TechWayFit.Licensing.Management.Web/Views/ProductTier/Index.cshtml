@@ -1,12 +1,24 @@
 @model TechWayFit.Licensing.Management.Web.ViewModels.Product.ProductEnhancedEditViewModel
 
-@{
-    ViewData["Title"] = "Product Tiers - " + Model.ProductName;
-    ViewData["Description"] = "Manage product tiers, pricing, and capabilities";
-}
-
 @section Styles {
     <style>
+        /* Ensure dropdown buttons are clickable */
+        .dropdown-toggle {
+            z-index: 1000;
+            pointer-events: auto;
+            position: relative;
+        }
+        
+        .dropdown-menu {
+            z-index: 1001;
+        }
+        
+        /* Debug: highlight dropdown on hover */
+        .dropdown-toggle:hover {
+            background-color: #f8f9fa !important;
+            border-color: #007bff !important;
+        }
+        
         .product-icon {
             width: 60px;
             height: 60px;
@@ -50,6 +62,12 @@
     </style>
 }
 
+@{
+    ViewData["Title"] = "Product Tiers - " + Model.ProductName;
+    ViewData["Description"] = "Manage product tiers, pricing, and capabilities";
+    var productTiers = ViewData["ProductTiers"] as List<TechWayFit.Licensing.Management.Web.ViewModels.Product.TierInfoViewModel> ?? new List<TechWayFit.Licensing.Management.Web.ViewModels.Product.TierInfoViewModel>();
+}
+
 <div class="container-fluid py-3">
     <!-- Header Section -->
     <div class="header mb-3">
@@ -57,20 +75,22 @@
             <div>
                 <h2 class="mb-1">Product Tiers</h2>
                 <p class="text-muted mb-0">Manage pricing tiers and feature sets for @Model.ProductName.</p>
-            </div>            <div class="btn-group" role="group">
-                <a href="@Url.Action("Details", new { id = Model.ProductId })" class="btn btn-outline-primary">
+            </div>
+            <div class="btn-group" role="group">
+                <a href="@Url.Action("Details", "Product", new { id = Model.ProductId })" class="btn btn-outline-primary">
                     <i class="fas fa-info-circle me-1"></i>Basic Details
                 </a>
-                <a href="@Url.Action("Tiers", new { id = Model.ProductId })" class="btn btn-primary">
+                <a href="@Url.Action("Index", "ProductTier", new { productId = Model.ProductId })" class="btn btn-primary">
                     <i class="fas fa-layer-group me-1"></i>Tiers
                 </a>
-                <a href="@Url.Action("Versions", new { id = Model.ProductId })" class="btn btn-outline-primary">
+                <a href="@Url.Action("Versions", "Product", new { id = Model.ProductId })" class="btn btn-outline-primary">
                     <i class="fas fa-code-branch me-1"></i>Versions
                 </a>
-                <a href="@Url.Action("Features", new { id = Model.ProductId })" class="btn btn-outline-primary">
+                <a href="@Url.Action("Features", "Product", new { id = Model.ProductId })" class="btn btn-outline-primary">
                     <i class="fas fa-star me-1"></i>Features
                 </a>
-            </div>        </div>
+            </div>
+        </div>
     </div>
 
     <!-- Product Info Card -->
@@ -99,7 +119,10 @@
                     </div>
                 </div>
             </div>
-        </div>    </div>    <!-- Statistics Cards -->
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
     <partial name="_StatsTiles" model="Model.StatsTiles" />
 
     <div class="row g-2">
@@ -126,14 +149,142 @@
                     </div>
                 </div>
                 <div class="section-content">
-                    <!-- Tiers content -->
+                    <!-- Tiers content - Server-side rendered -->
                     <div id="tiers-content">
-                        <div class="text-center py-5">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Loading...</span>
+                        @if (productTiers != null && productTiers.Any())
+                        {
+                            <!-- Card View -->
+                            <div id="card-view" class="row g-4">
+                                @foreach (var tier in productTiers)
+                                {
+                                    <div class="col-md-6 col-lg-4">
+                                        <div class="card tier-card @(tier.IsActive ? "tier-active" : "tier-inactive")">
+                                            <div class="card-header d-flex justify-content-between align-items-center">
+                                                <h6 class="mb-0 fw-bold">@tier.Name</h6>
+                                                <div class="dropdown">
+                                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" 
+                                                            id="dropdownTier@(tier.Id)" 
+                                                            data-bs-toggle="dropdown" 
+                                                            aria-expanded="false">
+                                                        <i class="fas fa-ellipsis-v"></i>
+                                                    </button>
+                                                    <ul class="dropdown-menu" aria-labelledby="dropdownTier@(tier.Id)">
+                                                        <li><a class="dropdown-item" href="/ProductTier/@Model.ProductId/@tier.Id/edit"><i class="fas fa-edit me-2"></i>Edit</a></li>
+                                                        <li><a class="dropdown-item toggle-tier" href="#" data-tier-id="@tier.Id"><i class="fas fa-toggle-@(tier.IsActive ? "off" : "on") me-2"></i>@(tier.IsActive ? "Deactivate" : "Activate")</a></li>
+                                                        <li><hr class="dropdown-divider"></li>
+                                                        <li><a class="dropdown-item delete-tier text-danger" href="#" data-tier-id="@tier.Id"><i class="fas fa-trash me-2"></i>Delete</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                            <div class="card-body">
+                                                <p class="text-muted small mb-3">@tier.Description</p>
+                                                <div class="pricing-info mb-3">
+                                                    <span class="price-tag">@tier.Price</span>
+                                                </div>
+                                                <div class="tier-details">
+                                                    <div class="row">
+                                                        <div class="col-6">
+                                                            <small class="text-muted">Max Users</small>
+                                                            <div class="fw-bold">@(tier.MaxUsers?.ToString() ?? "Unlimited")</div>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <small class="text-muted">Max Devices</small>
+                                                            <div class="fw-bold">@(tier.MaxDevices?.ToString() ?? "Unlimited")</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                @if (tier.SupportSLA != null)
+                                                {
+                                                    <div class="mt-3">
+                                                        <small class="text-muted">Support SLA</small>
+                                                        <div class="fw-bold">@tier.SupportSLA.Name</div>
+                                                        <small class="text-muted">Critical: @tier.SupportSLA.CriticalResponseHours hrs</small>
+                                                    </div>
+                                                }
+                                            </div>
+                                            <div class="card-footer">
+                                                <span class="badge bg-@(tier.IsActive ? "success" : "secondary")">
+                                                    @(tier.IsActive ? "Active" : "Inactive")
+                                                </span>
+                                                <span class="badge bg-light text-dark ms-2">Order: @tier.DisplayOrder</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
                             </div>
-                            <p class="mt-3 text-muted">Loading product tiers...</p>
-                        </div>
+
+                            <!-- List View -->
+                            <div id="list-view" style="display: none;">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Description</th>
+                                                <th>Price</th>
+                                                <th>Max Users</th>
+                                                <th>Max Devices</th>
+                                                <th>Support SLA</th>
+                                                <th>Status</th>
+                                                <th>Order</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var tier in productTiers)
+                                            {
+                                                <tr class="@(tier.IsActive ? "" : "table-secondary")">
+                                                    <td class="fw-bold">@tier.Name</td>
+                                                    <td class="text-muted">@tier.Description</td>
+                                                    <td><span class="price-tag">@tier.Price</span></td>
+                                                    <td>@(tier.MaxUsers?.ToString() ?? "Unlimited")</td>
+                                                    <td>@(tier.MaxDevices?.ToString() ?? "Unlimited")</td>
+                                                    <td>
+                                                        @if (tier.SupportSLA != null)
+                                                        {
+                                                            <span title="@tier.SupportSLA.Description">@tier.SupportSLA.Name</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="text-muted">None</span>
+                                                        }
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-@(tier.IsActive ? "success" : "secondary")">
+                                                            @(tier.IsActive ? "Active" : "Inactive")
+                                                        </span>
+                                                    </td>
+                                                    <td>@tier.DisplayOrder</td>
+                                                    <td>
+                                                        <div class="btn-group btn-group-sm">
+                                                            <a href="/ProductTier/@Model.ProductId/@tier.Id/edit" class="btn btn-outline-primary btn-sm" title="Edit">
+                                                                <i class="fas fa-edit"></i>
+                                                            </a>
+                                                            <button class="btn btn-outline-@(tier.IsActive ? "warning" : "success") btn-sm toggle-tier" data-tier-id="@tier.Id" title="@(tier.IsActive ? "Deactivate" : "Activate")">
+                                                                <i class="fas fa-toggle-@(tier.IsActive ? "off" : "on")"></i>
+                                                            </button>
+                                                            <button class="btn btn-outline-danger btn-sm delete-tier" data-tier-id="@tier.Id" title="Delete">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center py-5">
+                                <div class="text-muted">
+                                    <i class="fas fa-layer-group fa-3x mb-3"></i>
+                                    <p>No product tiers found.</p>
+                                    <p><small>Click "Add Tier" to create your first tier.</small></p>
+                                </div>
+                            </div>
+                        }
                     </div>
                 </div>
             </div>
@@ -148,9 +299,9 @@
                 </div>
                 <div class="section-content">
                     <div class="d-grid gap-2">
-                        <button type="button" class="btn btn-outline-primary" onclick="showAddTierModal()">
+                        <a href="@Url.Action("Create", new { productId = Model.ProductId })" class="btn btn-outline-primary">
                             <i class="fas fa-plus me-2"></i>Add Tier
-                        </button>
+                        </a>
                         <button type="button" class="btn btn-outline-secondary" onclick="importTiersFromJson()">
                             <i class="fas fa-upload me-2"></i>Import Tiers
                         </button>
@@ -160,7 +311,7 @@
                         <button type="button" class="btn btn-outline-success" onclick="exportToJson()">
                             <i class="fas fa-download me-2"></i>Export to JSON
                         </button>
-                        <a href="@Url.Action("Details", new { id = Model.ProductId })" class="btn btn-outline-warning">
+                        <a href="@Url.Action("Details", "Product", new { id = Model.ProductId })" class="btn btn-outline-warning">
                             <i class="fas fa-info-circle me-2"></i>Product Details
                         </a>
                         <a asp-controller="License" asp-action="Create" asp-route-productId="@Model.ProductId" class="btn btn-outline-success">
@@ -212,10 +363,10 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="monthlyPrice" class="form-label">Monthly Price</label>
+                                <label for="monthlyPriceAmount" class="form-label">Monthly Price</label>
                                 <div class="input-group">
                                     <span class="input-group-text">$</span>
-                                    <input type="number" class="form-control" id="monthlyPrice" name="MonthlyPriceAmount" step="0.01" min="0">
+                                    <input type="number" class="form-control" id="monthlyPriceAmount" name="MonthlyPriceAmount" step="0.01" min="0">
                                     <select class="form-select" id="monthlyPriceCurrency" name="MonthlyPriceCurrency" style="max-width: 100px;">
                                         <option value="USD">USD</option>
                                         <option value="EUR">EUR</option>
@@ -227,10 +378,10 @@
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="annualPrice" class="form-label">Annual Price</label>
+                                <label for="annualPriceAmount" class="form-label">Annual Price</label>
                                 <div class="input-group">
                                     <span class="input-group-text">$</span>
-                                    <input type="number" class="form-control" id="annualPrice" name="AnnualPriceAmount" step="0.01" min="0">
+                                    <input type="number" class="form-control" id="annualPriceAmount" name="AnnualPriceAmount" step="0.01" min="0">
                                     <select class="form-select" id="annualPriceCurrency" name="AnnualPriceCurrency" style="max-width: 100px;">
                                         <option value="USD">USD</option>
                                         <option value="EUR">EUR</option>
@@ -311,8 +462,8 @@
                         </div>
                         <div class="col-md-4">
                             <div class="mb-3">
-                                <label for="maxProjects" class="form-label">Max Projects</label>
-                                <input type="number" class="form-control" id="maxProjects" name="MaxProjects" min="1">
+                                <label for="maxDevices" class="form-label">Max Devices</label>
+                                <input type="number" class="form-control" id="maxDevices" name="MaxDevices" min="1">
                                 <div class="form-text">Leave empty for unlimited</div>
                                 <div class="invalid-feedback"></div>
                             </div>
@@ -327,7 +478,8 @@
                         </div>
                     </div>
                     
-                    <div class="row">                        <div class="col-md-4">
+                    <div class="row">
+                        <div class="col-md-4">
                             <div class="form-check mb-3">
                                 <input type="hidden" name="IsFree" value="false">
                                 <input class="form-check-input" type="checkbox" id="isFree" name="IsFree" value="true">
@@ -335,14 +487,16 @@
                                     Free Tier
                                 </label>
                             </div>
-                        </div><div class="col-md-4">
+                        </div>
+                        <div class="col-md-4">
                             <div class="form-check mb-3">
                                 <input type="hidden" name="IsActive" value="false">
                                 <input class="form-check-input" type="checkbox" id="isActive" name="IsActive" value="true" checked>
                                 <label class="form-check-label" for="isActive">
                                     Active
                                 </label>
-                            </div>                        </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -395,11 +549,11 @@
             // Free tier checkbox handler
             $('#isFree').on('change', function() {
                 if ($(this).is(':checked')) {
-                    $('#monthlyPrice').val('0').prop('disabled', true);
-                    $('#annualPrice').val('0').prop('disabled', true);
+                    $('#monthlyPriceAmount').val('0').prop('disabled', true);
+                    $('#annualPriceAmount').val('0').prop('disabled', true);
                 } else {
-                    $('#monthlyPrice').prop('disabled', false);
-                    $('#annualPrice').prop('disabled', false);
+                    $('#monthlyPriceAmount').prop('disabled', false);
+                    $('#annualPriceAmount').prop('disabled', false);
                 }
             });
             
@@ -409,58 +563,14 @@
         });
 
         function loadProductTiers() {
-            $('#tiers-content').html('<div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-3 text-muted">Loading product tiers...</p></div>');
-            
-            $.get('@Url.Action("GetProductTiers")', { productId: '@Model.ProductId' })
-                .done(function(response) {
-                    if (response.success && response.data) {
-                        var viewType = localStorage.getItem('tierViewType') || 'card';
-                        if (viewType === 'card') {
-                            var html = renderProductTiersCard(response.data);
-                            $('#tiers-content').html(html);
-                        } else {
-                            var html = renderProductTiersList(response.data);
-                            $('#tiers-content').html(html);
-                        }
-                        
-                        // Update counters
-                        updateTierStats(response.data);
-                    } else {
-                        $('#tiers-content').html('<div class="text-center py-5"><div class="text-muted"><i class="fas fa-layer-group fa-3x mb-3"></i><p>No product tiers found.</p><p><small>Click "Add Tier" to create your first tier.</small></p></div></div>');
-                        $('#tiers-count').text(0);
-                        $('#active-tiers-count').text(0);
-                        $('#customer-count').text(0);
-                        $('#avg-conversion-rate').text('0%');
-                    }
-                })
-                .fail(function(xhr, status, error) {
-                    console.error('Failed to load product tiers:', error);
-                    $('#tiers-content').html('<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i>Failed to load product tiers. Please try again.</div>');
-                    $('#tiers-count').text(0);
-                });
+            // Server-side rendering is already done, just update view type based on localStorage
+            var viewType = localStorage.getItem('tierViewType') || 'card';
+            switchView(viewType);
         }
         
         function updateTierStats(tiers) {
-            if (!tiers || tiers.length === 0) {
-                $('#tiers-count').text(0);
-                $('#active-tiers-count').text(0);
-                $('#customer-count').text(0);
-                $('#avg-conversion-rate').text('0%');
-                return;
-            }
-            
-            // Total tiers
-            $('#tiers-count').text(tiers.length);
-            
-            // Active tiers
-            const activeTiers = tiers.filter(t => t.IsActive);
-            $('#active-tiers-count').text(activeTiers.length);
-            
-            // Customer count (placeholder - in real implementation this would use actual data)
-            $('#customer-count').text(Math.floor(Math.random() * 100) + 5);
-            
-            // Conversion rate (placeholder)
-            $('#avg-conversion-rate').text(Math.floor(Math.random() * 10) + 5 + '%');
+            // Stats are now handled server-side via ViewData and calculated in controller
+            // This function is kept for compatibility but does nothing
         }
 
         function renderProductTiersCard(tiers) {
@@ -477,7 +587,7 @@
                 html += '        <div class="tier-icon me-3">';
                 
                 // Tier level icon
-                switch(tier.name.toLowerCase()) {
+                switch(tier.Name.toLowerCase()) {
                     case 'free':
                     case 'community':
                         html += '          <i class="fas fa-heart text-success"></i>';
@@ -500,9 +610,9 @@
                 
                 html += '        </div>';
                 html += '        <div class="flex-grow-1">';
-                html += '          <h6 class="card-title mb-1">' + tier.name + '</h6>';
+                html += '          <h6 class="card-title mb-1">' + tier.Name + '</h6>';
                 if (tier.Description) {
-                    html += '          <p class="card-text text-muted small mb-2">' + tier.description + '</p>';
+                    html += '          <p class="card-text text-muted small mb-2">' + tier.Description + '</p>';
                 }
                 html += '        </div>';
                 html += '        <div class="dropdown">';
@@ -510,9 +620,9 @@
                 html += '            <i class="fas fa-ellipsis-v"></i>';
                 html += '          </button>';
                 html += '          <ul class="dropdown-menu dropdown-menu-end">';
-                html += '            <li><a class="dropdown-item" href="#" onclick="editTier(\'' + tier.id + '\')"><i class="fas fa-edit me-2"></i>Edit</a></li>';
+                html += '            <li><a class="dropdown-item" href="/ProductTier/@Model.ProductId/' + tier.Id + '/edit"><i class="fas fa-edit me-2"></i>Edit</a></li>';
                 if (tier.CanDelete) {
-                    html += '            <li><a class="dropdown-item text-danger" href="#" onclick="deleteTier(\'' + tier.id + '\')"><i class="fas fa-trash me-2"></i>Delete</a></li>';
+                    html += '            <li><a class="dropdown-item text-danger" href="#" onclick="deleteTier(\'' + tier.Id + '\')"><i class="fas fa-trash me-2"></i>Delete</a></li>';
                 }
                 html += '          </ul>';
                 html += '        </div>';
@@ -520,29 +630,22 @@
                 
                 html += '      <div class="tier-info mt-3">';
                 html += '        <div class="price-tag text-center mb-3">';
-                if (parseFloat(tier.price) === 0 || tier.price === 'Free' || tier.price.includes('0.00')) {
+                if (tier.Price === 'Free' || tier.Price === '0' || tier.Price.includes('0.00')) {
                     html += '          <div class="h4 mb-0 text-success">Free</div>';
                 } else {
-                    html += '          <div class="h4 mb-0 text-success">' + tier.price + '</div>';
+                    html += '          <div class="h4 mb-0 text-success">' + tier.Price + '</div>';
                 }
                 html += '        </div>';
                 
                 html += '        <div class="tier-badges">';
-                if (tier.isActive) {
+                if (tier.IsActive) {
                     html += '          <span class="badge bg-success me-1">Active</span>';
                 } else {
                     html += '          <span class="badge bg-secondary me-1">Inactive</span>';
                 }
                 
-                // Add some sample badges
-                if (tier.name.toLowerCase().includes('enterprise')) {
-                    html += '          <span class="badge bg-info me-1">Premium Support</span>';
-                    html += '          <span class="badge bg-primary me-1">All Features</span>';
-                } else if (tier.name.toLowerCase().includes('pro')) {
-                    html += '          <span class="badge bg-primary me-1">Most Features</span>';
-                } else {
-                    html += '          <span class="badge bg-secondary me-1">Basic Features</span>';
-                }
+                // Display order badge
+                html += '          <span class="badge bg-info me-1">Order: ' + tier.DisplayOrder + '</span>';
                 
                 html += '        </div>';
                 html += '      </div>';
@@ -566,6 +669,8 @@
             html += '<th>Tier Name</th>';
             html += '<th>Price</th>';
             html += '<th>Description</th>';
+            html += '<th>Display Order</th>';
+            html += '<th>SLA</th>';
             html += '<th>Status</th>';
             html += '<th>Actions</th>';
             html += '</tr>';
@@ -581,7 +686,7 @@
                 html += '<div class="tier-icon me-2" style="width: 30px; height: 30px;">';
                 
                 // Tier icon based on name
-                switch(tier.name.toLowerCase()) {
+                switch(tier.Name.toLowerCase()) {
                     case 'free':
                     case 'community':
                         html += '<i class="fas fa-heart text-success"></i>';
@@ -603,27 +708,41 @@
                 }
                 
                 html += '</div>';
-                html += '<div class="fw-semibold">' + tier.name + '</div>';
+                html += '<div class="fw-semibold">' + tier.Name + '</div>';
                 html += '</div>';
                 html += '</td>';
                 
                 // Price
                 html += '<td>';
-                if (parseFloat(tier.price) === 0 || tier.price === 'Free' || tier.price.includes('0.00')) {
+                if (tier.Price === 'Free' || tier.Price === '0' || tier.Price.includes('0.00')) {
                     html += '<span class="badge bg-success">Free</span>';
                 } else {
-                    html += tier.price;
+                    html += tier.Price;
                 }
                 html += '</td>';
                 
                 // Description
                 html += '<td>';
-                html += '<small class="text-muted">' + (tier.description || '-') + '</small>';
+                html += '<small class="text-muted">' + (tier.Description || '-') + '</small>';
+                html += '</td>';
+                
+                // Display Order
+                html += '<td>';
+                html += '<span class="badge bg-info">' + tier.DisplayOrder + '</span>';
+                html += '</td>';
+                
+                // SLA
+                html += '<td>';
+                if (tier.SupportSLA && tier.SupportSLA.AvailabilityHours) {
+                    html += '<small class="text-muted">' + tier.SupportSLA.AvailabilityHours + '</small>';
+                } else {
+                    html += '<span class="text-muted">-</span>';
+                }
                 html += '</td>';
                 
                 // Status
                 html += '<td>';
-                if (tier.isActive) {
+                if (tier.IsActive) {
                     html += '<span class="badge bg-success">Active</span>';
                 } else {
                     html += '<span class="badge bg-secondary">Inactive</span>';
@@ -633,9 +752,9 @@
                 // Actions
                 html += '<td>';
                 html += '<div class="btn-group btn-group-sm" role="group">';
-                html += '<button type="button" class="btn btn-outline-primary" onclick="editTier(\'' + tier.id + '\')"><i class="fas fa-edit"></i></button>';
-                if (tier.canDelete) {
-                    html += '<button type="button" class="btn btn-outline-danger" onclick="deleteTier(\'' + tier.id + '\')"><i class="fas fa-trash"></i></button>';
+                html += '<a href="/ProductTier/@Model.ProductId/' + tier.Id + '/edit" class="btn btn-outline-primary"><i class="fas fa-edit"></i></a>';
+                if (tier.CanDelete) {
+                    html += '<button type="button" class="btn btn-outline-danger" onclick="deleteTier(\'' + tier.Id + '\')"><i class="fas fa-trash"></i></button>';
                 }
                 html += '</div>';
                 html += '</td>';
@@ -687,7 +806,7 @@
 
         function editTier(tierId) {
             // Get tier data
-            $.get('@Url.Action("GetProductTier")', { 
+            $.get('@Url.Action("GetProductTier", "ProductTier")', { 
                 productId: '@Model.ProductId', 
                 tierId: tierId 
             })
@@ -700,41 +819,19 @@
                     $('#tierName').val(tier.TierName);
                     $('#tierDescription').val(tier.Description);
                     $('#displayOrder').val(tier.DisplayOrder || 0);
-                    $('#tier').val(tier.Tier || 'Community');
                     $('#monthlyPrice').val(tier.MonthlyPrice);
-                    $('#annualPrice').val(tier.AnnualPrice);
-                    $('#trialPeriodDays').val(tier.TrialPeriodDays);
                     $('#maxUsers').val(tier.MaxUsers);
-                    $('#maxProjects').val(tier.MaxProjects);
-                    $('#isFree').prop('checked', tier.IsFree);
+                    $('#maxDevices').val(tier.MaxDevices);
                     $('#isActive').prop('checked', tier.IsActive);
-                    $('#isPublic').prop('checked', tier.IsPublic !== false); // default to true if not specified
                     
                     // Populate Support SLA fields
                     if (tier.SupportSLA) {
                         $('#slaName').val(tier.SupportSLA.Name || '');
                         $('#slaDescription').val(tier.SupportSLA.Description || '');
-                        $('#criticalResponseTime').val(tier.SupportSLA.CriticalResponseTime ? tier.SupportSLA.CriticalResponseTime / 3600000 : 1); // Convert from milliseconds to hours
-                        $('#highResponseTime').val(tier.SupportSLA.HighPriorityResponseTime ? tier.SupportSLA.HighPriorityResponseTime / 3600000 : 4);
-                        $('#mediumResponseTime').val(tier.SupportSLA.MediumPriorityResponseTime ? tier.SupportSLA.MediumPriorityResponseTime / 3600000 : 8);
-                        $('#lowResponseTime').val(tier.SupportSLA.LowPriorityResponseTime ? tier.SupportSLA.LowPriorityResponseTime / 3600000 : 24);
-                    } else {
-                        // Default values for new tiers
-                        $('#slaName').val('');
-                        $('#slaDescription').val('');
-                        $('#criticalResponseTime').val(1);
-                        $('#highResponseTime').val(4);
-                        $('#mediumResponseTime').val(8);
-                        $('#lowResponseTime').val(24);
-                    }
-                    
-                    // Handle free tier toggling of price fields
-                    if (tier.IsFree) {
-                        $('#monthlyPrice').val('0').prop('disabled', true);
-                        $('#annualPrice').val('0').prop('disabled', true);
-                    } else {
-                        $('#monthlyPrice').prop('disabled', false);
-                        $('#annualPrice').prop('disabled', false);
+                        $('#criticalResponseTime').val(tier.SupportSLA.CriticalResponseTime || 1);
+                        $('#highResponseTime').val(tier.SupportSLA.HighPriorityResponseTime || 4);
+                        $('#mediumResponseTime').val(tier.SupportSLA.MediumPriorityResponseTime || 8);
+                        $('#lowResponseTime').val(tier.SupportSLA.LowPriorityResponseTime || 24);
                     }
                     
                     // Update modal title and button
@@ -762,7 +859,7 @@
                 formData.append('__RequestVerificationToken', $('[name=__RequestVerificationToken]').val());
 
                 $.ajax({
-                    url: '@Url.Action("DeleteProductTier")',
+                    url: '@Url.Action("DeleteProductTier", "ProductTier")',
                     type: 'POST',
                     data: formData,
                     processData: false,
@@ -785,7 +882,7 @@
         function saveTier() {
             var tierId = $('#tierId').val();
             var isEdit = tierId && tierId !== '';
-            var url = isEdit ? '@Url.Action("EditProductTier")' : '@Url.Action("AddProductTier")';
+            var url = isEdit ? '@Url.Action("EditProductTier", "ProductTier")' : '@Url.Action("AddProductTier", "ProductTier")';
             
             var formData = new FormData(document.getElementById('tierForm'));
             if (isEdit) {
@@ -870,7 +967,7 @@
         }
         
         function exportToJson() {
-            $.get('@Url.Action("GetProductTiers")', { productId: '@Model.ProductId' })
+            $.get('/ProductTier/@Model.ProductId/list')
                 .done(function(response) {
                     if (response.success && response.data) {
                         // Create a JSON string and download it
@@ -930,5 +1027,28 @@
                 }, 5000);
             }
         }
+
+        // Initialize Bootstrap dropdowns - Bootstrap 5 should auto-initialize, but let's be explicit
+        document.addEventListener('DOMContentLoaded', function() {
+            // Debug: log dropdown elements found
+            console.log('Initializing dropdowns...');
+            
+            // Initialize all dropdowns explicitly
+            var dropdownElementList = document.querySelectorAll('.dropdown-toggle');
+            console.log('Found ' + dropdownElementList.length + ' dropdown toggles');
+            
+            dropdownElementList.forEach(function(element) {
+                console.log('Initializing dropdown:', element.id);
+                // Ensure the dropdown is properly initialized
+                var dropdown = new bootstrap.Dropdown(element);
+                
+                // Add click event listener as backup
+                element.addEventListener('click', function(e) {
+                    console.log('Dropdown clicked:', this.id);
+                    e.preventDefault();
+                    dropdown.toggle();
+                });
+            });
+        });
     </script>
 }

@@ -36,6 +36,7 @@ public partial class EfCoreLicensingDbContext : DbContext
     public DbSet<ProductEntity> Products { get; set; }
     public DbSet<ProductVersionEntity> ProductVersions { get; set; }
     public DbSet<ProductTierEntity> ProductTiers { get; set; }
+    public DbSet<ProductTierPriceEntity> ProductTierPrices { get; set; }
     public DbSet<ProductFeatureEntity> ProductFeatures { get; set; }
     public DbSet<ProductConsumerEntity> ProductConsumers { get; set; }
 
@@ -73,6 +74,7 @@ public partial class EfCoreLicensingDbContext : DbContext
         // Product-related entities
         modelBuilder.ApplyConfiguration(new ProductEntityConfiguration());
         modelBuilder.ApplyConfiguration(new ProductVersionEntityConfiguration());        modelBuilder.ApplyConfiguration(new ProductTierEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new ProductTierPriceEntityConfiguration());
         modelBuilder.ApplyConfiguration(new ProductFeatureEntityConfiguration());
 
         // User-related entities

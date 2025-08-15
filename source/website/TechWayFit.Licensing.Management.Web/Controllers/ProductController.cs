@@ -23,8 +23,6 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         private readonly IEnterpriseProductService _productService;
         private readonly IProductLicenseService _licenseService;
         private readonly IConsumerAccountService _consumerService;
-        private readonly IProductTierService _productTierService;
-
         private readonly IProductFeatureService _productFeatureService;
 
         public ProductController(
@@ -32,14 +30,12 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
             IEnterpriseProductService productService,
             IProductLicenseService licenseService,
             IConsumerAccountService consumerService,
-            IProductFeatureService productFeatureService,
-            IProductTierService productTierService)
+            IProductFeatureService productFeatureService)
         {
             _logger = logger;
             _productService = productService ?? throw new ArgumentNullException(nameof(productService));
             _licenseService = licenseService ?? throw new ArgumentNullException(nameof(licenseService));
             _consumerService = consumerService ?? throw new ArgumentNullException(nameof(consumerService));
-            _productTierService = productTierService ?? throw new ArgumentNullException(nameof(productTierService));
             _productFeatureService = productFeatureService ?? throw new ArgumentNullException(nameof(productFeatureService));
         }
 
@@ -783,31 +779,12 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
             await Task.Delay(0); // Simulate async operation if needed
             return RedirectToAction("Features", new { id });
         }        /// <summary>
-        /// Dedicated Product Tiers management page
+        /// Dedicated Product Tiers management page - redirects to ProductTier controller
         /// </summary>
         [Route("Product/{id:guid}/tiers")]
-        public async Task<IActionResult> Tiers(Guid id)
+        public IActionResult Tiers(Guid id)
         {
-            try
-            {
-                var product = await GetProductByIdAsync(id);
-                if (product == null)
-                {
-                    return NotFound();
-                }
-
-                var viewModel = CreateEnhancedEditViewModel(product);
-                viewModel.ActiveSection = "tiers";
-                viewModel.StatsTiles = CreateProductTiersStatsTiles(product);
-
-                return View("Tiers", viewModel);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error loading product tiers page for {ProductId}", id);
-                TempData["ErrorMessage"] = "Error loading product tiers. Please try again.";
-                return RedirectToAction(nameof(Index));
-            }
+            return RedirectToAction("Index", "ProductTier", new { productId = id });
         }        /// <summary>
         /// Dedicated Product Versions management page
         /// </summary>
@@ -1015,183 +992,6 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
             ViewBag.FeatureCategories = Enum.GetValues<FeatureCategory>()
                 .Select(fc => new SelectListItem { Value = ((int)fc).ToString(), Text = fc.ToString() })
                 .ToList();
-        }
-
-        /// <summary>
-        /// Get product tiers for AJAX loading
-        /// </summary>
-        [HttpGet]
-        public async Task<IActionResult> GetProductTiers(Guid productId)
-        {
-            try
-            {
-                // This would load from your actual data service
-                var tiers = await GetProductTiersDataAsync(productId);
-                return Json(JsonResponse.OK(tiers, "Product tiers loaded successfully"));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error loading product tiers for {ProductId}", productId);
-                return Json(JsonResponse.Error("Error loading tiers"));
-            }
-        }
-
-        /// <summary>
-        /// Add a new product tier
-        /// </summary>
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddProductTier(ProductTierViewModel model)
-        {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    var errors = ModelState.Values
-                        .SelectMany(v => v.Errors)
-                        .Select(e => e.ErrorMessage)
-                        .ToList();
-                    return Json(JsonResponse.Error("Validation failed", errors));
-                }
-                var serviceDto = new Core.Models.Product.ProductTier
-                {
-                    ProductId = model.ProductId,
-                    Name = model.TierName,
-                    Description = model.Description,
-                    Price = new Money
-                    {
-                        Amount = model.MonthlyPrice
-                        ?? 0,
-                        Currency = "USD"
-                    },
-                    Audit = new AuditInfo
-                    {
-                        IsActive = model.IsActive
-                    },
-                    MaxUsers = model.MaxUsers ?? 0
-                };
-               var productTier= await _productTierService.CreateTierAsync(serviceDto, User.Identity?.Name ?? "System");
-               
-                _logger.LogInformation("Product tier '{TierName}' added to product {ProductId}", model.TierName, model.ProductId);
-                return Json(JsonResponse.OK(productTier,"Product tier added successfully"));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error adding product tier for product {ProductId}", model.ProductId);
-                return Json(JsonResponse.Error("Error adding product tier"));
-            }
-        }
-
-        /// <summary>
-        /// Edit an existing product tier
-        /// </summary>
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditProductTier(Guid productId, Guid tierId, ProductTierViewModel model)
-        {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    var errors = ModelState.Values
-                        .SelectMany(v => v.Errors)
-                        .Select(e => e.ErrorMessage)
-                        .ToList();
-                    return Json(new { success = false, message = "Validation failed", errors });
-                }
-
-                // Simulate updating a product tier
-                await Task.CompletedTask; // For now, as this is mock implementation
-                
-                var updatedTier = new 
-                {
-                    Id = tierId,
-                    Name = model.TierName,
-                    Description = model.Description,
-                    Price = model.MonthlyPrice.HasValue ? $"USD {model.MonthlyPrice:F2}/month" : "Free",
-                    IsActive = model.IsActive,
-                    CanDelete = true
-                };
-
-                _logger.LogInformation("Product tier '{TierName}' (ID: {TierId}) updated for product {ProductId}", 
-                    model.TierName, tierId, productId);
-                
-                return Json(new { 
-                    success = true, 
-                    message = "Product tier updated successfully", 
-                    data = updatedTier 
-                });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating product tier {TierId} for product {ProductId}", tierId, productId);
-                return Json(new { success = false, message = "Error updating product tier" });
-            }
-        }
-
-        /// <summary>
-        /// Delete a product tier
-        /// </summary>
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteProductTier(Guid productId, Guid tierId)
-        {
-            try
-            {
-                // Simulate tier validation and deletion
-                await Task.CompletedTask; // For now, as this is mock implementation
-                
-                // In a real implementation, you would check if the tier can be deleted
-                // (e.g., no active licenses, not a system tier, etc.)
-                
-                _logger.LogInformation("Product tier {TierId} deleted from product {ProductId}", tierId, productId);
-                
-                return Json(new { 
-                    success = true, 
-                    message = "Product tier deleted successfully" 
-                });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error deleting product tier {TierId} for product {ProductId}", tierId, productId);
-                return Json(new { success = false, message = "Error deleting product tier" });
-            }
-        }
-
-        /// <summary>
-        /// Get a specific product tier for editing
-        /// </summary>
-        [HttpGet]
-        public async Task<IActionResult> GetProductTier(Guid productId, Guid tierId)
-        {
-            try
-            {
-                // Simulate getting a specific tier
-                await Task.CompletedTask; // For now, as this is mock implementation
-                
-                // In a real implementation, this would fetch from the database
-                var tier = new ProductTierViewModel
-                {
-                    TierId = tierId,
-                    ProductId = productId,
-                    TierName = "Professional", // Mock data
-                    Description = "Professional tier with advanced features",
-                    MonthlyPrice = 29.99m,
-                    AnnualPrice = 299.99m,
-                    IsActive = true,
-                    IsFree = false,
-                    TrialPeriodDays = 14,
-                    MaxUsers = 10,
-                    MaxProjects = 50
-                };
-
-                return Json(new { success = true, data = tier });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting product tier {TierId} for product {ProductId}", tierId, productId);
-                return Json(new { success = false, message = "Error loading product tier" });
-            }
         }
 
         /// <summary>
@@ -1639,26 +1439,6 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         #endregion
 
         #region Simple Data Access Methods for Enhanced Management
-
-        /// <summary>
-        /// Get product tiers data - simplified implementation
-        /// </summary>
-        private async Task<List<object>> GetProductTiersDataAsync(Guid productId)
-        {
-
-            var productTiers = await _productTierService.GetTiersByProductAsync(productId);
-
-            var returnObj = productTiers.Select(t => new
-            {
-                Id = t.TierId,
-                Name = t.Name,
-                Description = t.Description,
-                Price = t.Price?.Amount > 0 ? $"USD {t.Price.Amount:F2}/month" : "Free",
-                IsActive = t.Audit.IsActive,
-                CanDelete = true // Simplified, in real app check if tier can be deleted
-            });
-            return returnObj.Cast<object>().ToList();
-        }
 
         /// <summary>
         /// Get product versions data - simplified implementation

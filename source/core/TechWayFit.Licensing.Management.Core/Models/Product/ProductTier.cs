@@ -28,6 +28,11 @@ public class ProductTier
     public WorkflowInfo Workflow { get; set; } = new();
 
     /// <summary>
+    /// Display order for sorting tiers
+    /// </summary>
+    public int DisplayOrder { get; set; } = 0;
+
+    /// <summary>
     /// Name of the product tier
     /// </summary>
     public string Name { get; set; } = string.Empty;
@@ -38,23 +43,23 @@ public class ProductTier
     public string Description { get; set; } = string.Empty;
 
     /// <summary>
-    /// Display order of the product tier
+    /// Support SLA information for this tier
     /// </summary>
-    public int DisplayOrder { get; set; } = 0;
+    public ProductSupportSLA SupportSLA { get; set; } = ProductSupportSLA.NoSLA;
 
     /// <summary>
     /// Features included in this tier
     /// </summary>
     public List<ProductFeature> Features { get; set; } = new();
+
     /// <summary>
-    /// Support level for this tier
+    /// Pricing options for this tier (Monthly, Yearly, Perpetual)
     /// </summary>
-    public ProductSupportSLA SupportSLA { get; set; } = new();
+    public List<ProductTierPrice> Prices { get; set; } = new();
 
     public ProductTier()
     {
         Features.Add(ProductFeature.Default);
-        Price = Money.Zero;
         MaxUsers = 1;
         MaxDevices = 1;
         Audit.IsActive = true;
@@ -65,13 +70,8 @@ public class ProductTier
     {
         TierId = DefaultTierId,
         Name = "Default Tier",
-        Description = "Default product tier with basic features",
-        SupportSLA = ProductSupportSLA.NoSLA
+        Description = "Default product tier with basic features"
     };
-    /// <summary>
-    /// Price of the product tier
-    /// </summary>
-    public Money Price { get; set; }
     
     /// <summary>
     /// Maximum number of users allowed in this tier

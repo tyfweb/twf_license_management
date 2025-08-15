@@ -1,0 +1,172 @@
+@model TechWayFit.Licensing.Management.Web.ViewModels.TenantSelector.TenantSelectorViewModel
+
+@if (Model.ShouldDisplay)
+{
+    <div class="d-flex align-items-center">
+        <i class="fas fa-building text-white me-2" title="Tenant Selector"></i>
+        <select class="form-select form-select-sm border rounded bg-white text-dark" 
+                id="topbarTenantSwitcher" 
+                onchange="switchTenant(this.value)"
+                style="min-width: 180px; max-width: 250px;"
+                data-bs-toggle="tooltip" 
+                data-bs-placement="bottom" 
+                title="Switch between tenants (Administrator)">
+            
+            <option value="">All Tenants (Admin View)</option>
+            
+            @foreach (var tenant in Model.Tenants)
+            {
+                @if (Model.CurrentTenantId == tenant.Id)
+                {
+                    <option value="@tenant.Id" selected>@tenant.DisplayText</option>
+                }
+                else
+                {
+                    <option value="@tenant.Id">@tenant.DisplayText</option>
+                }
+            }
+        </select>
+    </div>
+}
+else if (Model.HasError)
+{
+    <div class="d-flex align-items-center">
+        <i class="fas fa-exclamation-triangle text-warning me-2" 
+           title="@Model.ErrorMessage"></i>
+        <small class="text-white-50">Tenant data unavailable</small>
+    </div>
+}
+
+@if (Model.IsAdministrator)
+{
+    <script>
+        // Tenant switcher functionality - only load if administrator
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTenantSwitcher();
+        });
+
+        function initializeTenantSwitcher() {
+            const tenantSwitcher = document.getElementById('topbarTenantSwitcher');
+            if (!tenantSwitcher) return;
+
+            // Initialize tooltip if Bootstrap is available
+            if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+                new bootstrap.Tooltip(tenantSwitcher);
+            }
+        }
+
+        function switchTenant(tenantId) {
+            const tenantSwitcher = document.getElementById('topbarTenantSwitcher');
+            
+            if (!tenantSwitcher) {
+                console.error('Tenant switcher element not found');
+                return;
+            }
+
+            // If no tenant selected, clear selection
+            if (!tenantId) {
+                clearTenantSelection();
+                return;
+            }
+
+            const requestData = { TenantId: tenantId };
+
+            // Show loading state
+            const originalValue = tenantSwitcher.value;
+            tenantSwitcher.disabled = true;
+
+            fetch('@Url.Action("SwitchTenant", "Account")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('Tenant switched successfully', 'success');
+                    
+                    // Refresh the current page to load data for the new tenant
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    // Restore original value on error
+                    tenantSwitcher.value = originalValue;
+                    tenantSwitcher.disabled = false;
+                    showNotification(data.message || 'Failed to switch tenant', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error switching tenant:', error);
+                
+                // Restore original value on error
+                tenantSwitcher.value = originalValue;
+                tenantSwitcher.disabled = false;
+                showNotification('Error switching tenant', 'error');
+            });
+        }
+
+        function clearTenantSelection() {
+            const tenantSwitcher = document.getElementById('topbarTenantSwitcher');
+            if (!tenantSwitcher) return;
+
+            // Show loading state
+            tenantSwitcher.disabled = true;
+
+            fetch('@Url.Action("ClearTenantSelection", "Account")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    tenantSwitcher.value = '';
+                    tenantSwitcher.disabled = false;
+                    showNotification('Tenant selection cleared', 'success');
+                    
+                    // Refresh the current page to load all data
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    tenantSwitcher.disabled = false;
+                    showNotification(data.message || 'Failed to clear selection', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error clearing tenant selection:', error);
+                tenantSwitcher.disabled = false;
+                showNotification('Error clearing tenant selection', 'error');
+            });
+        }
+
+        function showNotification(message, type) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} position-fixed`;
+            notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);';
+            notification.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
+                    <span>${message}</span>
+                    <button type="button" class="btn-close ms-auto" onclick="this.parentElement.parentElement.remove()"></button>
+                </div>
+            `;
+
+            document.body.appendChild(notification);
+
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+    </script>
+}

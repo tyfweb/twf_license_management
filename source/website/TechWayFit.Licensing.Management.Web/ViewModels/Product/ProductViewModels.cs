@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using TechWayFit.Licensing.Core.Models;
 using TechWayFit.Licensing.Management.Web.ViewModels.Shared;
 using TechWayFit.Licensing.Management.Core.Models.Common;
+using TechWayFit.Licensing.Management.Core.Models.Product;
 
 namespace TechWayFit.Licensing.Management.Web.ViewModels.Product
 {
@@ -273,50 +274,7 @@ namespace TechWayFit.Licensing.Management.Web.ViewModels.Product
         public List<ProductFeatureViewModel> ProductFeatures { get; set; } = new();
     }
 
-    /// <summary>
-    /// Product Tier View Model
-    /// </summary>
-    public class ProductTierViewModel
-    {
-        public Guid? TierId { get; set; }
-        [Required]
-        public Guid ProductId { get; set; }
-        
-        [Required]
-        [StringLength(50)]
-        public string TierName { get; set; } = string.Empty;
-        
-        [StringLength(200)]
-        public string Description { get; set; } = string.Empty;
-        
-        public LicenseTier Tier { get; set; }
-        
-        [Range(0, double.MaxValue)]
-        public decimal? MonthlyPrice { get; set; }
-        
-        [Range(0, double.MaxValue)]
-        public decimal? AnnualPrice { get; set; }
-        
-        public bool IsFree { get; set; }
-        
-        [Range(0, 365)]
-        public int TrialPeriodDays { get; set; }
-        
-        [Range(1, int.MaxValue)]
-        public int? MaxUsers { get; set; }
-        
-        [Range(1, int.MaxValue)]
-        public int? MaxProjects { get; set; }
-        
-        public bool IsActive { get; set; }
-        public bool IsDeleted { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public string CreatedBy { get; set; } = string.Empty;
-        public DateTime? UpdatedAt { get; set; }
-        public string? UpdatedBy { get; set; }
-        public DateTime? DeletedAt { get; set; }
-        public string? DeletedBy { get; set; }
-    }
+
 /// <summary>
     /// Enhanced Product Edit View Model with tabbed sections
     /// </summary>

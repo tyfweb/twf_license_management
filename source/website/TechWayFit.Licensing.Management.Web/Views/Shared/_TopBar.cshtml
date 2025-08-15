@@ -40,18 +40,8 @@
             <div class="d-flex align-items-center gap-3">
                 @if (User.Identity?.IsAuthenticated == true)
                 {
-                    <!-- Tenant Switcher (for administrators) -->
-                    @if (User.IsInRole("Administrator"))
-                    {
-                        <div class="d-flex align-items-center">
-                            <i class="fas fa-building text-white me-2"></i>
-                            <select class="form-select form-select-sm border rounded bg-white text-dark" 
-                                    id="topbarTenantSwitcher" onchange="switchTenant(this.value)"
-                                    style="min-width: 180px; max-width: 250px;">
-                                <option value="">All Tenants</option>
-                            </select>
-                        </div>
-                    }
+                    <!-- Tenant Switcher ViewComponent (for administrators) -->
+                    @await Component.InvokeAsync("TenantSelector")
 
                     <!-- Simple User Profile Dropdown -->
                     <div class="dropdown">

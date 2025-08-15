@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Web.Controllers;
 using TechWayFit.Licensing.Management.Web.ViewModels.Tenant;
+using TechWayFit.Licensing.Management.Web.ViewComponents;
 
 namespace TechWayFit.Licensing.Management.Web.Controllers;
 
@@ -14,13 +16,19 @@ public class TenantController : BaseController
 {
     private readonly ITenantService _tenantService;
     private readonly IUserService _userService;
+    private readonly IMemoryCache _cache;
+    private readonly ILogger<TenantController> _logger;
 
     public TenantController(
         ITenantService tenantService,
-        IUserService userService)
+        IUserService userService,
+        IMemoryCache cache,
+        ILogger<TenantController> logger)
     {
         _tenantService = tenantService ?? throw new ArgumentNullException(nameof(tenantService));
         _userService = userService ?? throw new ArgumentNullException(nameof(userService));
+        _cache = cache ?? throw new ArgumentNullException(nameof(cache));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     /// <summary>
@@ -105,6 +113,9 @@ public class TenantController : BaseController
                 model.TenantCode,
                 model.Description,
                 model.Website);
+
+            // Invalidate tenant cache since a new tenant was created
+            TenantSelectorViewComponent.InvalidateTenantCache(_cache, _logger);
 
             TempData["SuccessMessage"] = $"Tenant '{createdTenant.TenantName}' created successfully with code '{createdTenant.TenantCode}'.";
             return RedirectToAction("Index");

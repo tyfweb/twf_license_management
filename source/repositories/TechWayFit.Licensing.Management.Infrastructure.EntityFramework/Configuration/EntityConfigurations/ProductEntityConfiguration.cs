@@ -72,9 +72,10 @@ public class ProductTierEntityConfiguration : IEntityTypeConfiguration<ProductTi
         builder.Property(e => e.ProductId).HasMaxLength(50).IsRequired();
         builder.Property(e => e.Name).HasMaxLength(200).IsRequired();
         builder.Property(e => e.Description).HasMaxLength(1000);
-        builder.Property(e => e.Price).HasMaxLength(10);
         builder.Property(e => e.DisplayOrder);
         builder.Property(e => e.SupportSLAJson).HasMaxLength(1000);
+        builder.Property(e => e.MaxUsers);
+        builder.Property(e => e.MaxDevices);
 
         // Audit fields
         builder.Property(e => e.CreatedBy).HasMaxLength(100).IsRequired();
@@ -125,5 +126,39 @@ public class ProductFeatureEntityConfiguration : IEntityTypeConfiguration<Produc
         builder.HasIndex(e => e.IsEnabled);
         builder.HasIndex(e => e.Code);
         builder.HasIndex(e => e.TenantId);
+    }
+}
+
+public class ProductTierPriceEntityConfiguration : IEntityTypeConfiguration<ProductTierPriceEntity>
+{
+    public void Configure(EntityTypeBuilder<ProductTierPriceEntity> builder)
+    {
+        builder.HasKey(e => e.Id);
+        builder.Property(e => e.Id).IsRequired();
+        builder.Property(e => e.ProductId).IsRequired();
+        builder.Property(e => e.TierId).IsRequired();
+        builder.Property(e => e.PriceAmount).HasColumnType("decimal(10,2)").IsRequired();
+        builder.Property(e => e.Currency).HasMaxLength(3).IsRequired();
+        builder.Property(e => e.PriceType).IsRequired();
+
+        // Audit fields
+        builder.Property(e => e.CreatedBy).HasMaxLength(100).IsRequired();
+        builder.Property(e => e.UpdatedBy).HasMaxLength(100);
+
+        // Relationships
+        builder.HasOne(e => e.ProductTier)
+              .WithMany(t => t.Prices)
+              .HasForeignKey(e => e.TierId)
+              .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(e => e.Product)
+              .WithMany()
+              .HasForeignKey(e => e.ProductId)
+              .OnDelete(DeleteBehavior.Cascade);
+
+        // Indexes
+        builder.HasIndex(e => new { e.TierId, e.PriceType }).IsUnique();
+        builder.HasIndex(e => e.IsActive);
+        builder.HasIndex(e => e.Currency);
     }
 }
