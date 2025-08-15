@@ -51,14 +51,32 @@ public class ProductFeatureEntity : AuditWorkflowEntity, IEntityMapper<ProductFe
     /// </summary>
     public int DisplayOrder { get; set; } = 0;
 
-    public string SupportFromVersion { get; set; } = "1.0.0"; // Default version, adjust as needed
-    public string SupportToVersion { get; set; } = "9999.0.0"; // Default to no end version
+    /// <summary>
+    /// Foreign key to ProductVersion for minimum supported version
+    /// </summary>
+    public Guid? SupportFromVersionId { get; set; }
+
+    /// <summary>
+    /// Foreign key to ProductVersion for maximum supported version (nullable)
+    /// </summary>
+    public Guid? SupportToVersionId { get; set; }
+
     public string FeatureUsageJson { get; set; } = "{}"; // Assuming usage is stored as JSON
 
     /// <summary>
     /// Navigation property to Product Tier
     /// </summary>
     public virtual ProductTierEntity? Tier { get; set; }
+
+    /// <summary>
+    /// Navigation property to SupportFromVersion
+    /// </summary>
+    public virtual ProductVersionEntity? SupportFromVersion { get; set; }
+
+    /// <summary>
+    /// Navigation property to SupportToVersion
+    /// </summary>
+    public virtual ProductVersionEntity? SupportToVersion { get; set; }
 
     /// <summary>
     /// Navigation property to License Features
@@ -81,6 +99,8 @@ public class ProductFeatureEntity : AuditWorkflowEntity, IEntityMapper<ProductFe
             Description = model.Description,
             IsEnabled = model.IsEnabled,
             DisplayOrder = model.DisplayOrder,
+            SupportFromVersionId = model.SupportFromVersionId,
+            SupportToVersionId = model.SupportToVersionId,
             IsActive = model.Audit.IsActive,
             IsDeleted = model.Audit.IsDeleted,
             CreatedBy = model.Audit.CreatedBy,
@@ -116,6 +136,11 @@ public class ProductFeatureEntity : AuditWorkflowEntity, IEntityMapper<ProductFe
             Description = this.Description,
             IsEnabled = this.IsEnabled,
             DisplayOrder = this.DisplayOrder,
+            SupportFromVersionId = this.SupportFromVersionId,
+            SupportToVersionId = this.SupportToVersionId,
+            // Version semantic mapping would be done by service layer when needed
+            SupportFromVersion = SemanticVersion.Default,
+            SupportToVersion = SemanticVersion.Max,
             Audit = new AuditInfo
             {
                 IsActive = this.IsActive,

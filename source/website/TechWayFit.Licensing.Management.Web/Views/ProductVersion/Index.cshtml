@@ -319,6 +319,11 @@
                                                 </button>
                                             </form>
                                         }
+                                        <a href="@Url.Action("Details", new { productId = Model.ProductId, versionId = version.Id })" 
+                                           class="btn btn-sm btn-outline-info"
+                                           title="View version details">
+                                            <i class="fas fa-info-circle"></i>
+                                        </a>
                                         <a href="@Url.Action("Edit", new { productId = Model.ProductId, versionId = version.Id })" 
                                            class="btn btn-sm btn-outline-primary"
                                            title="Edit version">

@@ -27,6 +27,12 @@ namespace TechWayFit.Licensing.Management.Web.ViewModels.Product
         public string? ConfigurationSchema { get; set; }
         public Guid MinimumTier { get; set; }
 
+        [Display(Name = "Support From Version")]
+        public Guid? SupportFromVersionId { get; set; }
+
+        [Display(Name = "Support To Version")]
+        public Guid? SupportToVersionId { get; set; }
+
         public bool IsActive { get; set; } = true;
         public bool IsDeleted { get; set; } = false;
         public DateTime CreatedAt { get; set; }

@@ -34,10 +34,10 @@ public class ProductFeatureCreateEditViewModel
     public int DisplayOrder { get; set; } = 0;
 
     [Display(Name = "Support From Version")]
-    public string SupportFromVersion { get; set; } = string.Empty;
+    public Guid? SupportFromVersionId { get; set; }
 
     [Display(Name = "Support To Version")]
-    public string SupportToVersion { get; set; } = string.Empty;
+    public Guid? SupportToVersionId { get; set; }
 
     public bool IsActive { get; set; } = true;
     public bool CanDelete { get; set; } = true;

@@ -321,4 +321,51 @@ public class ProductVersionController : BaseController
             return StatusCode(500, "An error occurred while setting the current version");
         }
     }
+
+    /// <summary>
+    /// Product Version Details - Show detailed information about a specific version
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> Details(Guid productId, Guid versionId)
+    {
+        try
+        {
+            var product = await _productService.GetProductByIdAsync(productId);
+            if (product == null)
+            {
+                return NotFound($"Product with ID {productId} not found");
+            }
+
+            var versions = await _productService.GetProductVersionsAsync(productId);
+            var version = versions.FirstOrDefault(v => v.VersionId == versionId);
+            if (version == null)
+            {
+                return NotFound($"Version with ID {versionId} not found");
+            }
+
+            var viewModel = new ProductVersionDetailsViewModel
+            {
+                Id = version.VersionId,
+                ProductId = version.ProductId,
+                ProductName = product.Name,
+                ProductDescription = product.Description,
+                Version = version.Version?.ToString() ?? "",
+                Name = version.Name,
+                ReleaseNotes = version.ChangeLog, // Using ChangeLog from ProductVersion model
+                ReleaseDate = version.ReleaseDate,
+                EndOfLifeDate = version.EndOfLifeDate,
+                IsCurrent = version.IsCurrent,
+                IsActive = version.Audit.IsActive, // Using Audit.IsActive from ProductVersion model
+                CreatedAt = version.Audit.CreatedOn, // Using Audit.CreatedOn from ProductVersion model
+                UpdatedAt = version.Audit.UpdatedOn ?? version.Audit.CreatedOn // Using Audit.UpdatedOn from ProductVersion model
+            };
+
+            return View(viewModel);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting version details for version {VersionId} in product {ProductId}", versionId, productId);
+            return StatusCode(500, "An error occurred while getting version details");
+        }
+    }
 }

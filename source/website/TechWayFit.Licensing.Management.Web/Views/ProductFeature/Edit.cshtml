@@ -284,19 +284,26 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-row">
-                                    <label asp-for="SupportFromVersion" class="form-label">Support From Version</label>
-                                    <input asp-for="SupportFromVersion" class="form-control version-input" 
-                                           placeholder="e.g., 1.0.0" />
-                                    <span asp-validation-for="SupportFromVersion" class="text-danger"></span>
-                                    <small class="form-text text-muted">First version that supports this feature</small>
+                                    <label asp-for="SupportFromVersionId" class="form-label">Support From Version</label>
+                                    <select asp-for="SupportFromVersionId" class="form-select" asp-items="@((List<SelectListItem>?)ViewData["Versions"] ?? new List<SelectListItem>())">
+                                        <option value="">Select version...</option>
+                                    </select>
+                                    <span asp-validation-for="SupportFromVersionId" class="text-danger"></span>
+                                    <small class="form-text text-muted">
+                                        First version that supports this feature
+                                        <a href="@Url.Action("Index", "ProductVersion", new { productId = ViewData["ProductId"] })" class="ms-2 text-decoration-none" title="Manage versions">
+                                            <i class="fas fa-external-link-alt"></i> Manage versions
+                                        </a>
+                                    </small>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-row">
-                                    <label asp-for="SupportToVersion" class="form-label">Support To Version</label>
-                                    <input asp-for="SupportToVersion" class="form-control version-input" 
-                                           placeholder="e.g., 2.0.0" />
-                                    <span asp-validation-for="SupportToVersion" class="text-danger"></span>
+                                    <label asp-for="SupportToVersionId" class="form-label">Support To Version</label>
+                                    <select asp-for="SupportToVersionId" class="form-select" asp-items="@((List<SelectListItem>?)ViewData["Versions"] ?? new List<SelectListItem>())">
+                                        <option value="">Select version...</option>
+                                    </select>
+                                    <span asp-validation-for="SupportToVersionId" class="text-danger"></span>
                                     <small class="form-text text-muted">Last version that supports this feature (optional)</small>
                                 </div>
                             </div>

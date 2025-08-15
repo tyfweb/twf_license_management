@@ -107,8 +107,11 @@ public class ProductFeatureEntityConfiguration : IEntityTypeConfiguration<Produc
         builder.Property(e => e.Code).HasMaxLength(100).IsRequired();
         builder.Property(e => e.IsEnabled).IsRequired();
         builder.Property(e => e.DisplayOrder);
-        builder.Property(e => e.SupportFromVersion).HasMaxLength(20);
-        builder.Property(e => e.SupportToVersion).HasMaxLength(20);
+        
+        // Foreign key properties for version support
+        builder.Property(e => e.SupportFromVersionId);
+        builder.Property(e => e.SupportToVersionId);
+        
         builder.Property(e => e.FeatureUsageJson).HasMaxLength(1000);
 
         // Audit fields
@@ -121,11 +124,24 @@ public class ProductFeatureEntityConfiguration : IEntityTypeConfiguration<Produc
               .HasForeignKey(e => e.TierId)
               .OnDelete(DeleteBehavior.Cascade);
 
+        // Version support relationships
+        builder.HasOne(e => e.SupportFromVersion)
+              .WithMany()
+              .HasForeignKey(e => e.SupportFromVersionId)
+              .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasOne(e => e.SupportToVersion)
+              .WithMany()
+              .HasForeignKey(e => e.SupportToVersionId)
+              .OnDelete(DeleteBehavior.SetNull);
+
         // Indexes
         builder.HasIndex(e => new { e.TierId, e.Code }).IsUnique();
         builder.HasIndex(e => e.IsEnabled);
         builder.HasIndex(e => e.Code);
         builder.HasIndex(e => e.TenantId);
+        builder.HasIndex(e => e.SupportFromVersionId);
+        builder.HasIndex(e => e.SupportToVersionId);
     }
 }
 

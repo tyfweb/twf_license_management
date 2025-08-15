@@ -58,6 +58,17 @@ public class ProductFeature
     /// Usage limits for this feature
     /// </summary>
     public ProductFeatureUsage Usage { get; set; } = new();
+    
+    /// <summary>
+    /// Foreign key to ProductVersion for minimum supported version
+    /// </summary>
+    public Guid? SupportFromVersionId { get; set; }
+
+    /// <summary>
+    /// Foreign key to ProductVersion for maximum supported version (nullable)
+    /// </summary>
+    public Guid? SupportToVersionId { get; set; }
+    
     /// <summary>
     /// The version from which this feature is supported
     /// </summary>

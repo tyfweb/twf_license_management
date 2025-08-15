@@ -528,4 +528,22 @@ public class ProductFeatureService : IProductFeatureService
         var data = await _unitOfWork.ProductFeatures.GetByProductIdAsync(productId);
         return data.Select(f => f);
     }
+
+    /// <summary>
+    /// Gets features that are applicable to a specific version (current version or previous versions)
+    /// </summary>
+    public async Task<IEnumerable<ProductFeature>> GetFeaturesByProductVersionIdAsync(Guid productId, Guid versionId)
+    {
+        _logger.LogInformation("Getting features for product {ProductId} and version {VersionId}", productId, versionId);
+
+        try
+        {
+            return await _unitOfWork.ProductFeatures.GetFeaturesByProductVersionIdAsync(productId, versionId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting features for product {ProductId} and version {VersionId}", productId, versionId);
+            throw;
+        }
+    }
 }

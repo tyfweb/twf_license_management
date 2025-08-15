@@ -34,6 +34,14 @@ public interface IProductFeatureService
     Task<IEnumerable<ProductFeature>> GetFeaturesByproductIdAsync(Guid tiproductId);
 
     /// <summary>
+    /// Gets features that are applicable to a specific version (current version or previous versions)
+    /// </summary>
+    /// <param name="productId">Product ID</param>
+    /// <param name="versionId">Version ID</param>
+    /// <returns>List of features applicable to the version</returns>
+    Task<IEnumerable<ProductFeature>> GetFeaturesByProductVersionIdAsync(Guid productId, Guid versionId);
+
+    /// <summary>
     /// Gets features for a specific tier
     /// </summary>
     /// <param name="tierId">Tier ID</param>
