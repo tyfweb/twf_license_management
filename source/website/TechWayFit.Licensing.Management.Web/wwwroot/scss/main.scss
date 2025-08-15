@@ -39,6 +39,7 @@
 @import 'components/stats-cards';
 @import 'components/product-cards';
 @import 'components/edit-sections';
+@import 'components/page-sections';
 @import 'components/bootstrap-enhancements';
 
 // LAYOUT
@@ -52,6 +53,7 @@
 // -----
 // Page-specific styles
 @import 'pages/dashboard';
+@import 'pages/version-management';
 
 // ADDITIONAL COMPONENTS
 // --------------------

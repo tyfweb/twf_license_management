@@ -1,0 +1,188 @@
+// Version Management Styles
+// =================================================================
+
+// Version Management Container
+.version-management {
+    margin-top: 20px;
+}
+
+// Version Forms
+.version-form {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.version-input {
+    border: 2px solid #e9ecef;
+    border-radius: 6px;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+
+    &:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+}
+
+// Version Info Badges
+.version-info-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    color: #495057;
+}
+
+// Version Badges
+.version-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: linear-gradient(135deg, #6c757d, #495057);
+    color: white;
+
+    &.current {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+    }
+
+    &.archived {
+        background: linear-gradient(135deg, #6c757d, #495057);
+        color: white;
+    }
+}
+
+// Version Cards
+.version-card {
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 16px;
+    background: white;
+    transition: all 0.2s ease-in-out;
+
+    &:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        transform: translateY(-1px);
+    }
+}
+
+.version-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.version-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+// Version Details Page
+.version-details {
+    margin-top: 20px;
+}
+
+.details-section {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 24px;
+}
+
+// Info Grid for Version Details
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.info-item {
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border-left: 4px solid #007bff;
+
+    .label {
+        font-size: 0.875rem;
+        color: #6c757d;
+        font-weight: 600;
+        margin-bottom: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .value {
+        font-size: 1rem;
+        color: #212529;
+        font-weight: 500;
+    }
+}
+
+// Release Notes Section
+.release-notes {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 6px;
+    border-left: 4px solid #28a745;
+    margin-top: 20px;
+}
+
+// Action Buttons
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.back-link {
+    color: #6c757d;
+    text-decoration: none;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+
+    &:hover {
+        color: #007bff;
+    }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .version-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+
+    .version-actions {
+        justify-content: flex-start;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+    }
+}
