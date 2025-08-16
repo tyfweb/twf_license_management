@@ -25,12 +25,12 @@ public class SettingsSeeder : BaseDataSeeder
         var recordsCreated = 0;
 
         // Check if any settings already exist
-        var existingSettings = await _unitOfWork.Settings.GetAllAsync(cancellationToken);
-        if (existingSettings.Any())
-        {
-            _logger.LogInformation("System settings already exist, skipping seeding");
-            return 0;
-        }
+        // var existingSettings = await _unitOfWork.Settings.GetAllAsync(cancellationToken);
+        // if (existingSettings.Any())
+        // {
+        //     _logger.LogInformation("System settings already exist, skipping seeding");
+        //     return 0;
+        // }
 
         // Default system settings based on SQL structure
         var defaultSettings = new[]
@@ -586,6 +586,26 @@ public class SettingsSeeder : BaseDataSeeder
                 IsSensitive = false,
                 TenantId = IdConstants.SystemTenantId,
                 Audit = new AuditInfo { CreatedBy = "System", CreatedOn = DateTime.UtcNow, UpdatedBy = "System", UpdatedOn = DateTime.UtcNow, IsActive = true }
+            },
+       
+            new Setting
+            {
+                SettingId = Guid.NewGuid(),
+                Category = "Product Settings",
+                Key = "AvailableCurrencies",
+                Value = "USD",
+                DefaultValue = "USD",
+                DataType = "list",
+                DisplayName = "Available Currencies",
+                Description = "List of currencies available for product pricing",
+                GroupName = "Product",
+                SortOrder = 3,
+                IsRequired = true,
+                IsReadOnly = false,
+                IsSensitive = false,
+                TenantId = IdConstants.SystemTenantId,
+                PossibleValues = "['USD', 'EUR', 'GBP','INR','SGD']",
+                Audit = new AuditInfo { CreatedBy = "System", CreatedOn = DateTime.UtcNow, UpdatedBy = "System", UpdatedOn = DateTime.UtcNow, IsActive = true }
             }
         };
 
@@ -593,6 +613,17 @@ public class SettingsSeeder : BaseDataSeeder
         {
             try
             {
+                
+                // Check if setting already exists by Category, Key and TenantId
+                var existingSetting = await _unitOfWork.Settings.GetByKeyAsync(
+                    setting.Category,
+                    setting.Key);
+                         
+                if (existingSetting != null)
+                {
+                    _logger.LogDebug("Setting already exists: {SettingKey}", setting.FullKey);
+                    continue;
+                }
                 await _unitOfWork.Settings.AddAsync(setting, cancellationToken);
                 recordsCreated++;
                 _logger.LogDebug("Created setting: {SettingKey}", setting.FullKey);

@@ -1,0 +1,1341 @@
+@model TechWayFit.Licensing.Management.Web.ViewModels.Settings.SettingsIndexViewModel
+@using TechWayFit.Licensing.Management.Web.ViewModels.Settings
+@{
+    ViewData["Title"] = "System Settings";
+    ViewData["Description"] = "Manage system settings and configuration";
+}
+
+
+@Html.AntiForgeryToken()
+
+<div class="container-fluid py-3">
+    <!-- Header Section -->
+    <div class="header mb-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="mb-1">System Settings</h2>
+                <p class="text-muted mb-0">Manage your application configuration and system settings.</p>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-primary" onclick="saveAllChanges()">
+                    <i class="fas fa-save me-2"></i>Save All Changes
+                </button>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-outline-secondary" onclick="validateAllSettings()">
+                        <i class="fas fa-check-circle me-1"></i>Validate All
+                    </button>
+                    <a href="@Url.Action("Backup")" class="btn btn-outline-secondary">
+                        <i class="fas fa-download me-1"></i>Backup
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row g-2 mb-3">
+        <div class="col-sm-6 col-lg-3">
+            <div class="stats-card">
+                <div class="stats-row-1">
+                    <div class="stats-icon">
+                        <i class="fas fa-cog"></i>
+                    </div>
+                    <div class="stats-number">@Model.TotalSettings</div>
+                </div>
+                <div class="stats-row-2">
+                    <div class="stats-label">Total Settings</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="stats-card stats-card-success">
+                <div class="stats-row-1">
+                    <div class="stats-icon">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                    <div class="stats-number" id="modifiedCount">@Model.ModifiedSettings</div>
+                </div>
+                <div class="stats-row-2">
+                    <div class="stats-label">Modified</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="stats-card">
+                <div class="stats-row-1">
+                    <div class="stats-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <div class="stats-number">@Model.ReadOnlySettings</div>
+                </div>
+                <div class="stats-row-2">
+                    <div class="stats-label">Read-Only</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="stats-card">
+                <div class="stats-row-1">
+                    <div class="stats-icon">
+                        <i class="fas fa-tags"></i>
+                    </div>
+                    <div class="stats-number">@Model.Categories.Count</div>
+                </div>
+                <div class="stats-row-2">
+                    <div class="stats-label">Categories</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <h5><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+                </div>
+                <div class="section-content">
+                    <div class="row g-2">
+                        <div class="col-sm-6 col-lg-3">
+                            <button type="button" class="btn btn-outline-primary w-100" onclick="resetAllModified()">
+                                <i class="fas fa-undo me-2"></i>Reset Modified
+                            </button>
+                        </div>
+                        <div class="col-sm-6 col-lg-3">
+                            <button type="button" class="btn btn-outline-secondary w-100" onclick="exportSettings()">
+                                <i class="fas fa-download me-2"></i>Export Settings
+                            </button>
+                        </div>
+                        <div class="col-sm-6 col-lg-3">
+                            <button type="button" class="btn btn-outline-info w-100" onclick="importSettings()">
+                                <i class="fas fa-upload me-2"></i>Import Settings
+                            </button>
+                        </div>
+                        <div class="col-sm-6 col-lg-3">
+                            <button type="button" class="btn btn-outline-success w-100" onclick="validateAllSettings()">
+                                <i class="fas fa-shield-alt me-2"></i>Validate All
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Theme Selector Section -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <h5><i class="fas fa-palette me-2"></i>Application Theme</h5>
+                </div>
+                <div class="section-content">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="theme-selector-container">
+                                <label class="form-label">Select Theme</label>
+                                <div class="theme-options d-flex gap-3 flex-wrap">
+                                    <div class="theme-option" data-theme="default">
+                                        <div class="theme-preview theme-preview-default">
+                                            <div class="theme-preview-header"></div>
+                                            <div class="theme-preview-content">
+                                                <div class="theme-preview-text"></div>
+                                                <div class="theme-preview-button"></div>
+                                            </div>
+                                        </div>
+                                        <span class="theme-label">Default</span>
+                                    </div>
+                                    <div class="theme-option" data-theme="dark">
+                                        <div class="theme-preview theme-preview-dark">
+                                            <div class="theme-preview-header"></div>
+                                            <div class="theme-preview-content">
+                                                <div class="theme-preview-text"></div>
+                                                <div class="theme-preview-button"></div>
+                                            </div>
+                                        </div>
+                                        <span class="theme-label">Dark</span>
+                                    </div>
+                                    <div class="theme-option" data-theme="blue">
+                                        <div class="theme-preview theme-preview-blue">
+                                            <div class="theme-preview-header"></div>
+                                            <div class="theme-preview-content">
+                                                <div class="theme-preview-text"></div>
+                                                <div class="theme-preview-button"></div>
+                                            </div>
+                                        </div>
+                                        <span class="theme-label">Blue</span>
+                                    </div>
+                                    <div class="theme-option" data-theme="green">
+                                        <div class="theme-preview theme-preview-green">
+                                            <div class="theme-preview-header"></div>
+                                            <div class="theme-preview-content">
+                                                <div class="theme-preview-text"></div>
+                                                <div class="theme-preview-button"></div>
+                                            </div>
+                                        </div>
+                                        <span class="theme-label">Green</span>
+                                    </div>
+                                    <div class="theme-option" data-theme="purple">
+                                        <div class="theme-preview theme-preview-purple">
+                                            <div class="theme-preview-header"></div>
+                                            <div class="theme-preview-content">
+                                                <div class="theme-preview-text"></div>
+                                                <div class="theme-preview-button"></div>
+                                            </div>
+                                        </div>
+                                        <span class="theme-label">Purple</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="theme-settings">
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="themeAutoDetect">
+                                        <label class="form-check-label" for="themeAutoDetect">
+                                            Auto-detect theme based on system preference
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="themeTransitionDuration" class="form-label">Transition Duration</label>
+                                    <div class="input-group">
+                                        <input type="range" class="form-range" id="themeTransitionDuration" min="0" max="1000" step="50" value="200">
+                                        <span class="input-group-text" id="transitionValue">200ms</span>
+                                    </div>
+                                </div>
+                                <div class="theme-actions">
+                                    <button type="button" class="btn btn-primary btn-sm" id="applyThemeBtn">
+                                        <i class="fas fa-check me-1"></i>Apply Theme
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" id="resetThemeBtn">
+                                        <i class="fas fa-undo me-1"></i>Reset to Default
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="row g-2 mb-3">
+        <div class="col-12">
+            <div class="search-section">
+                <div class="d-flex flex-wrap align-items-center gap-3">
+                    <div class="flex-grow-1">
+                        <div class="search-box">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" class="form-control" id="searchInput" placeholder="Search settings by name, description, or key...">
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="form-check mb-0">
+                            <input class="form-check-input" type="checkbox" id="showModifiedOnly">
+                            <label class="form-check-label text-nowrap" for="showModifiedOnly">
+                                Show modified only
+                            </label>
+                        </div>
+                        <button type="button" class="btn btn-primary" id="searchBtn">
+                            <i class="fas fa-search me-1"></i>Search
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" id="clearFiltersBtn">
+                            <i class="fas fa-times me-1"></i>Clear
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Tabs -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="edit-section">
+                <div class="section-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-cogs me-2"></i>Settings Management</h5>
+                    </div>
+                </div>
+                
+                <!-- Category Navigation -->
+                <div class="category-navigation mb-3">
+                    <div class="btn-group" role="group" aria-label="Category filter">
+                        <button type="button" class="btn btn-outline-primary active" data-category="all" onclick="showCategory('all', this)">
+                            <i class="fas fa-layer-group me-1"></i>All Settings
+                            <span class="badge bg-secondary ms-1">@Model.TotalSettings</span>
+                        </button>
+                        @foreach (var category in Model.Categories)
+                        {
+                            <button type="button" class="btn btn-outline-primary" data-category="@category" onclick="showCategory('@category', this)">
+                                <i class="fas fa-tag me-1"></i>@category
+                                <span class="badge bg-secondary ms-1">@Model.GetCategorySettingsCount(category)</span>
+                            </button>
+                        }
+                        <button type="button" class="btn btn-outline-primary" data-category="config" onclick="showCategory('config', this)">
+                            <i class="fas fa-file-code me-1"></i>Configuration
+                            <span class="badge bg-secondary ms-1">@Model.ConfigurationSettings.Count</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Content Area -->
+                <div class="section-content">
+                    <!-- Alerts -->
+                    <div id="alertContainer"></div>
+
+                    <!-- List View -->
+                    <div id="listView">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Setting</th>
+                                        <th>Category</th>
+                                        <th>Current Value</th>
+                                        <th>Type</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="settingsTableBody">
+                                    @foreach (var categoryGroup in Model.SettingsGrouped.OrderBy(g => g.Key))
+                                    {
+                                        @foreach (var setting in categoryGroup.Value.OrderBy(s => s.SortOrder))
+                                        {
+                                            <tr class="setting-row @(setting.IsModified ? "table-warning" : "")" 
+                                                data-setting-id="@setting.SettingId" 
+                                                data-category="@setting.Category"
+                                                data-possible-values="@(setting.PossibleValues ?? "")"
+                                                data-search-text="@($"{setting.DisplayName} {setting.Description} {setting.Category} {setting.Key}".ToLower())">
+                                                <td>
+                                                    <div class="fw-semibold">
+                                                        @setting.DisplayName
+                                                        @if (setting.IsRequired)
+                                                        {
+                                                            <span class="text-danger">*</span>
+                                                        }
+                                                        @if (setting.IsModified)
+                                                        {
+                                                            <i class="fas fa-circle text-warning ms-1" title="Modified"></i>
+                                                        }
+                                                    </div>
+                                                    <small class="text-muted d-block">@setting.Key</small>
+                                                    @if (!string.IsNullOrEmpty(setting.Description))
+                                                    {
+                                                        <small class="text-muted d-block">@setting.Description</small>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-secondary">@setting.Category</span>
+                                                </td>
+                                                <td>
+                                                    <div class="setting-value-display">
+                                                        @if (setting.DataType.ToLower() == "boolean" || setting.DataType.ToLower() == "bool")
+                                                        {
+                                                            <span class="badge @(string.Equals(setting.Value, "true", StringComparison.OrdinalIgnoreCase) ? "bg-success" : "bg-secondary")">
+                                                                @(string.Equals(setting.Value, "true", StringComparison.OrdinalIgnoreCase) ? "Enabled" : "Disabled")
+                                                            </span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="text-truncate d-inline-block" style="max-width: 200px;" title="@setting.Value">@setting.Value</span>
+                                                        }
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-info">@setting.DataType</span>
+                                                </td>
+                                                <td>
+                                                    @if (setting.IsReadOnly)
+                                                    {
+                                                        <span class="badge bg-secondary">Read-Only</span>
+                                                    }
+                                                    else if (setting.IsModified)
+                                                    {
+                                                        <span class="badge bg-warning">Modified</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-light text-dark">Default</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <div class="btn-group" role="group">
+                                                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="editSetting('@setting.SettingId')" title="Edit">
+                                                            <i class="fas fa-edit"></i>
+                                                        </button>
+                                                        <button type="button" class="btn btn-sm btn-outline-warning" onclick="resetSetting('@setting.SettingId')" title="Reset to default">
+                                                            <i class="fas fa-undo"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Configuration Settings Section -->
+                    <div class="settings-category-section" data-category="config" style="display: none;">
+                        <h6 class="category-header">
+                            <i class="fas fa-file-code me-2"></i>Configuration Settings
+                        </h6>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="configuration-display">
+                                    @foreach (var configGroup in Model.ConfigurationSettings)
+                                    {
+                                        <div class="config-group mb-4">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h6 class="mb-0">
+                                                        <i class="fas fa-cog me-2"></i>@configGroup.Key
+                                                    </h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    @{
+                                                        string configJson = "";
+                                                        try
+                                                        {
+                                                            configJson = System.Text.Json.JsonSerializer.Serialize(configGroup.Value, new System.Text.Json.JsonSerializerOptions 
+                                                            { 
+                                                                WriteIndented = true,
+                                                                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                                                            });
+                                                        }
+                                                        catch
+                                                        {
+                                                            configJson = configGroup.Value?.ToString() ?? "null";
+                                                        }
+                                                    }
+                                                    
+                                                    @if (configGroup.Value is IDictionary<string, object> dict && dict.Any())
+                                                    {
+                                                        <div class="config-items">
+                                                            @foreach (var item in dict)
+                                                            {
+                                                                <div class="config-item mb-2">
+                                                                    <div class="row">
+                                                                        <div class="col-md-3">
+                                                                            <strong class="config-key">@item.Key:</strong>
+                                                                        </div>
+                                                                        <div class="col-md-9">
+                                                                            <span class="config-value">
+                                                                                @if (item.Value is IDictionary<string, object> nestedDict)
+                                                                                {
+                                                                                    <details class="nested-config">
+                                                                                        <summary>@nestedDict.Count nested items</summary>
+                                                                                        <div class="nested-config-content ms-3 mt-2">
+                                                                                            @foreach (var nested in nestedDict)
+                                                                                            {
+                                                                                                <div class="mb-1">
+                                                                                                    <span class="text-muted">@nested.Key:</span>
+                                                                                                    <span class="ms-2">@(nested.Value?.ToString() ?? "null")</span>
+                                                                                                </div>
+                                                                                            }
+                                                                                        </div>
+                                                                                    </details>
+                                                                                }
+                                                                                else if (item.Value is System.Collections.IEnumerable enumerable && !(item.Value is string))
+                                                                                {
+                                                                                    <div class="config-array">
+                                                                                        @{
+                                                                                            var items = enumerable.Cast<object>().ToList();
+                                                                                        }
+                                                                                        @if (items.Count > 0)
+                                                                                        {
+                                                                                            <span class="badge bg-info">@items.Count items</span>
+                                                                                            <ul class="list-unstyled mt-1 ms-3">
+                                                                                                @foreach (var arrayItem in items.Take(5))
+                                                                                                {
+                                                                                                    <li><small>• @(arrayItem?.ToString() ?? "null")</small></li>
+                                                                                                }
+                                                                                                @if (items.Count > 5)
+                                                                                                {
+                                                                                                    <li><small>... and @(items.Count - 5) more</small></li>
+                                                                                                }
+                                                                                            </ul>
+                                                                                        }
+                                                                                        else
+                                                                                        {
+                                                                                            <span class="text-muted">Empty array</span>
+                                                                                        }
+                                                                                    </div>
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    <code class="config-simple-value">@(item.Value?.ToString() ?? "null")</code>
+                                                                                }
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="config-simple">
+                                                            <code class="config-simple-value">@(configGroup.Value?.ToString() ?? "null")</code>
+                                                        </div>
+                                                    }
+                                                    
+                                                    <!-- Raw JSON view -->
+                                                    <div class="mt-3">
+                                                        <details>
+                                                            <summary class="text-muted"><small>View Raw JSON</small></summary>
+                                                            <pre class="mt-2 p-2 bg-light border rounded"><code>@configJson</code></pre>
+                                                        </details>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- No Results -->
+                    <div id="noResults" class="no-results d-none">
+                        <i class="fas fa-search"></i>
+                        <h5>No settings found</h5>
+                        <p>Try adjusting your search criteria or filters.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Global variables
+        let modifiedSettings = new Set();
+        let originalValues = new Map();
+        let currentView = 'list';
+        let currentCategory = 'all';
+
+        // Ensure jQuery is loaded before proceeding
+        function initializeSettings() {
+            // Check if jQuery is available
+            if (typeof $ === 'undefined') {
+                console.error('jQuery is not loaded. Retrying in 100ms...');
+                setTimeout(initializeSettings, 100);
+                return;
+            }
+
+            // Initialize when document is ready
+            $(document).ready(function() {
+            // Initialize original values
+            $('.setting-input').each(function() {
+                const settingId = $(this).data('setting-id');
+                const value = $(this).data('original');
+                originalValues.set(settingId, value);
+            });
+
+            // Initialize view based on saved preference (always list now)
+            const savedView = 'list';
+            // Remove any old preferences
+            localStorage.removeItem('settingsViewType');
+            // Initialize the list view
+            switchView('list');
+
+            // Bind setting input change events
+            $(document).on('input change', '.setting-input', function() {
+                markAsChanged(this);
+            });
+
+            // Bind search input
+            $('#searchInput').on('input', function() {
+                filterSettings(this.value);
+            });
+
+            // Bind search button
+            $('#searchBtn').on('click', function() {
+                const searchTerm = $('#searchInput').val();
+                filterSettings(searchTerm);
+            });
+
+            // Enable search on Enter key press
+            $('#searchInput').on('keypress', function(e) {
+                if (e.which === 13) { // Enter key
+                    const searchTerm = $(this).val();
+                    filterSettings(searchTerm);
+                }
+            });
+
+            // Bind modified filter checkbox
+            $('#showModifiedOnly').on('change', function() {
+                toggleModifiedFilter(this.checked);
+            });
+
+            // Bind clear filters button
+            $('#clearFiltersBtn').on('click', function() {
+                clearFilters();
+            });
+        });
+        }
+
+        // Start initialization
+        initializeSettings();
+
+        // View switching functionality (simplified for list-only)
+        function switchView(view) {
+            currentView = 'list';
+            const listView = document.getElementById('listView');
+            if (listView) {
+                listView.classList.remove('d-none');
+            }
+        }
+
+        // Category switching (updated for list view and config section)
+        function showCategory(category, button) {
+            currentCategory = category;
+            
+            // Update active button
+            document.querySelectorAll('.category-navigation .btn').forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            
+            // Handle table rows
+            const rows = document.querySelectorAll('.setting-row');
+            rows.forEach(row => {
+                const rowCategory = row.getAttribute('data-category');
+                if (category === 'all') {
+                    row.style.display = 'table-row';
+                } else if (category === 'config') {
+                    // Hide table rows when showing config section
+                    row.style.display = 'none';
+                } else {
+                    row.style.display = rowCategory === category ? 'table-row' : 'none';
+                }
+            });
+            
+            // Handle configuration section and table visibility
+            const listView = document.getElementById('listView');
+            const configSection = document.querySelector('.settings-category-section[data-category="config"]');
+            
+            if (category === 'config') {
+                // Show config section, hide table
+                if (listView) listView.style.display = 'none';
+                if (configSection) configSection.style.display = 'block';
+            } else {
+                // Show table, hide config section  
+                if (listView) listView.style.display = 'block';
+                if (configSection) configSection.style.display = 'none';
+            }
+            
+            // Apply current filters (only for non-config categories)
+            if (category !== 'config') {
+                filterSettings(document.getElementById('searchInput').value);
+            }
+        }
+
+        // Search functionality (simplified for list view only)
+        function filterSettings(searchTerm) {
+            const showModifiedOnly = document.getElementById('showModifiedOnly').checked;
+            filterListView(searchTerm, showModifiedOnly);
+        }
+
+        function filterListView(searchTerm, showModifiedOnly) {
+            let hasResults = false;
+            const rows = document.querySelectorAll('.setting-row');
+            
+            rows.forEach(row => {
+                const searchText = $(row).data('search-text') || '';
+                const isModified = row.classList.contains('table-warning');
+                const rowCategory = row.getAttribute('data-category');
+                
+                const matchesSearch = searchTerm === '' || searchText.includes(searchTerm.toLowerCase());
+                const matchesFilter = !showModifiedOnly || isModified;
+                const matchesCategory = currentCategory === 'all' || rowCategory === currentCategory;
+                
+                if (matchesSearch && matchesFilter && matchesCategory) {
+                    row.style.display = 'table-row';
+                    hasResults = true;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            
+            document.getElementById('noResults').classList.toggle('d-none', hasResults);
+        }
+
+        function toggleModifiedFilter(showModified) {
+            filterSettings(document.getElementById('searchInput').value);
+        }
+
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('showModifiedOnly').checked = false;
+            
+            // Reset category to 'all'
+            currentCategory = 'all';
+            document.querySelectorAll('.category-navigation .btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector('.category-navigation .btn[data-category="all"]').classList.add('active');
+            
+            // Show table, hide config section
+            const listView = document.getElementById('listView');
+            const configSection = document.querySelector('.settings-category-section[data-category="config"]');
+            if (listView) listView.style.display = 'block';
+            if (configSection) configSection.style.display = 'none';
+            
+            filterSettings('');
+        }
+
+        // Setting value change tracking
+        function markAsChanged(element) {
+            const settingId = $(element).data('setting-id'); // Use jQuery data access for consistency
+            const currentValue = element.type === 'checkbox' ? element.checked.toString() : element.value;
+            const originalValue = originalValues.get(settingId);
+            
+            const isModified = currentValue !== originalValue;
+            const container = element.closest('.setting-row');
+            
+            if (isModified) {
+                modifiedSettings.add(settingId);
+                container.classList.add('setting-modified', 'table-warning');
+                const saveBtn = container.querySelector('.save-setting-btn');
+                const cancelBtn = container.querySelector('.cancel-setting-btn');
+                if (saveBtn) saveBtn.style.display = 'inline-block';
+                if (cancelBtn) cancelBtn.style.display = 'inline-block';
+            } else {
+                modifiedSettings.delete(settingId);
+                container.classList.remove('setting-modified', 'table-warning');
+                const saveBtn = container.querySelector('.save-setting-btn');
+                const cancelBtn = container.querySelector('.cancel-setting-btn');
+                if (saveBtn) saveBtn.style.display = 'none';
+                if (cancelBtn) cancelBtn.style.display = 'none';
+            }
+            
+            // Update checkbox label
+            if (element.type === 'checkbox') {
+                const label = element.nextElementSibling;
+                if (label) {
+                    label.textContent = element.checked ? 'Enabled' : 'Disabled';
+                }
+            }
+            
+            updateModifiedCount();
+        }
+
+        function updateModifiedCount() {
+            const countElement = document.getElementById('modifiedCount');
+            if (countElement) {
+                countElement.textContent = modifiedSettings.size;
+            }
+        }
+
+        // Save individual setting
+        function saveSetting(settingId, button) {
+            const input = document.querySelector(`[data-setting-id="${settingId}"]`);
+            const value = input.type === 'checkbox' ? input.checked.toString() : input.value;
+            
+            showLoadingState(button, true);
+            
+            $.ajax({
+                url: '@Url.Action("UpdateSetting", "Settings")',
+                type: 'POST',
+                data: JSON.stringify({ settingId: settingId, value: value }),
+                contentType: 'application/json',
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        showToast('Setting saved successfully', 'success');
+                        originalValues.set(settingId, value);
+                        modifiedSettings.delete(settingId);
+                        
+                        const container = input.closest('.setting-row');
+                        container.classList.remove('setting-modified', 'table-warning');
+                        const saveBtn = container.querySelector('.save-setting-btn');
+                        const cancelBtn = container.querySelector('.cancel-setting-btn');
+                        if (saveBtn) saveBtn.style.display = 'none';
+                        if (cancelBtn) cancelBtn.style.display = 'none';
+                        
+                        updateModifiedCount();
+                    } else {
+                        showToast(response.message || 'Error saving setting', 'error');
+                    }
+                },
+                error: function() {
+                    showToast('Error saving setting', 'error');
+                },
+                complete: function() {
+                    showLoadingState(button, false);
+                }
+            });
+        }
+
+        // Cancel setting changes
+        function cancelSetting(settingId, button) {
+            const input = document.querySelector(`[data-setting-id="${settingId}"]`);
+            const originalValue = originalValues.get(settingId);
+            
+            if (input.type === 'checkbox') {
+                input.checked = originalValue === 'true';
+                const label = input.nextElementSibling;
+                if (label) {
+                    label.textContent = originalValue === 'true' ? 'Enabled' : 'Disabled';
+                }
+            } else {
+                input.value = originalValue;
+            }
+            
+            modifiedSettings.delete(settingId);
+            const container = input.closest('.setting-row');
+            container.classList.remove('setting-modified', 'table-warning');
+            const saveBtn = container.querySelector('.save-setting-btn');
+            const cancelBtn = container.querySelector('.cancel-setting-btn');
+            if (saveBtn) saveBtn.style.display = 'none';
+            if (cancelBtn) cancelBtn.style.display = 'none';
+            
+            updateModifiedCount();
+        }
+
+        // Reset setting to default
+        function resetSetting(settingId, button) {
+            if (!confirm('Are you sure you want to reset this setting to its default value?')) {
+                return;
+            }
+            
+            showLoadingState(button, true);
+            
+            $.ajax({
+                url: '@Url.Action("ResetSetting", "Settings")',
+                type: 'POST',
+                data: { settingId: settingId },
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        showToast('Setting reset to default value', 'success');
+                        location.reload(); // Reload to show updated values
+                    } else {
+                        showToast(response.message || 'Error resetting setting', 'error');
+                    }
+                },
+                error: function() {
+                    showToast('Error resetting setting', 'error');
+                },
+                complete: function() {
+                    showLoadingState(button, false);
+                }
+            });
+        }
+
+        // Save all changes
+        function saveAllChanges() {
+            if (modifiedSettings.size === 0) {
+                showToast('No changes to save', 'info');
+                return;
+            }
+            
+            const updates = [];
+            modifiedSettings.forEach(settingId => {
+                const input = document.querySelector(`[data-setting-id="${settingId}"]`);
+                const value = input.type === 'checkbox' ? input.checked.toString() : input.value;
+                updates.push({ settingId: settingId, value: value });
+            });
+            
+            const button = document.querySelector('.btn-primary');
+            showLoadingState(button, true);
+            
+            $.ajax({
+                url: '@Url.Action("UpdateMultipleSettings", "Settings")',
+                type: 'POST',
+                data: JSON.stringify(updates),
+                contentType: 'application/json',
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        showToast(response.message || 'Settings saved successfully', 'success');
+                        location.reload(); // Reload to show updated values
+                    } else {
+                        showToast(response.message || 'Error saving settings', 'error');
+                    }
+                },
+                error: function() {
+                    showToast('Error saving settings', 'error');
+                },
+                complete: function() {
+                    showLoadingState(button, false);
+                }
+            });
+        }
+
+        // Validate all settings
+        function validateAllSettings() {
+            const button = document.querySelector('button[onclick*="validateAllSettings"]');
+            showLoadingState(button, true);
+            
+            $.ajax({
+                url: '@Url.Action("ValidateAll", "Settings")',
+                type: 'GET',
+                success: function(response) {
+                    if (response.success) {
+                        showToast(response.message || 'All settings are valid', 'success');
+                    } else {
+                        showToast(response.message || 'Validation failed', 'warning');
+                        if (response.errors && response.errors.length > 0) {
+                            console.log('Validation errors:', response.errors);
+                        }
+                    }
+                },
+                error: function() {
+                    showToast('Error validating settings', 'error');
+                },
+                complete: function() {
+                    showLoadingState(button, false);
+                }
+            });
+        }
+
+        // Reset all modified settings
+        function resetAllModified() {
+            if (modifiedSettings.size === 0) {
+                showToast('No modified settings to reset', 'info');
+                return;
+            }
+            
+            if (!confirm(`Are you sure you want to reset all ${modifiedSettings.size} modified settings?`)) {
+                return;
+            }
+            
+            modifiedSettings.forEach(settingId => {
+                const input = document.querySelector(`[data-setting-id="${settingId}"]`);
+                const originalValue = originalValues.get(settingId);
+                
+                if (input.type === 'checkbox') {
+                    input.checked = originalValue === 'true';
+                    const label = input.nextElementSibling;
+                    if (label) {
+                        label.textContent = originalValue === 'true' ? 'Enabled' : 'Disabled';
+                    }
+                } else {
+                    input.value = originalValue;
+                }
+                
+                const container = input.closest('.setting-row');
+                container.classList.remove('setting-modified', 'table-warning');
+                const saveBtn = container.querySelector('.save-setting-btn');
+                const cancelBtn = container.querySelector('.cancel-setting-btn');
+                if (saveBtn) saveBtn.style.display = 'none';
+                if (cancelBtn) cancelBtn.style.display = 'none';
+            });
+            
+            modifiedSettings.clear();
+            updateModifiedCount();
+            showToast('All changes have been reset', 'success');
+        }
+
+        // Utility functions
+        function showLoadingState(button, loading) {
+            if (!button) return;
+            
+            if (loading) {
+                button.disabled = true;
+                const icon = button.querySelector('i');
+                if (icon) icon.classList.add('fa-spin');
+            } else {
+                button.disabled = false;
+                const icon = button.querySelector('i');
+                if (icon) icon.classList.remove('fa-spin');
+            }
+        }
+
+        function showToast(message, type = 'info') {
+            const alertClass = type === 'success' ? 'alert-success' : 
+                             type === 'error' ? 'alert-danger' : 
+                             type === 'warning' ? 'alert-warning' : 'alert-info';
+            
+            const toast = $(`<div class="alert ${alertClass} alert-dismissible fade show toast-notification" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>`);
+            
+            $('body').append(toast);
+            setTimeout(() => toast.alert('close'), 5000);
+        }
+
+        // Placeholder functions for quick actions
+        function exportSettings() {
+            showToast('Export functionality coming soon', 'info');
+        }
+
+        function importSettings() {
+            showToast('Import functionality coming soon', 'info');
+        }
+
+        function editSetting(settingId) {
+            const row = document.querySelector(`tr[data-setting-id="${settingId}"]`);
+            if (!row) return;
+            
+            const valueCell = row.querySelector('.setting-value-display');
+            if (!valueCell) return;
+            
+            // Check if already in edit mode
+            if (valueCell.querySelector('.list-setting-input')) return;
+            
+            // Get current value from the display
+            const currentSpan = valueCell.querySelector('span');
+            const currentValue = currentSpan ? currentSpan.textContent.trim() : '';
+            
+            // Determine if it's a boolean based on the current display
+            const isBoolean = currentSpan && (currentSpan.textContent === 'Enabled' || currentSpan.textContent === 'Disabled');
+            
+            // Create appropriate input control
+            let inputHtml = '';
+            if (isBoolean) {
+                const isChecked = currentValue === 'Enabled';
+                inputHtml = `
+                    <div class="form-check form-switch">
+                        <input type="checkbox" class="form-check-input list-setting-input" 
+                               data-setting-id="${settingId}" data-original="${isChecked ? 'true' : 'false'}"
+                               ${isChecked ? 'checked' : ''} />
+                        <label class="form-check-label">${isChecked ? 'Enabled' : 'Disabled'}</label>
+                    </div>
+                `;
+            } else {
+                // For non-boolean values, use text input
+                inputHtml = `
+                    <input type="text" class="form-control list-setting-input" 
+                           data-setting-id="${settingId}" data-original="${currentValue}" 
+                           value="${currentValue}" />
+                `;
+            }
+            
+            // Add save/cancel buttons
+            const buttonHtml = `
+                <div class="mt-2">
+                    <button type="button" class="btn btn-sm btn-success me-1" onclick="saveListSetting('${settingId}')">
+                        <i class="fas fa-check"></i> Save
+                    </button>
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="cancelListSetting('${settingId}')">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+            `;
+            
+            // Store original content and replace with input
+            valueCell.dataset.originalContent = valueCell.innerHTML;
+            valueCell.innerHTML = inputHtml + buttonHtml;
+            
+            // Bind change event for checkboxes
+            const input = valueCell.querySelector('.list-setting-input');
+            if (input && input.type === 'checkbox') {
+                input.addEventListener('change', function() {
+                    const label = this.nextElementSibling;
+                    if (label) {
+                        label.textContent = this.checked ? 'Enabled' : 'Disabled';
+                    }
+                });
+            }
+            
+            // Hide action buttons
+            const actionButtons = row.querySelector('.btn-group');
+            if (actionButtons) {
+                actionButtons.style.display = 'none';
+            }
+        }
+
+        function saveListSetting(settingId) {
+            const row = document.querySelector(`tr[data-setting-id="${settingId}"]`);
+            const input = row.querySelector('.list-setting-input');
+            const value = input.type === 'checkbox' ? input.checked.toString() : input.value;
+            
+            // Create a temporary button element for the saveSetting function
+            const tempButton = document.createElement('button');
+            
+            // Call the existing saveSetting function
+            showLoadingState(tempButton, true);
+            
+            $.ajax({
+                url: '@Url.Action("UpdateSetting", "Settings")',
+                type: 'POST',
+                data: JSON.stringify({ settingId: settingId, value: value }),
+                contentType: 'application/json',
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        showToast('Setting saved successfully', 'success');
+                        
+                        // Update the original values map
+                        originalValues.set(settingId, value);
+                        modifiedSettings.delete(settingId);
+                        
+                        // Update the display
+                        const valueCell = row.querySelector('.setting-value-display');
+                        if (input.type === 'checkbox') {
+                            const isEnabled = input.checked;
+                            valueCell.innerHTML = `<span class="badge ${isEnabled ? 'bg-success' : 'bg-secondary'}">${isEnabled ? 'Enabled' : 'Disabled'}</span>`;
+                        } else {
+                            valueCell.innerHTML = `<span class="text-truncate d-inline-block" style="max-width: 200px;" title="${value}">${value}</span>`;
+                        }
+                        
+                        // Remove table-warning class and update status
+                        row.classList.remove('table-warning');
+                        const statusCell = row.querySelector('td:nth-child(5)');
+                        if (statusCell) {
+                            statusCell.innerHTML = '<span class="badge bg-light text-dark">Default</span>';
+                        }
+                        
+                        // Show action buttons
+                        const actionButtons = row.querySelector('.btn-group');
+                        if (actionButtons) {
+                            actionButtons.style.display = 'block';
+                        }
+                        
+                        updateModifiedCount();
+                    } else {
+                        showToast(response.message || 'Error saving setting', 'error');
+                    }
+                },
+                error: function() {
+                    showToast('Error saving setting', 'error');
+                },
+                complete: function() {
+                    showLoadingState(tempButton, false);
+                }
+            });
+        }
+
+        function cancelListSetting(settingId) {
+            const row = document.querySelector(`tr[data-setting-id="${settingId}"]`);
+            const valueCell = row.querySelector('.setting-value-display');
+            
+            // Restore original content
+            if (valueCell.dataset.originalContent) {
+                valueCell.innerHTML = valueCell.dataset.originalContent;
+                delete valueCell.dataset.originalContent;
+            }
+            
+            // Show action buttons
+            const actionButtons = row.querySelector('.btn-group');
+            if (actionButtons) {
+                actionButtons.style.display = 'block';
+            }
+        }
+
+
+        // Theme Management Functions
+        let currentTheme = 'default';
+        let availableThemes = ['default', 'dark', 'blue', 'green', 'purple'];
+
+        // Initialize theme selector
+        function initializeThemeSelector() {
+            // Load current theme settings
+            loadCurrentThemeSettings();
+            
+            // Bind theme option clicks
+            $('.theme-option').on('click', function() {
+                const selectedTheme = $(this).data('theme');
+                selectTheme(selectedTheme);
+            });
+
+            // Bind auto-detect toggle
+            $('#themeAutoDetect').on('change', function() {
+                const autoDetect = $(this).is(':checked');
+                setThemeAutoDetect(autoDetect);
+            });
+
+            // Bind transition duration slider
+            $('#themeTransitionDuration').on('input', function() {
+                const duration = $(this).val();
+                $('#transitionValue').text(duration + 'ms');
+                updateTransitionDuration(duration);
+            });
+
+            // Bind apply theme button
+            $('#applyThemeBtn').on('click', function() {
+                applyCurrentTheme();
+            });
+
+            // Bind reset theme button
+            $('#resetThemeBtn').on('click', function() {
+                resetThemeToDefault();
+            });
+        }
+
+        // Load current theme settings
+        function loadCurrentThemeSettings() {
+            $.ajax({
+                url: '@Url.Action("GetCurrentTheme", "Settings")',
+                type: 'GET',
+                success: function(response) {
+                    if (response.success) {
+                        currentTheme = response.theme || 'default';
+                        selectTheme(currentTheme, false);
+                        
+                        // Load other settings
+                        if (response.autoDetect !== undefined) {
+                            $('#themeAutoDetect').prop('checked', response.autoDetect);
+                        }
+                        
+                        if (response.transitionDuration !== undefined) {
+                            $('#themeTransitionDuration').val(response.transitionDuration);
+                            $('#transitionValue').text(response.transitionDuration + 'ms');
+                        }
+                    }
+                },
+                error: function() {
+                    console.warn('Failed to load current theme settings');
+                }
+            });
+        }
+
+        // Select a theme
+        function selectTheme(themeName, apply = true) {
+            // Update visual selection
+            $('.theme-option').removeClass('active');
+            $(`.theme-option[data-theme="${themeName}"]`).addClass('active');
+            
+            currentTheme = themeName;
+            
+            if (apply) {
+                previewTheme(themeName);
+            }
+        }
+
+        // Preview theme without saving
+        function previewTheme(themeName) {
+            const duration = $('#themeTransitionDuration').val() || 200;
+            
+            // Apply theme with transition
+            $('body').addClass('theme-transition');
+            $('*').css('transition-duration', duration + 'ms');
+            
+            // Load theme CSS
+            loadThemeCSS(themeName);
+            
+            // Remove transition class after duration
+            setTimeout(() => {
+                $('body').removeClass('theme-transition');
+                $('*').css('transition-duration', '');
+            }, parseInt(duration) + 100);
+        }
+
+        // Load theme CSS
+        function loadThemeCSS(themeName) {
+            // Remove existing theme stylesheets
+            $('link[data-theme]').remove();
+            
+            if (themeName !== 'default') {
+                // Add new theme stylesheet
+                const link = $('<link>');
+                link.attr({
+                    'rel': 'stylesheet',
+                    'type': 'text/css',
+                    'href': `@Url.Content("~/css/themes/")${themeName}.css`,
+                    'data-theme': themeName
+                });
+                $('head').append(link);
+            }
+        }
+
+        // Apply current theme (save to server)
+        function applyCurrentTheme() {
+            const button = $('#applyThemeBtn');
+            const originalText = button.html();
+            
+            button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i>Applying...');
+            
+            $.ajax({
+                url: '@Url.Action("SetCurrentTheme", "Settings")',
+                type: 'POST',
+                data: JSON.stringify({ theme: currentTheme }),
+                contentType: 'application/json',
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        showToast('Theme applied successfully', 'success');
+                        loadThemeCSS(currentTheme);
+                    } else {
+                        showToast(response.message || 'Failed to apply theme', 'error');
+                    }
+                },
+                error: function() {
+                    showToast('Failed to apply theme', 'error');
+                },
+                complete: function() {
+                    button.prop('disabled', false).html(originalText);
+                }
+            });
+        }
+
+        // Set theme auto-detect
+        function setThemeAutoDetect(autoDetect) {
+            $.ajax({
+                url: '@Url.Action("SetThemeAutoDetect", "Settings")',
+                type: 'POST',
+                data: JSON.stringify({ autoDetect: autoDetect }),
+                contentType: 'application/json',
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        if (autoDetect) {
+                            detectAndApplySystemTheme();
+                        }
+                    } else {
+                        showToast(response.message || 'Failed to update auto-detect setting', 'error');
+                        $('#themeAutoDetect').prop('checked', !autoDetect);
+                    }
+                },
+                error: function() {
+                    showToast('Failed to update auto-detect setting', 'error');
+                    $('#themeAutoDetect').prop('checked', !autoDetect);
+                }
+            });
+        }
+
+        // Detect system theme preference
+        function detectAndApplySystemTheme() {
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                selectTheme('dark');
+                applyCurrentTheme();
+            } else {
+                selectTheme('default');
+                applyCurrentTheme();
+            }
+        }
+
+        // Update transition duration
+        function updateTransitionDuration(duration) {
+            // This could be saved immediately or on apply
+            document.documentElement.style.setProperty('--theme-transition-duration', duration + 'ms');
+        }
+
+        // Reset theme to default
+        function resetThemeToDefault() {
+            selectTheme('default');
+            $('#themeAutoDetect').prop('checked', false);
+            $('#themeTransitionDuration').val(200);
+            $('#transitionValue').text('200ms');
+            
+            applyCurrentTheme();
+            showToast('Theme reset to default', 'info');
+        }
+
+        // Add theme selector initialization to the main initialization
+        $(document).ready(function() {
+            initializeThemeSelector();
+        });
+    </script>
+}

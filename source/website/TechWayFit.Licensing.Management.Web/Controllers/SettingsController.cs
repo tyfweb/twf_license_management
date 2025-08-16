@@ -221,6 +221,40 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         }
 
         /// <summary>
+        /// Get the default value for a setting
+        /// </summary>
+        /// <param name="settingId">Setting ID</param>
+        /// <returns>JSON result with default value</returns>
+        [HttpGet]
+        public async Task<IActionResult> GetDefaultValue(string settingId)
+        {
+            try
+            {
+                // Use ResetSettingAsync to get the setting info including default value
+                // but don't actually save it by passing a fake user and then discarding the result
+                var allSettings = await _settingService.GetAllSettingsGroupedAsync();
+                var setting = allSettings
+                    .SelectMany(kvp => kvp.Value)
+                    .FirstOrDefault(s => s.SettingId.ToString() == settingId);
+
+                if (setting == null)
+                {
+                    return Json(new { success = false, message = "Setting not found" });
+                }
+
+                return Json(new { 
+                    success = true, 
+                    defaultValue = setting.DefaultValue ?? string.Empty 
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving default value for setting {SettingId}", settingId);
+                return Json(new { success = false, message = "Error retrieving default value" });
+            }
+        }
+
+        /// <summary>
         /// Reset a setting to its default value
         /// </summary>
         /// <param name="settingId">Setting ID to reset</param>

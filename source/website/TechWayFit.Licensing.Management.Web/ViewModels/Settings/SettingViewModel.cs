@@ -68,6 +68,11 @@ namespace TechWayFit.Licensing.Management.Web.ViewModels.Settings
         public int SortOrder { get; set; }
 
         /// <summary>
+        /// Possible values for list-type settings (JSON array)
+        /// </summary>
+        public string? PossibleValues { get; set; }
+
+        /// <summary>
         /// When the setting was created
         /// </summary>
         public DateTime CreatedAt { get; set; }
