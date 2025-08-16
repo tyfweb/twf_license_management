@@ -92,4 +92,36 @@ public class ProductVersionDetailsViewModel
     
     [Display(Name = "Updated At")]
     public DateTime UpdatedAt { get; set; }
+    
+    [Display(Name = "Applicable Features")]
+    public List<VersionFeatureViewModel> ApplicableFeatures { get; set; } = new();
+}
+
+/// <summary>
+/// ViewModel for features applicable to a specific version
+/// </summary>
+public class VersionFeatureViewModel
+{
+    public Guid FeatureId { get; set; }
+    
+    [Display(Name = "Feature Name")]
+    public string Name { get; set; } = string.Empty;
+    
+    [Display(Name = "Description")]
+    public string Description { get; set; } = string.Empty;
+    
+    [Display(Name = "Category")]
+    public string Category { get; set; } = string.Empty;
+    
+    [Display(Name = "Is Enabled")]
+    public bool IsEnabled { get; set; } = true;
+    
+    [Display(Name = "Introduced in Version")]
+    public string IntroducedInVersion { get; set; } = string.Empty;
+    
+    [Display(Name = "Support From Version")]
+    public string SupportFromVersion { get; set; } = string.Empty;
+    
+    [Display(Name = "Support To Version")]
+    public string SupportToVersion { get; set; } = string.Empty;
 }

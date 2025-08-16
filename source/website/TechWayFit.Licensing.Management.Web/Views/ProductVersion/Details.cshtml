@@ -155,6 +155,88 @@
         </div>
     </div>
 
+        }
+
+    <!-- Applicable Features Section -->
+    @if (Model.ApplicableFeatures != null && Model.ApplicableFeatures.Any())
+    {
+        <div class="row">
+            <div class="col-12">
+                <div class="details-section">
+                    <div class="section-header">
+                        <h5><i class="fas fa-puzzle-piece me-2"></i>Applicable Features</h5>
+                        <span class="text-muted">Features available in version @Model.Version</span>
+                    </div>
+                    <div class="section-content">
+                        <div class="features-grid">
+                            @foreach (var feature in Model.ApplicableFeatures.OrderBy(f => f.Category).ThenBy(f => f.Name))
+                            {
+                                <div class="feature-card">
+                                    <div class="feature-header">
+                                        <h6 class="feature-name">
+                                            @if (feature.IsEnabled)
+                                            {
+                                                <i class="fas fa-check-circle text-success me-2"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="fas fa-times-circle text-muted me-2"></i>
+                                            }
+                                            @feature.Name
+                                        </h6>
+                                        <span class="feature-category badge @(feature.Category.ToLower())">@feature.Category</span>
+                                    </div>
+                                    @if (!string.IsNullOrWhiteSpace(feature.Description))
+                                    {
+                                        <p class="feature-description">@feature.Description</p>
+                                    }
+                                    <div class="feature-meta">
+                                        <small class="text-muted">
+                                            <i class="fas fa-calendar-plus me-1"></i>
+                                            Introduced in: <strong>@feature.IntroducedInVersion</strong>
+                                        </small>
+                                        @if (!string.IsNullOrWhiteSpace(feature.SupportFromVersion) && feature.SupportFromVersion != feature.IntroducedInVersion)
+                                        {
+                                            <small class="text-muted ms-3">
+                                                <i class="fas fa-arrow-right me-1"></i>
+                                                From: <strong>@feature.SupportFromVersion</strong>
+                                            </small>
+                                        }
+                                        @if (!string.IsNullOrWhiteSpace(feature.SupportToVersion) && feature.SupportToVersion != "Latest")
+                                        {
+                                            <small class="text-muted ms-3">
+                                                <i class="fas fa-arrow-left me-1"></i>
+                                                Until: <strong>@feature.SupportToVersion</strong>
+                                            </small>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-12">
+                <div class="details-section">
+                    <div class="section-header">
+                        <h5><i class="fas fa-puzzle-piece me-2"></i>Applicable Features</h5>
+                    </div>
+                    <div class="section-content">
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-puzzle-piece fa-3x mb-3"></i>
+                            <p>No features are available for this version.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
     <!-- Related Features Section -->
     <div class="row">
         <div class="col-12">

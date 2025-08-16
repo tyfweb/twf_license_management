@@ -104,7 +104,18 @@ try
     // Add Hangfire server
     builder.Services.AddHangfireServer();
 
-        // Register tenant scope infrastructure for system operations
+    // Configure product tier settings
+    builder.Services.Configure<TechWayFit.Licensing.Management.Web.Configuration.ProductTierConfiguration>(
+        builder.Configuration.GetSection(TechWayFit.Licensing.Management.Web.Configuration.ProductTierConfiguration.SectionName));
+
+    // Add product configuration from external file
+    builder.Configuration.AddJsonFile("product-config.json", optional: false, reloadOnChange: true);
+    
+    // Configure product settings
+    builder.Services.Configure<TechWayFit.Licensing.Management.Web.Configuration.ProductConfiguration>(
+        builder.Configuration.GetSection(TechWayFit.Licensing.Management.Web.Configuration.ProductConfiguration.SectionName));
+
+    // Register tenant scope infrastructure for system operations
     builder.Services.AddSingleton<ITenantScope, TenantScope>();
     builder.Services.AddScoped<IUserContext, TenantAwareUserContext>();
     RegisterServices(builder);    

@@ -72,21 +72,6 @@
     </div>
 
 <div class="container-fluid">
-    <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item">
-                <a href="@Url.Action("Index", "Product")">Products</a>
-            </li>
-            <li class="breadcrumb-item">
-                <a href="@Url.Action("Details", "Product", new { id = productId })">@productName</a>
-            </li>
-            <li class="breadcrumb-item">
-                <a href="@Url.Action("Index", "ProductVersion", new { productId = productId })">Versions</a>
-            </li>
-            <li class="breadcrumb-item active" aria-current="page">Edit: @Model.Name</li>
-        </ol>
-    </nav>
 
     <!-- Alert Messages -->
     @if (TempData["Error"] != null)

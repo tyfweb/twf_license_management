@@ -1,0 +1,140 @@
+{
+  "ProductConfiguration": {
+    "SupportedCurrencies": [
+      {
+        "Code": "USD",
+        "Symbol": "$",
+        "Name": "US Dollar",
+        "IsDefault": true
+      },
+      {
+        "Code": "EUR",
+        "Symbol": "€",
+        "Name": "Euro",
+        "IsDefault": false
+      },
+      {
+        "Code": "GBP",
+        "Symbol": "£",
+        "Name": "British Pound",
+        "IsDefault": false
+      },
+      {
+        "Code": "INR",
+        "Symbol": "₹",
+        "Name": "Indian Rupee",
+        "IsDefault": false
+      },
+      {
+        "Code": "CAD",
+        "Symbol": "C$",
+        "Name": "Canadian Dollar",
+        "IsDefault": false
+      },
+      {
+        "Code": "AUD",
+        "Symbol": "A$",
+        "Name": "Australian Dollar",
+        "IsDefault": false
+      },
+      {
+        "Code": "JPY",
+        "Symbol": "¥",
+        "Name": "Japanese Yen",
+        "IsDefault": false
+      },
+      {
+        "Code": "SGD",
+        "Symbol": "S$",
+        "Name": "Singapore Dollar",
+        "IsDefault": false
+      }
+    ],
+    "SLATemplates": [
+      {
+        "Id": "basic",
+        "Name": "Basic Support",
+        "Description": "Standard business hours support with email assistance",
+        "CriticalResponseHours": 24.0,
+        "HighPriorityResponseHours": 48.0,
+        "MediumPriorityResponseHours": 72.0,
+        "LowPriorityResponseHours": 120.0
+      },
+      {
+        "Id": "business",
+        "Name": "Business Support",
+        "Description": "Extended hours support with priority handling",
+        "CriticalResponseHours": 8.0,
+        "HighPriorityResponseHours": 16.0,
+        "MediumPriorityResponseHours": 24.0,
+        "LowPriorityResponseHours": 48.0
+      },
+      {
+        "Id": "premium",
+        "Name": "Premium Support",
+        "Description": "24/7 priority support with dedicated assistance",
+        "CriticalResponseHours": 4.0,
+        "HighPriorityResponseHours": 8.0,
+        "MediumPriorityResponseHours": 12.0,
+        "LowPriorityResponseHours": 24.0
+      },
+      {
+        "Id": "enterprise",
+        "Name": "Enterprise Support",
+        "Description": "Immediate 24/7 enterprise-grade support with guaranteed SLA",
+        "CriticalResponseHours": 2.0,
+        "HighPriorityResponseHours": 4.0,
+        "MediumPriorityResponseHours": 8.0,
+        "LowPriorityResponseHours": 16.0
+      },
+      {
+        "Id": "custom",
+        "Name": "Custom SLA",
+        "Description": "Define your own custom SLA parameters",
+        "CriticalResponseHours": 1.0,
+        "HighPriorityResponseHours": 2.0,
+        "MediumPriorityResponseHours": 4.0,
+        "LowPriorityResponseHours": 8.0
+      }
+    ],
+    "ProductFeatures": {
+      "DisplaySettings": {
+        "UseListView": true,
+        "UseGridView": false,
+        "ItemsPerPage": 10,
+        "ShowDescriptions": true,
+        "ShowIcons": true
+      },
+      "Categories": [
+        {
+          "Id": "core",
+          "Name": "Core Features",
+          "Description": "Essential functionality included in all tiers",
+          "Icon": "fas fa-cogs",
+          "Color": "primary"
+        },
+        {
+          "Id": "advanced",
+          "Name": "Advanced Features",
+          "Description": "Enhanced capabilities for power users",
+          "Icon": "fas fa-rocket",
+          "Color": "success"
+        },
+        {
+          "Id": "enterprise",
+          "Name": "Enterprise Features",
+          "Description": "Enterprise-grade functionality and integrations",
+          "Icon": "fas fa-building",
+          "Color": "warning"
+        },
+        {
+          "Id": "addon",
+          "Name": "Add-on Features",
+          "Description": "Optional features available for purchase",
+          "Icon": "fas fa-plus-circle",
+          "Color": "info"
+        }
+      ]
+    }
+  }
+}

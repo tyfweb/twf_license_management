@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.Options;
 using TechWayFit.Licensing.Management.Web.Controllers;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Web.ViewModels.Product;
 using TechWayFit.Licensing.Management.Core.Models.Product;
 using TechWayFit.Licensing.Management.Core.Models.Common;
+using TechWayFit.Licensing.Management.Web.Configuration;
 
 namespace TechWayFit.Licensing.Management.Web.Controllers;
 
@@ -20,17 +22,20 @@ public class ProductFeatureController : BaseController
     private readonly IEnterpriseProductService _productService;
     private readonly IProductTierService _productTierService;
     private readonly IProductFeatureService _productFeatureService;
+    private readonly ProductConfiguration _productConfig;
 
     public ProductFeatureController(
         ILogger<ProductFeatureController> logger,
         IEnterpriseProductService productService,
         IProductTierService productTierService,
-        IProductFeatureService productFeatureService)
+        IProductFeatureService productFeatureService,
+        IOptions<ProductConfiguration> productConfig)
     {
         _logger = logger;
         _productService = productService ?? throw new ArgumentNullException(nameof(productService));
         _productTierService = productTierService ?? throw new ArgumentNullException(nameof(productTierService));
         _productFeatureService = productFeatureService ?? throw new ArgumentNullException(nameof(productFeatureService));
+        _productConfig = productConfig?.Value ?? throw new ArgumentNullException(nameof(productConfig));
     }
 
     /// <summary>
@@ -82,8 +87,12 @@ public class ProductFeatureController : BaseController
             };
 
             ViewData["Product"] = indexViewModel;
+            ViewData["ProductId"] = productId;
+            ViewData["ProductName"] = product.Name;
             ViewData["Features"] = featureViewModels;
             ViewData["Tiers"] = tierViewModels;
+            ViewData["DisplaySettings"] = _productConfig.ProductFeatures.DisplaySettings;
+            ViewData["FeatureCategories"] = _productConfig.ProductFeatures.Categories;
 
             return View(indexViewModel);
         }

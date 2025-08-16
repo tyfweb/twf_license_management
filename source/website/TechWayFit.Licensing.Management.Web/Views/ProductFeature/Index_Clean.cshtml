@@ -1,40 +1,16 @@
-@model TechWayFit.Licensing.Management.Web.ViewModels.Product.ProductFeatureIndexViewModel
+@model IEnumerable<TechWayFit.Licensing.Management.Core.Models.Product.ProductFeature>
 @{
-    ViewData["Title"] = $"{Model.ProductName} - Features";
-    var features = ViewData["Features"] as List<TechWayFit.Licensing.Management.Web.ViewModels.Product.FeatureInfoViewModel> ?? new List<TechWayFit.Licensing.Management.Web.ViewModels.Product.FeatureInfoViewModel>();
+    ViewData["Title"] = "Product Features";
+    var header = new TechWayFit.Licensing.Management.Web.ViewModels.Shared.PageHeaderViewModel
+    {
+        Title = "Product Features",
+        Icon = "fas fa-puzzle-piece"
+    };
 }
 
-<!-- Page Header -->
-<div class="page-header">
-    <div class="page-header-content">
-        <div class="page-header-info">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item">
-                        <a asp-controller="Product" asp-action="Index">Products</a>
-                    </li>
-                    <li class="breadcrumb-item">
-                        <a asp-controller="Product" asp-action="Details" asp-route-id="@Model.ProductId">@Model.ProductName</a>
-                    </li>
-                    <li class="breadcrumb-item active" aria-current="page">Features</li>
-                </ol>
-            </nav>
-            <h1 class="page-title">
-                <i class="fas fa-puzzle-piece"></i>
-                @Model.ProductName - Features
-            </h1>
-            @if (!string.IsNullOrEmpty(Model.ProductDescription))
-            {
-                <p class="page-description">@Model.ProductDescription</p>
-            }
-        </div>
-        <div class="page-header-actions">
-            <a asp-action="Create" asp-route-productId="@Model.ProductId" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Add Feature
-            </a>
-        </div>
-    </div>
-</div>
+@section PageHeader {
+    <partial name="_PageHeaderViewComponent" model="header" />
+}
 
 <div class="product-list-container">
     <!-- Header with Search and Actions -->
@@ -48,12 +24,17 @@
                 <span class="filter-count" id="filterCount" style="display: none;">0 results</span>
                 <a href="#" class="clear-filter" id="clearFilter" style="display: none;">Clear</a>
             </div>
+            <div class="action-controls">
+                <a asp-action="Create" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Add Feature
+                </a>
+            </div>
         </div>
     </div>
 
     <!-- Table Section -->
     <div class="product-list-table">
-        @if (features.Any())
+        @if (Model.Any())
         {
             <table class="table">
                 <thead>
@@ -70,8 +51,8 @@
                             Display Order
                             <i class="fas fa-sort sort-icon"></i>
                         </th>
-                        <th class="sortable" data-sort="code">
-                            Feature Code
+                        <th class="sortable" data-sort="usage">
+                            Usage Type
                             <i class="fas fa-sort sort-icon"></i>
                         </th>
                         <th class="sortable" data-sort="status">
@@ -82,7 +63,7 @@
                     </tr>
                 </thead>
                 <tbody id="productTable">
-                    @foreach (var item in features)
+                    @foreach (var item in Model)
                     {
                         <tr data-search="@(item.Name?.ToLower()) @(item.Description?.ToLower()) @(item.Code?.ToLower())">
                             <td>
@@ -115,13 +96,17 @@
                                 <span class="badge badge-tier">Order: @item.DisplayOrder</span>
                             </td>
                             <td>
-                                @if (!string.IsNullOrEmpty(item.Code))
+                                @if (item.Usage?.IsUnlimited == true)
                                 {
-                                    <span class="badge badge-secondary">@item.Code</span>
+                                    <span class="badge badge-success">Unlimited</span>
+                                }
+                                else if (item.Usage?.MaxUsage > 0)
+                                {
+                                    <span class="badge badge-warning">Limited (@item.Usage.MaxUsage)</span>
                                 }
                                 else
                                 {
-                                    <span class="text-muted">No code</span>
+                                    <span class="badge badge-secondary">Basic</span>
                                 }
                             </td>
                             <td>
@@ -137,24 +122,21 @@
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-end">
                                             <li>
-                                                <a class="dropdown-item" asp-action="Details" asp-route-id="@item.Id" asp-route-productId="@Model.ProductId">
+                                                <a class="dropdown-item" asp-action="Details" asp-route-id="@item.FeatureId">
                                                     <i class="fas fa-eye"></i> View Details
                                                 </a>
                                             </li>
                                             <li>
-                                                <a class="dropdown-item" asp-action="Edit" asp-route-id="@item.Id" asp-route-productId="@Model.ProductId">
+                                                <a class="dropdown-item" asp-action="Edit" asp-route-id="@item.FeatureId">
                                                     <i class="fas fa-edit"></i> Edit
                                                 </a>
                                             </li>
-                                            @if (item.CanDelete)
-                                            {
-                                                <li><hr class="dropdown-divider"></li>
-                                                <li>
-                                                    <a class="dropdown-item text-danger" asp-action="Delete" asp-route-id="@item.Id" asp-route-productId="@Model.ProductId">
-                                                        <i class="fas fa-trash"></i> Delete
-                                                    </a>
-                                                </li>
-                                            }
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <a class="dropdown-item text-danger" asp-action="Delete" asp-route-id="@item.FeatureId">
+                                                    <i class="fas fa-trash"></i> Delete
+                                                </a>
+                                            </li>
                                         </ul>
                                     </div>
                                 </div>
@@ -166,55 +148,26 @@
         }
         else
         {
-            <div class="empty-state">
-                <div class="empty-state-icon">
+            <div class="product-list-empty">
+                <div class="empty-icon">
                     <i class="fas fa-puzzle-piece"></i>
                 </div>
-                <div class="empty-state-content">
-                    <h5>No Product Features Found</h5>
-                    <p class="text-muted">
-                        @if (features.Any())
-                        {
-                            <span>No features match your search criteria.</span>
-                        }
-                        else
-                        {
-                            <span>No features have been configured for this product yet.</span>
-                        }
-                    </p>
-                    <a asp-action="Create" asp-route-productId="@Model.ProductId" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> Create First Feature
-                    </a>
-                </div>
+                <div class="empty-title">No Product Features Found</div>
+                <div class="empty-subtitle">Get started by creating your first product feature.</div>
+                <a asp-action="Create" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Create First Feature
+                </a>
             </div>
         }
     </div>
 
-    <!-- Stats Bar -->
-    <div class="product-list-stats">
-        <div class="stats-content">
-            <div class="stats-info">
-                @if (features.Any())
-                {
-                    <span class="stats-text">
-                        Showing <span id="visibleCount">@features.Count()</span> of <span id="totalCount">@features.Count()</span> features
-                    </span>
-                }
-                else
-                {
-                    <span class="stats-text">No features available</span>
-                }
-            </div>
-        
-    </div>
-
     <!-- Footer with Info -->
-    @if (features.Any())
+    @if (Model.Any())
     {
         <div class="product-list-footer">
             <div class="list-info">
                 <div class="count-info">
-                    Showing <span id="visibleCount">@features.Count()</span> of <span id="totalCount">@features.Count()</span> features
+                    Showing <span id="visibleCount">@Model.Count()</span> of <span id="totalCount">@Model.Count()</span> features
                 </div>
             </div>
         </div>

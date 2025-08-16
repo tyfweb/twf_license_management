@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Options;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Core.Models.Product;
 using TechWayFit.Licensing.Management.Core.Models.Common;
 using TechWayFit.Licensing.Management.Web.ViewModels.Product;
 using TechWayFit.Licensing.Management.Web.ViewModels.Shared;
 using TechWayFit.Licensing.Management.Web.Helpers;
+using TechWayFit.Licensing.Management.Web.Configuration;
 using ProductTierViewModel = TechWayFit.Licensing.Management.Web.ViewModels.Product.ProductTierViewModel;
 
 namespace TechWayFit.Licensing.Management.Web.Controllers
@@ -20,15 +22,18 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         private readonly ILogger<ProductTierController> _logger;
         private readonly IEnterpriseProductService _productService;
         private readonly IProductTierService _productTierService;
+        private readonly ProductConfiguration _productConfig;
 
         public ProductTierController(
             ILogger<ProductTierController> logger,
             IEnterpriseProductService productService,
-            IProductTierService productTierService)
+            IProductTierService productTierService,
+            IOptions<ProductConfiguration> productConfig)
         {
             _logger = logger;
             _productService = productService ?? throw new ArgumentNullException(nameof(productService));
             _productTierService = productTierService ?? throw new ArgumentNullException(nameof(productTierService));
+            _productConfig = productConfig?.Value ?? throw new ArgumentNullException(nameof(productConfig));
         }
 
         /// <summary>
@@ -142,6 +147,8 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
 
                 ViewData["ProductName"] = product.Name;
                 ViewData["ProductId"] = productId;
+                ViewData["SLATemplates"] = _productConfig.SLATemplates;
+                ViewData["SupportedCurrencies"] = _productConfig.SupportedCurrencies;
                 return View(model);
             }
             catch (Exception ex)
@@ -214,6 +221,8 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
 
                 ViewData["ProductName"] = product.Name;
                 ViewData["ProductId"] = productId;
+                ViewData["SLATemplates"] = _productConfig.SLATemplates;
+                ViewData["SupportedCurrencies"] = _productConfig.SupportedCurrencies;
                 return View(model);
             }
             catch (Exception ex)

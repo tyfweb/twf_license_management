@@ -17,13 +17,16 @@ public class ProductVersionController : BaseController
 {
     private readonly ILogger<ProductVersionController> _logger;
     private readonly IEnterpriseProductService _productService;
+    private readonly IProductFeatureService _productFeatureService;
 
     public ProductVersionController(
         ILogger<ProductVersionController> logger,
-        IEnterpriseProductService productService)
+        IEnterpriseProductService productService,
+        IProductFeatureService productFeatureService)
     {
         _logger = logger;
         _productService = productService ?? throw new ArgumentNullException(nameof(productService));
+        _productFeatureService = productFeatureService ?? throw new ArgumentNullException(nameof(productFeatureService));
     }
 
     /// <summary>
@@ -343,6 +346,9 @@ public class ProductVersionController : BaseController
                 return NotFound($"Version with ID {versionId} not found");
             }
 
+            // Get applicable features for this version
+            var applicableFeatures = await _productFeatureService.GetFeaturesByProductVersionIdAsync(productId, versionId);
+            
             var viewModel = new ProductVersionDetailsViewModel
             {
                 Id = version.VersionId,
@@ -357,7 +363,18 @@ public class ProductVersionController : BaseController
                 IsCurrent = version.IsCurrent,
                 IsActive = version.Audit.IsActive, // Using Audit.IsActive from ProductVersion model
                 CreatedAt = version.Audit.CreatedOn, // Using Audit.CreatedOn from ProductVersion model
-                UpdatedAt = version.Audit.UpdatedOn ?? version.Audit.CreatedOn // Using Audit.UpdatedOn from ProductVersion model
+                UpdatedAt = version.Audit.UpdatedOn ?? version.Audit.CreatedOn, // Using Audit.UpdatedOn from ProductVersion model
+                ApplicableFeatures = applicableFeatures.Select(f => new VersionFeatureViewModel
+                {
+                    FeatureId = f.FeatureId,
+                    Name = f.Name,
+                    Description = f.Description,
+                    IntroducedInVersion = f.SupportFromVersion?.ToString() ?? "Unknown",
+                    SupportFromVersion = f.SupportFromVersion?.ToString() ?? "Unknown",
+                    SupportToVersion = f.SupportToVersion?.ToString() ?? "Latest",
+                    IsEnabled = f.IsEnabled,
+                    Category = "General" // Default category since not available in model
+                }).ToList()
             };
 
             return View(viewModel);
