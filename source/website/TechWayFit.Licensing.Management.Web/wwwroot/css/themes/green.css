@@ -1,187 +1,272 @@
-/* ===== GREEN THEME ===== */
-/* TechWayFit License Management - Nature Green Theme */
+/* ===== GREEN THEME - SKYDASH PROFESSIONAL STYLE ===== */
+/* TechWayFit License Management - Professional Green Theme */
+/* Inspired by modern dashboard design with greens and nature tones */
 
 :root {
-    /* Theme Identity */
-    --theme-name: 'green';
-    --theme-display-name: 'Nature Green';
-    --theme-mode: 'light';
+    /* Primary Colors - Deep Green to Light Green */
+    --primary-color: #047857;
+    --primary-light: #4ade80;
+    --primary-dark: #064e3b;
     
-    /* Green-centric Brand Colors */
-    --accent-primary: #047857;
-    --accent-secondary: #059669;
-    --accent-tertiary: #10b981;
+    /* Secondary Colors - Emerald and Supporting */
+    --secondary-color: #059669;
+    --secondary-light: #10b981;
+    --accent-color: #fbbf24;
     
-    /* Extended Green Palette */
-    --primary-50: #f0fdf4;
-    --primary-100: #dcfce7;
-    --primary-200: #bbf7d0;
-    --primary-300: #86efac;
-    --primary-400: #4ade80;
-    --primary-500: #22c55e;
-    --primary-600: #16a34a;
-    --primary-700: #15803d;
-    --primary-800: #166534;
-    --primary-900: #14532d;
+    /* Gradients */
+    --primary-gradient: linear-gradient(135deg, #047857 0%, #4ade80 100%);
+    --secondary-gradient: linear-gradient(135deg, #059669 0%, #10b981 100%);
+    --accent-gradient: linear-gradient(135deg, #4ade80 0%, #10b981 100%);
+    --bg-gradient: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 50%, #f7fee7 100%);
     
-    /* Green-tinted Backgrounds */
-    --background-primary: #ffffff;
-    --background-secondary: #f0fdf4;
-    --background-tertiary: #ecfdf5;
-    --background-accent: #dcfce7;
+    /* Background Colors */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f0fdf4;
+    --bg-header: var(--primary-gradient);
+    --bg-sidebar: linear-gradient(180deg, #047857 0%, #064e3b 100%);
+    --bg-card: #ffffff;
+    --bg-overlay: rgba(4, 120, 87, 0.1);
     
-    /* Card and Surface Colors */
-    --card-background: var(--background-primary);
-    --card-background-hover: var(--background-secondary);
-    --sidebar-background: linear-gradient(135deg, var(--background-secondary), var(--background-tertiary));
-    --header-background: linear-gradient(135deg, #047857, #059669);
-    --footer-background: var(--background-tertiary);
-    
-    /* Interactive Elements */
-    --hover-lift: 2px;
-    --hover-shadow: 0 10px 25px -5px rgba(4, 120, 87, 0.15), 0 10px 10px -5px rgba(5, 150, 105, 0.1);
-    --animation-speed: 0.25s;
-    --animation-curve: cubic-bezier(0.4, 0, 0.2, 1);
-    
-    /* Green Theme Gradients */
-    --gradient-primary: linear-gradient(135deg, #047857, #059669);
-    --gradient-secondary: linear-gradient(135deg, #f0fdf4, #ecfdf5);
-    --gradient-card: linear-gradient(135deg, var(--background-primary), var(--background-secondary));
-    --gradient-accent: linear-gradient(135deg, #dcfce7, #bbf7d0);
-    
-    /* Text Colors - Green Theme */
-    --text-primary: #0f172a;
-    --text-secondary: #374151;
-    --text-muted: #6b7280;
+    /* Text Colors */
+    --text-primary: #2d3748;
+    --text-secondary: #718096;
+    --text-muted: #a0aec0;
     --text-inverse: #ffffff;
-    --text-accent: var(--accent-primary);
+    --text-link: #047857;
+    --text-link-hover: #064e3b;
     
-    /* Border and Shadow Colors */
-    --border-color: #d1fae5;
-    --border-strong: #a7f3d0;
-    --shadow-color: rgba(4, 120, 87, 0.1);
-    --divider-color: #bbf7d0;
+    /* Border Colors */
+    --border-color: rgba(4, 120, 87, 0.1);
+    --border-light: rgba(74, 222, 128, 0.2);
+    --border-dark: rgba(4, 120, 87, 0.3);
     
-    /* Status Colors - Green Theme Adjusted */
-    --success-color: #059669;
-    --success-light: #d1fae5;
-    --warning-color: #f59e0b;
-    --warning-light: #fef3c7;
-    --danger-color: #dc2626;
-    --danger-light: #fee2e2;
-    --info-color: #0ea5e9;
-    --info-light: #e0f2fe;
+    /* Shadow Effects */
+    --shadow-sm: 0 2px 4px rgba(4, 120, 87, 0.1);
+    --shadow-md: 0 4px 12px rgba(4, 120, 87, 0.15);
+    --shadow-lg: 0 8px 25px rgba(4, 120, 87, 0.2);
+    --shadow-xl: 0 12px 35px rgba(4, 120, 87, 0.25);
     
-    /* Button Colors */
-    --btn-primary-bg: var(--accent-primary);
-    --btn-primary-hover: #065f46;
-    --btn-primary-border: var(--accent-primary);
-    --btn-secondary-bg: var(--background-secondary);
-    --btn-secondary-hover: var(--background-tertiary);
-    --btn-secondary-border: var(--border-strong);
-    
-    /* Form Elements */
-    --input-bg: var(--background-primary);
-    --input-border: var(--border-color);
-    --input-focus: var(--accent-primary);
-    --input-placeholder: var(--text-muted);
-    
-    /* Navigation Colors */
-    --nav-bg: var(--gradient-primary);
-    --nav-text: var(--text-inverse);
-    --nav-hover: rgba(255, 255, 255, 0.1);
-    --nav-active: rgba(255, 255, 255, 0.2);
-    
-    /* Table Colors */
-    --table-bg: var(--background-primary);
-    --table-stripe: var(--background-secondary);
-    --table-hover: var(--background-accent);
-    --table-border: var(--border-color);
-    
-    /* Modal and Overlay Colors */
-    --modal-bg: var(--background-primary);
-    --modal-header: var(--background-secondary);
-    --modal-overlay: rgba(0, 0, 0, 0.5);
-    
-    /* Custom Green Theme Variables */
-    --nature-accent: #22c55e;
-    --forest-green: #047857;
-    --mint-fresh: #86efac;
-    --sage-light: #bbf7d0;
-    
-    /* Status Colors - Green Theme */
-    --success-color: #059669;
-    --success-light: #d1fae5;
-    --success-text: #065f46;
-    --warning-color: #d97706;
-    --warning-light: #fef3c7;
-    --warning-text: #92400e;
-    --danger-color: #dc2626;
-    --danger-light: #fee2e2;
-    --danger-text: #991b1b;
-    --info-color: #0891b2;
-    --info-light: #cffafe;
-    --info-text: #155e75;
-    --purple-color: #7c3aed;
-    --purple-light: #ede9fe;
-    --purple-text: #5b21b6;
-    
-    /* Primary Color Variations - Green Theme */
-    --primary-dark: #047857;
-    --primary-darker: #14532d;
+    /* Interactive States */
+    --hover-bg: rgba(4, 120, 87, 0.05);
+    --active-bg: rgba(4, 120, 87, 0.1);
+    --focus-ring: rgba(74, 222, 128, 0.4);
 }
 
-/* ===== GREEN THEME COMPONENT OVERRIDES ===== */
-
-/* Navigation Bar */
-.navbar-dark {
-    background: var(--nav-bg) !important;
-}
-
-.navbar-dark .navbar-brand,
-.navbar-dark .navbar-nav .nav-link {
-    color: var(--nav-text) !important;
-}
-
-.navbar-dark .navbar-nav .nav-link:hover {
-    color: var(--nav-text) !important;
-    background: var(--nav-hover);
-    border-radius: 0.375rem;
-}
-
-/* Cards */
+/* Global Body Styling */
 body {
-    background-color: var(--background-secondary) !important;
+    background: var(--bg-gradient) !important;
+    color: var(--text-primary) !important;
+    font-family: 'Inter', 'Segoe UI', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    line-height: 1.6;
+    overflow-x: hidden;
 }
 
+/* Main Content Area */
+.main-content,
+.content-wrapper,
+main {
+    background: transparent !important;
+    min-height: 100vh;
+    padding-top: 80px !important;
+}
+
+/* Card Styling */
 .card,
-.stats-card,
-.product-card,
-.consumer-card {
-    background: var(--card-background) !important;
-    border-color: var(--border-color) !important;
+.card-body,
+.panel,
+.widget,
+.box {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-light) !important;
+    border-radius: 16px !important;
+    box-shadow: var(--shadow-md) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(10px);
 }
 
 .card:hover,
-.stats-card:hover,
-.product-card:hover,
-.consumer-card:hover {
-    background: var(--card-background-hover) !important;
-    transform: translateY(calc(-1 * var(--hover-lift)));
-    box-shadow: var(--hover-shadow);
+.panel:hover,
+.widget:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg) !important;
+    border-color: var(--border-dark) !important;
 }
 
-/* Headers and Sections */
-.section-header {
-    background: var(--background-secondary) !important;
-    border-color: var(--border-color) !important;
+.card-header,
+.panel-heading {
+    background: var(--secondary-gradient) !important;
+    color: var(--text-inverse) !important;
+    border-bottom: none !important;
+    border-radius: 16px 16px 0 0 !important;
+    padding: 1.25rem 1.5rem !important;
+    font-weight: 600;
 }
 
-.sidebar-section {
-    background: var(--sidebar-background) !important;
-    border-color: var(--border-color) !important;
-    box-shadow: 0 2px 8px rgba(4, 120, 87, 0.08) !important;
+/* Header/Navbar Styling */
+.navbar,
+.navbar-brand,
+.navbar-nav,
+header,
+.licensehub-topbar {
+    background: var(--bg-header) !important;
+    border-bottom: none !important;
+    box-shadow: var(--shadow-md);
+}
+
+/* Override compiled CSS for topbar */
+.licensehub-topbar {
+    background: var(--bg-header) !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 60px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: var(--shadow-lg) !important;
+    z-index: 1030 !important;
+}
+
+/* Fix container-fluid background inside topbar */
+.licensehub-topbar .container-fluid {
+    background: transparent !important;
+}
+
+/* Force all topbar text to be white - aggressive approach */
+.licensehub-topbar,
+.licensehub-topbar *:not(.btn):not(.dropdown-menu):not(.dropdown-item) {
+    color: #ffffff !important;
+}
+
+/* Specifically target common logo/title elements */
+.licensehub-topbar h1,
+.licensehub-topbar h2, 
+.licensehub-topbar h3,
+.licensehub-topbar h4,
+.licensehub-topbar h5,
+.licensehub-topbar h6,
+.licensehub-topbar .navbar-brand,
+.licensehub-topbar .brand,
+.licensehub-topbar .logo,
+.licensehub-topbar .title {
+    color: #ffffff !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Other topbar content - use dark text for light areas */
+.licensehub-topbar .btn {
+    color: var(--text-primary) !important;
+    border-color: rgba(45, 55, 72, 0.3) !important;
+}
+
+.licensehub-topbar .btn:hover {
+    background: rgba(45, 55, 72, 0.1) !important;
+    border-color: rgba(45, 55, 72, 0.5) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Sidebar Styling */
+.licensehub-sidebar,
+.sidebar,
+.main-sidebar {
+    background: var(--bg-sidebar) !important;
+    border-right: none !important;
+    box-shadow: var(--shadow-lg) !important;
+}
+
+.licensehub-sidebar-nav li a,
+.sidebar-nav li a,
+.main-sidebar .nav li a {
+    color: var(--text-inverse) !important;
+    border-radius: 8px !important;
+    margin: 4px 8px !important;
     transition: all 0.3s ease !important;
+}
+
+.licensehub-sidebar-nav li a:hover,
+.sidebar-nav li a:hover,
+.main-sidebar .nav li a:hover {
+    background: var(--hover-bg) !important;
+    transform: translateX(4px) !important;
+    color: var(--text-inverse) !important;
+}
+
+.licensehub-sidebar-nav li.active a,
+.sidebar-nav li.active a,
+.main-sidebar .nav li.active a {
+    background: var(--active-bg) !important;
+    color: var(--text-inverse) !important;
+    font-weight: 600 !important;
+}
+
+.licensehub-sidebar-nav * {
+    color: var(--text-inverse) !important;
+}
+
+/* Button Styling */
+.btn-primary {
+    background: var(--primary-gradient) !important;
+    border: none !important;
+    box-shadow: var(--shadow-sm) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: var(--shadow-md) !important;
+    background: var(--secondary-gradient) !important;
+}
+
+.btn-secondary {
+    background: transparent !important;
+    border: 2px solid var(--border-light) !important;
+    color: var(--text-primary) !important;
+}
+
+.btn-secondary:hover {
+    background: var(--hover-bg) !important;
+    border-color: var(--border-dark) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Statistics Cards */
+.stats-card {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-light) !important;
+    border-radius: 16px !important;
+    box-shadow: var(--shadow-md) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.stats-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--accent-gradient);
+}
+
+.stats-card:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: var(--shadow-lg) !important;
+}
+
+/* Form Elements */
+.form-control {
+    border: 2px solid var(--border-light) !important;
+    border-radius: 12px !important;
+    padding: 12px 16px !important;
+    transition: all 0.3s ease !important;
+    background: var(--bg-card) !important;
+}
+
+.form-control:focus {
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 4px var(--focus-ring) !important;
+    outline: none !important;
 }
 
 .sidebar-section:hover {

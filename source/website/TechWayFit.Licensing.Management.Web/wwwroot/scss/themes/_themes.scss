@@ -111,23 +111,23 @@
     }
 }
 
-// Dark Theme Preview
-// ------------------
+// Dark Theme Preview (Professional Dark)
+// -------------------------------------
 .theme-preview-dark {
     .theme-preview-header {
-        background: #1f2937;
+        background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
     }
 
     .theme-preview-content {
-        background: #111827;
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
     }
 
     .theme-preview-text {
-        background: #374151;
+        background: linear-gradient(90deg, #6366f1 0%, #818cf8 100%);
     }
 
     .theme-preview-button {
-        background: #3b82f6;
+        background: linear-gradient(135deg, #374151 0%, #f59e0b 100%);
     }
 }
 
@@ -151,23 +151,23 @@
     }
 }
 
-// Green Theme Preview
-// -------------------
+// Green Theme Preview (Professional Green)
+// ----------------------------------------
 .theme-preview-green {
     .theme-preview-header {
-        background: #047857;
+        background: linear-gradient(135deg, #047857 0%, #4ade80 100%);
     }
 
     .theme-preview-content {
-        background: #f0fdf4;
+        background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
     }
 
     .theme-preview-text {
-        background: #dcfce7;
+        background: linear-gradient(90deg, #059669 0%, #10b981 100%);
     }
 
     .theme-preview-button {
-        background: #047857;
+        background: linear-gradient(135deg, #4ade80 0%, #fbbf24 100%);
     }
 }
 

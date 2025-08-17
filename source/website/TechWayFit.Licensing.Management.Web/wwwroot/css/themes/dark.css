@@ -1,196 +1,275 @@
-/* ===== DARK THEME ===== */
-/* TechWayFit License Management - Dark Theme */
+/* ===== DARK THEME - SKYDASH PROFESSIONAL STYLE ===== */
+/* TechWayFit License Management - Professional Dark Theme */
+/* Inspired by modern dark dashboard design with blues and purples */
 
 :root {
-    /* Theme Identity */
-    --theme-name: 'dark';
-    --theme-display-name: 'Dark Mode';
-    --theme-mode: 'dark';
+    /* Primary Colors - Dark Blue to Light Blue */
+    --primary-color: #1f2937;
+    --primary-light: #60a5fa;
+    --primary-dark: #111827;
     
-    /* Primary Brand Colors - Adjusted for dark mode */
-    --accent-primary: #60a5fa;
-    --accent-secondary: #a78bfa;
-    --accent-tertiary: #22d3ee;
+    /* Secondary Colors - Purple and Supporting */
+    --secondary-color: #6366f1;
+    --secondary-light: #818cf8;
+    --accent-color: #f59e0b;
     
-    /* Extended Color Palette - Dark Mode */
-    --primary-50: #1e3a8a;
-    --primary-100: #1e40af;
-    --primary-200: #1d4ed8;
-    --primary-300: #2563eb;
-    --primary-400: #3b82f6;
-    --primary-500: #60a5fa;
-    --primary-600: #93c5fd;
-    --primary-700: #bfdbfe;
-    --primary-800: #dbeafe;
-    --primary-900: #eff6ff;
+    /* Gradients */
+    --primary-gradient: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+    --secondary-gradient: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+    --accent-gradient: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+    --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #111827 100%);
     
-    /* Dark Background Layers */
-    --background-primary: #0f172a;
-    --background-secondary: #1e293b;
-    --background-tertiary: #334155;
-    --background-accent: #1e3a8a;
+    /* Background Colors */
+    --bg-primary: #1f2937;
+    --bg-secondary: #111827;
+    --bg-header: var(--primary-gradient);
+    --bg-sidebar: linear-gradient(180deg, #1f2937 0%, #111827 100%);
+    --bg-card: #374151;
+    --bg-overlay: rgba(31, 41, 55, 0.1);
     
-    /* Card and Surface Colors */
-    --card-background: #1e293b;
-    --card-background-hover: #334155;
-    --sidebar-background: linear-gradient(135deg, #0f172a, #1e293b);
-    --header-background: #1e293b;
-    --footer-background: #0f172a;
+    /* Text Colors */
+    --text-primary: #f9fafb;
+    --text-secondary: #d1d5db;
+    --text-muted: #9ca3af;
+    --text-inverse: #ffffff;
+    --text-link: #60a5fa;
+    --text-link-hover: #3b82f6;
     
-    /* Interactive Elements */
-    --hover-lift: 3px;
-    --hover-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
-    --animation-speed: 0.3s;
-    --animation-curve: cubic-bezier(0.4, 0, 0.2, 1);
+    /* Border Colors */
+    --border-color: rgba(75, 85, 99, 0.3);
+    --border-light: rgba(156, 163, 175, 0.2);
+    --border-dark: rgba(75, 85, 99, 0.5);
     
-    /* Dark Theme Gradients */
-    --gradient-primary: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-    --gradient-secondary: linear-gradient(135deg, var(--background-secondary), var(--background-tertiary));
-    --gradient-card: linear-gradient(135deg, var(--card-background), var(--background-secondary));
-    --gradient-accent: linear-gradient(135deg, #1e3a8a, #1e40af);
+    /* Shadow Effects */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 25px rgba(0, 0, 0, 0.5);
+    --shadow-xl: 0 12px 35px rgba(0, 0, 0, 0.6);
     
-    /* Status Colors - Dark Mode Adjusted */
-    --status-success: #34d399;
-    --status-success-bg: #064e3b;
-    --status-warning: #fbbf24;
-    --status-warning-bg: #78350f;
-    --status-danger: #f87171;
-    --status-danger-bg: #7f1d1d;
-    --status-info: #60a5fa;
-    --status-info-bg: #1e3a8a;
-    
-    /* Border and Shadow Variations */
-    --border-light-themed: rgba(96, 165, 250, 0.2);
-    --border-medium-themed: rgba(96, 165, 250, 0.3);
-    --shadow-themed: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
-    --shadow-themed-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
-    
-    /* Typography - Dark Mode */
-    --heading-color: #f1f5f9;
-    --text-primary-themed: #e2e8f0;
-    --text-secondary-themed: #94a3b8;
-    --text-accent: var(--accent-primary);
-    
-    /* Form Elements - Dark Mode */
-    --input-background: var(--background-secondary);
-    --input-border: #475569;
-    --input-border-focus: var(--accent-primary);
-    --input-background-focus: var(--background-accent);
-    
-    /* Navigation - Dark Mode */
-    --nav-active-background: var(--background-accent);
-    --nav-active-border: var(--accent-primary);
-    --nav-hover-background: var(--background-secondary);
-    
-    /* Special Effects - Dark Mode */
-    --background-pattern: radial-gradient(circle at 25% 25%, rgba(96, 165, 250, 0.05) 0%, transparent 50%);
-    --glass-effect: rgba(30, 41, 59, 0.8);
-    --backdrop-blur: blur(15px);
-    
-    /* Override light mode colors */
-    --white: #1e293b;
-    --black: #f1f5f9;
-    --gray-50: #334155;
-    --gray-100: #475569;
-    --gray-200: #64748b;
-    --gray-300: #94a3b8;
-    --gray-400: #cbd5e1;
-    --gray-500: #e2e8f0;
-    --gray-600: #f1f5f9;
-    --text-primary: #f1f5f9;
-    --text-secondary: #cbd5e1;
-    --text-muted: #94a3b8;
-    --border-color: #475569;
-    --border-light: #334155;
-    
-    /* Status Colors - Dark Theme */
-    --success-color: #10b981;
-    --success-light: #064e3b;
-    --success-text: #6ee7b7;
-    --warning-color: #f59e0b;
-    --warning-light: #451a03;
-    --warning-text: #fbbf24;
-    --danger-color: #ef4444;
-    --danger-light: #450a0a;
-    --danger-text: #f87171;
-    --info-color: #06b6d4;
-    --info-light: #083344;
-    --info-text: #67e8f9;
-    --purple-color: #8b5cf6;
-    --purple-light: #3c1561;
-    --purple-text: #c4b5fd;
-    
-    /* Primary Color Variations - Dark Theme */
-    --primary-dark: #1e40af;
-    --primary-darker: #1e3a8a;
+    /* Interactive States */
+    --hover-bg: rgba(75, 85, 99, 0.2);
+    --active-bg: rgba(75, 85, 99, 0.3);
+    --focus-ring: rgba(96, 165, 250, 0.4);
 }
 
-/* Dark theme-specific component overrides */
-.theme-dark {
-    /* Enhanced dark card styling */
-    .card, .sidebar-section, .form-section {
-        background: var(--card-background);
-        border: 1px solid var(--border-light-themed);
-        box-shadow: var(--shadow-themed);
-        backdrop-filter: var(--backdrop-blur);
-    }
-    
-    .card:hover, .sidebar-section:hover {
-        transform: translateY(calc(-1 * var(--hover-lift)));
-        box-shadow: var(--hover-shadow);
-        background: var(--card-background-hover);
-    }
-    
-    /* Enhanced dark button styling */
-    .btn-primary {
-        background: var(--gradient-primary);
-        border: none;
-        box-shadow: var(--shadow-themed);
-        color: var(--background-primary);
-    }
-    
-    .btn-outline-primary {
-        border-color: var(--accent-primary);
-        color: var(--accent-primary);
-        background: transparent;
-    }
-    
-    .btn-outline-primary:hover {
-        background: var(--accent-primary);
-        color: var(--background-primary);
-    }
-    
-    /* Dark form enhancements */
-    .form-control {
-        background: var(--input-background);
-        border-color: var(--input-border);
-        color: var(--text-primary-themed);
-    }
-    
-    .form-control:focus {
-        background: var(--input-background-focus);
-        border-color: var(--input-border-focus);
-        box-shadow: 0 0 0 0.2rem rgba(96, 165, 250, 0.2);
-        color: var(--text-primary-themed);
-    }
-    
-    .form-control::placeholder {
-        color: var(--text-secondary-themed);
-    }
-    
-    /* Dark navigation enhancements */
-    .nav-link.active {
-        background: var(--nav-active-background);
-        border-left: 3px solid var(--nav-active-border);
-        color: var(--text-primary-themed);
-    }
-    
-    /* Table styling for dark mode */
-    .table {
-        color: var(--text-primary-themed);
-    }
-    
-    .table-hover tbody tr:hover {
+/* Global Body Styling */
+body {
+    background: var(--bg-gradient) !important;
+    color: var(--text-primary) !important;
+    font-family: 'Inter', 'Segoe UI', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* Main Content Area */
+.main-content,
+.content-wrapper,
+main {
+    background: transparent !important;
+    min-height: 100vh;
+    padding-top: 80px !important;
+}
+
+/* Card Styling */
+.card,
+.card-body,
+.panel,
+.widget,
+.box {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-light) !important;
+    border-radius: 16px !important;
+    box-shadow: var(--shadow-md) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(10px);
+}
+
+.card:hover,
+.panel:hover,
+.widget:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg) !important;
+    border-color: var(--border-dark) !important;
+}
+
+.card-header,
+.panel-heading {
+    background: var(--secondary-gradient) !important;
+    color: var(--text-inverse) !important;
+    border-bottom: none !important;
+    border-radius: 16px 16px 0 0 !important;
+    padding: 1.25rem 1.5rem !important;
+    font-weight: 600;
+}
+
+/* Header/Navbar Styling */
+.navbar,
+.navbar-brand,
+.navbar-nav,
+header,
+.licensehub-topbar {
+    background: var(--bg-header) !important;
+    border-bottom: none !important;
+    box-shadow: var(--shadow-md);
+}
+
+/* Override compiled CSS for topbar */
+.licensehub-topbar {
+    background: var(--bg-header) !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 60px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: var(--shadow-lg) !important;
+    z-index: 1030 !important;
+}
+
+/* Fix container-fluid background inside topbar */
+.licensehub-topbar .container-fluid {
+    background: transparent !important;
+}
+
+/* Force all topbar text to be white - aggressive approach */
+.licensehub-topbar,
+.licensehub-topbar *:not(.btn):not(.dropdown-menu):not(.dropdown-item) {
+    color: #ffffff !important;
+}
+
+/* Specifically target common logo/title elements */
+.licensehub-topbar h1,
+.licensehub-topbar h2, 
+.licensehub-topbar h3,
+.licensehub-topbar h4,
+.licensehub-topbar h5,
+.licensehub-topbar h6,
+.licensehub-topbar .navbar-brand,
+.licensehub-topbar .brand,
+.licensehub-topbar .logo,
+.licensehub-topbar .title {
+    color: #ffffff !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Other topbar content - use light text for dark areas */
+.licensehub-topbar .btn {
+    color: var(--text-primary) !important;
+    border-color: rgba(156, 163, 175, 0.3) !important;
+}
+
+.licensehub-topbar .btn:hover {
+    background: rgba(156, 163, 175, 0.1) !important;
+    border-color: rgba(156, 163, 175, 0.5) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Sidebar Styling */
+.licensehub-sidebar,
+.sidebar,
+.main-sidebar {
+    background: var(--bg-sidebar) !important;
+    border-right: none !important;
+    box-shadow: var(--shadow-lg) !important;
+}
+
+.licensehub-sidebar-nav li a,
+.sidebar-nav li a,
+.main-sidebar .nav li a {
+    color: var(--text-inverse) !important;
+    border-radius: 8px !important;
+    margin: 4px 8px !important;
+    transition: all 0.3s ease !important;
+}
+
+.licensehub-sidebar-nav li a:hover,
+.sidebar-nav li a:hover,
+.main-sidebar .nav li a:hover {
+    background: var(--hover-bg) !important;
+    transform: translateX(4px) !important;
+    color: var(--text-inverse) !important;
+}
+
+.licensehub-sidebar-nav li.active a,
+.sidebar-nav li.active a,
+.main-sidebar .nav li.active a {
+    background: var(--active-bg) !important;
+    color: var(--text-inverse) !important;
+    font-weight: 600 !important;
+}
+
+.licensehub-sidebar-nav * {
+    color: var(--text-inverse) !important;
+}
+
+/* Button Styling */
+.btn-primary {
+    background: var(--primary-gradient) !important;
+    border: none !important;
+    box-shadow: var(--shadow-sm) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    color: var(--text-inverse) !important;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: var(--shadow-md) !important;
+    background: var(--secondary-gradient) !important;
+}
+
+.btn-secondary {
+    background: transparent !important;
+    border: 2px solid var(--border-light) !important;
+    color: var(--text-primary) !important;
+}
+
+.btn-secondary:hover {
+    background: var(--hover-bg) !important;
+    border-color: var(--border-dark) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Statistics Cards */
+.stats-card {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-light) !important;
+    border-radius: 16px !important;
+    box-shadow: var(--shadow-md) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.stats-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--accent-gradient);
+}
+
+.stats-card:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: var(--shadow-lg) !important;
+}
+
+/* Form Elements */
+.form-control {
+    border: 2px solid var(--border-light) !important;
+    border-radius: 12px !important;
+    padding: 12px 16px !important;
+    transition: all 0.3s ease !important;
+    background: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+}
+
+.form-control:focus {
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 4px var(--focus-ring) !important;
+    outline: none !important;
+}
         background-color: var(--background-secondary);
         color: var(--text-primary-themed);
     }
