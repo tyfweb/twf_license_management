@@ -136,8 +136,7 @@ header,
 .licensehub-topbar h4.text-white,
 .licensehub-topbar h4 span,
 .licensehub-topbar h4 i {
-    color: var(--text-inverse) !important;
-    margin: 0 !important;
+    color: var(--text-inverse) !important; 
     font-weight: 600 !important;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
 }
@@ -205,9 +204,7 @@ header,
 .sidebar a,
 .licensehub-sidebar a {
     color: rgba(255, 255, 255, 0.9) !important;
-    padding: 12px 20px !important;
     border-radius: 8px !important;
-    margin: 4px 8px !important;
     transition: all 0.3s ease;
     border-left: 3px solid transparent;
 }

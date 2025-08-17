@@ -204,9 +204,7 @@ header,
 .sidebar a,
 .licensehub-sidebar a {
     color: rgba(255, 255, 255, 0.9) !important;
-    padding: 12px 20px !important;
     border-radius: 8px !important;
-    margin: 4px 8px !important;
     transition: all 0.3s ease;
     border-left: 3px solid transparent;
 }

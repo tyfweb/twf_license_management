@@ -27,12 +27,19 @@
 //-----------------------
 .theme-options {
     gap: $spacing-md;
+}
+
+.theme-option {
     cursor: pointer;
     text-align: center;
     transition: all 0.2s ease;
     padding: $spacing-sm;
     border-radius: $radius-md;
     border: 2px solid transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 .theme-option:hover {
@@ -52,7 +59,7 @@
     height: 60px;
     border-radius: 6px;
     overflow: hidden;
-    margin-bottom: $spacing-sm;
+    margin: 0 auto $spacing-sm auto;
     border: 1px solid $gray-300;
     position: relative;
 }
@@ -204,23 +211,23 @@
     }
 }
 
-// Modern Theme 2 Preview (Sunset)
-// ------------------------------
+// Modern Theme 2 Preview (Breeze Dashboard)
+// -----------------------------------------
 .theme-preview-modern2 {
     .theme-preview-header {
-        background: linear-gradient(135deg, #ff6b6b 0%, #ffa726 100%);
+        background: linear-gradient(135deg, #423AAE 0%, #00CCCD 100%);
     }
 
     .theme-preview-content {
-        background: linear-gradient(135deg, #fff3e0 0%, #fce4ec 100%);
+        background: linear-gradient(135deg, #f8f9ff 0%, #e8f8f8 100%);
     }
 
     .theme-preview-text {
-        background: linear-gradient(90deg, #ffb74d 0%, #ffcc02 100%);
+        background: linear-gradient(90deg, #423AAE 0%, #5c4fd6 100%);
     }
 
     .theme-preview-button {
-        background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+        background: linear-gradient(135deg, #00CCCD 0%, #FFC107 100%);
     }
 }
 
@@ -230,6 +237,8 @@
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-medium);
     color: var(--text-secondary);
+    text-align: center;
+    margin-top: $spacing-xs;
 }
 
 .theme-settings {

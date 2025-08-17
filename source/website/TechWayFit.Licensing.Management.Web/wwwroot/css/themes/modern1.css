@@ -159,12 +159,39 @@ header,
 .licensehub-topbar h4,
 .licensehub-topbar h4.text-white,
 .licensehub-topbar h4 span,
-.licensehub-topbar h4 i {
-    color: var(--text-inverse) !important;
-    margin: 0 !important;
+.licensehub-topbar h4 i,
+.licensehub-topbar h1,
+.licensehub-topbar h2,
+.licensehub-topbar h3,
+.licensehub-topbar h5,
+.licensehub-topbar h6,
+.licensehub-topbar .h1,
+.licensehub-topbar .h2,
+.licensehub-topbar .h3,
+.licensehub-topbar .h4,
+.licensehub-topbar .h5,
+.licensehub-topbar .h6,
+.navbar-brand,
+.navbar-brand *,
+.logo,
+.logo *,
+.brand,
+.brand *,
+.topbar .title,
+.topbar .brand,
+.topbar .logo {
+    color: #ffffff !important;
+    -webkit-text-fill-color:#fff; 
     font-weight: 600 !important;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
 }
+
+/* Force all topbar text to be white - aggressive approach */
+.licensehub-topbar,
+.licensehub-topbar *:not(.btn):not(.dropdown-menu):not(.dropdown-item) {
+    color: #ffffff !important;
+}
+
 
 /* Other topbar content - use dark text for light areas */
 .licensehub-topbar .btn {
@@ -178,12 +205,6 @@ header,
     color: var(--text-primary) !important;
 }
 
-/* Font size controls and other content - dark text */
-.licensehub-topbar #fontSizeControls *,
-.licensehub-topbar .dropdown button,
-.licensehub-topbar .dropdown button * {
-    color: var(--text-primary) !important;
-}
 
 /* Specific overrides for content areas */
 .licensehub-topbar .text-white:not(h4):not(h4 *) {
