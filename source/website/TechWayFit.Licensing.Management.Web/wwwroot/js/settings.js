@@ -330,6 +330,16 @@ function createFormControlForType(settingData) {
     const value = settingData.currentValue;
     const disabled = settingData.isReadOnly ? 'disabled' : '';
     
+    console.log('Creating form control for type:', type, 'value:', value, 'settingData:', settingData);
+    
+    // Special debug for currency setting
+    if (settingData.key === 'AvailableCurrencies' || settingData.displayName === 'Available Currencies') {
+        console.log('*** DEBUGGING CURRENCY SETTING ***');
+        console.log('Setting data:', JSON.stringify(settingData, null, 2));
+        console.log('Possible values raw:', settingData.possibleValues);
+        console.log('Data type:', settingData.dataType);
+    }
+    
     switch (type) {
         case 'boolean':
         case 'bool':
@@ -375,7 +385,20 @@ function createFormControlForType(settingData) {
         
         case 'list':
         case 'array':
+        case 'select':
+        case 'dropdown':
+        case 'enum':
             return createListDropdown(value, disabled, settingData);
+        
+        case 'multi-list':
+        case 'multilist':
+        case 'multiple':
+        case 'checkbox-list':
+            return createMultiListDropdown(value, disabled, settingData);
+        
+        case 'image':
+        case 'file':
+            return createImageUpload(value, disabled, settingData);
         
         case 'multiline':
         case 'text':
@@ -392,10 +415,20 @@ function createFormControlForType(settingData) {
 function createListDropdown(value, disabled, settingData) {
     // Extract possible values from setting data
     let possibleValues = [];
+    console.log('Creating dropdown for:', settingData);
+    console.log('possibleValues attribute:', settingData.possibleValues);
+    
     try {
         const possibleValuesAttr = settingData.possibleValues;
         if (possibleValuesAttr) {
-            possibleValues = JSON.parse(possibleValuesAttr);
+            // First try to parse as JSON
+            try {
+                possibleValues = JSON.parse(possibleValuesAttr);
+            } catch {
+                // If JSON parsing fails, try splitting by comma/semicolon
+                possibleValues = possibleValuesAttr.split(/[,;|]/).map(v => v.trim()).filter(v => v);
+            }
+            
             // Handle both array of strings and array of objects
             if (possibleValues.length > 0 && typeof possibleValues[0] === 'object') {
                 // For objects, use the first string property as the value
@@ -405,15 +438,26 @@ function createListDropdown(value, disabled, settingData) {
                 });
             }
         }
-    } catch {
+    } catch (error) {
+        console.error('Error parsing possible values:', error);
         // Fallback to basic list if no possible values
-        possibleValues = ['Option 1', 'Option 2', 'Option 3'];
+        possibleValues = ['USD', 'EUR', 'GBP', 'JPY', 'CAD'];
     }
     
-    // If no possible values, show text input instead
+    console.log('Possible values after processing:', possibleValues);
+    
+    // If no possible values for currencies specifically, provide defaults
     if (possibleValues.length === 0) {
-        return `<input type="text" class="form-control" id="settingValue" value="${value}" ${disabled}>`;
+        if (settingData.key && settingData.key.toLowerCase().includes('currenc')) {
+            possibleValues = ['USD', 'EUR', 'GBP', 'JPY', 'CAD', 'AUD', 'CHF', 'CNY'];
+        } else if (settingData.displayName && settingData.displayName.toLowerCase().includes('currenc')) {
+            possibleValues = ['USD', 'EUR', 'GBP', 'JPY', 'CAD', 'AUD', 'CHF', 'CNY'];
+        } else {
+            possibleValues = ['Option 1', 'Option 2', 'Option 3'];
+        }
     }
+    
+    console.log('Final possible values:', possibleValues);
     
     return `
         <select class="form-select" id="settingValue" ${disabled}>
@@ -423,6 +467,102 @@ function createListDropdown(value, disabled, settingData) {
             `).join('')}
         </select>
         <div class="form-text">Select a single value from the available options</div>
+    `;
+}
+
+function createMultiListDropdown(value, disabled, settingData) {
+    // Extract possible values from setting data
+    let possibleValues = [];
+    let selectedValues = [];
+    
+    try {
+        const possibleValuesAttr = settingData.possibleValues;
+        if (possibleValuesAttr) {
+            try {
+                possibleValues = JSON.parse(possibleValuesAttr);
+            } catch {
+                possibleValues = possibleValuesAttr.split(/[,;|]/).map(v => v.trim()).filter(v => v);
+            }
+        }
+        
+        // Parse current value as array
+        if (value) {
+            try {
+                selectedValues = JSON.parse(value);
+                if (!Array.isArray(selectedValues)) {
+                    selectedValues = value.split(/[,;|]/).map(v => v.trim()).filter(v => v);
+                }
+            } catch {
+                selectedValues = value.split(/[,;|]/).map(v => v.trim()).filter(v => v);
+            }
+        }
+    } catch (error) {
+        console.error('Error parsing multi-list values:', error);
+        possibleValues = ['Option 1', 'Option 2', 'Option 3'];
+        selectedValues = [];
+    }
+    
+    if (possibleValues.length === 0) {
+        possibleValues = ['Option 1', 'Option 2', 'Option 3'];
+    }
+    
+    console.log('Multi-list possible values:', possibleValues);
+    console.log('Multi-list selected values:', selectedValues);
+    
+    const checkboxes = possibleValues.map((option, index) => `
+        <div class="form-check">
+            <input class="form-check-input multi-list-option" type="checkbox" 
+                   value="${option}" id="multiOption${index}" 
+                   ${selectedValues.includes(option) ? 'checked' : ''} ${disabled}>
+            <label class="form-check-label" for="multiOption${index}">
+                ${option}
+            </label>
+        </div>
+    `).join('');
+    
+    return `
+        <div class="multi-list-container">
+            <input type="hidden" id="settingValue" value='${JSON.stringify(selectedValues)}'>
+            <div class="border rounded p-3" style="max-height: 200px; overflow-y: auto;">
+                ${checkboxes}
+            </div>
+            <div class="form-text">Select multiple values from the available options</div>
+        </div>
+    `;
+}
+
+function createImageUpload(value, disabled, settingData) {
+    const hasImage = value && value.length > 0;
+    let imagePreview = '';
+    
+    if (hasImage) {
+        // Check if value already contains data URI prefix
+        const imageSrc = value.startsWith('data:') ? value : `data:image/jpeg;base64,${value}`;
+        imagePreview = `<div class="image-preview mb-3">
+            <img src="${imageSrc}" alt="Current Image" 
+                 style="max-width: 200px; max-height: 200px; border: 1px solid #ddd; border-radius: 4px;">
+        </div>`;
+    }
+    
+    return `
+        <div class="image-upload-container">
+            <input type="hidden" id="settingValue" value="${value || ''}">
+            ${imagePreview}
+            <div class="mb-3">
+                <input type="file" class="form-control" id="imageFileInput" 
+                       accept="image/*" ${disabled} onchange="handleImageUpload(this)">
+            </div>
+            <div class="form-text">
+                Upload an image file (JPG, PNG, GIF). The image will be converted to base64 and stored in the database.
+                ${hasImage ? '<br><strong>Current:</strong> Image uploaded' : ''}
+            </div>
+            ${hasImage ? `
+                <button type="button" class="btn btn-sm btn-outline-danger" 
+                        onclick="clearImage()" ${disabled}>
+                    <i class="fas fa-trash"></i> Remove Image
+                </button>
+            ` : ''}
+        </div>
     `;
 }
 
@@ -438,6 +578,11 @@ function setupModalFormControls(settingData) {
         });
     }
     
+    // Setup multi-list checkbox handlers
+    if (settingData.dataType === 'multi-list' || settingData.dataType === 'multilist' || settingData.dataType === 'multiple') {
+        setupMultiListHandlers();
+    }
+    
     // Load default value
     loadDefaultValue(settingData.settingId);
     
@@ -447,6 +592,115 @@ function setupModalFormControls(settingData) {
         if (jsonInput) {
             jsonInput.addEventListener('blur', validateJsonInput);
         }
+    }
+}
+
+function setupMultiListHandlers() {
+    const checkboxes = document.querySelectorAll('.multi-list-option');
+    const hiddenInput = document.getElementById('settingValue');
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const selectedValues = [];
+            checkboxes.forEach(cb => {
+                if (cb.checked) {
+                    selectedValues.push(cb.value);
+                }
+            });
+            hiddenInput.value = JSON.stringify(selectedValues);
+        });
+    });
+}
+
+function handleImageUpload(fileInput) {
+    const file = fileInput.files[0];
+    if (!file) return;
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+        if (typeof showToast === 'function') {
+            showToast('Please select a valid image file', 'error');
+        } else {
+            alert('Please select a valid image file');
+        }
+        fileInput.value = '';
+        return;
+    }
+    
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+        if (typeof showToast === 'function') {
+            showToast('Image file must be smaller than 5MB', 'error');
+        } else {
+            alert('Image file must be smaller than 5MB');
+        }
+        fileInput.value = '';
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const dataUri = e.target.result; // Full data URI (data:image/jpeg;base64,...)
+        const hiddenInput = document.getElementById('settingValue');
+        hiddenInput.value = dataUri; // Store full data URI for consistency
+        
+        // Update preview
+        updateImagePreview(dataUri);
+    };
+    reader.readAsDataURL(file);
+}
+
+function updateImagePreview(dataUri) {
+    const container = document.querySelector('.image-upload-container');
+    if (!container) return;
+    
+    // Remove existing preview
+    const existingPreview = container.querySelector('.image-preview');
+    if (existingPreview) {
+        existingPreview.remove();
+    }
+    
+    // Add new preview - dataUri should already have the full data URI format
+    const preview = document.createElement('div');
+    preview.className = 'image-preview mb-3';
+    preview.innerHTML = `
+        <img src="${dataUri}" alt="Image Preview" 
+             style="max-width: 200px; max-height: 200px; border: 1px solid #ddd; border-radius: 4px;">
+    `;
+    
+    const fileInput = container.querySelector('#imageFileInput');
+    container.insertBefore(preview, fileInput.parentNode);
+    
+    // Add remove button if not exists
+    if (!container.querySelector('.btn-outline-danger')) {
+        const formText = container.querySelector('.form-text');
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'btn btn-sm btn-outline-danger';
+        removeBtn.onclick = clearImage;
+        removeBtn.innerHTML = '<i class="fas fa-trash"></i> Remove Image';
+        formText.parentNode.insertBefore(removeBtn, formText.nextSibling);
+    }
+}
+
+function clearImage() {
+    const hiddenInput = document.getElementById('settingValue');
+    const fileInput = document.getElementById('imageFileInput');
+    const container = document.querySelector('.image-upload-container');
+    
+    hiddenInput.value = '';
+    fileInput.value = '';
+    
+    // Remove preview
+    const preview = container.querySelector('.image-preview');
+    if (preview) {
+        preview.remove();
+    }
+    
+    // Remove button
+    const removeBtn = container.querySelector('.btn-outline-danger');
+    if (removeBtn) {
+        removeBtn.remove();
     }
 }
 
@@ -526,6 +780,18 @@ function getFormValue(settingData) {
         case 'list':
         case 'array':
             // For dropdown selections, return the selected value directly
+            return input.value;
+            
+        case 'multi-list':
+        case 'multilist':
+        case 'multiple':
+        case 'checkbox-list':
+            // For multi-list, return the JSON array value
+            return input.value;
+            
+        case 'image':
+        case 'file':
+            // For images, return the base64 string
             return input.value;
         
         case 'json':
@@ -631,6 +897,28 @@ function updateTableRow(settingId, newValue, dataType) {
     if (dataType === 'boolean' || dataType === 'bool') {
         const isEnabled = newValue === 'true' || newValue?.toLowerCase() === 'true';
         displayHtml = `<span class="badge ${isEnabled ? 'bg-success' : 'bg-secondary'}">${isEnabled ? 'Enabled' : 'Disabled'}</span>`;
+    } else if (dataType === 'multi-list' || dataType === 'multilist' || dataType === 'multiple' || dataType === 'checkbox-list') {
+        try {
+            const selectedValues = JSON.parse(newValue);
+            if (Array.isArray(selectedValues)) {
+                const displayText = selectedValues.length > 0 ? selectedValues.join(', ') : 'No items selected';
+                const truncatedText = displayText.length > 50 ? displayText.substring(0, 50) + '...' : displayText;
+                displayHtml = `<span class="text-truncate d-inline-block" style="max-width: 200px;" title="${displayText}">${truncatedText}</span>`;
+            } else {
+                displayHtml = `<span class="text-muted">Invalid multi-list value</span>`;
+            }
+        } catch (e) {
+            displayHtml = `<span class="text-danger">Invalid JSON format</span>`;
+        }
+    } else if (dataType === 'image' || dataType === 'file') {
+        if (newValue && newValue.startsWith('data:image/')) {
+            displayHtml = `<div class="d-flex align-items-center">
+                <img src="${newValue}" class="img-thumbnail me-2" style="max-width: 40px; max-height: 40px;">
+                <span class="text-muted">Image uploaded</span>
+            </div>`;
+        } else {
+            displayHtml = `<span class="text-muted">No image</span>`;
+        }
     } else {
         const displayValue = newValue.length > 50 ? newValue.substring(0, 50) + '...' : newValue;
         displayHtml = `<span class="text-truncate d-inline-block" style="max-width: 200px;" title="${newValue}">${displayValue}</span>`;
@@ -823,7 +1111,8 @@ function resetSetting(settingId) {
 }
 
 // Theme Management Functions
-let currentTheme = 'default';
+let currentTheme = 'default';           // The saved/persisted theme
+let previewedTheme = 'default';         // The currently previewed theme
 let availableThemes = ['default', 'dark', 'blue', 'green', 'purple'];
 
 // Initialize theme selector
@@ -831,10 +1120,10 @@ function initializeThemeSelector() {
     // Load current theme settings
     loadCurrentThemeSettings();
     
-    // Bind theme option clicks
+    // Bind theme option clicks - only preview, don't apply
     $('.theme-option').on('click', function() {
         const selectedTheme = $(this).data('theme');
-        selectTheme(selectedTheme);
+        previewTheme(selectedTheme);
     });
 
     // Bind auto-detect toggle
@@ -850,7 +1139,7 @@ function initializeThemeSelector() {
         updateTransitionDuration(duration);
     });
 
-    // Bind apply theme button
+    // Bind apply theme button - actually save and apply
     $('#applyThemeBtn').on('click', function() {
         applyCurrentTheme();
     });
@@ -869,7 +1158,11 @@ function loadCurrentThemeSettings() {
         success: function(response) {
             if (response.success) {
                 currentTheme = response.theme || 'default';
-                selectTheme(currentTheme, false);
+                previewedTheme = currentTheme; // Initialize preview to current theme
+                selectThemeInUI(currentTheme);
+                
+                // Apply the current theme to the document
+                document.documentElement.setAttribute('data-theme', currentTheme);
                 
                 // Load other settings
                 if (response.autoDetect !== undefined) {
@@ -888,27 +1181,63 @@ function loadCurrentThemeSettings() {
     });
 }
 
-// Select a theme
+// Preview a theme (only visual, not saved)
+function previewTheme(themeName) {
+    // Set the global preview theme variable
+    previewedTheme = themeName;
+    
+    // Update UI selection
+    selectThemeInUI(themeName);
+    loadThemeCSS(themeName);
+    // Apply theme to document for preview
+    document.documentElement.setAttribute('data-theme', themeName);
+}
+
+// Update UI selection without applying theme
+function selectThemeInUI(themeName) {
+    $('.theme-option').removeClass('active');
+    $(`.theme-option[data-theme="${themeName}"]`).addClass('active');
+}
+
+// Select a theme (backward compatibility)
 function selectTheme(themeName, apply = true) {
-    currentTheme = themeName;
-    
-    // Update UI
-    $('.theme-option').removeClass('selected');
-    $(`.theme-option[data-theme="${themeName}"]`).addClass('selected');
-    
     if (apply) {
+        currentTheme = themeName;
+        previewedTheme = themeName;
+        selectThemeInUI(themeName);
         applyCurrentTheme();
+    } else {
+        previewTheme(themeName);
+    }
+}
+function loadThemeCSS(themeName) {
+    // Remove existing theme stylesheets
+    $('link[data-theme]').remove();
+    
+    if (themeName !== 'default') {
+        // Add new theme stylesheet
+        const link = $('<link>');
+        link.attr({
+            'rel': 'stylesheet',
+            'type': 'text/css',
+            'href': `css/themes/${themeName}.css`,
+            'data-theme': themeName
+        });
+        $('head').append(link);
     }
 }
 
 // Apply current theme
 function applyCurrentTheme() {
+    // Set the preview theme as the current theme
+    currentTheme = previewedTheme;
+    
     // Apply theme to document
     document.documentElement.setAttribute('data-theme', currentTheme);
     
     // Save theme preference
     $.ajax({
-        url: '/Settings/SaveTheme',
+        url: '/Settings/SetCurrentTheme',
         type: 'POST',
         data: JSON.stringify({ theme: currentTheme }),
         contentType: 'application/json',
@@ -917,11 +1246,24 @@ function applyCurrentTheme() {
         },
         success: function(response) {
             if (response.success) {
-                showToast(`Theme changed to ${currentTheme}`, 'success');
+                if (typeof showToast === 'function') {
+                    showToast(`Theme applied and saved: ${currentTheme}`, 'success');
+                } else {
+                    console.log(`Theme applied and saved: ${currentTheme}`);
+                }
+                
+                // Optionally refresh the page to ensure full theme application
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
             }
         },
         error: function() {
-            showToast('Failed to save theme preference', 'error');
+            if (typeof showToast === 'function') {
+                showToast('Failed to save theme preference', 'error');
+            } else {
+                console.error('Failed to save theme preference');
+            }
         }
     });
 }

@@ -341,6 +341,41 @@
                                                                 @(string.Equals(setting.Value, "true", StringComparison.OrdinalIgnoreCase) ? "Enabled" : "Disabled")
                                                             </span>
                                                         }
+                                                        else if (setting.DataType.ToLower() == "multi-list" || setting.DataType.ToLower() == "multilist" || setting.DataType.ToLower() == "multiple" || setting.DataType.ToLower() == "checkbox-list")
+                                                        {
+                                                            @try
+                                                            {
+                                                                var selectedValues = System.Text.Json.JsonSerializer.Deserialize<string[]>(setting.Value ?? "[]");
+                                                                if (selectedValues != null && selectedValues.Length > 0)
+                                                                {
+                                                                    var displayText = string.Join(", ", selectedValues);
+                                                                    var truncatedText = displayText.Length > 50 ? displayText.Substring(0, 50) + "..." : displayText;
+                                                                    <span class="text-truncate d-inline-block" style="max-width: 200px;" title="@displayText">@truncatedText</span>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span class="text-muted">No items selected</span>
+                                                                }
+                                                            }
+                                                            catch
+                                                            {
+                                                                <span class="text-danger">Invalid JSON format</span>
+                                                            }
+                                                        }
+                                                        else if (setting.DataType.ToLower() == "image" || setting.DataType.ToLower() == "file")
+                                                        {
+                                                            @if (!string.IsNullOrEmpty(setting.Value) && setting.Value.StartsWith("data:image/"))
+                                                            {
+                                                                <div class="d-flex align-items-center">
+                                                                    <img src="@setting.Value" class="img-thumbnail me-2" style="max-width: 40px; max-height: 40px;">
+                                                                    <span class="text-muted">Image uploaded</span>
+                                                                </div>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="text-muted">No image</span>
+                                                            }
+                                                        }
                                                         else
                                                         {
                                                             <span class="text-truncate d-inline-block" style="max-width: 200px;" title="@setting.Value">@setting.Value</span>
@@ -516,5 +551,5 @@
 </div>
 
 @section Scripts {
-    <script src="~/js/settings.js"></script>
+    <script src="~/js/settings.js"  asp-append-version="true"></script>
 }

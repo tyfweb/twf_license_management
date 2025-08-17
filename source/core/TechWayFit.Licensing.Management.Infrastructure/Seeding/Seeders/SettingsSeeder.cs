@@ -604,7 +604,49 @@ public class SettingsSeeder : BaseDataSeeder
                 IsReadOnly = false,
                 IsSensitive = false,
                 TenantId = IdConstants.SystemTenantId,
-                PossibleValues = "['USD', 'EUR', 'GBP','INR','SGD']",
+                PossibleValues = "[\"USD\", \"EUR\", \"GBP\", \"INR\", \"SGD\", \"JPY\", \"CAD\", \"AUD\", \"CHF\", \"CNY\"]",
+                Audit = new AuditInfo { CreatedBy = "System", CreatedOn = DateTime.UtcNow, UpdatedBy = "System", UpdatedOn = DateTime.UtcNow, IsActive = true }
+            },
+            
+            // Multi-list test setting
+            new Setting
+            {
+                SettingId = Guid.NewGuid(),
+                Category = "Product Settings",
+                Key = "AvailableFeatures",
+                Value = "[\"Analytics\", \"Reporting\"]",
+                DefaultValue = "[]",
+                DataType = "multi-list",
+                DisplayName = "Available Features",
+                Description = "Select multiple features available for products",
+                GroupName = "Product",
+                SortOrder = 4,
+                IsRequired = false,
+                IsReadOnly = false,
+                IsSensitive = false,
+                TenantId = IdConstants.SystemTenantId,
+                PossibleValues = "[\"Analytics\", \"Reporting\", \"Dashboard\", \"API Access\", \"Mobile App\", \"Integrations\", \"Custom Branding\", \"Advanced Security\"]",
+                Audit = new AuditInfo { CreatedBy = "System", CreatedOn = DateTime.UtcNow, UpdatedBy = "System", UpdatedOn = DateTime.UtcNow, IsActive = true }
+            },
+            
+            // Image test setting
+            new Setting
+            {
+                SettingId = Guid.NewGuid(),
+                Category = "Branding",
+                Key = "CompanyLogo",
+                Value = "",
+                DefaultValue = "",
+                DataType = "image",
+                DisplayName = "Company Logo",
+                Description = "Upload company logo for branding purposes",
+                GroupName = "Branding",
+                SortOrder = 1,
+                IsRequired = false,
+                IsReadOnly = false,
+                IsSensitive = false,
+                TenantId = IdConstants.SystemTenantId,
+                PossibleValues = "",
                 Audit = new AuditInfo { CreatedBy = "System", CreatedOn = DateTime.UtcNow, UpdatedBy = "System", UpdatedOn = DateTime.UtcNow, IsActive = true }
             }
         };

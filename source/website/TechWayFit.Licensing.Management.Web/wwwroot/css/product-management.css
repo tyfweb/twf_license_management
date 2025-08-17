@@ -1590,16 +1590,6 @@ h6, .h6 { font-size: var(--font-size-sm); }
     background: #3b82f6;
 }
 
-.theme-preview {
-    width: 80px;
-    height: 60px;
-    border-radius: 6px;
-    overflow: hidden;
-    margin-bottom: 0.5rem;
-    border: 1px solid var(--border-color);
-    position: relative;
-}
-
 .theme-preview-header {
     height: 20px;
     width: 100%;
