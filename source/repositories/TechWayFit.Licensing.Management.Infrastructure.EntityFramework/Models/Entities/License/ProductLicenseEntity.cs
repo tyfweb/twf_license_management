@@ -2,6 +2,7 @@ using TechWayFit.Licensing.Management.Infrastructure.Data.Entities.Consumer;
 using TechWayFit.Licensing.Management.Core.Models.License;
 using TechWayFit.Licensing.Management.Core.Models.Product;
 using TechWayFit.Licensing.Management.Core.Models.Consumer;
+using TechWayFit.Licensing.Management.Core.Models.Enums;
 using System.ComponentModel.DataAnnotations.Schema;
 using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Models.Entities.Products;
 using TechWayFit.Licensing.Core.Models;
@@ -59,16 +60,6 @@ public class ProductLicenseEntity : AuditWorkflowEntity, IEntityMapper<ProductLi
     public string? ValidProductVersionTo { get; set; }
 
     /// <summary>
-    /// Encryption method used for the license
-    /// </summary>
-    public string Encryption { get; set; } = "AES256";
-
-    /// <summary>
-    /// Signature algorithm used for the license
-    /// </summary>
-    public string Signature { get; set; } = "SHA256";
-
-    /// <summary>
     /// Base64 encoded license key
     /// </summary>
     public string LicenseKey { get; set; } = string.Empty;
@@ -77,11 +68,6 @@ public class ProductLicenseEntity : AuditWorkflowEntity, IEntityMapper<ProductLi
     /// Public key used for signing the license
     /// </summary>
     public string PublicKey { get; set; } = string.Empty;
-
-    /// <summary>
-    /// License Signature
-    /// </summary>
-    public string LicenseSignature { get; set; } = string.Empty;
 
     /// <summary>
     /// Date when the license key was generated
@@ -112,6 +98,13 @@ public class ProductLicenseEntity : AuditWorkflowEntity, IEntityMapper<ProductLi
     /// Additional metadata for the license (JSON)
     /// </summary>
     public string MetadataJson { get; set; } = "{}";
+
+    #region LicenseTypeSpecificProperties
+    /// <summary>
+    /// Type of license - determines which specific properties are relevant
+    /// </summary>
+    public LicenseType LicenseType { get; set; } = LicenseType.ProductLicenseFile;
+    #endregion
     #endregion
 
     #region NavigationProperties
@@ -129,6 +122,26 @@ public class ProductLicenseEntity : AuditWorkflowEntity, IEntityMapper<ProductLi
     /// Navigation property to Product Tier
     /// </summary>
     public virtual ProductTierEntity? ProductTier { get; set; }
+
+    /// <summary>
+    /// Navigation property to License Activities - tracks all usage and changes
+    /// </summary>
+    public virtual ICollection<LicenseActivityEntity> Activities { get; set; } = new List<LicenseActivityEntity>();
+
+    /// <summary>
+    /// Navigation property to Product Activations (for ProductKey type)
+    /// </summary>
+    public virtual ICollection<ProductActivationEntity> Activations { get; set; } = new List<ProductActivationEntity>();
+
+    /// <summary>
+    /// Navigation property to License Files (for ProductLicenseFile type)
+    /// </summary>
+    public virtual ICollection<LicenseFileEntity> LicenseFiles { get; set; } = new List<LicenseFileEntity>();
+
+    /// <summary>
+    /// Navigation property to Volumetric License (for VolumetricLicense type)
+    /// </summary>
+    public virtual VolumetricLicenseEntity? VolumetricLicense { get; set; }
 
    
     #endregion
@@ -148,11 +161,8 @@ public class ProductLicenseEntity : AuditWorkflowEntity, IEntityMapper<ProductLi
         ValidTo = model.ValidTo;
         ValidProductVersionFrom = model.ValidProductVersionFrom;
         ValidProductVersionTo = model.ValidProductVersionTo;
-        Encryption = model.Encryption;
-        Signature = model.Signature;
         LicenseKey = model.LicenseKey;
         PublicKey = model.PublicKey;
-        LicenseSignature = model.LicenseSignature;
         KeyGeneratedAt = model.KeyGeneratedAt;
         Status = model.Status.ToString();
         IssuedBy = model.IssuedBy;
@@ -193,11 +203,8 @@ public class ProductLicenseEntity : AuditWorkflowEntity, IEntityMapper<ProductLi
             ValidTo = this.ValidTo,
             ValidProductVersionFrom = this.ValidProductVersionFrom,
             ValidProductVersionTo = this.ValidProductVersionTo,
-            Encryption = this.Encryption,
-            Signature = this.Signature,
             LicenseKey = this.LicenseKey,
             PublicKey = this.PublicKey,
-            LicenseSignature = this.LicenseSignature,
             KeyGeneratedAt = this.KeyGeneratedAt,
             Status = Enum.TryParse<LicenseStatus>(this.Status, out var status) ? status : LicenseStatus.Active,
             IssuedBy = this.IssuedBy,
