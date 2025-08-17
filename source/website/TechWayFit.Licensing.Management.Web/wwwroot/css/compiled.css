@@ -2944,6 +2944,19 @@ pre code {
     gap: 8px;
   }
 }
+.theme-preview-purple .theme-preview-header {
+  background: linear-gradient(135deg, #A05AFF 0%, #1BCFB4 100%);
+}
+.theme-preview-purple .theme-preview-content {
+  background: linear-gradient(135deg, #f8f6ff 0%, #f0fdfa 100%);
+}
+.theme-preview-purple .theme-preview-text {
+  background: linear-gradient(90deg, #1BCFB4 0%, #4BCBEB 100%);
+}
+.theme-preview-purple .theme-preview-button {
+  background: linear-gradient(135deg, #FE9496 0%, #9E58FF 100%);
+}
+
 .theme-options {
   gap: 1rem;
   cursor: pointer;
@@ -3026,16 +3039,16 @@ pre code {
 }
 
 .theme-preview-blue .theme-preview-header {
-  background: #1e40af;
+  background: linear-gradient(135deg, #4B49AC 0%, #98BDFF 100%);
 }
 .theme-preview-blue .theme-preview-content {
-  background: #eff6ff;
+  background: linear-gradient(135deg, #f8f9ff 0%, #e8f1ff 100%);
 }
 .theme-preview-blue .theme-preview-text {
-  background: #dbeafe;
+  background: linear-gradient(90deg, #7978E9 0%, #7DA0FA 100%);
 }
 .theme-preview-blue .theme-preview-button {
-  background: #1e40af;
+  background: linear-gradient(135deg, #98BDFF 0%, #F3797E 100%);
 }
 
 .theme-preview-green .theme-preview-header {
@@ -3062,6 +3075,32 @@ pre code {
 }
 .theme-preview-purple .theme-preview-button {
   background: #7c3aed;
+}
+
+.theme-preview-modern1 .theme-preview-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+.theme-preview-modern1 .theme-preview-content {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+.theme-preview-modern1 .theme-preview-text {
+  background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+}
+.theme-preview-modern1 .theme-preview-button {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.theme-preview-modern2 .theme-preview-header {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ffa726 100%);
+}
+.theme-preview-modern2 .theme-preview-content {
+  background: linear-gradient(135deg, #fff3e0 0%, #fce4ec 100%);
+}
+.theme-preview-modern2 .theme-preview-text {
+  background: linear-gradient(90deg, #ffb74d 0%, #ffcc02 100%);
+}
+.theme-preview-modern2 .theme-preview-button {
+  background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
 }
 
 .theme-label {

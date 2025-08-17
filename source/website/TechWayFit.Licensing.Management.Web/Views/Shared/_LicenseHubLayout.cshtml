@@ -196,14 +196,15 @@
                                     <i class="fas fa-external-link-alt me-2"></i>Full Dashboard
                                 </a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link licensehub-nav-link py-1 @(ViewContext.RouteData.Values["controller"]?.ToString() == "Settings" ? "active" : "")" 
-                                   asp-controller="Settings" asp-action="Index">
-                                    <i class="fas fa-cog me-2"></i>Settings
-                                </a>
-                            </li>
+                            
                         </ul>
                     </div>
+                </li>
+                <li class="nav-item"> 
+                    <a class="nav-link licensehub-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Settings" ? "active" : "")" 
+                        asp-controller="Settings" asp-action="Index">
+                        <i class="fas fa-cog me-2"></i>Settings
+                    </a>
                 </li>
             </ul>
         </nav>
