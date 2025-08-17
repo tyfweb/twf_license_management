@@ -29,6 +29,11 @@ public interface IUnitOfWork : IDisposable
     IProductLicenseRepository Licenses { get; }
 
     /// <summary>
+    /// Product Activation repository
+    /// </summary>
+    IProductActivationRepository ProductActivations { get; }
+
+    /// <summary>
     /// Consumer Account repository
     /// </summary>
     IConsumerAccountRepository Consumers { get; }

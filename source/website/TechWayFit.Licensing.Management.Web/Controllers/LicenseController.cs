@@ -10,6 +10,7 @@ using TechWayFit.Licensing.Management.Web.Extensions;
 using TechWayFit.Licensing.Management.Core.Models.Product;
 using TechWayFit.Licensing.Management.Core.Models.Consumer;
 using TechWayFit.Licensing.Management.Web.Helpers;
+using TechWayFit.Licensing.Management.Core.Models.Enums;
 
 namespace TechWayFit.Licensing.Management.Web.Controllers
 {
@@ -24,17 +25,20 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         private readonly IProductLicenseService _licenseService;
         private readonly IEnterpriseProductService _productService;
         private readonly IConsumerAccountService _consumerService;
+        private readonly IProductActivationService _productActivationService;
 
         public LicenseController(
             ILogger<LicenseController> logger,
             IProductLicenseService licenseService,
             IEnterpriseProductService productService,
-            IConsumerAccountService consumerService)
+            IConsumerAccountService consumerService,
+            IProductActivationService productActivationService)
         {
             _logger = logger;
             _licenseService = licenseService;
             _productService = productService;
             _consumerService = consumerService;
+            _productActivationService = productActivationService;
         }
 
         /// <summary>
@@ -723,6 +727,171 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 ViewBag.AvailableConsumers = new List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>();
             }
         }
+
+        #region ProductKey Management
+
+        /// <summary>
+        /// Display ProductKeys for a specific license
+        /// </summary>
+        public async Task<IActionResult> ProductKeys(string licenseId, int page = 1, int pageSize = 10)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(licenseId))
+                {
+                    TempData["ErrorMessage"] = "License ID is required.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Get the license details
+                var license = await _licenseService.GetLicenseByIdAsync(Guid.Parse(licenseId));
+                if (license == null)
+                {
+                    TempData["ErrorMessage"] = "License not found.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Get ProductKeys for this license by querying all activations and filtering
+                // Since we don't have a direct method, we'll use a placeholder implementation
+                var licenseActivations = new List<ProductActivationDetails>();
+                
+                // TODO: Implement proper method to get activations by license ID
+                // For now, return empty list with proper structure
+
+                var totalItems = licenseActivations.Count;
+                var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+                // Convert to ProductKey items
+                var productKeyItems = licenseActivations
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .Select(a => new ProductKeyItemViewModel
+                    {
+                        Id = a.ActivationId,
+                        ProductKey = a.ProductKey ?? string.Empty,
+                        ClientIdentifier = a.MachineId ?? string.Empty,
+                        Status = a.Status,
+                        CreatedAt = a.ActivationDate,
+                        ActivationDate = a.ActivationDate,
+                        ActivationEndDate = a.ActivationEndDate,
+                        ActivationSignature = a.ActivationSignature,
+                        MachineId = a.MachineId,
+                        MachineName = a.MachineName,
+                        LastHeartbeat = a.LastHeartbeat,
+                        Description = "ProductKey activation"
+                    }).ToList();
+
+                // Calculate statistics
+                var stats = new ProductKeyStatsViewModel
+                {
+                    TotalKeys = totalItems,
+                    ActiveKeys = licenseActivations.Count(a => a.Status == ProductActivationStatus.Active),
+                    PendingKeys = licenseActivations.Count(a => a.Status == ProductActivationStatus.PendingActivation),
+                    ExpiredKeys = licenseActivations.Count(a => a.Status == ProductActivationStatus.Expired),
+                    RevokedKeys = licenseActivations.Count(a => a.Status == ProductActivationStatus.Revoked)
+                };
+
+                var model = new LicenseProductKeysViewModel
+                {
+                    License = license,
+                    ProductKeys = productKeyItems,
+                    Stats = stats,
+                    Pagination = new PaginationViewModel
+                    {
+                        CurrentPage = page,
+                        TotalPages = totalPages,
+                        TotalItems = totalItems,
+                        PageSize = pageSize
+                    }
+                };
+
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading ProductKeys for license {LicenseId}", licenseId);
+                TempData["ErrorMessage"] = "Failed to load ProductKeys. Please try again.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        /// <summary>
+        /// Generate new ProductKey for a license
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> GenerateProductKey(string licenseId, int quantity = 1)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(licenseId))
+                {
+                    TempData["ErrorMessage"] = "License ID is required.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                var license = await _licenseService.GetLicenseByIdAsync(Guid.Parse(licenseId));
+                if (license == null)
+                {
+                    TempData["ErrorMessage"] = "License not found.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // TODO: Implement ProductKey generation
+                // For now, show a placeholder message
+                TempData["InfoMessage"] = "ProductKey generation feature will be implemented.";
+
+                return RedirectToAction(nameof(ProductKeys), new { licenseId });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error generating ProductKey for license {LicenseId}", licenseId);
+                TempData["ErrorMessage"] = "Failed to generate ProductKey. Please try again.";
+                return RedirectToAction(nameof(ProductKeys), new { licenseId });
+            }
+        }
+
+        /// <summary>
+        /// Deactivate a ProductKey
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> DeactivateProductKey(string licenseId, string productKey)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(licenseId) || string.IsNullOrEmpty(productKey))
+                {
+                    TempData["ErrorMessage"] = "License ID and ProductKey are required.";
+                    return RedirectToAction(nameof(ProductKeys), new { licenseId });
+                }
+
+                // Get current user for audit
+                var currentUser = User.Identity?.Name ?? "System";
+                
+                var success = await _productActivationService.DeactivateProductKeyAsync(
+                    productKey, 
+                    currentUser, 
+                    "Deactivated by admin");
+
+                if (success)
+                {
+                    TempData["SuccessMessage"] = "ProductKey deactivated successfully.";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Failed to deactivate ProductKey.";
+                }
+
+                return RedirectToAction(nameof(ProductKeys), new { licenseId });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deactivating ProductKey {ProductKey}", productKey);
+                TempData["ErrorMessage"] = "Failed to deactivate ProductKey. Please try again.";
+                return RedirectToAction(nameof(ProductKeys), new { licenseId });
+            }
+        }
+
+        #endregion
 
         #endregion
     }

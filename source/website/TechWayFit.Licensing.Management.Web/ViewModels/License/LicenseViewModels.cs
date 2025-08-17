@@ -116,6 +116,12 @@ namespace TechWayFit.Licensing.Management.Web.ViewModels.License
         public bool CanRenew { get; set; }
         public bool CanRevoke { get; set; }
         public bool CanSuspend { get; set; }
+        
+        // ProductKey integration
+        public int ProductKeyCount { get; set; }
+        public int ActiveProductKeys { get; set; }
+        public int PendingProductKeys { get; set; }
+        
         public string StatusCssClass => GetStatusCssClass();
 
         private string GetStatusCssClass()

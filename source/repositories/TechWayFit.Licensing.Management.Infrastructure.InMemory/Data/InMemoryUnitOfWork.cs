@@ -37,6 +37,7 @@ public class InMemoryUnitOfWork : IUnitOfWork
     // Core repositories
     private IProductRepository? _products;
     private IProductLicenseRepository? _licenses;
+    private IProductActivationRepository? _productActivations;
     private IConsumerAccountRepository? _consumers;
     private IUserProfileRepository? _users;
 
@@ -75,6 +76,9 @@ public class InMemoryUnitOfWork : IUnitOfWork
 
     public IProductLicenseRepository Licenses => 
         _licenses ??= new EfCoreProductLicenseRepository(_context, _userContext);
+
+    public IProductActivationRepository ProductActivations =>
+        _productActivations ??= new EfCoreProductActivationRepository(_context, _userContext);
 
     public IConsumerAccountRepository Consumers => 
         _consumers ??= new EfCoreConsumerAccountRepository(_context, _userContext);

@@ -42,6 +42,7 @@ public partial class EfCoreLicensingDbContext : DbContext
 
     // License related entities
     public DbSet<ProductLicenseEntity> ProductLicenses { get; set; }
+    public DbSet<ProductActivationEntity> ProductActivations { get; set; }
 
     // Consumer related entities
     public DbSet<ConsumerAccountEntity> ConsumerAccounts { get; set; }
@@ -89,6 +90,7 @@ public partial class EfCoreLicensingDbContext : DbContext
 
         // License-related entities
         modelBuilder.ApplyConfiguration(new ProductLicenseEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new ProductActivationEntityConfiguration());
 
         // Notification-related entities
         modelBuilder.ApplyConfiguration(new NotificationTemplateEntityConfiguration());
@@ -136,6 +138,7 @@ public partial class EfCoreLicensingDbContext : DbContext
 
         // License related entities
         modelBuilder.Entity<ProductLicenseEntity>().HasIndex(e => e.TenantId);
+        modelBuilder.Entity<ProductActivationEntity>().HasIndex(e => e.TenantId);
 
         // Consumer related entities
         modelBuilder.Entity<ConsumerAccountEntity>().HasIndex(e => e.TenantId);
