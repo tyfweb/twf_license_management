@@ -295,16 +295,85 @@
 
         // Initialize tooltips and popovers
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing Bootstrap components...');
+            
             // Initialize tooltips
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
             var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
                 return new bootstrap.Tooltip(tooltipTriggerEl);
             });
+            console.log('Initialized ' + tooltipList.length + ' tooltips');
             
             // Initialize popovers
             var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
             var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
                 return new bootstrap.Popover(popoverTriggerEl);
+            });
+            console.log('Initialized ' + popoverList.length + ' popovers');
+            
+            // Force re-initialize dropdowns to ensure they work
+            var dropdownElementList = [].slice.call(document.querySelectorAll('[data-bs-toggle="dropdown"]'));
+            console.log('Found ' + dropdownElementList.length + ' dropdown elements:', dropdownElementList);
+            var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
+                console.log('Initializing dropdown:', dropdownToggleEl);
+                return new bootstrap.Dropdown(dropdownToggleEl);
+            });
+            console.log('Initialized ' + dropdownList.length + ' dropdowns');
+            
+            // Enhanced dropdown functionality with manual toggle
+            dropdownElementList.forEach(function(dropdownEl, index) {
+                console.log('Setting up enhanced dropdown ' + index + ':', dropdownEl);
+                
+                // Find the associated dropdown menu
+                var dropdownMenu = dropdownEl.nextElementSibling;
+                if (!dropdownMenu || !dropdownMenu.classList.contains('dropdown-menu')) {
+                    dropdownMenu = dropdownEl.parentElement.querySelector('.dropdown-menu');
+                }
+                
+                if (dropdownMenu) {
+                    console.log('Found dropdown menu for element ' + index + ':', dropdownMenu);
+                    
+                    // Add click event with manual toggle
+                    dropdownEl.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        console.log('Manual dropdown toggle clicked:', e.target);
+                        
+                        // Close all other dropdowns first
+                        document.querySelectorAll('.dropdown-menu.show').forEach(function(otherMenu) {
+                            if (otherMenu !== dropdownMenu) {
+                                otherMenu.classList.remove('show');
+                                otherMenu.parentElement.classList.remove('show');
+                            }
+                        });
+                        
+                        // Toggle current dropdown
+                        var isShown = dropdownMenu.classList.contains('show');
+                        if (isShown) {
+                            dropdownMenu.classList.remove('show');
+                            dropdownEl.parentElement.classList.remove('show');
+                            dropdownEl.setAttribute('aria-expanded', 'false');
+                            console.log('Dropdown closed manually');
+                        } else {
+                            dropdownMenu.classList.add('show');
+                            dropdownEl.parentElement.classList.add('show');
+                            dropdownEl.setAttribute('aria-expanded', 'true');
+                            console.log('Dropdown opened manually');
+                        }
+                    });
+                    
+                    // Close dropdown when clicking outside
+                    document.addEventListener('click', function(e) {
+                        if (!dropdownEl.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                            dropdownMenu.classList.remove('show');
+                            dropdownEl.parentElement.classList.remove('show');
+                            dropdownEl.setAttribute('aria-expanded', 'false');
+                        }
+                    });
+                } else {
+                    console.warn('No dropdown menu found for element ' + index);
+                }
             });
         });
 

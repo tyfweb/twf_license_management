@@ -627,6 +627,9 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 "blue" => "Ocean Blue",
                 "green" => "Forest Green",
                 "purple" => "Royal Purple",
+                "clean" => "Clean Modern",
+                "modern1" => "Modern Aurora",
+                "modern2" => "Modern Professional",
                 _ => themeName.Substring(0, 1).ToUpper() + themeName.Substring(1).ToLower()
             };
         }

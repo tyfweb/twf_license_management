@@ -1113,7 +1113,7 @@ function resetSetting(settingId) {
 // Theme Management Functions
 let currentTheme = 'default';           // The saved/persisted theme
 let previewedTheme = 'default';         // The currently previewed theme
-let availableThemes = ['default', 'dark', 'blue', 'green', 'purple', 'modern1', 'modern2'];
+let availableThemes = ['default', 'dark', 'blue', 'green', 'clean', 'purple', 'modern1', 'modern2'];
 
 // Initialize theme selector
 function initializeThemeSelector() {

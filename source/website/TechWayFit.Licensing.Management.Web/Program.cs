@@ -70,6 +70,58 @@ try
             options.ViewLocationFormats.Add("/Views/Shared/{0}.cshtml");
         });
 
+    // Add Swagger/OpenAPI services
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen(c =>
+    {
+        c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+        {
+            Title = "TechWayFit Licensing Management API",
+            Version = "v1",
+            Description = "API for managing enterprise licensing, products, features, and consumers",
+            Contact = new Microsoft.OpenApi.Models.OpenApiContact
+            {
+                Name = "TechWayFit Support",
+                Email = "support@techwayfit.com"
+            }
+        });
+
+        // Enable annotations for richer documentation
+        c.EnableAnnotations();
+
+        // Include XML comments for better API documentation
+        var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+        var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+        if (File.Exists(xmlPath))
+        {
+            c.IncludeXmlComments(xmlPath);
+        }
+
+        // Configure authorization for Swagger
+        c.AddSecurityDefinition("Cookie", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+        {
+            Name = "Authentication",
+            Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+            In = Microsoft.OpenApi.Models.ParameterLocation.Cookie,
+            Description = "Cookie-based authentication"
+        });
+
+        c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+        {
+            {
+                new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+                {
+                    Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                    {
+                        Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                        Id = "Cookie"
+                    }
+                },
+                new string[] { }
+            }
+        });
+    });
+
     // Add Razor runtime compilation for development
     builder.Services.AddRazorPages()
         .AddRazorRuntimeCompilation();
@@ -194,6 +246,18 @@ try
     if (!app.Environment.IsDevelopment())
     {
         app.UseExceptionHandler("/Home/Error");
+    }
+    else
+    {
+        // Enable Swagger in development environment
+        app.UseSwagger();
+        app.UseSwaggerUI(c =>
+        {
+            c.SwaggerEndpoint("/swagger/v1/swagger.json", "TechWayFit Licensing API v1");
+            c.RoutePrefix = "api/docs"; // Swagger will be available at /api/docs
+            c.DocumentTitle = "TechWayFit Licensing API Documentation";
+            c.DefaultModelsExpandDepth(-1); // Hide models section by default
+        });
     }
 
     app.UseStaticFiles();

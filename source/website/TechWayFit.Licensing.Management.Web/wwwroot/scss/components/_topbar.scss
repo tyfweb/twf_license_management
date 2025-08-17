@@ -1,0 +1,150 @@
+// ===================================================
+// TOPBAR COMPONENT STYLES
+// ===================================================
+
+.licensehub-topbar {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+    height: 60px;
+    
+    // Form controls styling
+    .form-select {
+        background-color: rgba(255,255,255,0.15) !important;
+        color: white !important;
+        border: 1px solid rgba(255,255,255,0.2) !important;
+        
+        &:focus {
+            border-color: rgba(255,255,255,0.4) !important;
+            box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25) !important;
+            background-color: rgba(255,255,255,0.2) !important;
+        }
+        
+        option {
+            background-color: #2c3e50 !important;
+            color: white !important;
+        }
+    }
+    
+    // Button styling
+    .btn-outline-light:hover {
+        background-color: rgba(255,255,255,0.2);
+        border-color: rgba(255,255,255,0.4);
+    }
+    
+    // Font size controls
+    .font-size-btn {
+        transition: all 0.2s ease;
+        border-radius: 4px !important;
+        padding: 0.375rem 0.5rem !important;
+        opacity: 0.7;
+        
+        &:hover {
+            background-color: rgba(255,255,255,0.15) !important;
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        
+        &.active {
+            background-color: rgba(255,255,255,0.2) !important;
+            opacity: 1;
+            border: 1px solid rgba(255,255,255,0.3) !important;
+        }
+        
+        &:focus {
+            box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25) !important;
+            background-color: rgba(255,255,255,0.2) !important;
+        }
+    }
+    
+    // Dropdown styling
+    .dropdown-toggle {
+        position: relative;
+        
+        &::after {
+            margin-left: 0.5rem;
+            border-top-color: rgba(255,255,255,0.75);
+            display: none !important; // Hide default Bootstrap caret since we have custom chevron
+        }
+        
+        &:focus {
+            box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
+            outline: none;
+        }
+        
+        &:hover {
+            background-color: rgba(255,255,255,0.15) !important;
+        }
+    }
+    
+    .dropdown-menu {
+        border: none;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.25);
+        min-width: 200px;
+        background-color: white;
+        z-index: 1055;
+        margin-top: 0.5rem;
+        position: absolute;
+        top: 100%;
+        right: 0;
+        left: auto;
+        
+        // Animation for dropdown appearance
+        transition: all 0.15s ease-in-out;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        display: none; // Initially hidden
+        
+        &.show {
+            display: block !important;
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+    }
+    
+    .dropdown-item {
+        &:hover {
+            background-color: #f8f9fa;
+        }
+        
+        &.text-danger:hover {
+            background-color: #f8d7da;
+            color: #721c24 !important;
+        }
+    }
+    
+    // Ensure dropdown works correctly
+    .dropdown {
+        position: relative;
+        
+        &.show .dropdown-menu {
+            display: block !important;
+        }
+        
+        // Override any theme-specific interference
+        button,
+        button *,
+        .dropdown-toggle {
+            pointer-events: auto !important;
+            cursor: pointer !important;
+        }
+    }
+    
+    // Force dropdown visibility with maximum specificity
+    &.licensehub-topbar {
+        .dropdown-menu.show {
+            display: block !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            transform: translateY(0) !important;
+        }
+        
+        .dropdown.show .dropdown-menu {
+            display: block !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+    }
+}

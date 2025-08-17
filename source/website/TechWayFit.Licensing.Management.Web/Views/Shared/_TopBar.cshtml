@@ -45,9 +45,11 @@
 
                     <!-- Simple User Profile Dropdown -->
                     <div class="dropdown">
-                        <button class="btn text-white text-decoration-none p-2 border-0 bg-transparent d-flex align-items-center" 
-                                type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false"
-                                data-bs-auto-close="outside">
+                        <button class="btn dropdown-toggle text-white text-decoration-none p-2 border-0 bg-transparent d-flex align-items-center" 
+                                type="button" 
+                                id="userDropdown" 
+                                data-bs-toggle="dropdown" 
+                                aria-expanded="false">
                             <i class="fas fa-user-circle me-2 text-white fs-5"></i>
                             <span class="d-none d-md-inline me-1 text-white">@User.Identity.Name</span>
                             <i class="fas fa-chevron-down small text-white"></i>
@@ -93,84 +95,3 @@
         </div>
     </div>
 </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<style>
-    .licensehub-topbar {
-        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-        backdrop-filter: blur(10px);
-        border-bottom: 1px solid rgba(255,255,255,0.1) !important;
-        height: 60px;
-    }
-    
-    .licensehub-topbar .form-select {
-        background-color: rgba(255,255,255,0.15) !important;
-        color: white !important;
-        border: 1px solid rgba(255,255,255,0.2) !important;
-    }
-    
-    .licensehub-topbar .form-select:focus {
-        border-color: rgba(255,255,255,0.4) !important;
-        box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25) !important;
-        background-color: rgba(255,255,255,0.2) !important;
-    }
-    
-    .licensehub-topbar .form-select option {
-        background-color: #2c3e50 !important;
-        color: white !important;
-    }
-    
-    .licensehub-topbar .dropdown-toggle::after {
-        margin-left: 0.5rem;
-        border-top-color: rgba(255,255,255,0.75);
-    }
-    
-    .licensehub-topbar .dropdown-menu {
-        border: none;
-        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.25);
-        min-width: 200px;
-        background-color: white;
-    }
-    
-    .licensehub-topbar .dropdown-item:hover {
-        background-color: #f8f9fa;
-    }
-    
-    .licensehub-topbar .dropdown-item.text-danger:hover {
-        background-color: #f8d7da;
-        color: #721c24 !important;
-    }
-    
-    .licensehub-topbar .btn-outline-light:hover {
-        background-color: rgba(255,255,255,0.2);
-        border-color: rgba(255,255,255,0.4);
-    }
-    
-    /* Font Size Controls */
-    .font-size-btn {
-        transition: all 0.2s ease;
-        border-radius: 4px !important;
-        padding: 0.375rem 0.5rem !important;
-        opacity: 0.7;
-    }
-    
-    .font-size-btn:hover {
-        background-color: rgba(255,255,255,0.15) !important;
-        opacity: 1;
-        transform: scale(1.1);
-    }
-    
-    .font-size-btn.active {
-        background-color: rgba(255,255,255,0.2) !important;
-        opacity: 1;
-        border: 1px solid rgba(255,255,255,0.3) !important;
-    }
-    
-    .font-size-btn:focus {
-        box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25) !important;
-        background-color: rgba(255,255,255,0.2) !important;
-    }
-</style>

@@ -42,6 +42,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         /// <summary>
         /// Product listing page with search and filtering
         /// </summary>
+        [HttpGet]
         public async Task<IActionResult> Index(string searchTerm = "", bool showInactive = false)
         {
             try
@@ -99,6 +100,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         /// Product details view
         /// </summary>
         /// <param name="id">Product ID</param>
+        [HttpGet]
         public async Task<IActionResult> Details(Guid id)
         {
             if (id == Guid.Empty)
@@ -136,6 +138,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         /// <summary>
         /// Create new product form
         /// </summary>
+        [HttpGet]
         public IActionResult Create()
         {
             var viewModel = new ProductCreateViewModel
@@ -230,6 +233,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         /// <summary>
         /// Edit existing product form
         /// </summary>
+        [HttpGet]
         public async Task<IActionResult> Edit(Guid id)
         {
             if (id == Guid.Empty)
@@ -326,6 +330,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         /// <summary>
         /// Delete product confirmation
         /// </summary>
+        [HttpGet]
         public async Task<IActionResult> Delete(Guid id)
         {
             if (id == Guid.Empty)
@@ -781,6 +786,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         }        /// <summary>
         /// Dedicated Product Tiers management page - redirects to ProductTier controller
         /// </summary>
+        [HttpGet]
         [Route("Product/{id:guid}/tiers")]
         public IActionResult Tiers(Guid id)
         {
@@ -788,6 +794,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         }        /// <summary>
         /// Dedicated Product Versions management page
         /// </summary>
+        [HttpGet]
         [Route("Product/{id:guid}/versions")]
         public async Task<IActionResult> Versions(Guid id)
         {
@@ -814,6 +821,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         }        /// <summary>
         /// Dedicated Product Features management page
         /// </summary>
+        [HttpGet]
         [Route("Product/{id:guid}/features")]
         public async Task<IActionResult> Features(Guid id)
         {

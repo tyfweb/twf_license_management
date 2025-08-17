@@ -72,3 +72,65 @@
 .animate-slide-up {
     animation: slideUp 0.3s ease-out;
 }
+
+// ===================================================
+// DROPDOWN ENHANCEMENTS
+// ===================================================
+
+// Ensure dropdown toggle functionality works properly
+.dropdown-toggle {
+    &::after {
+        // Hide the default Bootstrap caret for custom designs
+        display: none !important;
+    }
+    
+    // Ensure proper focus states
+    &:focus {
+        outline: none;
+        box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
+    }
+    
+    // Ensure hover states work
+    &:hover {
+        text-decoration: none;
+    }
+}
+
+// Ensure dropdown menu visibility
+.dropdown-menu {
+    // Base state - hidden by default
+    display: none;
+    
+    // When dropdown is shown by Bootstrap
+    &.show {
+        display: block !important;
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+}
+
+// Ensure dropdown parent container works
+.dropdown {
+    position: relative;
+    
+    // When dropdown is shown
+    &.show {
+        .dropdown-menu {
+            display: block !important;
+            opacity: 1;
+            visibility: visible;
+        }
+    }
+}
+
+// Theme-specific dropdown fixes
+.dropdown-menu {
+    // Ensure proper z-index to appear above other content
+    z-index: 1050;
+    
+    // Prevent theme CSS from interfering
+    border: var(--bs-border-width) solid var(--bs-border-color) !important;
+    background-color: var(--bs-body-bg) !important;
+    color: var(--bs-body-color) !important;
+}

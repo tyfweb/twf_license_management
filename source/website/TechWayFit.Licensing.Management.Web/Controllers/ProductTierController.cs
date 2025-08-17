@@ -39,6 +39,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         /// <summary>
         /// Dedicated Product Tiers management page
         /// </summary>
+        [HttpGet]
         [Route("ProductTier/{productId:guid}")]
         public async Task<IActionResult> Index(Guid productId)
         {

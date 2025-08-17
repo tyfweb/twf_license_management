@@ -191,6 +191,26 @@
     }
 }
 
+// Clean Theme Preview (Clean Modern)
+// ----------------------------------
+.theme-preview-clean {
+    .theme-preview-header {
+        background: linear-gradient(135deg, #312e81 0%, #6366f1 100%);
+    }
+
+    .theme-preview-content {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    }
+
+    .theme-preview-text {
+        background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%);
+    }
+
+    .theme-preview-button {
+        background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+    }
+}
+
 // Modern Theme 1 Preview (Aurora)
 // ------------------------------
 .theme-preview-modern1 {

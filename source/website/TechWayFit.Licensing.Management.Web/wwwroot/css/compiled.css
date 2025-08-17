@@ -1725,6 +1725,156 @@ pre code {
   animation: slideUp 0.3s ease-out;
 }
 
+.dropdown-toggle::after {
+  display: none !important;
+}
+.dropdown-toggle:focus {
+  outline: none;
+  box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
+}
+.dropdown-toggle:hover {
+  text-decoration: none;
+}
+
+.dropdown-menu {
+  display: none;
+}
+.dropdown-menu.show {
+  display: block !important;
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.dropdown {
+  position: relative;
+}
+.dropdown.show .dropdown-menu {
+  display: block !important;
+  opacity: 1;
+  visibility: visible;
+}
+
+.dropdown-menu {
+  z-index: 1050;
+  border: var(--bs-border-width) solid var(--bs-border-color) !important;
+  background-color: var(--bs-body-bg) !important;
+  color: var(--bs-body-color) !important;
+}
+
+.licensehub-topbar {
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  height: 60px;
+}
+.licensehub-topbar .form-select {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  color: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+.licensehub-topbar .form-select:focus {
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25) !important;
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}
+.licensehub-topbar .form-select option {
+  background-color: #2c3e50 !important;
+  color: white !important;
+}
+.licensehub-topbar .btn-outline-light:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+.licensehub-topbar .font-size-btn {
+  transition: all 0.2s ease;
+  border-radius: 4px !important;
+  padding: 0.375rem 0.5rem !important;
+  opacity: 0.7;
+}
+.licensehub-topbar .font-size-btn:hover {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  opacity: 1;
+  transform: scale(1.1);
+}
+.licensehub-topbar .font-size-btn.active {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  opacity: 1;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+.licensehub-topbar .font-size-btn:focus {
+  box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25) !important;
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}
+.licensehub-topbar .dropdown-toggle {
+  position: relative;
+}
+.licensehub-topbar .dropdown-toggle::after {
+  margin-left: 0.5rem;
+  border-top-color: rgba(255, 255, 255, 0.75);
+  display: none !important;
+}
+.licensehub-topbar .dropdown-toggle:focus {
+  box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
+  outline: none;
+}
+.licensehub-topbar .dropdown-toggle:hover {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+}
+.licensehub-topbar .dropdown-menu {
+  border: none;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.25);
+  min-width: 200px;
+  background-color: white;
+  z-index: 1055;
+  margin-top: 0.5rem;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: auto;
+  transition: all 0.15s ease-in-out;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  display: none;
+}
+.licensehub-topbar .dropdown-menu.show {
+  display: block !important;
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+.licensehub-topbar .dropdown-item:hover {
+  background-color: #f8f9fa;
+}
+.licensehub-topbar .dropdown-item.text-danger:hover {
+  background-color: #f8d7da;
+  color: #721c24 !important;
+}
+.licensehub-topbar .dropdown {
+  position: relative;
+}
+.licensehub-topbar .dropdown.show .dropdown-menu {
+  display: block !important;
+}
+.licensehub-topbar .dropdown button,
+.licensehub-topbar .dropdown button *,
+.licensehub-topbar .dropdown .dropdown-toggle {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+.licensehub-topbar.licensehub-topbar .dropdown-menu.show {
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateY(0) !important;
+}
+.licensehub-topbar.licensehub-topbar .dropdown.show .dropdown-menu {
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
 .sidebar, .licensehub-sidebar {
   background: linear-gradient(135deg, #2d3748 0%, #334155 100%);
   width: 250px;
@@ -3033,16 +3183,16 @@ pre code {
 }
 
 .theme-preview-dark .theme-preview-header {
-  background: #1f2937;
+  background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
 }
 .theme-preview-dark .theme-preview-content {
-  background: #111827;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
 }
 .theme-preview-dark .theme-preview-text {
-  background: #374151;
+  background: linear-gradient(90deg, #6366f1 0%, #818cf8 100%);
 }
 .theme-preview-dark .theme-preview-button {
-  background: #3b82f6;
+  background: linear-gradient(135deg, #374151 0%, #f59e0b 100%);
 }
 
 .theme-preview-blue .theme-preview-header {
@@ -3059,16 +3209,16 @@ pre code {
 }
 
 .theme-preview-green .theme-preview-header {
-  background: #047857;
+  background: linear-gradient(135deg, #047857 0%, #4ade80 100%);
 }
 .theme-preview-green .theme-preview-content {
-  background: #f0fdf4;
+  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
 }
 .theme-preview-green .theme-preview-text {
-  background: #dcfce7;
+  background: linear-gradient(90deg, #059669 0%, #10b981 100%);
 }
 .theme-preview-green .theme-preview-button {
-  background: #047857;
+  background: linear-gradient(135deg, #4ade80 0%, #fbbf24 100%);
 }
 
 .theme-preview-purple .theme-preview-header {
@@ -3082,6 +3232,19 @@ pre code {
 }
 .theme-preview-purple .theme-preview-button {
   background: #7c3aed;
+}
+
+.theme-preview-clean .theme-preview-header {
+  background: linear-gradient(135deg, #312e81 0%, #6366f1 100%);
+}
+.theme-preview-clean .theme-preview-content {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+}
+.theme-preview-clean .theme-preview-text {
+  background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%);
+}
+.theme-preview-clean .theme-preview-button {
+  background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
 }
 
 .theme-preview-modern1 .theme-preview-header {

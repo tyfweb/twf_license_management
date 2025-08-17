@@ -360,11 +360,6 @@ header,
 }
 
 /* Buttons */
-.btn-primary {
-    background: var(--btn-primary-bg) !important;
-    border-color: var(--btn-primary-border) !important;
-    color: var(--text-inverse) !important;
-}
 
 .btn-primary:hover,
 .btn-primary:focus {
