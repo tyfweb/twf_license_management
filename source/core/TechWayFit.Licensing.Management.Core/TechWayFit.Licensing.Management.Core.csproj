@@ -14,5 +14,8 @@
   <ItemGroup>
     <PackageReference Include="TechWayFit.Licensing.Core" Version="1.0.0" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TechWayFit.Licensing.Generator\TechWayFit.Licensing.Generator.csproj" />
+  </ItemGroup>
 
 </Project>

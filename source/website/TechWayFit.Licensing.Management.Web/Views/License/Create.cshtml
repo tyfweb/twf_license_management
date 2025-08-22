@@ -137,6 +137,84 @@
                     </div>
                 </div>
 
+                <!-- License Model Section -->
+                <div class="form-section">
+                    <h5><i class="fas fa-key me-2"></i>License Model</h5>
+                    <div class="alert alert-info alert-persistent">
+                        <i class="fas fa-info-circle me-1"></i>Choose the licensing model based on your activation requirements.
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="LicenseModel" class="form-label">License Type</label>
+                            <select asp-for="LicenseModel" class="form-select" required id="licenseModelSelect">
+                                @foreach (TechWayFit.Licensing.Management.Core.Models.Enums.LicenseType licenseType in Enum.GetValues<TechWayFit.Licensing.Management.Core.Models.Enums.LicenseType>())
+                                {
+                                    <option value="@licenseType">
+                                        @(licenseType switch {
+                                            TechWayFit.Licensing.Management.Core.Models.Enums.LicenseType.ProductKey => "Product Key (Online Activation)",
+                                            TechWayFit.Licensing.Management.Core.Models.Enums.LicenseType.ProductLicenseFile => "Product License (Offline Activation)",
+                                            TechWayFit.Licensing.Management.Core.Models.Enums.LicenseType.VolumetricLicense => "Volumetric License (Multi-User Keys)",
+                                            _ => licenseType.ToString()
+                                        })
+                                    </option>
+                                }
+                            </select>
+                            <span asp-validation-for="LicenseModel" class="invalid-feedback"></span>
+                            <div class="form-text" id="licenseModelDescription">
+                                Select a license model to see its description.
+                            </div>
+                        </div>
+                        <div class="col-md-6" id="maxUsersContainer">
+                            <label asp-for="MaxAllowedUsers" class="form-label">Max Allowed Users</label>
+                            <input asp-for="MaxAllowedUsers" type="number" class="form-control" min="1" placeholder="Enter maximum number of users" />
+                            <span asp-validation-for="MaxAllowedUsers" class="invalid-feedback"></span>
+                            <div class="form-text">
+                                Maximum number of concurrent users allowed for this license.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- License Model Information Cards -->
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-4">
+                            <div class="card h-100 license-model-card" data-model="ProductKey">
+                                <div class="card-body">
+                                    <h6 class="card-title"><i class="fas fa-cloud me-1"></i>Product Key</h6>
+                                    <p class="card-text small">
+                                        Online activation with XXXX-XXXX-XXXX-XXXX format keys. 
+                                        Requires internet connection for activation.
+                                    </p>
+                                    <small class="text-muted">✓ Supports max users limit</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card h-100 license-model-card" data-model="ProductLicenseFile">
+                                <div class="card-body">
+                                    <h6 class="card-title"><i class="fas fa-file-download me-1"></i>Product License</h6>
+                                    <p class="card-text small">
+                                        Offline activation with downloadable license files. 
+                                        No internet required after initial download.
+                                    </p>
+                                    <small class="text-muted">✓ Supports max users limit</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card h-100 license-model-card" data-model="VolumetricLicense">
+                                <div class="card-body">
+                                    <h6 class="card-title"><i class="fas fa-users me-1"></i>Volumetric License</h6>
+                                    <p class="card-text small">
+                                        Multi-user keys with usage limits (XXXX-XXXX-XXXX-0001 to 9999). 
+                                        Single key for multiple activations.
+                                    </p>
+                                    <small class="text-muted">ⓘ Uses internal user tracking</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Features Section -->
                 <div class="form-section">
                     <h5><i class="fas fa-puzzle-piece me-2"></i>Features</h5>
@@ -245,6 +323,50 @@
     </form>
 </div>
 
+@section Styles {
+    <style>
+        .license-model-card {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid #dee2e6;
+        }
+        
+        .license-model-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .license-model-card.border-primary {
+            border-color: #0d6efd !important;
+            box-shadow: 0 2px 4px rgba(13, 110, 253, 0.2);
+        }
+        
+        .feature-selection {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            padding: 1rem;
+        }
+        
+        .metadata-row {
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-section {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .alert-persistent {
+            margin-bottom: 1rem;
+        }
+    </style>
+}
+
 @section Scripts {
     <script src="~/js/product-features.js"></script>
     <script>
@@ -340,6 +462,60 @@
                 
                 validFromInput.addEventListener('change', validateDates);
                 validToInput.addEventListener('change', validateDates);
+            }
+
+            // License Model handling
+            const licenseModelSelect = document.getElementById('licenseModelSelect');
+            const maxUsersContainer = document.getElementById('maxUsersContainer');
+            const licenseModelCards = document.querySelectorAll('.license-model-card');
+            
+            if (licenseModelSelect) {
+                function updateLicenseModelUI() {
+                    const selectedModel = licenseModelSelect.value;
+                    
+                    // Update card highlighting
+                    licenseModelCards.forEach(card => {
+                        const cardModel = card.getAttribute('data-model');
+                        if (cardModel === selectedModel) {
+                            card.classList.add('border-primary', 'bg-light');
+                        } else {
+                            card.classList.remove('border-primary', 'bg-light');
+                        }
+                    });
+                    
+                    // Show/hide max users field based on license model
+                    if (selectedModel === 'VolumetricLicense') {
+                        maxUsersContainer.style.display = 'none';
+                        // Clear the max users value for volumetric licenses
+                        const maxUsersInput = maxUsersContainer.querySelector('input');
+                        if (maxUsersInput) {
+                            maxUsersInput.value = '';
+                            maxUsersInput.removeAttribute('required');
+                        }
+                    } else {
+                        maxUsersContainer.style.display = 'block';
+                        // Make max users required for Product Key and Product License
+                        const maxUsersInput = maxUsersContainer.querySelector('input');
+                        if (maxUsersInput) {
+                            maxUsersInput.setAttribute('required', 'required');
+                        }
+                    }
+                }
+                
+                // Set initial state
+                updateLicenseModelUI();
+                
+                // Handle changes
+                licenseModelSelect.addEventListener('change', updateLicenseModelUI);
+                
+                // Add click handlers to license model cards
+                licenseModelCards.forEach(card => {
+                    card.addEventListener('click', function() {
+                        const cardModel = this.getAttribute('data-model');
+                        licenseModelSelect.value = cardModel;
+                        updateLicenseModelUI();
+                    });
+                });
             }
         });
 

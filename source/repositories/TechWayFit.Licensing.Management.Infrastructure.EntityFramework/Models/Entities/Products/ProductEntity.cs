@@ -72,6 +72,11 @@ public class ProductEntity : AuditWorkflowEntity, IEntityMapper<EnterpriseProduc
     /// </summary>
     public virtual ICollection<ProductLicenseEntity> Licenses { get; set; } = new List<ProductLicenseEntity>();
 
+    /// <summary>
+    /// Navigation property to Product Keys (for license signing)
+    /// </summary>
+    public virtual ICollection<ProductKeysEntity> Keys { get; set; } = new List<ProductKeysEntity>();
+
     public virtual ICollection<ProductConsumerEntity> ProductConsumers { get; set; } = new List<ProductConsumerEntity>();
 
     #region IEntityMapper Implementation

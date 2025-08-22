@@ -4,6 +4,7 @@ using TechWayFit.Licensing.Management.Core.Models.License;
 using TechWayFit.Licensing.Management.Core.Models.Consumer;
 using LicenseModels = TechWayFit.Licensing.Core.Models;
 using TechWayFit.Licensing.Management.Core.Models.Product;
+using TechWayFit.Licensing.Management.Core.Models.Enums;
 
 namespace TechWayFit.Licensing.Management.Web.ViewModels.License
 {
@@ -60,6 +61,14 @@ namespace TechWayFit.Licensing.Management.Web.ViewModels.License
         [Required]
         [Display(Name = "License Tier")]
         public LicenseTier Tier { get; set; } = LicenseTier.Community;
+
+        [Required]
+        [Display(Name = "License Model")]
+        public LicenseType LicenseModel { get; set; } = LicenseType.ProductKey;
+
+        [Display(Name = "Max Allowed Users")]
+        [Range(1, int.MaxValue, ErrorMessage = "Max allowed users must be at least 1")]
+        public int? MaxAllowedUsers { get; set; }
 
         [Display(Name = "Max API Calls Per Month")]
         [Range(0, long.MaxValue, ErrorMessage = "API calls must be a positive number")]

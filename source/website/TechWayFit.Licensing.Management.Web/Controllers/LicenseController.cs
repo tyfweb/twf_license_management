@@ -202,8 +202,9 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                     ProductId = model.ProductId.ToGuid(),
                     ConsumerId = model.ConsumerId.ToGuid(),
                     TierId = model.ProductTierId.ToGuid(),
+                    LicenseModel = model.LicenseModel,
                     ExpiryDate = model.ValidTo, // Use ValidTo as ExpiryDate
-                    MaxUsers = (int?)model.MaxApiCallsPerMonth, // Map API calls to Max Users for now
+                    MaxUsers = model.MaxAllowedUsers ?? (int?)model.MaxApiCallsPerMonth, // Map MaxAllowedUsers first, fallback to API calls
                     MaxDevices = model.MaxConcurrentConnections,
                     Notes = $"Generated via Web UI by {User.Identity?.Name}",
                     CustomProperties = model.Metadata.ToDictionary(kv => kv.Key, kv => (object)kv.Value),
@@ -217,7 +218,9 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                         ["SelectedFeatures"] = string.Join(",", model.SelectedFeatures),
                         ["CreatedBy"] = model.CreatedBy,
                         ["CreatedAt"] = DateTime.UtcNow.ToString("O"),
-                        ["ValidFrom"] = model.ValidFrom.ToString("O") // Store ValidFrom in metadata
+                        ["ValidFrom"] = model.ValidFrom.ToString("O"), // Store ValidFrom in metadata
+                        ["LicenseModel"] = model.LicenseModel.ToString(),
+                        ["MaxAllowedUsers"] = model.MaxAllowedUsers?.ToString() ?? ""
                     }
                 };
 

@@ -1,3 +1,5 @@
+using TechWayFit.Licensing.Management.Core.Models.Enums;
+
 namespace TechWayFit.Licensing.Management.Core.Models.License;
 
 /// <summary>
@@ -11,6 +13,7 @@ public class LicenseGenerationRequest
     public string? ConsumerName { get; set; }
     public string? LicenseCode { get; set; }
     public string? ProductTier{ get; set; }
+    public LicenseType LicenseModel { get; set; } = LicenseType.ProductKey;
     public IEnumerable<string> Features { get; set; } = new List<string>();
     public DateTime? ValidFrom { get; set; } = DateTime.UtcNow; 
     public string ValidProductVersionFrom { get; set; } = "1.0.0";

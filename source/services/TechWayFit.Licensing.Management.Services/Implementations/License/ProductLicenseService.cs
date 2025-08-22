@@ -8,6 +8,7 @@ using TechWayFit.Licensing.Management.Infrastructure.Models.Search;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Core.Models.Common;
 using TechWayFit.Licensing.Management.Core.Models.License;
+using TechWayFit.Licensing.Management.Services.Factories;
 using System.Text.Json;
 using CoreModels = TechWayFit.Licensing.Core.Models;
 using ManagementModels = TechWayFit.Licensing.Management.Core.Models.License;
@@ -21,106 +22,41 @@ namespace TechWayFit.Licensing.Management.Services.Implementations.License;
 public class ProductLicenseService : IProductLicenseService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly ILicenseGenerator _licenseGenerator;
-    private readonly IKeyManagementService _keyManagementService;
+    private readonly ILicenseGenerationFactory _licenseGenerationFactory;
     private readonly ILogger<ProductLicenseService> _logger;
 
     public ProductLicenseService(
         IUnitOfWork unitOfWork,
-        ILicenseGenerator licenseGenerator,
-        IKeyManagementService keyManagementService,
+        ILicenseGenerationFactory licenseGenerationFactory,
         ILogger<ProductLicenseService> logger)
     {
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-        _licenseGenerator = licenseGenerator ?? throw new ArgumentNullException(nameof(licenseGenerator));
-        _keyManagementService = keyManagementService ?? throw new ArgumentNullException(nameof(keyManagementService));
+        _licenseGenerationFactory = licenseGenerationFactory ?? throw new ArgumentNullException(nameof(licenseGenerationFactory));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     /// <summary>
-    /// Generates a new product license
+    /// Generates a new product license using the appropriate strategy pattern
     /// </summary>
     public async Task<ProductLicense> GenerateLicenseAsync(LicenseGenerationRequest request, string generatedBy)
     {
-        _logger.LogInformation("Generating license for product: {ProductId}, consumer: {ConsumerId}",
-            request.ProductId, request.ConsumerId);
-
-        // Input validation
-        if (request == null)
-            throw new ArgumentNullException(nameof(request));
-        if (string.IsNullOrWhiteSpace(generatedBy))
-            throw new ArgumentException("GeneratedBy cannot be null or empty", nameof(generatedBy));
+        _logger.LogInformation("Generating {LicenseModel} license for product: {ProductId}, consumer: {ConsumerId}",
+            request.LicenseModel, request.ProductId, request.ConsumerId);
 
         try
         {
-            // Get or generate private key for the product
-            var privateKey = await _keyManagementService.GetPrivateKeyAsync(request.ProductId);
-            if (string.IsNullOrEmpty(privateKey))
-            {
-                _logger.LogInformation("No private key found for product {ProductId}, generating new key pair", request.ProductId);
-                var publicKey = await _keyManagementService.GenerateKeyPairForProductAsync(request.ProductId);
-                privateKey = await _keyManagementService.GetPrivateKeyAsync(request.ProductId);
-                _logger.LogInformation("Generated new key pair for product {ProductId}, public key length: {PublicKeyLength}",
-                    request.ProductId, publicKey.Length);
-            }
+            // Use the factory to generate the license with the appropriate strategy
+            var result = await _licenseGenerationFactory.GenerateAsync(request, generatedBy);
 
-            // Create license generation request for the Generator
-            var generationRequest = new SimplifiedLicenseGenerationRequest
-            {
-                ProductId = request.ProductId,
-                LicensedTo = request.ConsumerId.ToString(), // Map ConsumerId to LicensedTo
-                ValidFrom = DateTime.UtcNow,
-                ValidTo = request.ExpiryDate ?? DateTime.UtcNow.AddYears(1),
-                CustomData = request.Metadata ?? new Dictionary<string, object>(),
-                PrivateKeyPem = privateKey,
+            _logger.LogInformation("Successfully generated {LicenseModel} license with ID: {LicenseId} and key: {LicenseKey}", 
+                request.LicenseModel, result.LicenseId, result.LicenseKey);
 
-                // Map tier information
-                Tier = MapTierFromRequest(request.ProductTier),
-                MaxApiCallsPerMonth = request.MaxUsers, // Map MaxUsers to API calls if applicable
-                MaxConcurrentConnections = request.MaxDevices, // Map MaxDevices to connections if applicable
-
-                // Map features from request properties
-                Features = MapFeaturesFromRequest(request),
-
-                // TODO: Map additional fields when needed:
-                // ProductName, ContactPerson, ContactEmail, etc.
-            };
-
-            // Generate cryptographically signed license
-            var signedLicense = await _licenseGenerator.GenerateLicenseAsync(generationRequest);
-
-            var licenseId = Guid.NewGuid().ToString();            // Create license entity for database storage
-            var licenseEntity = new ProductLicense
-            {
-                ProductId = request.ProductId,
-                ConsumerId = request.ConsumerId,
-                ProductTierId = request.TierId,
-                ValidProductVersionFrom = request.ValidProductVersionFrom,
-                ValidProductVersionTo = request.ValidProductVersionTo,
-                LicenseKey = signedLicense.LicenseData ?? string.Empty, // Store the signed license data
-                ValidFrom = generationRequest.ValidFrom,
-                ValidTo = generationRequest.ValidTo,
-                Status = LicenseStatus.Active,
-                Metadata = request.Metadata ?? new Dictionary<string, object>(),
-                CreatedBy = generatedBy,
-                CreatedOn = DateTime.UtcNow,
-                UpdatedBy = generatedBy,
-                UpdatedOn = DateTime.UtcNow
-            };
-
-            // Save to repository
-            var createdEntity = await _unitOfWork.Licenses.AddAsync(licenseEntity);
-            await _unitOfWork.SaveChangesAsync();
-
-            // Map to model
-            var result = createdEntity;
-
-            _logger.LogInformation("Successfully generated cryptographically signed license with ID: {LicenseId}", result.LicenseId);
             return result;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error generating license for product: {ProductId}", request.ProductId);
+            _logger.LogError(ex, "Error generating {LicenseModel} license for product: {ProductId}", 
+                request.LicenseModel, request.ProductId);
             throw;
         }
     }
@@ -250,26 +186,87 @@ public class ProductLicenseService : IProductLicenseService
 
     public async Task<IEnumerable<ProductLicense>> GetLicensesByProductAsync(Guid productId, LicenseStatus? status = null, int pageNumber = 1, int pageSize = 50)
     {
-        // TODO: Implement when repository methods are available
-        _logger.LogWarning("GetLicensesByProductAsync not implemented");
-        await Task.CompletedTask;
-        return Enumerable.Empty<ProductLicense>();
+        try
+        {
+            SearchRequest<ProductLicense> searchRequest = new SearchRequest<ProductLicense>
+            {
+                Filters = new Dictionary<string, object>
+                {
+                    { nameof(ProductLicense.ProductId), productId }
+                },
+                Page = pageNumber,
+                PageSize = pageSize
+            };
+
+            if (status.HasValue)
+            {
+                searchRequest.Filters.Add("Status", status.Value.ToString());
+            }
+
+            var result = await _unitOfWork.Licenses.SearchAsync(searchRequest);
+            return result.Results;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting licenses for product: {ProductId}", productId);
+            return Enumerable.Empty<ProductLicense>();
+        }
     }
 
     public async Task<IEnumerable<ProductLicense>> GetExpiringLicensesAsync(int daysAhead = 30)
     {
-        // TODO: Implement when repository methods are available
-        _logger.LogWarning("GetExpiringLicensesAsync not implemented");
-        await Task.CompletedTask;
-        return Enumerable.Empty<ProductLicense>();
+        try
+        {
+            var expiryDate = DateTime.UtcNow.AddDays(daysAhead);
+            
+            SearchRequest<ProductLicense> searchRequest = new SearchRequest<ProductLicense>
+            {
+                Filters = new Dictionary<string, object>
+                {
+                    { "Status", LicenseStatus.Active.ToString() }
+                },
+                Page = 1,
+                PageSize = 1000 // Get a large number of expiring licenses
+            };
+
+            var result = await _unitOfWork.Licenses.SearchAsync(searchRequest);
+            
+            // Filter by expiry date in memory since complex date filtering might not be supported by search
+            return result.Results.Where(l => 
+                l.ValidTo <= expiryDate && 
+                l.ValidTo > DateTime.UtcNow && 
+                l.Status == LicenseStatus.Active);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting expiring licenses for {DaysAhead} days", daysAhead);
+            return Enumerable.Empty<ProductLicense>();
+        }
     }
 
     public async Task<IEnumerable<ProductLicense>> GetExpiredLicensesAsync()
     {
-        // TODO: Implement
-        _logger.LogWarning("GetExpiredLicensesAsync not implemented");
-        await Task.CompletedTask;
-        return Enumerable.Empty<ProductLicense>();
+        try
+        {
+            SearchRequest<ProductLicense> searchRequest = new SearchRequest<ProductLicense>
+            {
+                Filters = new Dictionary<string, object>(),
+                Page = 1,
+                PageSize = 1000 // Get a large number of licenses
+            };
+
+            var result = await _unitOfWork.Licenses.SearchAsync(searchRequest);
+            
+            // Filter expired licenses in memory
+            return result.Results.Where(l => 
+                l.ValidTo <= DateTime.UtcNow && 
+                (l.Status == LicenseStatus.Active || l.Status == LicenseStatus.Expired));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting expired licenses");
+            return Enumerable.Empty<ProductLicense>();
+        }
     }
 
     public async Task<bool> ActivateLicenseAsync(Guid licenseId, ActivationInfo activationInfo)
@@ -328,28 +325,91 @@ public class ProductLicenseService : IProductLicenseService
         return false;
     }
 
-    public async Task<bool> LicenseExistsAsync(string licenseId)
+    public async Task<bool> LicenseExistsAsync(string licenseKey)
     {
-        // TODO: Implement
-        _logger.LogWarning("LicenseExistsAsync not implemented");
-        await Task.CompletedTask;
-        return false;
+        try
+        {
+            if (string.IsNullOrWhiteSpace(licenseKey))
+                return false;
+
+            var license = await GetLicenseByKeyAsync(licenseKey);
+            return license != null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error checking if license exists: {LicenseKey}", licenseKey);
+            return false;
+        }
     }
 
-    public async Task<ValidationResult> ValidateLicenseDataAsync(ProductLicense license)
+    public Task<ValidationResult> ValidateLicenseDataAsync(ProductLicense license)
     {
-        // TODO: Implement
-        _logger.LogWarning("ValidateLicenseDataAsync not implemented");
-        await Task.CompletedTask;
-        return ValidationResult.Success();
+        try
+        {
+            var errors = new List<string>();
+
+            if (license == null)
+            {
+                errors.Add("License cannot be null");
+                return Task.FromResult(ValidationResult.Failure(errors.ToArray()));
+            }
+
+            if (license.ProductId == Guid.Empty)
+                errors.Add("License must have a valid ProductId");
+
+            if (license.ConsumerId == Guid.Empty)
+                errors.Add("License must have a valid ConsumerId");
+
+            if (string.IsNullOrWhiteSpace(license.LicenseKey))
+                errors.Add("License must have a valid LicenseKey");
+
+            if (license.ValidFrom >= license.ValidTo)
+                errors.Add("ValidFrom must be before ValidTo");
+
+            return Task.FromResult(errors.Count == 0 ? ValidationResult.Success() : ValidationResult.Failure(errors.ToArray()));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error validating license data");
+            return Task.FromResult(ValidationResult.Failure("An error occurred during license data validation"));
+        }
     }
 
-    public async Task<ValidationResult> ValidateLicenseGenerationRequestAsync(LicenseGenerationRequest request)
+    public Task<ValidationResult> ValidateLicenseGenerationRequestAsync(LicenseGenerationRequest request)
     {
-        // TODO: Implement
-        _logger.LogWarning("ValidateLicenseGenerationRequestAsync not implemented");
-        await Task.CompletedTask;
-        return ValidationResult.Success();
+        try
+        {
+            var errors = new List<string>();
+
+            // Basic validation
+            if (request == null)
+            {
+                errors.Add("License generation request cannot be null");
+                return Task.FromResult(ValidationResult.Failure(errors.ToArray()));
+            }
+
+            if (request.ProductId == Guid.Empty)
+                errors.Add("ProductId is required");
+
+            if (request.ConsumerId == Guid.Empty)
+                errors.Add("ConsumerId is required");
+
+            if (request.ExpiryDate.HasValue && request.ExpiryDate <= DateTime.UtcNow)
+                errors.Add("Expiry date must be in the future");
+
+            if (request.MaxUsers.HasValue && request.MaxUsers <= 0)
+                errors.Add("Max users must be greater than 0");
+
+            if (request.MaxDevices.HasValue && request.MaxDevices <= 0)
+                errors.Add("Max devices must be greater than 0");
+
+            return Task.FromResult(errors.Count == 0 ? ValidationResult.Success() : ValidationResult.Failure(errors.ToArray()));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error validating license generation request");
+            return Task.FromResult(ValidationResult.Failure("An error occurred during validation"));
+        }
     }
 
     public async Task<ValidationResult> ValidateLicenseUpdateRequestAsync(Guid licenseId, LicenseUpdateRequest request)
@@ -362,18 +422,35 @@ public class ProductLicenseService : IProductLicenseService
 
     public async Task<IEnumerable<ProductLicense>> GetAllLicensesAsync(LicenseStatus? status = null, string? searchTerm = null, int pageNumber = 1, int pageSize = 50)
     {
-        // TODO: Implement
-        _logger.LogWarning("GetAllLicensesAsync not implemented");
-        await Task.CompletedTask;
-        return Enumerable.Empty<ProductLicense>();
+        // Delegate to GetLicensesAsync which has the same functionality
+        return await GetLicensesAsync(status, searchTerm, pageNumber, pageSize);
     }
 
     public async Task<int> GetLicenseCountAsync(LicenseStatus? status = null, string? searchTerm = null)
     {
-        // TODO: Implement
-        _logger.LogWarning("GetLicenseCountAsync not implemented");
-        await Task.CompletedTask;
-        return 0;
+        try
+        {
+            SearchRequest<ProductLicense> searchRequest = new SearchRequest<ProductLicense>
+            {
+                Filters = new Dictionary<string, object>(),
+                Page = 1,
+                PageSize = int.MaxValue, // Get all to count
+                Query = searchTerm
+            };
+
+            if (status.HasValue)
+            {
+                searchRequest.Filters.Add("Status", status.Value.ToString());
+            }
+
+            var result = await _unitOfWork.Licenses.SearchAsync(searchRequest);
+            return result.TotalCount;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting license count");
+            return 0;
+        }
     }
 
     public async Task<LicenseUsageStatistics> GetLicenseUsageStatisticsAsync(Guid? productId = null, Guid? consumerId = null)
@@ -405,67 +482,6 @@ public class ProductLicenseService : IProductLicenseService
         {
             return "{}";
         }
-    }
-
-    private static CoreModels.LicenseTier MapTierFromRequest(string? tierId)
-    {
-        if (string.IsNullOrEmpty(tierId))
-            return CoreModels.LicenseTier.Community;
-
-        return tierId.ToLowerInvariant() switch
-        {
-            "community" or "free" => CoreModels.LicenseTier.Community,
-            "professional" or "pro" => CoreModels.LicenseTier.Professional,
-            "enterprise" or "ent" => CoreModels.LicenseTier.Enterprise,
-            _ => CoreModels.LicenseTier.Community // Default to Community for unknown tiers
-        };
-    }
-
-    private static List<LicenseFeature> MapFeaturesFromRequest(LicenseGenerationRequest request)
-    {
-        var features = new List<LicenseFeature>();
-
-        // Map usage limits as features
-        if (request.MaxUsers.HasValue && request.MaxUsers.Value > 0)
-        {
-            features.Add(new LicenseFeature
-            {
-                Name = "UserLimit",
-                Description = $"Maximum {request.MaxUsers.Value} concurrent users"
-            });
-        }
-
-        if (request.MaxDevices.HasValue && request.MaxDevices.Value > 0)
-        {
-            features.Add(new LicenseFeature
-            {
-                Name = "DeviceLimit",
-                Description = $"Maximum {request.MaxDevices.Value} registered devices"
-            });
-        }
-
-        // Map custom properties as features
-        foreach (var customProperty in request.CustomProperties)
-        {
-            if (customProperty.Value is bool boolValue && boolValue)
-            {
-                features.Add(new LicenseFeature
-                {
-                    Name = customProperty.Key,
-                    Description = $"Custom feature: {customProperty.Key}"
-                });
-            }
-            else if (customProperty.Value is int intValue && intValue > 0)
-            {
-                features.Add(new LicenseFeature
-                {
-                    Name = customProperty.Key,
-                    Description = $"Custom limit: {customProperty.Key} = {intValue}"
-                });
-            }
-        }
-
-        return features;
     }
 
     public async Task<IEnumerable<ProductLicense>> GetLicensesAsync(LicenseStatus? status = null, string? searchTerm = null, int pageNumber = 1, int pageSize = 50)

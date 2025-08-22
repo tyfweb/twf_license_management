@@ -80,6 +80,16 @@ public class ProductLicenseEntity : AuditWorkflowEntity, IEntityMapper<ProductLi
     public string Status { get; set; } = string.Empty;
 
     /// <summary>
+    /// Type of license (Product Key, Product License, Volumetric License)
+    /// </summary>
+    public string LicenseModel { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Maximum number of users allowed for this license (for Volumetric licenses)
+    /// </summary>
+    public int? MaxAllowedUsers { get; set; }
+
+    /// <summary>
     /// User who issued the license
     /// </summary>
     public string IssuedBy { get; set; } = string.Empty;
@@ -165,6 +175,8 @@ public class ProductLicenseEntity : AuditWorkflowEntity, IEntityMapper<ProductLi
         PublicKey = model.PublicKey;
         KeyGeneratedAt = model.KeyGeneratedAt;
         Status = model.Status.ToString();
+        LicenseModel = model.LicenseModel.ToString();
+        MaxAllowedUsers = model.MaxAllowedUsers;
         IssuedBy = model.IssuedBy;
         RevokedAt = model.RevokedAt;
         RevocationReason = model.RevocationReason;
@@ -207,6 +219,8 @@ public class ProductLicenseEntity : AuditWorkflowEntity, IEntityMapper<ProductLi
             PublicKey = this.PublicKey,
             KeyGeneratedAt = this.KeyGeneratedAt,
             Status = Enum.TryParse<LicenseStatus>(this.Status, out var status) ? status : LicenseStatus.Active,
+            LicenseModel = Enum.TryParse<LicenseType>(this.LicenseModel, out var licenseType) ? licenseType : LicenseType.ProductKey,
+            MaxAllowedUsers = this.MaxAllowedUsers,
             IssuedBy = this.IssuedBy,
             RevokedAt = this.RevokedAt,
             RevocationReason = this.RevocationReason,

@@ -3,6 +3,7 @@ using TechWayFit.Licensing.Management.Core.Models.Audit;
 using TechWayFit.Licensing.Management.Core.Models.Common;
 using TechWayFit.Licensing.Management.Core.Models.Consumer;
 using TechWayFit.Licensing.Management.Core.Models.Product;
+using TechWayFit.Licensing.Management.Core.Models.Enums;
 
 namespace TechWayFit.Licensing.Management.Core.Models.License;
 
@@ -95,6 +96,17 @@ public class ProductLicense : BaseAuditModel
     /// Status of the license
     /// </summary>
     public LicenseStatus Status { get; set; } = LicenseStatus.Active;
+
+    /// <summary>
+    /// Type of license (Product Key, Product License, Volumetric License)
+    /// </summary>
+    public LicenseType LicenseModel { get; set; } = LicenseType.ProductKey;
+
+    /// <summary>
+    /// Maximum number of users allowed for this license (for Volumetric licenses)
+    /// </summary>
+    public int? MaxAllowedUsers { get; set; }
+
     /// <summary>
     /// User who issued the license
     /// </summary>
