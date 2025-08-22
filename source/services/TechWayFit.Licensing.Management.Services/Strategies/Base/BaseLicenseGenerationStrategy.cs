@@ -153,11 +153,30 @@ public abstract class BaseLicenseGenerationStrategy : ILicenseGenerationStrategy
         SimplifiedLicenseGenerationRequest generationRequest,
         string generatedBy)
     {
+        // Validate required foreign key references
+        if (request.TierId == null || request.TierId == Guid.Empty)
+        {
+            throw new InvalidOperationException("ProductTierId cannot be empty. A valid product tier must be selected.");
+        }
+
+        if (request.ProductId == Guid.Empty)
+        {
+            throw new InvalidOperationException("ProductId cannot be empty. A valid product must be selected.");
+        }
+
+        if (request.ConsumerId == Guid.Empty)
+        {
+            throw new InvalidOperationException("ConsumerId cannot be empty. A valid consumer must be selected.");
+        }
+
+        // Additional validation: Check if referenced entities exist
+        await ValidateReferencedEntitiesAsync(request);
+
         return new ProductLicense
         {
             ProductId = request.ProductId,
             ConsumerId = request.ConsumerId,
-            ProductTierId = request.TierId,
+            ProductTierId = request.TierId!.Value,
             ValidProductVersionFrom = request.ValidProductVersionFrom,
             ValidProductVersionTo = request.ValidProductVersionTo,
             LicenseKey = signedLicense.LicenseData ?? string.Empty,
@@ -216,6 +235,40 @@ public abstract class BaseLicenseGenerationStrategy : ILicenseGenerationStrategy
         }
 
         return features;
+    }
+
+    /// <summary>
+    /// Validates that referenced entities exist in the database
+    /// </summary>
+    private async Task ValidateReferencedEntitiesAsync(LicenseGenerationRequest request)
+    {
+        // Check if Product exists
+        var product = await _unitOfWork.Products.GetByIdAsync(request.ProductId);
+        if (product == null)
+        {
+            throw new InvalidOperationException($"Product with ID '{request.ProductId}' does not exist.");
+        }
+
+        // Check if Consumer exists
+        var consumer = await _unitOfWork.Consumers.GetByIdAsync(request.ConsumerId);
+        if (consumer == null)
+        {
+            throw new InvalidOperationException($"Consumer with ID '{request.ConsumerId}' does not exist.");
+        }
+
+        // Check if ProductTier exists
+        var tier = await _unitOfWork.ProductTiers.GetByIdAsync(request.TierId!.Value);
+        if (tier == null)
+        {
+            throw new InvalidOperationException($"Product tier with ID '{request.TierId}' does not exist.");
+        }
+
+        // Validate that the tier belongs to the specified product
+        var productTiers = await _unitOfWork.ProductTiers.GetByProductIdAsync(request.ProductId);
+        if (!productTiers.Any(t => t.TierId == request.TierId!.Value))
+        {
+            throw new InvalidOperationException($"Product tier '{request.TierId}' does not belong to product '{request.ProductId}'.");
+        }
     }
 
     #endregion

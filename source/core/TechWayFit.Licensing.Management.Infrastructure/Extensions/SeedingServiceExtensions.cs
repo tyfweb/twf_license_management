@@ -25,6 +25,7 @@ public static class SeedingServiceExtensions
         services.AddScoped<IDataSeeder, UserProfileSeeder>();
         services.AddScoped<IDataSeeder, UserRoleSeeder>();
         services.AddScoped<IDataSeeder, SettingsSeeder>();
+        services.AddScoped<IDataSeeder, EnterpriseProductSeeder>();
 
         return services;
     }

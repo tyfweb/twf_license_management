@@ -118,18 +118,18 @@ public class VolumetricLicenseStrategy : BaseLicenseGenerationStrategy
         if (licenseEntity.Metadata == null)
             licenseEntity.Metadata = new Dictionary<string, object>();
 
-        licenseEntity.Metadata["VolumetricLicenseGenerated"] = true;
-        licenseEntity.Metadata["OnlineActivation"] = true;
+        licenseEntity.Metadata["VolumetricLicenseGenerated"] = "true";
+        licenseEntity.Metadata["OnlineActivation"] = "true";
         licenseEntity.Metadata["KeyFormat"] = "XXXX-XXXX-XXXX-NNNN";
-        licenseEntity.Metadata["MaxUsers"] = request.MaxUsers.Value;
-        licenseEntity.Metadata["ConcurrentUserLimit"] = request.MaxUsers.Value;
-        licenseEntity.Metadata["CurrentActiveUsers"] = 0;
-        licenseEntity.Metadata["TotalUsersRegistered"] = 0;
+        licenseEntity.Metadata["MaxUsers"] = request.MaxUsers.Value.ToString();
+        licenseEntity.Metadata["ConcurrentUserLimit"] = request.MaxUsers.Value.ToString();
+        licenseEntity.Metadata["CurrentActiveUsers"] = "0";
+        licenseEntity.Metadata["TotalUsersRegistered"] = "0";
         
         // Usage tracking
-        licenseEntity.Metadata["UsageTrackingEnabled"] = true;
-        licenseEntity.Metadata["LastUsageUpdate"] = DateTime.UtcNow;
-        licenseEntity.Metadata["UsageReportingEnabled"] = true;
+        licenseEntity.Metadata["UsageTrackingEnabled"] = "true";
+        licenseEntity.Metadata["LastUsageUpdate"] = DateTime.UtcNow.ToString("O");
+        licenseEntity.Metadata["UsageReportingEnabled"] = "true";
         
         // User management URLs
         licenseEntity.Metadata["UserTrackingUrl"] = $"/api/volumetric/{licenseEntity.LicenseId}/track-usage";

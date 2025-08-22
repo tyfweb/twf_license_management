@@ -227,6 +227,14 @@ public class ProductLicenseEntity : AuditWorkflowEntity, IEntityMapper<ProductLi
             Metadata = !string.IsNullOrEmpty(this.MetadataJson)
                         ? JsonSerializer.Deserialize<Dictionary<string, string>>(this.MetadataJson)?.ToDictionary(kvp => kvp.Key, kvp => (object)kvp.Value) ?? new Dictionary<string, object>()
                         : new Dictionary<string, object>(),
+            // Map the navigation properties to LicenseConsumer
+            LicenseConsumer = new Core.Models.Consumer.ProductConsumer
+            {
+                TenantId = this.TenantId,
+                Product = this.Product?.Map() ?? new Core.Models.Product.EnterpriseProduct(),
+                Consumer = this.Consumer?.Map() ?? new Core.Models.Consumer.ConsumerAccount(),
+                ProductTier = this.ProductTier?.Map() ?? new Core.Models.Product.ProductTier()
+            },
             IsActive = this.IsActive,
             IsDeleted = this.IsDeleted,
             CreatedBy = this.CreatedBy,

@@ -63,6 +63,12 @@ try
 
     // Add services to the container.
     builder.Services.AddControllersWithViews()
+        .AddJsonOptions(options =>
+        {
+            // Configure JSON serialization to use camelCase
+            options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+            options.JsonSerializerOptions.DictionaryKeyPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+        })
         .AddRazorOptions(options =>
         {
             // Ensure tag helpers are enabled
@@ -384,6 +390,11 @@ static void RegisterServices(WebApplicationBuilder builder)
     
     // Add license generation factory - Required for ProductLicenseService
     builder.Services.AddScoped<TechWayFit.Licensing.Management.Services.Factories.ILicenseGenerationFactory, TechWayFit.Licensing.Management.Services.Factories.LicenseGenerationFactory>();
+    
+    // Register license generation strategies - Required for LicenseGenerationFactory
+    builder.Services.AddScoped<TechWayFit.Licensing.Management.Services.Strategies.ProductLicenseFileStrategy>();
+    builder.Services.AddScoped<TechWayFit.Licensing.Management.Services.Strategies.ProductKeyStrategy>();
+    builder.Services.AddScoped<TechWayFit.Licensing.Management.Services.Strategies.VolumetricLicenseStrategy>();
     
     // Task 5: License File Generation & Download services
     builder.Services.AddScoped<ILicenseFileService, LicenseFileService>();

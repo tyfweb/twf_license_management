@@ -7,7 +7,7 @@
 
 
 
-<div class="container-fluid py-3">
+<div class="container-fluid py-3 license-details-container">
     <!-- Header Section -->
     <div class="header mb-3">
         <div class="d-flex justify-content-between align-items-center">
@@ -24,7 +24,8 @@
                         @{
                             var LicenseId = Model.License.LicenseId.ConvertToString();
                         }
-                        <li class="breadcrumb-item active">@LicenseId.Substring(0, Math.Min(8, LicenseId.Length))...</li>
+                        <li class="breadcrumb-item active">@LicenseId.Substring(0, Math.Min(8, LicenseId.Length))...
+                        </li>
                     </ol>
                 </nav>
             </div>
@@ -32,21 +33,23 @@
                 @if (Model.License.Status == LicenseStatus.Active)
                 {
                     <div class="btn-group" role="group">
-                        <a href="@Url.Action("Download", "License", new { id = Model.License.LicenseId })" class="btn btn-info">
+                        <a href="@Url.Action("Download", "License", new { id = Model.License.LicenseId })"
+                            class="btn btn-info">
                             <i class="fas fa-download me-1"></i><span class="d-none d-md-inline">Download</span>
                         </a>
-                        <button type="button" class="btn btn-info dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                        <button type="button" class="btn btn-info dropdown-toggle dropdown-toggle-split"
+                            data-bs-toggle="dropdown" aria-expanded="false">
                             <span class="visually-hidden">Toggle Dropdown</span>
-    using TechWayFit.Licensing.Management.Web.Helpers;
-#line default
-                    <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="@Url.Action("Download", "License", new { id = Model.License.LicenseId })">
-                                <i class="fas fa-file-alt me-2"></i>License File (.lic)
-                            </a></li>
-                            <li><a class="dropdown-item" href="@Url.Action("DownloadJson", "License", new { id = Model.License.LicenseId })">
-                                <i class="fas fa-code me-2"></i>JSON Format (.json)
-                            </a></li>
-                        </ul>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item"
+                                        href="@Url.Action("Download", "License", new { id = Model.License.LicenseId })">
+                                        <i class="fas fa-file-alt me-2"></i>License File (.lic)
+                                    </a></li>
+                                <li><a class="dropdown-item"
+                                        href="@Url.Action("DownloadJson", "License", new { id = Model.License.LicenseId })">
+                                        <i class="fas fa-code me-2"></i>JSON Format (.json)
+                                    </a></li>
+                            </ul>
                     </div>
                 }
                 @if (Model.CanEdit)
@@ -87,12 +90,14 @@
     <div class="row g-2 mb-3">
         <div class="col-sm-6 col-lg-3">
             <div class="stats-card">
-                <div class="stats-icon">
-                    <i class="fas fa-key"></i>
-                </div>
-                <div class="stats-content">
-                    <div class="stats-label">License ID</div>
+                <div class="stats-row-1">
+                    <div class="stats-icon">
+                        <i class="fas fa-key"></i>
+                    </div>
                     <div class="stats-number text-monospace small">@Model.License.LicenseCode</div>
+                </div>
+                <div class="stats-row-2">
+                    <div class="stats-label">License ID</div>
                 </div>
             </div>
         </div>
@@ -108,12 +113,14 @@
                 };
             }
             <div class="stats-card @statusCardClass">
-                <div class="stats-icon">
-                    <i class="fas fa-circle-check"></i>
-                </div>
-                <div class="stats-content">
-                    <div class="stats-label">Status</div>
+                <div class="stats-row-1">
+                    <div class="stats-icon">
+                        <i class="fas fa-circle-check"></i>
+                    </div>
                     <div class="stats-number">@Model.License.Status</div>
+                </div>
+                <div class="stats-row-2">
+                    <div class="stats-label">Status</div>
                 </div>
             </div>
         </div>
@@ -121,14 +128,13 @@
             @{
                 var daysUntilExpiry = (Model.License.ValidTo - DateTime.UtcNow).Days;
                 var expiryCardClass = daysUntilExpiry <= 0 ? "stats-card-danger" :
-                                    daysUntilExpiry <= 30 ? "stats-card-warning" : "stats-card-success";
+                daysUntilExpiry <= 30 ? "stats-card-warning" : "stats-card-success";
             }
             <div class="stats-card @expiryCardClass">
-                <div class="stats-icon">
-                    <i class="fas fa-calendar-alt"></i>
-                </div>
-                <div class="stats-content">
-                    <div class="stats-label">Expires In</div>
+                <div class="stats-row-1">
+                    <div class="stats-icon">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
                     <div class="stats-number">
                         @if (daysUntilExpiry <= 0)
                         {
@@ -144,24 +150,31 @@
                         }
                     </div>
                 </div>
+                <div class="stats-row-2">
+                    <div class="stats-label">Expires In</div>
+                </div>
             </div>
         </div>
         <div class="col-sm-6 col-lg-3">
             <div class="stats-card">
-                <div class="stats-icon">
-                    <i class="fas fa-calendar-plus"></i>
-                </div>
-                <div class="stats-content">
-                    <div class="stats-label">Created</div>
+                <div class="stats-row-1">
+                    <div class="stats-icon">
+                        <i class="fas fa-calendar-plus"></i>
+                    </div>
                     <div class="stats-number small">@Model.License.CreatedAt.ToString("MMM dd, yyyy")</div>
+                </div>
+                <div class="stats-row-2">
+                    <div class="stats-label">Created</div>
                 </div>
             </div>
         </div>
-    </div>    <!-- Main Content -->
+    </div>
+    
+    <!-- Main Content -->
     <div class="row g-2">
         <!-- License Information -->
         <div class="col-lg-8">
-            <div class="edit-section mb-3">
+            <div class="edit-section mb-3 license-info">
                 <div class="section-header">
                     <h5><i class="fas fa-info-circle me-2"></i>License Information</h5>
                 </div>
@@ -201,7 +214,8 @@
                                 <label class="detail-label">Contact Email</label>
                                 <div class="detail-value">
                                     <i class="fas fa-envelope me-2 text-muted"></i>
-                                    <a href="mailto:@Model.License.LicenseConsumer.Consumer.PrimaryContact.Email" class="text-decoration-none">
+                                    <a href="mailto:@Model.License.LicenseConsumer.Consumer.PrimaryContact.Email"
+                                        class="text-decoration-none">
                                         @Model.License.LicenseConsumer.Consumer.PrimaryContact.Email
                                     </a>
                                 </div>
@@ -241,7 +255,8 @@
                                     <span>@Model.License.CreatedAt.ToString("MMM dd, yyyy HH:mm")</span>
                                 </div>
                             </div>
-                        </div>                        <div class="col-md-6">
+                        </div>
+                        <div class="col-md-6">
                             <div class="detail-group">
                                 <label class="detail-label">Product Tiers</label>
                                 <div class="detail-value">
@@ -281,14 +296,17 @@
                 <div class="download-section">
                     <div class="section-header">
                         <h5><i class="fas fa-download me-2"></i>Download License Files</h5>
-                        <p class="mb-0 opacity-75">Download your license files in different formats for integration with your applications.</p>
+                        <p class="mb-0 opacity-75">Download your license files in different formats for integration with
+                            your applications.</p>
                     </div>
                     <div class="section-content">
                         <div class="download-options">
-                            <a href="@Url.Action("DownloadZip", "License", new { id = Model.License.LicenseId })" class="download-option">
+                            <a href="@Url.Action("DownloadZip", "License", new { id = Model.License.LicenseId })"
+                                class="download-option">
                                 <i class="fas fa-file-archive download-option-icon"></i>
                                 <div class="download-option-title">Complete Package</div>
-                                <p class="download-option-description">ZIP bundle with license file, JSON data, and documentation</p>
+                                <p class="download-option-description">ZIP bundle with license file, JSON data, and
+                                    documentation</p>
                             </a>
                         </div>
                     </div>
@@ -353,7 +371,8 @@
                                 </div>
                             </div>
                             <div class="col-12">
-                                <a href="@Url.Action("Details", "Product", new { id = Model.Product.ProductId })" class="btn btn-outline-primary">
+                                <a href="@Url.Action("Details", "Product", new { id = Model.Product.ProductId })"
+                                    class="btn btn-outline-primary">
                                     <i class="fas fa-external-link-alt me-1"></i>View Product Details
                                 </a>
                             </div>
@@ -401,7 +420,8 @@
                                 </div>
                             </div>
                             <div class="col-12">
-                                <a href="@Url.Action("Details", "Consumer", new { id = Model.Consumer.ConsumerId })" class="btn btn-outline-primary">
+                                <a href="@Url.Action("Details", "Consumer", new { id = Model.Consumer.ConsumerId })"
+                                    class="btn btn-outline-primary">
                                     <i class="fas fa-external-link-alt me-1"></i>View Consumer Details
                                 </a>
                             </div>
@@ -409,7 +429,7 @@
                     </div>
                 </div>
             }
-        </div>        <!-- Sidebar - Quick Actions moved here -->
+        </div> <!-- Sidebar - Quick Actions moved here -->
         <div class="col-lg-4">
             <!-- Quick Actions -->
             <div class="sidebar-section mb-3">
@@ -441,14 +461,15 @@
                     <div class="section-header">
                         <div class="d-flex justify-content-between align-items-center">
                             <h6><i class="fas fa-history me-2"></i>Recent License History</h6>
-                            <a href="@Url.Action("Index", "License", new { consumerId = Model.Consumer.ConsumerId })" class="btn btn-outline-primary btn-sm">
+                            <a href="@Url.Action("Index", "License", new { consumerId = Model.Consumer.ConsumerId })"
+                                class="btn btn-outline-primary btn-sm">
                                 View All
                             </a>
                         </div>
                     </div>
                     <div class="section-content">
                         <p class="text-muted small mb-3">Latest licenses for @Model.Consumer.CompanyName</p>
-                        
+
                         <!-- Sample Recent Licenses - Replace with actual data when available -->
                         <div class="table-responsive">
                             <table class="table table-sm">
@@ -468,33 +489,35 @@
                                             @{
                                                 var currentLicenseId = Model.License.LicenseId.ConvertToString();
                                             }
-                                            <span class="text-monospace small fw-bold">@currentLicenseId.Substring(0, Math.Min(8, currentLicenseId.Length))...</span>
-                                            <br><small class="text-muted">Current</small>
-                                        </td>
-                                        <td>
-                                            <span class="fw-medium">@(Model.Product?.Name ?? "Unknown")</span>
-                                        </td>
-                                        <td>
-                                            <span class="badge @(GetStatusBadgeClass(Model.License.Status)) badge-sm">
-                                                @Model.License.Status
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span class="small">@Model.License.ValidTo.ToString("MMM dd, yyyy")</span>
-                                        </td>
-                                        <td>
-                                            <div class="btn-group btn-group-sm">
-                                                <a href="@Url.Action("Details", "License", new { id = Model.License.LicenseId })" 
-                                                   class="btn btn-outline-primary btn-sm" title="View Details">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                                <button class="btn btn-outline-secondary btn-sm" onclick="downloadLicense()" title="Download">
-                                                    <i class="fas fa-download"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    
+                                            <span class="text-monospace small fw-bold">@currentLicenseId.Substring(0,
+                                                                                            Math.Min(8, currentLicenseId.Length))...</span>
+                                        <br><small class="text-muted">Current</small>
+                                    </td>
+                                    <td>
+                                        <span class="fw-medium">@(Model.Product?.Name ?? "Unknown")</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge @(GetStatusBadgeClass(Model.License.Status)) badge-sm">
+                                            @Model.License.Status
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="small">@Model.License.ValidTo.ToString("MMM dd, yyyy")</span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="@Url.Action("Details", "License", new { id = Model.License.LicenseId })"
+                                                class="btn btn-outline-primary btn-sm" title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <button class="btn btn-outline-secondary btn-sm" onclick="downloadLicense()"
+                                                title="Download">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+
                                     <!-- Sample Previous Licenses - TODO: Replace with actual data -->
                                     <tr>
                                         <td>
@@ -512,11 +535,12 @@
                                         </td>
                                         <td>
                                             <div class="btn-group btn-group-sm">
-                                                <a href="@Url.Action("Details", "License", new { id = "LIC-FITLIFE-FP-001" })" 
-                                                   class="btn btn-outline-primary btn-sm" title="View Details">
+                                                <a href="@Url.Action("Details", "License", new { id = "LIC-FITLIFE-FP-001" })"
+                                                    class="btn btn-outline-primary btn-sm" title="View Details">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                <button class="btn btn-outline-secondary btn-sm" onclick="alert('Download previous license')" title="Download">
+                                                <button class="btn btn-outline-secondary btn-sm"
+                                                    onclick="alert('Download previous license')" title="Download">
                                                     <i class="fas fa-download"></i>
                                                 </button>
                                             </div>
@@ -527,7 +551,7 @@
                         </div>
                     </div>
                 </div>
-            }
+                        }
         </div>
     </div>
 </div>

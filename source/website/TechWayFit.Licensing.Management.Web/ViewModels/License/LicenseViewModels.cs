@@ -5,6 +5,7 @@ using TechWayFit.Licensing.Management.Core.Models.Consumer;
 using LicenseModels = TechWayFit.Licensing.Core.Models;
 using TechWayFit.Licensing.Management.Core.Models.Product;
 using TechWayFit.Licensing.Management.Core.Models.Enums;
+using TechWayFit.Licensing.Management.Web.Attributes;
 
 namespace TechWayFit.Licensing.Management.Web.ViewModels.License
 {
@@ -13,16 +14,19 @@ namespace TechWayFit.Licensing.Management.Web.ViewModels.License
     /// </summary>
     public class LicenseGenerationViewModel
     {
-        [Required]
+        [Required(ErrorMessage = "Please select a product")]
         [Display(Name = "Product")]
+        [GuidNotEmpty(ErrorMessage = "Please select a valid product")]
         public string ProductId { get; set; } = string.Empty;
 
-        [Required]
+        [Required(ErrorMessage = "Please select a consumer")]
         [Display(Name = "Consumer")]
+        [GuidNotEmpty(ErrorMessage = "Please select a valid consumer")]
         public string ConsumerId { get; set; } = string.Empty;
 
-        [Required]
+        [Required(ErrorMessage = "Please select a product tier")]
         [Display(Name = "ProductTier")]
+        [GuidNotEmpty(ErrorMessage = "Please select a valid product tier")]
         public string ProductTierId { get; set; } = string.Empty;
 
         [Required]
@@ -35,27 +39,29 @@ namespace TechWayFit.Licensing.Management.Web.ViewModels.License
         [StringLength(100)]
         public string ContactPerson { get; set; } = string.Empty;
 
-        [Required]
-        [EmailAddress]
+        [Required(ErrorMessage = "Contact Email is required")]
+        [EmailAddress(ErrorMessage = "Please enter a valid email address")]
         [Display(Name = "Contact Email")]
         public string ContactEmail { get; set; } = string.Empty;
 
         [Display(Name = "Secondary Contact Person")]
-        [StringLength(100)]
+        [StringLength(100, ErrorMessage = "Secondary Contact Person cannot exceed 100 characters")]
         public string? SecondaryContactPerson { get; set; }
 
-        [EmailAddress]
+        [EmailAddress(ErrorMessage = "Please enter a valid secondary email address")]
         [Display(Name = "Secondary Contact Email")]
         public string? SecondaryContactEmail { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Valid From date is required")]
         [Display(Name = "Valid From")]
         [DataType(DataType.DateTime)]
+        [DateNotInPast(ErrorMessage = "Valid From date cannot be in the past")]
         public DateTime ValidFrom { get; set; } = DateTime.Now;
 
-        [Required]
+        [Required(ErrorMessage = "Valid To date is required")]
         [Display(Name = "Valid To")]
         [DataType(DataType.DateTime)]
+        [DateAfter("ValidFrom", ErrorMessage = "Valid To date must be after Valid From date")]
         public DateTime ValidTo { get; set; } = DateTime.Now.AddYears(1);
 
         [Required]

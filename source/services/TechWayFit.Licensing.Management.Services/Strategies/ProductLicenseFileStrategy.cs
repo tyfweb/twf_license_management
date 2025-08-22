@@ -83,14 +83,14 @@ public class ProductLicenseFileStrategy : BaseLicenseGenerationStrategy
         if (licenseEntity.Metadata == null)
             licenseEntity.Metadata = new Dictionary<string, object>();
 
-        licenseEntity.Metadata["LicenseFileGenerated"] = true;
-        licenseEntity.Metadata["OfflineActivation"] = true;
+        licenseEntity.Metadata["LicenseFileGenerated"] = "true";
+        licenseEntity.Metadata["OfflineActivation"] = "true";
         licenseEntity.Metadata["FileFormat"] = "XML";
-        licenseEntity.Metadata["SupportsOfflineValidation"] = true;
+        licenseEntity.Metadata["SupportsOfflineValidation"] = "true";
 
         // Add download information (would be implemented in future)
         licenseEntity.Metadata["DownloadUrl"] = $"/api/licenses/{licenseEntity.LicenseId}/download";
-        licenseEntity.Metadata["FileSize"] = signedLicense.LicenseData?.Length ?? 0;
+        licenseEntity.Metadata["FileSize"] = (signedLicense.LicenseData?.Length ?? 0).ToString();
 
         _logger.LogInformation("Created Product License File entity for license: {LicenseId}", licenseEntity.LicenseId);
 

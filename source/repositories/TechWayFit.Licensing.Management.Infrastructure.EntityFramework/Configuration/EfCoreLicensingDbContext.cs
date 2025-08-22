@@ -177,20 +177,36 @@ public partial class EfCoreLicensingDbContext : DbContext
     public override int SaveChanges()
     {
         UpdateAuditFields();
-        CreateAuditEntries();
+        var auditEntries = CollectAuditEntries();
         ConvertDateTimesToUtc();
-        return base.SaveChanges();
+        var result = base.SaveChanges();
+        
+        // Save audit entries after the main save operation
+        if (auditEntries.Any())
+        {
+            SaveAuditEntries(auditEntries);
+        }
+        
+        return result;
     }
 
     /// <summary>
     /// Override SaveChangesAsync to update audit fields and convert DateTime values to UTC automatically
     /// </summary>
-    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         UpdateAuditFields();
-        CreateAuditEntries();
+        var auditEntries = CollectAuditEntries();
         ConvertDateTimesToUtc();
-        return base.SaveChangesAsync(cancellationToken);
+        var result = await base.SaveChangesAsync(cancellationToken);
+        
+        // Save audit entries after the main save operation
+        if (auditEntries.Any())
+        {
+            await SaveAuditEntriesAsync(auditEntries, cancellationToken);
+        }
+        
+        return result;
     }
 
     /// <summary>
@@ -261,10 +277,11 @@ public partial class EfCoreLicensingDbContext : DbContext
     }
 
     /// <summary>
-    /// Create audit entries for all entity changes (add/update)
+    /// Collect audit entries for all entity changes (add/update) without adding them to the context
     /// </summary>
-    private void CreateAuditEntries()
+    private List<AuditEntryEntity> CollectAuditEntries()
     {
+        var auditEntries = new List<AuditEntryEntity>();
         var entries = ChangeTracker.Entries<BaseEntity>()
             .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified)
             .ToList();
@@ -274,7 +291,59 @@ public partial class EfCoreLicensingDbContext : DbContext
             var auditEntry = CreateAuditEntry(entry);
             if (auditEntry != null)
             {
-                AuditEntries.Add(auditEntry);
+                auditEntries.Add(auditEntry);
+            }
+        }
+        
+        return auditEntries;
+    }
+
+    /// <summary>
+    /// Save audit entries in a separate operation (synchronous)
+    /// </summary>
+    private void SaveAuditEntries(List<AuditEntryEntity> auditEntries)
+    {
+        try
+        {
+            // Add audit entries to the context
+            AuditEntries.AddRange(auditEntries);
+            
+            // Save only the audit entries
+            base.SaveChanges();
+        }
+        catch (Exception ex)
+        {
+            // Log the error but don't fail the main operation
+            Console.WriteLine($"Failed to save audit entries: {ex.Message}");
+            // Clear any failed audit entries from the context
+            foreach (var entry in auditEntries)
+            {
+                Entry(entry).State = EntityState.Detached;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Save audit entries in a separate operation (asynchronous)
+    /// </summary>
+    private async Task SaveAuditEntriesAsync(List<AuditEntryEntity> auditEntries, CancellationToken cancellationToken)
+    {
+        try
+        {
+            // Add audit entries to the context
+            AuditEntries.AddRange(auditEntries);
+            
+            // Save only the audit entries
+            await base.SaveChangesAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            // Log the error but don't fail the main operation
+            Console.WriteLine($"Failed to save audit entries: {ex.Message}");
+            // Clear any failed audit entries from the context
+            foreach (var entry in auditEntries)
+            {
+                Entry(entry).State = EntityState.Detached;
             }
         }
     }

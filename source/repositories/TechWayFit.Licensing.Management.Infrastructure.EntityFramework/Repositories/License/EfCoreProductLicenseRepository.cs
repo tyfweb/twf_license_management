@@ -147,7 +147,7 @@ public class EfCoreProductLicenseRepository : BaseRepository<ProductLicense, Pro
     /// <returns></returns>
     public async Task<ProductLicense?> GetByIdWithAllIncludesAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var result = await _dbSet.Include(l => l.Product).Include(l => l.Consumer)
+        var result = await _dbSet.Include(l => l.Product).Include(l => l.Consumer).Include(l => l.ProductTier)
                       .FirstOrDefaultAsync(l => l.Id == id, cancellationToken);
         return result?.Map();
     }
@@ -155,7 +155,8 @@ public class EfCoreProductLicenseRepository : BaseRepository<ProductLicense, Pro
     protected override IQueryable<ProductLicenseEntity> SearchIncludesQuery(IQueryable<ProductLicenseEntity> query)
     {
         query = query.Include(l => l.Product)
-                     .Include(l => l.Consumer);
+                     .Include(l => l.Consumer)
+                     .Include(l => l.ProductTier);
         return base.SearchIncludesQuery(query);
     }
 

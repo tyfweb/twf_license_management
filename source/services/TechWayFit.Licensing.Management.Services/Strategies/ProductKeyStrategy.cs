@@ -109,13 +109,13 @@ public class ProductKeyStrategy : BaseLicenseGenerationStrategy
         if (licenseEntity.Metadata == null)
             licenseEntity.Metadata = new Dictionary<string, object>();
 
-        licenseEntity.Metadata["ProductKeyGenerated"] = true;
-        licenseEntity.Metadata["OnlineActivation"] = true;
+        licenseEntity.Metadata["ProductKeyGenerated"] = "true";
+        licenseEntity.Metadata["OnlineActivation"] = "true";
         licenseEntity.Metadata["KeyFormat"] = "XXXX-XXXX-XXXX-XXXX";
-        licenseEntity.Metadata["RequiresActivation"] = true;
+        licenseEntity.Metadata["RequiresActivation"] = "true";
         licenseEntity.Metadata["ActivationStatus"] = "Pending";
-        licenseEntity.Metadata["ActivationsUsed"] = 0;
-        licenseEntity.Metadata["MaxActivations"] = request.MaxDevices ?? 1;
+        licenseEntity.Metadata["ActivationsUsed"] = "0";
+        licenseEntity.Metadata["MaxActivations"] = (request.MaxDevices ?? 1).ToString();
 
         // Activation tracking
         licenseEntity.Metadata["ActivationUrl"] = $"/api/activation/activate/{licenseEntity.LicenseId}";

@@ -532,8 +532,8 @@
                     tierSelect.innerHTML = '<option value="">Select a Tier</option>';
                     tiers.data.forEach(tier => {
                         const option = document.createElement('option');
-                        option.value = tier.tierId || tier.TierId;
-                        option.textContent = `${tier.name || tier.Name} - $${tier.monthlyPrice || tier.MonthlyPrice || 0}/month`;
+                        option.value = tier.id;
+                        option.textContent = `${tier.name} - $${tier.monthlyPrice || 0}/month`;
                         tierSelect.appendChild(option);
                     });
                     tierSelect.disabled = false;

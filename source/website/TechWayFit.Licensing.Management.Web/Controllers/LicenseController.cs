@@ -27,6 +27,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         private readonly IConsumerAccountService _consumerService;
         private readonly IProductActivationService _productActivationService;
         private readonly ILicenseFileService _licenseFileService;
+        private readonly IProductTierService _productTierService;
 
         public LicenseController(
             ILogger<LicenseController> logger,
@@ -34,7 +35,8 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
             IEnterpriseProductService productService,
             IConsumerAccountService consumerService,
             IProductActivationService productActivationService,
-            ILicenseFileService licenseFileService)
+            ILicenseFileService licenseFileService,
+            IProductTierService productTierService)
         {
             _logger = logger;
             _licenseService = licenseService;
@@ -42,6 +44,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
             _consumerService = consumerService;
             _productActivationService = productActivationService;
             _licenseFileService = licenseFileService;
+            _productTierService = productTierService;
         }
 
         /// <summary>
@@ -199,6 +202,18 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                     return View(model);
                 }
 
+                // Additional validation for required fields
+                var validationErrors = await ValidateLicenseCreationRequest(model);
+                if (validationErrors.Any())
+                {
+                    foreach (var error in validationErrors)
+                    {
+                        ModelState.AddModelError(error.Key, error.Value);
+                    }
+                    await PopulateCreateLicenseDropdowns(model);
+                    return View(model);
+                }
+
                 // Map ViewModel to Core request model
                 var licenseRequest = new LicenseGenerationRequest
                 {
@@ -257,6 +272,41 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 ModelState.AddModelError("", "An error occurred while creating the license. Please try again.");
                 await PopulateCreateLicenseDropdowns(model);
                 return View(model);
+            }
+        }
+
+        /// <summary>
+        /// Get product tiers for a specific product (AJAX endpoint)
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> GetProductTiers(string productId)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(productId))
+                {
+                    return Json(new { success = false, message = "Product ID is required" });
+                }
+
+                var productGuid = productId.ToGuid();
+                if (productGuid == Guid.Empty)
+                {
+                    return Json(new { success = false, message = "Invalid Product ID" });
+                }
+
+                var tiers = await _productTierService.GetTiersByProductAsync(productGuid);
+                var tierOptions = tiers.Select(t => new
+                {
+                    value = t.TierId.ConvertToString(),
+                    text = t.Name
+                }).ToList();
+
+                return Json(new { success = true, tiers = tierOptions });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting product tiers for product {ProductId}", productId);
+                return Json(new { success = false, message = "Error loading product tiers" });
             }
         }
 
@@ -827,6 +877,36 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                     Text = c.CompanyName,
                     Selected = c.ConsumerId.ConvertToString() == model.ConsumerId
                 }).ToList();
+
+                // Get product tiers - if a specific product is selected, get tiers for that product
+                var productTiers = new List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>();
+                if (!string.IsNullOrEmpty(model.ProductId))
+                {
+                    var productGuid = model.ProductId.ToGuid();
+                    if (productGuid != Guid.Empty)
+                    {
+                        var tiers = await _productTierService.GetTiersByProductAsync(productGuid);
+                        productTiers = tiers.Select(t => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+                        {
+                            Value = t.TierId.ConvertToString(),
+                            Text = t.Name,
+                            Selected = t.TierId.ConvertToString() == model.ProductTierId
+                        }).ToList();
+                    }
+                }
+
+                // Add default option if no tiers found
+                if (!productTiers.Any())
+                {
+                    productTiers.Add(new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+                    {
+                        Value = "",
+                        Text = "Select a Product first",
+                        Selected = true
+                    });
+                }
+
+                ViewBag.AvailableProductTiers = productTiers;
             }
             catch (Exception ex)
             {
@@ -834,6 +914,15 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 // Initialize empty lists to prevent null reference exceptions
                 ViewBag.AvailableProducts = new List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>();
                 ViewBag.AvailableConsumers = new List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>();
+                ViewBag.AvailableProductTiers = new List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>
+                {
+                    new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+                    {
+                        Value = "",
+                        Text = "Error loading tiers",
+                        Selected = true
+                    }
+                };
             }
         }
 
@@ -997,6 +1086,147 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 _logger.LogError(ex, "Error deactivating ProductKey {ProductKey}", productKey);
                 TempData["ErrorMessage"] = "Failed to deactivate ProductKey. Please try again.";
                 return RedirectToAction(nameof(ProductKeys), new { licenseId });
+            }
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        /// <summary>
+        /// Validates the license creation request for all required fields and business rules
+        /// </summary>
+        private async Task<Dictionary<string, string>> ValidateLicenseCreationRequest(LicenseGenerationViewModel model)
+        {
+            var errors = new Dictionary<string, string>();
+
+            try
+            {
+                // Validate ProductId
+                if (string.IsNullOrWhiteSpace(model.ProductId) || !Guid.TryParse(model.ProductId, out var productId) || productId == Guid.Empty)
+                {
+                    errors.Add("ProductId", "Please select a valid product.");
+                }
+                else
+                {
+                    // Check if product exists
+                    var product = await _productService.GetProductByIdAsync(productId);
+                    if (product == null)
+                    {
+                        errors.Add("ProductId", "Selected product does not exist.");
+                    }
+                }
+
+                // Validate ConsumerId
+                if (string.IsNullOrWhiteSpace(model.ConsumerId) || !Guid.TryParse(model.ConsumerId, out var consumerId) || consumerId == Guid.Empty)
+                {
+                    errors.Add("ConsumerId", "Please select a valid consumer.");
+                }
+                else
+                {
+                    // Check if consumer exists
+                    var consumer = await _consumerService.GetConsumerAccountByIdAsync(consumerId);
+                    if (consumer == null)
+                    {
+                        errors.Add("ConsumerId", "Selected consumer does not exist.");
+                    }
+                }
+
+                // Validate ProductTierId
+                if (string.IsNullOrWhiteSpace(model.ProductTierId) || !Guid.TryParse(model.ProductTierId, out var tierId) || tierId == Guid.Empty)
+                {
+                    errors.Add("ProductTierId", "Please select a valid product tier.");
+                }
+                else if (Guid.TryParse(model.ProductId, out var prodId))
+                {
+                    // Check if tier exists and belongs to the selected product
+                    var tiers = await _productTierService.GetTiersByProductAsync(prodId);
+                    if (!tiers.Any(t => t.TierId == tierId))
+                    {
+                        errors.Add("ProductTierId", "Selected tier does not belong to the selected product.");
+                    }
+                }
+
+                // Validate date ranges
+                if (model.ValidFrom >= model.ValidTo)
+                {
+                    errors.Add("ValidTo", "Valid To date must be after Valid From date.");
+                }
+
+                if (model.ValidFrom < DateTime.Now.Date)
+                {
+                    errors.Add("ValidFrom", "Valid From date cannot be in the past.");
+                }
+
+                // Validate required contact information
+                if (string.IsNullOrWhiteSpace(model.LicensedTo))
+                {
+                    errors.Add("LicensedTo", "Licensed To field is required.");
+                }
+
+                if (string.IsNullOrWhiteSpace(model.ContactPerson))
+                {
+                    errors.Add("ContactPerson", "Contact Person field is required.");
+                }
+
+                if (string.IsNullOrWhiteSpace(model.ContactEmail))
+                {
+                    errors.Add("ContactEmail", "Contact Email field is required.");
+                }
+                else if (!IsValidEmail(model.ContactEmail))
+                {
+                    errors.Add("ContactEmail", "Please enter a valid email address.");
+                }
+
+                // Validate secondary email if provided
+                if (!string.IsNullOrWhiteSpace(model.SecondaryContactEmail) && !IsValidEmail(model.SecondaryContactEmail))
+                {
+                    errors.Add("SecondaryContactEmail", "Please enter a valid secondary email address.");
+                }
+
+                // Validate license model specific requirements
+                if (model.LicenseModel == LicenseType.VolumetricLicense && (!model.MaxAllowedUsers.HasValue || model.MaxAllowedUsers <= 0))
+                {
+                    errors.Add("MaxAllowedUsers", "Max Allowed Users must be greater than 0 for Volumetric licenses.");
+                }
+
+                // Validate API call limits if provided
+                if (model.MaxApiCallsPerMonth.HasValue && model.MaxApiCallsPerMonth <= 0)
+                {
+                    errors.Add("MaxApiCallsPerMonth", "Max API Calls Per Month must be greater than 0 if specified.");
+                }
+
+                // Validate concurrent connections if provided
+                if (model.MaxConcurrentConnections.HasValue && model.MaxConcurrentConnections <= 0)
+                {
+                    errors.Add("MaxConcurrentConnections", "Max Concurrent Connections must be greater than 0 if specified.");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during license creation validation");
+                errors.Add("General", "An error occurred during validation. Please try again.");
+            }
+
+            return errors;
+        }
+
+        /// <summary>
+        /// Validates email format
+        /// </summary>
+        private static bool IsValidEmail(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                return false;
+
+            try
+            {
+                var addr = new System.Net.Mail.MailAddress(email);
+                return addr.Address == email;
+            }
+            catch
+            {
+                return false;
             }
         }
 
