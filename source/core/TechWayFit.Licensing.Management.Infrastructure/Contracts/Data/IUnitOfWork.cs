@@ -39,6 +39,11 @@ public interface IUnitOfWork : IDisposable
     IConsumerAccountRepository Consumers { get; }
 
     /// <summary>
+    /// Consumer Contact repository
+    /// </summary>
+    IConsumerContactRepository ConsumerContacts { get; }
+
+    /// <summary>
     /// User Profile repository
     /// </summary>
     IUserProfileRepository Users { get; }

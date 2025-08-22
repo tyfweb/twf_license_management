@@ -106,15 +106,15 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                     .Select(l => new LicenseItemViewModel
                     {
                         LicenseId = l.LicenseId.ConvertToString(),
-                        LicenseCode = l.LicenseCode,
-                        ConsumerName = l.LicenseConsumer.Consumer.CompanyName,
-                        ContactEmail = l.LicenseConsumer.Consumer.PrimaryContact.Email,
+                        LicenseCode = l.LicenseCode ?? "N/A",
+                        ConsumerName = l.LicenseConsumer?.Consumer?.CompanyName ?? "Unknown Consumer",
+                        ContactEmail = l.LicenseConsumer?.Consumer?.PrimaryContact?.Email ?? "No Email",
                         Tier = LicenseTier.Community, // Default value since ProductLicense doesn't have LicenseTier
                         Status = l.Status,
                         ValidFrom = l.ValidFrom,
                         ValidTo = l.ValidTo,
                         CreatedAt = l.CreatedAt,
-                        CreatedBy = l.IssuedBy, // Using IssuedBy instead of CreatedBy
+                        CreatedBy = l.IssuedBy ?? "System", // Using IssuedBy instead of CreatedBy
                         Version = 1, // Default version since ProductLicense doesn't have Version property
                         DaysUntilExpiry = (int)(l.ValidTo - DateTime.UtcNow).TotalDays,
                         CanRenew = l.Status == LicenseStatus.Active && l.ValidTo <= DateTime.UtcNow.AddDays(30),
@@ -141,7 +141,18 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
             {
                 _logger.LogError(ex, "Error loading license dashboard");
                 TempData["ErrorMessage"] = "Failed to load license dashboard. Please try again.";
-                return View(new DashboardViewModel());
+                return View(new LicenseListViewModel
+                {
+                    Licenses = new List<LicenseItemViewModel>(),
+                    Filter = filter ?? new LicenseFilterViewModel(),
+                    Pagination = new PaginationViewModel
+                    {
+                        CurrentPage = page,
+                        TotalPages = 1,
+                        TotalItems = 0,
+                        PageSize = pageSize
+                    }
+                });
             }
         }
 

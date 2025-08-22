@@ -116,3 +116,74 @@ public class GetConsumerLicensesResponse
     public List<ConsumerLicenseResponse> Licenses { get; set; } = new();
     public int TotalCount { get; set; }
 }
+
+// ========================================================================
+// Consumer Contact Models (Addon Feature)
+// ========================================================================
+
+public class CreateConsumerContactRequest
+{
+    [Required]
+    public Guid ConsumerId { get; set; }
+
+    [Required]
+    [StringLength(200)]
+    public string ContactName { get; set; } = string.Empty;
+
+    [Required]
+    [EmailAddress]
+    [StringLength(255)]
+    public string ContactEmail { get; set; } = string.Empty;
+
+    [StringLength(50)]
+    public string? ContactPhone { get; set; }
+
+    [StringLength(500)]
+    public string? ContactAddress { get; set; }
+
+    [StringLength(100)]
+    public string? CompanyDivision { get; set; }
+
+    [StringLength(100)]
+    public string? ContactDesignation { get; set; }
+
+    public bool IsPrimaryContact { get; set; } = false;
+
+    [StringLength(50)]
+    public string? ContactType { get; set; }
+
+    [StringLength(1000)]
+    public string? Notes { get; set; }
+}
+
+public class UpdateConsumerContactRequest
+{
+    [Required]
+    [StringLength(200)]
+    public string ContactName { get; set; } = string.Empty;
+
+    [Required]
+    [EmailAddress]
+    [StringLength(255)]
+    public string ContactEmail { get; set; } = string.Empty;
+
+    [StringLength(50)]
+    public string? ContactPhone { get; set; }
+
+    [StringLength(500)]
+    public string? ContactAddress { get; set; }
+
+    [StringLength(100)]
+    public string? CompanyDivision { get; set; }
+
+    [StringLength(100)]
+    public string? ContactDesignation { get; set; }
+
+    public bool IsPrimaryContact { get; set; } = false;
+
+    [StringLength(50)]
+    public string? ContactType { get; set; }
+
+    [StringLength(1000)]
+    public string? Notes { get; set; }
+}

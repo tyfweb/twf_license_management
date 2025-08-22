@@ -40,6 +40,7 @@ public class EfCoreUnitOfWork : IUnitOfWork
     private IProductLicenseRepository? _licenses;
     private IProductActivationRepository? _productActivations;
     private IConsumerAccountRepository? _consumers;
+    private IConsumerContactRepository? _consumerContacts;
     private IUserProfileRepository? _users;
 
     // Supporting repositories
@@ -83,6 +84,9 @@ public class EfCoreUnitOfWork : IUnitOfWork
 
     public IConsumerAccountRepository Consumers => 
         _consumers ??= new EfCoreConsumerAccountRepository(_context,_userContext);
+
+    public IConsumerContactRepository ConsumerContacts => 
+        _consumerContacts ??= new EfCoreConsumerContactRepository(_context,_userContext);
 
     public IUserProfileRepository Users => 
         _users ??= new EfCoreUserProfileRepository(_context,_userContext);

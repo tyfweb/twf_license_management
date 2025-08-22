@@ -14,7 +14,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers.Api;
 /// Provides REST API endpoints for consumer operations
 /// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/consumer")]
 [Authorize]
 [Produces("application/json")]
 public class ConsumerApiController : BaseController
@@ -335,4 +335,313 @@ public class ConsumerApiController : BaseController
             LicenseCount = licenses?.Count() ?? 0
         };
     }
+
+    #region Consumer Contact Management (Addon Feature)
+
+    /// <summary>
+    /// Get all contacts for a specific consumer
+    /// </summary>
+    /// <param name="consumerId">Consumer ID</param>
+    /// <returns>List of consumer contacts</returns>
+    [HttpGet("{consumerId:guid}/contacts")]
+    [ProducesResponseType(typeof(JsonResponse), 200)]
+    [ProducesResponseType(404)]
+    [ProducesResponseType(500)]
+    public async Task<ActionResult<JsonResponse>> GetConsumerContacts(Guid consumerId)
+    {
+        try
+        {
+            _logger.LogInformation("Getting contacts for consumer: {ConsumerId}", consumerId);
+
+            // Verify consumer exists
+            var consumer = await _consumerService.GetConsumerAccountByIdAsync(consumerId);
+            if (consumer == null)
+            {
+                return NotFound(JsonResponse.Error("Consumer not found"));
+            }
+
+            var contacts = await _consumerService.GetConsumerContactsByConsumerIdAsync(consumerId);
+            var response = contacts.Select(contact => new
+            {
+                Id = contact.ContactId,
+                ConsumerId = contact.ConsumerId,
+                ContactName = contact.ContactName,
+                ContactEmail = contact.ContactEmail,
+                ContactPhone = contact.ContactPhone,
+                ContactAddress = contact.ContactAddress,
+                CompanyDivision = contact.CompanyDivision,
+                ContactDesignation = contact.ContactDesignation,
+                IsPrimaryContact = contact.IsPrimaryContact,
+                ContactType = contact.ContactType,
+                Notes = contact.Notes,
+                CreatedDate = contact.Audit.CreatedOn,
+                ModifiedDate = contact.Audit.UpdatedOn
+            }).ToList();
+
+            return Ok(JsonResponse.OK(response));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting contacts for consumer {ConsumerId}", consumerId);
+            return StatusCode(500, JsonResponse.Error("Failed to retrieve consumer contacts"));
+        }
+    }
+
+    /// <summary>
+    /// Get a specific consumer contact by ID
+    /// </summary>
+    /// <param name="contactId">Contact ID</param>
+    /// <returns>Consumer contact details</returns>
+    [HttpGet("contacts/{contactId:guid}")]
+    [ProducesResponseType(typeof(JsonResponse), 200)]
+    [ProducesResponseType(404)]
+    [ProducesResponseType(500)]
+    public async Task<ActionResult<JsonResponse>> GetConsumerContact(Guid contactId)
+    {
+        try
+        {
+            _logger.LogInformation("Getting consumer contact: {ContactId}", contactId);
+
+            var contact = await _consumerService.GetConsumerContactByIdAsync(contactId);
+            if (contact == null)
+            {
+                return NotFound(JsonResponse.Error("Consumer contact not found"));
+            }
+
+            var response = new
+            {
+                Id = contact.ContactId,
+                ConsumerId = contact.ConsumerId,
+                ContactName = contact.ContactName,
+                ContactEmail = contact.ContactEmail,
+                ContactPhone = contact.ContactPhone,
+                ContactAddress = contact.ContactAddress,
+                CompanyDivision = contact.CompanyDivision,
+                ContactDesignation = contact.ContactDesignation,
+                IsPrimaryContact = contact.IsPrimaryContact,
+                ContactType = contact.ContactType,
+                Notes = contact.Notes,
+                CreatedDate = contact.Audit.CreatedOn,
+                ModifiedDate = contact.Audit.UpdatedOn
+            };
+
+            return Ok(JsonResponse.OK(response));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting consumer contact {ContactId}", contactId);
+            return StatusCode(500, JsonResponse.Error("Failed to retrieve consumer contact"));
+        }
+    }
+
+    /// <summary>
+    /// Create a new consumer contact
+    /// </summary>
+    /// <param name="request">Consumer contact creation request</param>
+    /// <returns>Created consumer contact</returns>
+    [HttpPost("contacts")]
+    [ProducesResponseType(typeof(JsonResponse), 201)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(500)]
+    public async Task<ActionResult<JsonResponse>> CreateConsumerContact([FromBody] CreateConsumerContactRequest request)
+    {
+        try
+        {
+            _logger.LogInformation("Creating consumer contact for consumer: {ConsumerId}", request.ConsumerId);
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(JsonResponse.Error("Invalid request data"));
+            }
+
+            var contact = new ConsumerContact
+            {
+                ConsumerId = request.ConsumerId,
+                TenantId = Guid.Empty, // TODO: Implement tenant context
+                ContactName = request.ContactName,
+                ContactEmail = request.ContactEmail,
+                ContactPhone = request.ContactPhone ?? string.Empty,
+                ContactAddress = request.ContactAddress ?? string.Empty,
+                CompanyDivision = request.CompanyDivision ?? string.Empty,
+                ContactDesignation = request.ContactDesignation ?? string.Empty,
+                IsPrimaryContact = request.IsPrimaryContact,
+                ContactType = request.ContactType ?? string.Empty,
+                Notes = request.Notes ?? string.Empty
+            };
+
+            var createdContact = await _consumerService.CreateConsumerContactAsync(contact, CurrentUserName);
+
+            var response = new
+            {
+                Id = createdContact.ContactId,
+                ConsumerId = createdContact.ConsumerId,
+                ContactName = createdContact.ContactName,
+                ContactEmail = createdContact.ContactEmail,
+                ContactPhone = createdContact.ContactPhone,
+                ContactAddress = createdContact.ContactAddress,
+                CompanyDivision = createdContact.CompanyDivision,
+                ContactDesignation = createdContact.ContactDesignation,
+                IsPrimaryContact = createdContact.IsPrimaryContact,
+                ContactType = createdContact.ContactType,
+                Notes = createdContact.Notes,
+                CreatedDate = createdContact.Audit.CreatedOn
+            };
+
+            return CreatedAtAction(nameof(GetConsumerContact), new { contactId = createdContact.ContactId }, JsonResponse.OK(response));
+        }
+        catch (ArgumentException ex)
+        {
+            _logger.LogWarning(ex, "Invalid consumer contact data");
+            return BadRequest(JsonResponse.Error(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating consumer contact for consumer: {ConsumerId}", request.ConsumerId);
+            return StatusCode(500, JsonResponse.Error("Failed to create consumer contact"));
+        }
+    }
+
+    /// <summary>
+    /// Update an existing consumer contact
+    /// </summary>
+    /// <param name="contactId">Contact ID</param>
+    /// <param name="request">Consumer contact update request</param>
+    /// <returns>Updated consumer contact</returns>
+    [HttpPut("contacts/{contactId:guid}")]
+    [ProducesResponseType(typeof(JsonResponse), 200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    [ProducesResponseType(500)]
+    public async Task<ActionResult<JsonResponse>> UpdateConsumerContact(Guid contactId, [FromBody] UpdateConsumerContactRequest request)
+    {
+        try
+        {
+            _logger.LogInformation("Updating consumer contact: {ContactId}", contactId);
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(JsonResponse.Error("Invalid request data"));
+            }
+
+            var existingContact = await _consumerService.GetConsumerContactByIdAsync(contactId);
+            if (existingContact == null)
+            {
+                return NotFound(JsonResponse.Error("Consumer contact not found"));
+            }
+
+            existingContact.ContactName = request.ContactName;
+            existingContact.ContactEmail = request.ContactEmail;
+            existingContact.ContactPhone = request.ContactPhone ?? string.Empty;
+            existingContact.ContactAddress = request.ContactAddress ?? string.Empty;
+            existingContact.CompanyDivision = request.CompanyDivision ?? string.Empty;
+            existingContact.ContactDesignation = request.ContactDesignation ?? string.Empty;
+            existingContact.IsPrimaryContact = request.IsPrimaryContact;
+            existingContact.ContactType = request.ContactType ?? string.Empty;
+            existingContact.Notes = request.Notes ?? string.Empty;
+
+            var updatedContact = await _consumerService.UpdateConsumerContactAsync(existingContact, CurrentUserName);
+
+            var response = new
+            {
+                Id = updatedContact.ContactId,
+                ConsumerId = updatedContact.ConsumerId,
+                ContactName = updatedContact.ContactName,
+                ContactEmail = updatedContact.ContactEmail,
+                ContactPhone = updatedContact.ContactPhone,
+                ContactAddress = updatedContact.ContactAddress,
+                CompanyDivision = updatedContact.CompanyDivision,
+                ContactDesignation = updatedContact.ContactDesignation,
+                IsPrimaryContact = updatedContact.IsPrimaryContact,
+                ContactType = updatedContact.ContactType,
+                Notes = updatedContact.Notes,
+                ModifiedDate = updatedContact.Audit.UpdatedOn
+            };
+
+            return Ok(JsonResponse.OK(response));
+        }
+        catch (ArgumentException ex)
+        {
+            _logger.LogWarning(ex, "Invalid consumer contact data");
+            return BadRequest(JsonResponse.Error(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating consumer contact: {ContactId}", contactId);
+            return StatusCode(500, JsonResponse.Error("Failed to update consumer contact"));
+        }
+    }
+
+    /// <summary>
+    /// Delete a consumer contact
+    /// </summary>
+    /// <param name="contactId">Contact ID</param>
+    /// <returns>Success response</returns>
+    [HttpDelete("contacts/{contactId:guid}")]
+    [ProducesResponseType(typeof(JsonResponse), 200)]
+    [ProducesResponseType(404)]
+    [ProducesResponseType(500)]
+    public async Task<ActionResult<JsonResponse>> DeleteConsumerContact(Guid contactId)
+    {
+        try
+        {
+            _logger.LogInformation("Deleting consumer contact: {ContactId}", contactId);
+
+            var contact = await _consumerService.GetConsumerContactByIdAsync(contactId);
+            if (contact == null)
+            {
+                return NotFound(JsonResponse.Error("Consumer contact not found"));
+            }
+
+            var deleted = await _consumerService.DeleteConsumerContactAsync(contactId, CurrentUserName);
+            if (!deleted)
+            {
+                return StatusCode(500, JsonResponse.Error("Failed to delete consumer contact"));
+            }
+
+            return Ok(JsonResponse.OK("Consumer contact deleted successfully"));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting consumer contact: {ContactId}", contactId);
+            return StatusCode(500, JsonResponse.Error("Failed to delete consumer contact"));
+        }
+    }
+
+    /// <summary>
+    /// Set a consumer contact as primary
+    /// </summary>
+    /// <param name="contactId">Contact ID</param>
+    /// <returns>Success response</returns>
+    [HttpPut("contacts/{contactId:guid}/set-primary")]
+    [ProducesResponseType(typeof(JsonResponse), 200)]
+    [ProducesResponseType(404)]
+    [ProducesResponseType(500)]
+    public async Task<ActionResult<JsonResponse>> SetPrimaryConsumerContact(Guid contactId)
+    {
+        try
+        {
+            _logger.LogInformation("Setting consumer contact as primary: {ContactId}", contactId);
+
+            var contact = await _consumerService.GetConsumerContactByIdAsync(contactId);
+            if (contact == null)
+            {
+                return NotFound(JsonResponse.Error("Consumer contact not found"));
+            }
+
+            var updated = await _consumerService.SetPrimaryConsumerContactAsync(contactId, CurrentUserName);
+            if (!updated)
+            {
+                return StatusCode(500, JsonResponse.Error("Failed to set consumer contact as primary"));
+            }
+
+            return Ok(JsonResponse.OK("Consumer contact set as primary successfully"));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error setting consumer contact as primary: {ContactId}", contactId);
+            return StatusCode(500, JsonResponse.Error("Failed to set consumer contact as primary"));
+        }
+    }
+
+    #endregion
 }

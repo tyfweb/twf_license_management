@@ -380,6 +380,7 @@ static void RegisterServices(WebApplicationBuilder builder)
     builder.Services.AddScoped<IKeyManagementService, KeyManagementService>();
     builder.Services.AddScoped<IProductLicenseService, ProductLicenseService>();
     builder.Services.AddScoped<IProductFeatureService, ProductFeatureService>();
+    builder.Services.AddScoped<IProductActivationService, ProductActivationService>();
     builder.Services.AddSingleton<ILicenseValidationService, LicenseValidationService>();
 
     // Step 6: Settings management services

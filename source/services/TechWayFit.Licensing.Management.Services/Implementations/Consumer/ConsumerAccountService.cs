@@ -48,14 +48,41 @@ public class ConsumerAccountService : IConsumerAccountService
 
         try
         {
+            // Set audit information and ConsumerId if not set
+            if (consumerAccount.ConsumerId == Guid.Empty)
+            {
+                consumerAccount.ConsumerId = Guid.NewGuid();
+            }
+            
+            // Initialize audit fields for creation
+            consumerAccount.Audit.CreatedBy = createdBy;
+            consumerAccount.Audit.CreatedOn = DateTime.UtcNow;
+            consumerAccount.Audit.IsActive = true;
+            consumerAccount.Audit.IsDeleted = false;
+            
+            // Set CreatedAt timestamp if not already set
+            if (consumerAccount.CreatedAt == default)
+            {
+                consumerAccount.CreatedAt = DateTime.UtcNow;
+            }
+            
+            // Ensure PrimaryContact and Address are not null (should be set by constructor, but double-check)
+            if (consumerAccount.PrimaryContact == null)
+            {
+                consumerAccount.PrimaryContact = new ContactPerson();
+            }
+            
+            if (consumerAccount.Address == null)
+            {
+                consumerAccount.Address = new Address();
+            }
+            
             // Save to repository using Unit of Work
             var createdEntity = await _unitOfWork.Consumers.AddAsync(consumerAccount); 
-            
-            // Map back to model
-            var result = createdEntity;
             await _unitOfWork.SaveChangesAsync();
-            _logger.LogInformation("Successfully created consumer account with ID: {ConsumerId}", result.ConsumerId);
-            return result;
+            
+            _logger.LogInformation("Successfully created consumer account with ID: {ConsumerId}", createdEntity.ConsumerId);
+            return createdEntity;
         }
         catch (Exception ex)
         {
@@ -113,11 +140,15 @@ public class ConsumerAccountService : IConsumerAccountService
             existingEntity.Address.Country = consumerAccount.Address.Country;
             existingEntity.Notes = consumerAccount.Notes;
             existingEntity.Status = consumerAccount.Status;
-            existingEntity.Audit.IsActive = consumerAccount.Audit.IsActive; 
+            existingEntity.Audit.IsActive = consumerAccount.Audit.IsActive;
+            
+            // Update audit information
+            existingEntity.Audit.UpdatedBy = updatedBy;
+            existingEntity.Audit.UpdatedOn = DateTime.UtcNow;
 
             // Update in repository using Unit of Work
             var updatedEntity = await _unitOfWork.Consumers.UpdateAsync(existingEntity.Id, existingEntity);
-            
+            await _unitOfWork.SaveChangesAsync();
             
             _logger.LogInformation("Successfully updated consumer account: {ConsumerId}", updatedEntity.ConsumerId);
             return updatedEntity;
@@ -602,6 +633,260 @@ public class ConsumerAccountService : IConsumerAccountService
         _logger.LogWarning("GetConsumersByAccountManagerWithoutProductAsync not implemented - requires complex entity relationships and queries");
         await Task.CompletedTask;
         return Enumerable.Empty<ConsumerAccount>();
+    }
+
+    #endregion
+
+    #region Consumer Contact Management (Addon Feature)
+
+    /// <summary>
+    /// Creates a new consumer contact
+    /// </summary>
+    public async Task<ConsumerContact> CreateConsumerContactAsync(ConsumerContact consumerContact, string createdBy)
+    {
+        _logger.LogInformation("Creating consumer contact for consumer: {ConsumerId}, Contact: {ContactName}", 
+            consumerContact.ConsumerId, consumerContact.ContactName);
+
+        // Input validation
+        if (consumerContact == null)
+            throw new ArgumentNullException(nameof(consumerContact));
+        if (string.IsNullOrWhiteSpace(createdBy))
+            throw new ArgumentException("CreatedBy cannot be null or empty", nameof(createdBy));
+
+        // Business validation
+        if (string.IsNullOrWhiteSpace(consumerContact.ContactName))
+            throw new ArgumentException("Contact name is required", nameof(consumerContact.ContactName));
+        if (string.IsNullOrWhiteSpace(consumerContact.ContactEmail))
+            throw new ArgumentException("Contact email is required", nameof(consumerContact.ContactEmail));
+        if (!IsValidEmail(consumerContact.ContactEmail))
+            throw new ArgumentException("Invalid email format", nameof(consumerContact.ContactEmail));
+
+        // Verify consumer exists
+        var consumer = await _unitOfWork.Consumers.GetByIdAsync(consumerContact.ConsumerId);
+        if (consumer == null)
+            throw new InvalidOperationException($"Consumer with ID {consumerContact.ConsumerId} not found");
+
+        try
+        {
+            // Set audit information
+            consumerContact.Audit.CreatedBy = createdBy;
+            consumerContact.Audit.CreatedOn = DateTime.UtcNow;
+            consumerContact.Audit.IsActive = true;
+            consumerContact.Audit.IsDeleted = false;
+
+            // Generate new ID if not provided
+            if (consumerContact.ContactId == Guid.Empty)
+                consumerContact.ContactId = Guid.NewGuid();
+
+            // Add contact to repository
+            await _unitOfWork.ConsumerContacts.AddAsync(consumerContact);
+            await _unitOfWork.SaveChangesAsync();
+
+            _logger.LogInformation("Successfully created consumer contact: {ContactId} for consumer: {ConsumerId}", 
+                consumerContact.ContactId, consumerContact.ConsumerId);
+            
+            return consumerContact;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating consumer contact for consumer: {ConsumerId}", consumerContact.ConsumerId);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Updates an existing consumer contact
+    /// </summary>
+    public async Task<ConsumerContact> UpdateConsumerContactAsync(ConsumerContact consumerContact, string updatedBy)
+    {
+        _logger.LogInformation("Updating consumer contact: {ContactId}", consumerContact.ContactId);
+
+        // Input validation
+        if (consumerContact == null)
+            throw new ArgumentNullException(nameof(consumerContact));
+        if (string.IsNullOrWhiteSpace(updatedBy))
+            throw new ArgumentException("UpdatedBy cannot be null or empty", nameof(updatedBy));
+
+        // Business validation
+        if (string.IsNullOrWhiteSpace(consumerContact.ContactName))
+            throw new ArgumentException("Contact name is required", nameof(consumerContact.ContactName));
+        if (string.IsNullOrWhiteSpace(consumerContact.ContactEmail))
+            throw new ArgumentException("Contact email is required", nameof(consumerContact.ContactEmail));
+        if (!IsValidEmail(consumerContact.ContactEmail))
+            throw new ArgumentException("Invalid email format", nameof(consumerContact.ContactEmail));
+
+        try
+        {
+            // Update audit information
+            consumerContact.Audit.UpdatedBy = updatedBy;
+            consumerContact.Audit.UpdatedOn = DateTime.UtcNow;
+
+            // Update contact in repository
+            await _unitOfWork.ConsumerContacts.UpdateAsync(consumerContact.ContactId, consumerContact);
+            await _unitOfWork.SaveChangesAsync();
+
+            _logger.LogInformation("Successfully updated consumer contact: {ContactId}", consumerContact.ContactId);
+            
+            return consumerContact;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating consumer contact: {ContactId}", consumerContact.ContactId);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Gets a consumer contact by ID
+    /// </summary>
+    public async Task<ConsumerContact?> GetConsumerContactByIdAsync(Guid contactId)
+    {
+        _logger.LogInformation("Getting consumer contact by ID: {ContactId}", contactId);
+
+        try
+        {
+            var contact = await _unitOfWork.ConsumerContacts.GetByIdAsync(contactId);
+            
+            _logger.LogInformation("Successfully retrieved consumer contact: {ContactId}", contactId);
+            return contact;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting consumer contact by ID: {ContactId}", contactId);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Gets all contacts for a specific consumer
+    /// </summary>
+    public async Task<IEnumerable<ConsumerContact>> GetConsumerContactsByConsumerIdAsync(Guid consumerId)
+    {
+        _logger.LogInformation("Getting consumer contacts for consumer: {ConsumerId}", consumerId);
+
+        try
+        {
+            // Use the optimized repository method to get contacts by consumer ID
+            var consumerContacts = await _unitOfWork.ConsumerContacts.GetByConsumerIdAsync(consumerId);
+            
+            _logger.LogInformation("Successfully retrieved {Count} consumer contacts for consumer: {ConsumerId}", 
+                consumerContacts.Count(), consumerId);
+            
+            return consumerContacts;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting consumer contacts for consumer: {ConsumerId}", consumerId);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Deletes a consumer contact
+    /// </summary>
+    public async Task<bool> DeleteConsumerContactAsync(Guid contactId, string deletedBy)
+    {
+        _logger.LogInformation("Deleting consumer contact: {ContactId}", contactId);
+
+        // Input validation
+        if (string.IsNullOrWhiteSpace(deletedBy))
+            throw new ArgumentException("DeletedBy cannot be null or empty", nameof(deletedBy));
+
+        try
+        {
+            // Delete the contact from repository
+            var result = await _unitOfWork.ConsumerContacts.DeleteAsync(contactId);
+            
+            if (result)
+            {
+                await _unitOfWork.SaveChangesAsync();
+                _logger.LogInformation("Successfully deleted consumer contact: {ContactId}", contactId);
+            }
+            else
+            {
+                _logger.LogWarning("Consumer contact not found for deletion: {ContactId}", contactId);
+            }
+            
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting consumer contact: {ContactId}", contactId);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Sets a contact as primary for a specific consumer
+    /// </summary>
+    public async Task<bool> SetPrimaryConsumerContactAsync(Guid contactId, string updatedBy)
+    {
+        _logger.LogInformation("Setting consumer contact as primary: {ContactId}", contactId);
+
+        // Input validation
+        if (string.IsNullOrWhiteSpace(updatedBy))
+            throw new ArgumentException("UpdatedBy cannot be null or empty", nameof(updatedBy));
+
+        try
+        {
+            // First, get the contact to set as primary
+            var contactToSetPrimary = await _unitOfWork.ConsumerContacts.GetByIdAsync(contactId);
+            if (contactToSetPrimary == null)
+            {
+                _logger.LogWarning("Contact not found: {ContactId}", contactId);
+                return false;
+            }
+
+            // Get all contacts for this consumer
+            var allContacts = await GetConsumerContactsByConsumerIdAsync(contactToSetPrimary.ConsumerId);
+            
+            // Update all contacts: set the target as primary, others as non-primary
+            foreach (var contact in allContacts)
+            {
+                var wasChanged = false;
+                
+                if (contact.ContactId == contactId)
+                {
+                    // Set this contact as primary
+                    if (!contact.IsPrimaryContact)
+                    {
+                        contact.IsPrimaryContact = true;
+                        contact.Audit.UpdatedBy = updatedBy;
+                        contact.Audit.UpdatedOn = DateTime.UtcNow;
+                        wasChanged = true;
+                    }
+                }
+                else
+                {
+                    // Unset other contacts as primary
+                    if (contact.IsPrimaryContact)
+                    {
+                        contact.IsPrimaryContact = false;
+                        contact.Audit.UpdatedBy = updatedBy;
+                        contact.Audit.UpdatedOn = DateTime.UtcNow;
+                        wasChanged = true;
+                    }
+                }
+
+                // Update if changed
+                if (wasChanged)
+                {
+                    await _unitOfWork.ConsumerContacts.UpdateAsync(contact.ContactId, contact);
+                }
+            }
+            
+            await _unitOfWork.SaveChangesAsync();
+            
+            _logger.LogInformation("Successfully set consumer contact as primary: {ContactId} for consumer: {ConsumerId}", 
+                contactId, contactToSetPrimary.ConsumerId);
+            
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error setting consumer contact as primary: {ContactId}", contactId);
+            throw;
+        }
     }
 
     #endregion

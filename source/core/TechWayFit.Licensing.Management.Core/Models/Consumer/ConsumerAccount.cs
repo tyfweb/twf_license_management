@@ -93,4 +93,10 @@ public class ConsumerAccount : IWorkflowCapable
     /// Status of the consumer account
     /// </summary>
     public ConsumerStatus Status { get; set; } = ConsumerStatus.Prospect;
+
+    /// <summary>
+    /// Collection of additional contacts for this consumer (addon feature)
+    /// This doesn't affect existing PrimaryContact/SecondaryContact functionality
+    /// </summary>
+    public virtual ICollection<ConsumerContact> AdditionalContacts { get; set; } = new List<ConsumerContact>();
 }

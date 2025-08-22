@@ -46,6 +46,7 @@ public partial class EfCoreLicensingDbContext : DbContext
 
     // Consumer related entities
     public DbSet<ConsumerAccountEntity> ConsumerAccounts { get; set; }
+    public DbSet<ConsumerContactEntity> ConsumerContacts { get; set; }
 
     // Audit related entities
     public DbSet<AuditEntryEntity> AuditEntries { get; set; }
@@ -86,6 +87,7 @@ public partial class EfCoreLicensingDbContext : DbContext
 
         // Consumer-related entities
         modelBuilder.ApplyConfiguration(new ConsumerAccountEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new ConsumerContactEntityConfiguration());
         modelBuilder.ApplyConfiguration(new ProductConsumerEntityConfiguration());
 
         // License-related entities

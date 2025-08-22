@@ -19,7 +19,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers.Api;
 /// All endpoints require authentication and proper authorization.
 /// </remarks>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/product")]
 [Authorize]
 [Produces("application/json")]
 [SwaggerTag("Product Management - Manage enterprise products, features, and pricing tiers")]

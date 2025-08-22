@@ -243,4 +243,54 @@ public interface IConsumerAccountService
         bool? isActive = null,
         int pageNumber = 1,
         int pageSize = 50);
+
+    // ========================================================================
+    // Consumer Contact Management (Addon Feature)
+    // ========================================================================
+
+    /// <summary>
+    /// Creates a new consumer contact
+    /// </summary>
+    /// <param name="consumerContact">Consumer contact to create</param>
+    /// <param name="createdBy">User creating the contact</param>
+    /// <returns>Created consumer contact</returns>
+    Task<ConsumerContact> CreateConsumerContactAsync(ConsumerContact consumerContact, string createdBy);
+
+    /// <summary>
+    /// Updates an existing consumer contact
+    /// </summary>
+    /// <param name="consumerContact">Consumer contact to update</param>
+    /// <param name="updatedBy">User updating the contact</param>
+    /// <returns>Updated consumer contact</returns>
+    Task<ConsumerContact> UpdateConsumerContactAsync(ConsumerContact consumerContact, string updatedBy);
+
+    /// <summary>
+    /// Gets a consumer contact by ID
+    /// </summary>
+    /// <param name="contactId">Contact ID</param>
+    /// <returns>Consumer contact or null if not found</returns>
+    Task<ConsumerContact?> GetConsumerContactByIdAsync(Guid contactId);
+
+    /// <summary>
+    /// Gets all contacts for a specific consumer
+    /// </summary>
+    /// <param name="consumerId">Consumer ID</param>
+    /// <returns>List of consumer contacts</returns>
+    Task<IEnumerable<ConsumerContact>> GetConsumerContactsByConsumerIdAsync(Guid consumerId);
+
+    /// <summary>
+    /// Deletes a consumer contact
+    /// </summary>
+    /// <param name="contactId">Contact ID to delete</param>
+    /// <param name="deletedBy">User deleting the contact</param>
+    /// <returns>True if deleted successfully</returns>
+    Task<bool> DeleteConsumerContactAsync(Guid contactId, string deletedBy);
+
+    /// <summary>
+    /// Sets a contact as primary for a specific consumer
+    /// </summary>
+    /// <param name="contactId">Contact ID to set as primary</param>
+    /// <param name="updatedBy">User making the change</param>
+    /// <returns>True if updated successfully</returns>
+    Task<bool> SetPrimaryConsumerContactAsync(Guid contactId, string updatedBy);
 }

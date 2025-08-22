@@ -32,7 +32,9 @@ public class PostgreSqlUnitOfWork : IUnitOfWork
     // Core repositories
     private IProductRepository? _products;
     private IProductLicenseRepository? _licenses;
+    private IProductActivationRepository? _productActivations;
     private IConsumerAccountRepository? _consumers;
+    private IConsumerContactRepository? _consumerContacts;
     private IUserProfileRepository? _users;
 
     // Supporting repositories
@@ -62,6 +64,9 @@ public class PostgreSqlUnitOfWork : IUnitOfWork
 
     public IConsumerAccountRepository Consumers => 
         _consumers ??= new PostgreSqlConsumerAccountRepository(_context,_userContext);
+
+    public IConsumerContactRepository ConsumerContacts => 
+        _consumerContacts ??= new PostgreSqlConsumerContactRepository(_context,_userContext);
 
     public IUserProfileRepository Users => 
         _users ??= new PostgreSqlUserProfileRepository(_context,_userContext);

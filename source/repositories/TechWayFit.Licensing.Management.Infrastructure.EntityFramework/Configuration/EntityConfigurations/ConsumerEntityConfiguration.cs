@@ -43,6 +43,12 @@ public class ConsumerAccountEntityConfiguration : IEntityTypeConfiguration<Consu
         builder.HasIndex(e => e.IsActive);
         builder.HasIndex(e => e.TenantId);
         builder.HasIndex(e => new { e.TenantId, e.IsActive });
+
+        // Relationship with ConsumerContacts (One-to-Many)
+        builder.HasMany(e => e.AdditionalContacts)
+               .WithOne(c => c.Consumer)
+               .HasForeignKey(c => c.ConsumerId)
+               .OnDelete(DeleteBehavior.Cascade);
     }
 }
 
@@ -80,5 +86,44 @@ public class ProductConsumerEntityConfiguration : IEntityTypeConfiguration<Produ
         builder.HasIndex(e => e.ConsumerId);
         builder.HasIndex(e => e.IsActive);
         builder.HasIndex(e => e.TenantId);
+    }
+}
+
+/// <summary>
+/// Entity configuration for ConsumerContact (Addon Feature)
+/// </summary>
+public class ConsumerContactEntityConfiguration : IEntityTypeConfiguration<ConsumerContactEntity>
+{
+    public void Configure(EntityTypeBuilder<ConsumerContactEntity> builder)
+    {
+        builder.HasKey(e => e.Id);
+        builder.Property(e => e.Id).IsRequired();
+        builder.Property(e => e.ConsumerId).IsRequired();
+        builder.Property(e => e.ContactName).HasMaxLength(200).IsRequired();
+        builder.Property(e => e.ContactEmail).HasMaxLength(255).IsRequired();
+        builder.Property(e => e.ContactPhone).HasMaxLength(50);
+        builder.Property(e => e.ContactAddress).HasMaxLength(500);
+        builder.Property(e => e.CompanyDivision).HasMaxLength(100);
+        builder.Property(e => e.ContactDesignation).HasMaxLength(100);
+        builder.Property(e => e.ContactType).HasMaxLength(50);
+        builder.Property(e => e.Notes).HasMaxLength(1000);
+        builder.Property(e => e.CreatedBy).HasMaxLength(100).IsRequired();
+        builder.Property(e => e.UpdatedBy).HasMaxLength(100);
+
+        // Foreign key relationship
+        builder.HasOne(e => e.Consumer)
+               .WithMany()
+               .HasForeignKey(e => e.ConsumerId)
+               .OnDelete(DeleteBehavior.Cascade);
+
+        // Indexes
+        builder.HasIndex(e => e.ConsumerId);
+        builder.HasIndex(e => e.ContactEmail);
+        builder.HasIndex(e => e.CompanyDivision);
+        builder.HasIndex(e => e.ContactType);
+        builder.HasIndex(e => e.IsPrimaryContact);
+        builder.HasIndex(e => e.IsActive);
+        builder.HasIndex(e => e.TenantId);
+        builder.HasIndex(e => new { e.TenantId, e.ConsumerId, e.IsActive });
     }
 }

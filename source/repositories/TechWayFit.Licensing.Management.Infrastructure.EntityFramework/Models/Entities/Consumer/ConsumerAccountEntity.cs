@@ -89,6 +89,11 @@ public class ConsumerAccountEntity : AuditWorkflowEntity, IEntityMapper<Consumer
 
     public ICollection<ProductLicenseEntity> Licenses { get; set; } = new List<ProductLicenseEntity>();
     public ICollection<ProductConsumerEntity> ProductConsumers { get; set; } = new List<ProductConsumerEntity>();
+    
+    /// <summary>
+    /// Navigation property for additional contacts (addon feature)
+    /// </summary>
+    public virtual ICollection<ConsumerContactEntity> AdditionalContacts { get; set; } = new List<ConsumerContactEntity>();
 
     #region IEntityMapper implementation
     public ConsumerAccountEntity Map(ConsumerAccount model)
@@ -194,7 +199,8 @@ public class ConsumerAccountEntity : AuditWorkflowEntity, IEntityMapper<Consumer
                 Country = this.AddressCountry
             },
             Notes = this.Notes,
-            Status = Enum.TryParse<ConsumerStatus>(this.Status, out var status) ? status : ConsumerStatus.Prospect
+            Status = Enum.TryParse<ConsumerStatus>(this.Status, out var status) ? status : ConsumerStatus.Prospect,
+            AdditionalContacts = this.AdditionalContacts?.Select(c => c.Map()).ToList() ?? new List<ConsumerContact>()
         };
     }
     #endregion

@@ -68,34 +68,47 @@
                 <!-- Contact Information Section -->
                 <div class="form-section">
                     <h5><i class="fas fa-user me-2"></i>Contact Information</h5>
+                    <div class="alert alert-info alert-persistent">
+                        <i class="fas fa-info-circle me-1"></i>Contact information is automatically populated from the selected consumer and cannot be edited here.
+                    </div>
+                    <!-- Contact Selection Dropdown -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-12">
+                            <label for="ContactSelection" class="form-label">Select Contact Person</label>
+                            <select id="ContactSelection" class="form-select">
+                                <option value="">Select a consumer first to load contacts</option>
+                            </select>
+                        </div>
+                    </div>
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label asp-for="LicensedTo" class="form-label">Licensed To</label>
-                            <input asp-for="LicensedTo" class="form-control" placeholder="Organization or individual name" required />
+                            <input asp-for="LicensedTo" class="form-control" placeholder="Select a consumer to populate" readonly required />
                             <span asp-validation-for="LicensedTo" class="invalid-feedback"></span>
                         </div>
                         <div class="col-md-6">
                             <label asp-for="ContactPerson" class="form-label">Contact Person</label>
-                            <input asp-for="ContactPerson" class="form-control" placeholder="Primary contact name" required />
+                            <input asp-for="ContactPerson" class="form-control" placeholder="Will be loaded from consumer" readonly required />
                             <span asp-validation-for="ContactPerson" class="invalid-feedback"></span>
                         </div>
                         <div class="col-md-6">
                             <label asp-for="ContactEmail" class="form-label">Contact Email</label>
-                            <input asp-for="ContactEmail" type="email" class="form-control" placeholder="contact@example.com" required />
+                            <input asp-for="ContactEmail" type="email" class="form-control" placeholder="Will be loaded from consumer" readonly required />
                             <span asp-validation-for="ContactEmail" class="invalid-feedback"></span>
                         </div>
                         <div class="col-md-6">
                             <label asp-for="SecondaryContactPerson" class="form-label">Secondary Contact (Optional)</label>
-                            <input asp-for="SecondaryContactPerson" class="form-control" placeholder="Secondary contact name" />
+                            <input asp-for="SecondaryContactPerson" class="form-control" placeholder="No secondary contact available" readonly />
                             <span asp-validation-for="SecondaryContactPerson" class="invalid-feedback"></span>
                         </div>
                         <div class="col-md-6">
                             <label asp-for="SecondaryContactEmail" class="form-label">Secondary Email (Optional)</label>
-                            <input asp-for="SecondaryContactEmail" type="email" class="form-control" placeholder="secondary@example.com" />
+                            <input asp-for="SecondaryContactEmail" type="email" class="form-control" placeholder="No secondary email available" readonly />
                             <span asp-validation-for="SecondaryContactEmail" class="invalid-feedback"></span>
                         </div>
                     </div>
                 </div>
+ 
 
                 <!-- License Configuration Section -->
                 <div class="form-section">
@@ -236,6 +249,44 @@
     <script src="~/js/product-features.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Load consumer contact information when consumer is selected
+            const consumerSelect = document.getElementById('ConsumerId');
+            const contactSelect = document.getElementById('ContactSelection');
+            
+            if (consumerSelect) {
+                consumerSelect.addEventListener('change', function() {
+                    const consumerId = this.value;
+                    if (consumerId) {
+                        loadConsumerContacts(consumerId);
+                    } else {
+                        clearContactInfo();
+                        clearContactDropdown();
+                    }
+                });
+            }
+
+            // Handle contact selection
+            if (contactSelect) {
+                contactSelect.addEventListener('change', function() {
+                    const selectedContactData = this.value;
+                    if (selectedContactData) {
+                        try {
+                            const contactInfo = JSON.parse(selectedContactData);
+                            populateContactFields(contactInfo);
+                        } catch (error) {
+                            console.error('Error parsing contact data:', error);
+                        }
+                    } else {
+                        clearContactInfo();
+                    }
+                });
+            }
+
+            // Load contacts for initially selected consumer
+            if (consumerSelect && consumerSelect.value) {
+                loadConsumerContacts(consumerSelect.value);
+            }
+
             // Load product tiers when product is selected
             const productSelect = document.getElementById('ProductId');
             const tierSelect = document.getElementById('productTierSelect');
@@ -303,7 +354,7 @@
                 .then(response => response.json())
                 .then(tiers => {
                     tierSelect.innerHTML = '<option value="">Select a Tier</option>';
-                    tiers.forEach(tier => {
+                    tiers.data.forEach(tier => {
                         const option = document.createElement('option');
                         option.value = tier.tierId || tier.TierId;
                         option.textContent = `${tier.name || tier.Name} - $${tier.monthlyPrice || tier.MonthlyPrice || 0}/month`;
@@ -324,9 +375,9 @@
             fetch(`/api/Product/${productId}/features`)
                 .then(response => response.json())
                 .then(features => {
-                    if (features && features.length > 0) {
+                    if (features && features.data && features.data.length > 0) {
                         featuresContainer.innerHTML = '';
-                        features.forEach(feature => {
+                        features.data.forEach(feature => {
                             const featureDiv = document.createElement('div');
                             featureDiv.className = 'feature-item';
                             featureDiv.innerHTML = `
@@ -381,6 +432,173 @@
         function removeMetadataRow(button) {
             const row = button.closest('.metadata-row');
             row.remove();
+        }
+
+        function loadConsumerContacts(consumerId) {
+            const contactSelect = document.getElementById('ContactSelection');
+            
+            // Show loading state
+            contactSelect.innerHTML = '<option value="">Loading contacts...</option>';
+            contactSelect.disabled = true;
+            
+            // First, get the consumer's basic information
+            fetch(`/api/Consumer/${consumerId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(consumer => {
+                    // Then get the consumer's additional contacts
+                    return fetch(`/api/Consumer/${consumerId}/contacts`)
+                        .then(response => {
+                            if (!response.ok) {
+                                // If contacts API fails, still use primary consumer info
+                                console.warn('Could not load additional contacts, using primary consumer info only');
+                                return { data: [] };
+                            }
+                            return response.json();
+                        })
+                        .then(contactsResult => {
+                            const contacts = contactsResult.data || [];
+                            populateContactDropdown(consumer.data, contacts);
+                        });
+                })
+                .catch(error => {
+                    console.error('Error loading consumer contacts:', error);
+                    contactSelect.innerHTML = '<option value="">Error loading contacts</option>';
+                    contactSelect.disabled = false;
+                    showMessage('Error loading consumer contact information. Please try again.', 'error');
+                });
+        }
+
+        function populateContactDropdown(consumer, additionalContacts) {
+            const contactSelect = document.getElementById('ContactSelection');
+            
+            // Clear existing options
+            contactSelect.innerHTML = '';
+            
+            // Add primary consumer contact as first option
+            const primaryContactData = {
+                type: 'primary',
+                licensedTo: consumer.companyName || consumer.company || consumer.name || '',
+                contactPerson: consumer.primaryContactName || consumer.name || '',
+                contactEmail: consumer.primaryContactEmail || consumer.email || '',
+                secondaryContactPerson: consumer.secondaryContactName || '',
+                secondaryContactEmail: consumer.secondaryContactEmail || ''
+            };
+            
+            const primaryOption = document.createElement('option');
+            primaryOption.value = JSON.stringify(primaryContactData);
+            primaryOption.textContent = `${primaryContactData.contactPerson} (Primary Contact)`;
+            contactSelect.appendChild(primaryOption);
+            
+            // Add additional contacts if available
+            if (additionalContacts && additionalContacts.length > 0) {
+                additionalContacts.forEach(contact => {
+                    const contactData = {
+                        type: 'additional',
+                        licensedTo: consumer.companyName || consumer.company || consumer.name || '',
+                        contactPerson: contact.contactName || '',
+                        contactEmail: contact.contactEmail || '',
+                        secondaryContactPerson: '',
+                        secondaryContactEmail: '',
+                        contactPhone: contact.contactPhone || '',
+                        contactAddress: contact.contactAddress || '',
+                        companyDivision: contact.companyDivision || '',
+                        contactDesignation: contact.contactDesignation || '',
+                        isPrimary: contact.isPrimary || false
+                    };
+                    
+                    const option = document.createElement('option');
+                    option.value = JSON.stringify(contactData);
+
+                    let displayText = contact.contactName || 'Unnamed Contact'; // Updated property name
+                    if (contact.companyDivision) { // Updated property name
+                        displayText += ` (${contact.companyDivision})`;
+                    }
+                    if (contact.contactDesignation) { // Updated property name
+                        displayText += ` - ${contact.contactDesignation}`;
+                    }
+                    if (contact.isPrimary) { // Updated property name
+                        displayText += ' [Primary]';
+                    }
+                    
+                    option.textContent = displayText;
+                    contactSelect.appendChild(option);
+                });
+            }
+            
+            // Enable the dropdown
+            contactSelect.disabled = false;
+            
+            // Auto-select the first option (primary contact) and populate fields
+            if (contactSelect.options.length > 0) {
+                contactSelect.selectedIndex = 0;
+                const selectedContactData = JSON.parse(contactSelect.value);
+                populateContactFields(selectedContactData);
+                showMessage('Contact information loaded successfully from consumer data.', 'success');
+            }
+        }
+
+        function populateContactFields(contactInfo) {
+            // Populate the form fields
+            document.getElementById('LicensedTo').value = contactInfo.licensedTo || '';
+            document.getElementById('ContactPerson').value = contactInfo.contactPerson || '';
+            document.getElementById('ContactEmail').value = contactInfo.contactEmail || '';
+            document.getElementById('SecondaryContactPerson').value = contactInfo.secondaryContactPerson || '';
+            document.getElementById('SecondaryContactEmail').value = contactInfo.secondaryContactEmail || '';
+        }
+
+        function clearContactDropdown() {
+            const contactSelect = document.getElementById('ContactSelection');
+            contactSelect.innerHTML = '<option value="">Select a consumer first to load contacts</option>';
+            contactSelect.disabled = true;
+        }
+
+        function clearContactInfo() {
+            document.getElementById('LicensedTo').value = '';
+            document.getElementById('ContactPerson').value = '';
+            document.getElementById('ContactEmail').value = '';
+            document.getElementById('SecondaryContactPerson').value = '';
+            document.getElementById('SecondaryContactEmail').value = '';
+            clearContactDropdown();
+        }
+
+        function showMessage(message, type) {
+            const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+            const iconClass = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle';
+            
+            const messageHtml = `
+                <div class="alert ${alertClass} alert-dismissible fade show mt-3" role="alert">
+                    <i class="fas ${iconClass} me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            
+            // Remove existing messages
+            const existingAlerts = document.querySelectorAll('.alert-dismissible');
+            existingAlerts.forEach(alert => alert.remove());
+            
+            // Add new message after the form header
+            const formHeader = document.querySelector('.form-header');
+            if (formHeader) {
+                formHeader.insertAdjacentHTML('afterend', messageHtml);
+            }
+            
+            // Auto-dismiss success messages after 3 seconds
+            if (type === 'success') {
+                setTimeout(() => {
+                    const successAlert = document.querySelector('.alert-success');
+                    if (successAlert) {
+                        successAlert.style.transition = 'opacity 0.5s';
+                        successAlert.style.opacity = '0';
+                        setTimeout(() => successAlert.remove(), 500);
+                    }
+                }, 3000);
+            }
         }
     </script>
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
