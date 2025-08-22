@@ -65,6 +65,7 @@ namespace TechWayFit.Licensing.Management.Web.ViewModels.Product
         public List<LicenseSummaryViewModel> RecentLicenses { get; set; } = new();
         public ProductStatisticsViewModel Statistics { get; set; } = new();
         public List<StatsTileViewModel> StatsTiles { get; set; } = new();
+        public ProductKeyInfoViewModel? KeyInfo { get; set; }
     }
 
     /// <summary>
@@ -163,6 +164,14 @@ namespace TechWayFit.Licensing.Management.Web.ViewModels.Product
 
         [Display(Name = "Created Date")]
         public DateTime? CreatedDate { get; set; }
+
+        // RSA Key Generation Options
+        [Display(Name = "Auto-generate RSA keys")]
+        public bool AutoGenerateKeys { get; set; } = true;
+
+        [Display(Name = "Key Size")]
+        [Range(2048, 4096, ErrorMessage = "Key size must be 2048 or 4096 bits")]
+        public int KeySize { get; set; } = 2048;
  
     }
     /// <summary>

@@ -26,19 +26,22 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         private readonly IEnterpriseProductService _productService;
         private readonly IConsumerAccountService _consumerService;
         private readonly IProductActivationService _productActivationService;
+        private readonly ILicenseFileService _licenseFileService;
 
         public LicenseController(
             ILogger<LicenseController> logger,
             IProductLicenseService licenseService,
             IEnterpriseProductService productService,
             IConsumerAccountService consumerService,
-            IProductActivationService productActivationService)
+            IProductActivationService productActivationService,
+            ILicenseFileService licenseFileService)
         {
             _logger = logger;
             _licenseService = licenseService;
             _productService = productService;
             _consumerService = consumerService;
             _productActivationService = productActivationService;
+            _licenseFileService = licenseFileService;
         }
 
         /// <summary>
@@ -330,12 +333,15 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
-                // Generate license file content
-                var licenseFileContent = GenerateLicenseFileContent(license);
+                // Generate license file content using the enhanced service
+                var licenseFileContent = await _licenseFileService.GenerateLicenseFileAsync(license);
                 var fileName = $"License_{license.LicenseCode}_{DateTime.UtcNow:yyyyMMdd}.lic";
 
+                // Track download
+                await _licenseFileService.TrackDownloadAsync(license.LicenseId, User.Identity?.Name ?? "Anonymous", "lic");
+
                 // Log the download action
-                _logger.LogInformation("License {LicenseId} downloaded by user", id);
+                _logger.LogInformation("License {LicenseId} downloaded by user {User}", id, User.Identity?.Name);
 
                 // Return file for download
                 var fileBytes = System.Text.Encoding.UTF8.GetBytes(licenseFileContent);
@@ -376,11 +382,14 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
-                // Generate JSON license content
-                var licenseJson = GenerateLicenseJsonContent(license);
+                // Generate JSON license content using enhanced service
+                var licenseJson = await _licenseFileService.GenerateJsonLicenseFileAsync(license);
                 var fileName = $"License_{license.LicenseCode}_{DateTime.UtcNow:yyyyMMdd}.json";
 
-                _logger.LogInformation("License {LicenseId} downloaded as JSON by user", id);
+                // Track download
+                await _licenseFileService.TrackDownloadAsync(license.LicenseId, User.Identity?.Name ?? "Anonymous", "json");
+
+                _logger.LogInformation("License {LicenseId} downloaded as JSON by user {User}", id, User.Identity?.Name);
 
                 var fileBytes = System.Text.Encoding.UTF8.GetBytes(licenseJson);
                 return File(fileBytes, "application/json", fileName);
@@ -394,7 +403,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         }
 
         /// <summary>
-        /// Download License as ZIP bundle containing both formats
+        /// Download License as ZIP bundle containing all formats
         /// </summary>
         [HttpGet]
         public async Task<IActionResult> DownloadZip(Guid id)
@@ -420,50 +429,136 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
-                // Generate both license formats
-                var licenseFileContent = GenerateLicenseFileContent(license);
-                var licenseJsonContent = GenerateLicenseJsonContent(license);
-                
-                // Create ZIP file in memory
-                using var memoryStream = new MemoryStream();
-                using (var archive = new System.IO.Compression.ZipArchive(memoryStream, System.IO.Compression.ZipArchiveMode.Create, true))
-                {
-                    // Add .lic file
-                    var licenseEntry = archive.CreateEntry($"License_{license.LicenseCode}.lic");
-                    using (var licenseStream = licenseEntry.Open())
-                    {
-                        var licenseBytes = System.Text.Encoding.UTF8.GetBytes(licenseFileContent);
-                        await licenseStream.WriteAsync(licenseBytes, 0, licenseBytes.Length);
-                    }
-
-                    // Add .json file
-                    var jsonEntry = archive.CreateEntry($"License_{license.LicenseCode}.json");
-                    using (var jsonStream = jsonEntry.Open())
-                    {
-                        var jsonBytes = System.Text.Encoding.UTF8.GetBytes(licenseJsonContent);
-                        await jsonStream.WriteAsync(jsonBytes, 0, jsonBytes.Length);
-                    }
-
-                    // Add README file with instructions
-                    var readmeEntry = archive.CreateEntry("README.txt");
-                    using (var readmeStream = readmeEntry.Open())
-                    {
-                        var readmeContent = GenerateReadmeContent(license);
-                        var readmeBytes = System.Text.Encoding.UTF8.GetBytes(readmeContent);
-                        await readmeStream.WriteAsync(readmeBytes, 0, readmeBytes.Length);
-                    }
-                }
-
+                // Generate complete license package using enhanced service
+                var packageBytes = await _licenseFileService.GenerateLicensePackageAsync(license);
                 var fileName = $"License_{license.LicenseCode}_{DateTime.UtcNow:yyyyMMdd}.zip";
-                _logger.LogInformation("License {LicenseId} downloaded as ZIP bundle by user", id);
 
-                return File(memoryStream.ToArray(), "application/zip", fileName);
+                // Track download
+                await _licenseFileService.TrackDownloadAsync(license.LicenseId, User.Identity?.Name ?? "Anonymous", "zip");
+
+                _logger.LogInformation("License {LicenseId} downloaded as ZIP bundle by user {User}", id, User.Identity?.Name);
+
+                return File(packageBytes, "application/zip", fileName);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error downloading license ZIP {LicenseId}", id);
                 TempData["ErrorMessage"] = "An error occurred while downloading the license bundle.";
                 return RedirectToAction(nameof(Index));
+            }
+        }
+
+        /// <summary>
+        /// Download License as XML format
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> DownloadXml(Guid id)
+        {
+            try
+            {
+                if (id == Guid.Empty)
+                {
+                    TempData["ErrorMessage"] = "License ID is required.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                var license = await _licenseService.GetLicenseByIdAsync(id);
+                if (license == null)
+                {
+                    TempData["ErrorMessage"] = "License not found.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                if (license.Status != LicenseStatus.Active)
+                {
+                    TempData["ErrorMessage"] = "Only active licenses can be downloaded.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Generate XML license content using enhanced service
+                var licenseXml = await _licenseFileService.GenerateXmlLicenseFileAsync(license);
+                var fileName = $"License_{license.LicenseCode}_{DateTime.UtcNow:yyyyMMdd}.xml";
+
+                // Track download
+                await _licenseFileService.TrackDownloadAsync(license.LicenseId, User.Identity?.Name ?? "Anonymous", "xml");
+
+                _logger.LogInformation("License {LicenseId} downloaded as XML by user {User}", id, User.Identity?.Name);
+
+                var fileBytes = System.Text.Encoding.UTF8.GetBytes(licenseXml);
+                return File(fileBytes, "application/xml", fileName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error downloading license XML {LicenseId}", id);
+                TempData["ErrorMessage"] = "An error occurred while downloading the license.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        /// <summary>
+        /// Download Statistics for a license
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> DownloadStats(Guid id)
+        {
+            try
+            {
+                if (id == Guid.Empty)
+                {
+                    return Json(new { success = false, message = "License ID is required." });
+                }
+
+                var stats = await _licenseFileService.GetDownloadStatsAsync(id);
+                return Json(new { success = true, data = stats });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting download stats for license {LicenseId}", id);
+                return Json(new { success = false, message = "An error occurred while retrieving download statistics." });
+            }
+        }
+
+        /// <summary>
+        /// Bulk export multiple licenses
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> BulkExport([FromBody] BulkExportRequest request)
+        {
+            try
+            {
+                if (request?.LicenseIds?.Any() != true)
+                {
+                    return Json(new { success = false, message = "No licenses selected for export." });
+                }
+
+                // Get all selected licenses
+                var licenses = new List<ProductLicense>();
+                foreach (var licenseId in request.LicenseIds)
+                {
+                    var license = await _licenseService.GetLicenseByIdAsync(licenseId);
+                    if (license != null && license.Status == LicenseStatus.Active)
+                    {
+                        licenses.Add(license);
+                    }
+                }
+
+                if (!licenses.Any())
+                {
+                    return Json(new { success = false, message = "No valid licenses found for export." });
+                }
+
+                // Generate bulk export
+                var exportBytes = await _licenseFileService.GenerateBulkExportAsync(licenses, request.Format ?? "zip");
+                var fileName = $"BulkExport_{DateTime.UtcNow:yyyyMMdd_HHmmss}.zip";
+
+                _logger.LogInformation("Bulk export of {Count} licenses by user {User}", licenses.Count, User.Identity?.Name);
+
+                return File(exportBytes, "application/zip", fileName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during bulk export");
+                return Json(new { success = false, message = "An error occurred during bulk export." });
             }
         }
 

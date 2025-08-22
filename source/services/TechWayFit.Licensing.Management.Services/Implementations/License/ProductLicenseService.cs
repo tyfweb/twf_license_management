@@ -13,6 +13,7 @@ using System.Text.Json;
 using CoreModels = TechWayFit.Licensing.Core.Models;
 using ManagementModels = TechWayFit.Licensing.Management.Core.Models.License;
 using TechWayFit.Licensing.Core.Models;
+using TechWayFit.Licensing.Management.Core.Models.Enums;
 
 namespace TechWayFit.Licensing.Management.Services.Implementations.License;
 
@@ -24,15 +25,18 @@ public class ProductLicenseService : IProductLicenseService
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILicenseGenerationFactory _licenseGenerationFactory;
     private readonly ILogger<ProductLicenseService> _logger;
+    private readonly LicenseValidationEnhancementService? _enhancedValidationService;
 
     public ProductLicenseService(
         IUnitOfWork unitOfWork,
         ILicenseGenerationFactory licenseGenerationFactory,
-        ILogger<ProductLicenseService> logger)
+        ILogger<ProductLicenseService> logger,
+        LicenseValidationEnhancementService? enhancedValidationService = null)
     {
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _licenseGenerationFactory = licenseGenerationFactory ?? throw new ArgumentNullException(nameof(licenseGenerationFactory));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _enhancedValidationService = enhancedValidationService;
     }
 
     /// <summary>
@@ -138,6 +142,183 @@ public class ProductLicenseService : IProductLicenseService
             return LicenseValidationResult.Failure(LicenseStatus.ServiceUnavailable, 
                     "An error occurred while validating the license. Please try again later.");
         }
+    }
+
+    /// <summary>
+    /// Performs enhanced validation of a license with detailed business rules and usage analysis
+    /// </summary>
+    /// <param name="licenseKey">License key to validate</param>
+    /// <param name="productId">Product ID to validate against</param>
+    /// <param name="includeDetailedAnalysis">Whether to include detailed validation analysis</param>
+    /// <returns>Enhanced validation result with detailed information</returns>
+    public async Task<EnhancedLicenseValidationResult?> ValidateLicenseWithEnhancedRulesAsync(
+        string licenseKey, 
+        Guid productId, 
+        bool includeDetailedAnalysis = true)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(licenseKey))
+                throw new ArgumentException("LicenseKey cannot be null or empty", nameof(licenseKey));
+            if (Guid.Empty.Equals(productId))
+                throw new ArgumentException("ProductId cannot be null or empty", nameof(productId));
+
+            _logger.LogInformation("Starting enhanced validation for license key: {LicenseKey}, product: {ProductId}", 
+                licenseKey.Substring(0, Math.Min(8, licenseKey.Length)) + "...", productId);
+
+            // First, get the license
+            var license = await GetLicenseByKeyAsync(licenseKey);
+            if (license == null)
+            {
+                _logger.LogWarning("License not found during enhanced validation: {LicenseKey}", licenseKey);
+                return new EnhancedLicenseValidationResult
+                {
+                    LicenseKey = licenseKey,
+                    IsValid = false,
+                    ValidationMessages = new List<string> { "License not found" },
+                    BusinessRuleViolations = new List<string> { "License key does not exist in the system" },
+                    Warnings = new List<string>()
+                };
+            }
+
+            // Check product match
+            if (license.LicenseConsumer?.Product?.ProductId != productId)
+            {
+                _logger.LogWarning("Product mismatch during enhanced validation. Expected: {ExpectedProductId}, Found: {ActualProductId}", 
+                    productId, license.LicenseConsumer?.Product?.ProductId);
+                return new EnhancedLicenseValidationResult
+                {
+                    LicenseId = license.LicenseId,
+                    LicenseKey = licenseKey,
+                    LicenseType = license.LicenseModel,
+                    IsValid = false,
+                    ValidationMessages = new List<string> { "Product mismatch" },
+                    BusinessRuleViolations = new List<string> { "License does not match the specified product" },
+                    Warnings = new List<string>()
+                };
+            }
+
+            // Perform enhanced validation if service is available and detailed analysis is requested
+            if (_enhancedValidationService != null && includeDetailedAnalysis)
+            {
+                _logger.LogDebug("Performing enhanced validation with business rules analysis");
+                var enhancedResult = await _enhancedValidationService.ValidateWithEnhancedRulesAsync(license);
+                
+                _logger.LogInformation("Enhanced validation completed. Valid: {IsValid}, Warnings: {WarningCount}, Violations: {ViolationCount}", 
+                    enhancedResult.IsValid, enhancedResult.Warnings.Count, enhancedResult.BusinessRuleViolations.Count);
+                
+                return enhancedResult;
+            }
+            else
+            {
+                // Fallback to basic enhanced validation without external service
+                _logger.LogDebug("Performing basic enhanced validation without external service");
+                return await PerformBasicEnhancedValidationAsync(license);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error during enhanced license validation for key: {LicenseKey}", licenseKey);
+            return new EnhancedLicenseValidationResult
+            {
+                LicenseKey = licenseKey,
+                IsValid = false,
+                ValidationMessages = new List<string> { $"Validation error: {ex.Message}" },
+                BusinessRuleViolations = new List<string> { "Internal validation error occurred" },
+                Warnings = new List<string>()
+            };
+        }
+    }
+
+    /// <summary>
+    /// Performs basic enhanced validation when the enhanced validation service is not available
+    /// </summary>
+    /// <param name="license">License to validate</param>
+    /// <returns>Basic enhanced validation result</returns>
+    private async Task<EnhancedLicenseValidationResult> PerformBasicEnhancedValidationAsync(ProductLicense license)
+    {
+        var result = new EnhancedLicenseValidationResult
+        {
+            LicenseId = license.LicenseId,
+            LicenseKey = license.LicenseKey,
+            LicenseType = license.LicenseModel,
+            IsValid = true,
+            ValidationMessages = new List<string>(),
+            Warnings = new List<string>(),
+            BusinessRuleViolations = new List<string>()
+        };
+
+        // Basic validation checks
+        if (license.ProductId == Guid.Empty)
+            result.BusinessRuleViolations.Add("License must have a valid Product ID");
+
+        if (license.ConsumerId == Guid.Empty)
+            result.BusinessRuleViolations.Add("License must have a valid Consumer ID");
+
+        if (string.IsNullOrWhiteSpace(license.LicenseKey))
+            result.BusinessRuleViolations.Add("License must have a valid License Key");
+
+        // Date validation
+        if (license.ValidFrom >= license.ValidTo)
+            result.BusinessRuleViolations.Add("License ValidFrom date must be before ValidTo date");
+
+        // Status and expiration validation
+        var now = DateTime.UtcNow;
+        var daysUntilExpiry = (license.ValidTo - now).Days;
+        result.DaysUntilExpiry = daysUntilExpiry;
+
+        if (license.Status == TechWayFit.Licensing.Core.Models.LicenseStatus.Active && license.ValidTo < now)
+        {
+            result.BusinessRuleViolations.Add("License status is Active but the license has expired");
+        }
+
+        if (daysUntilExpiry <= 0)
+        {
+            result.Warnings.Add("License has expired");
+            result.IsExpired = true;
+        }
+        else if (daysUntilExpiry <= 7)
+        {
+            result.Warnings.Add($"License expires in {daysUntilExpiry} day(s) - urgent renewal required");
+            result.RequiresUrgentRenewal = true;
+        }
+        else if (daysUntilExpiry <= 30)
+        {
+            result.Warnings.Add($"License expires in {daysUntilExpiry} day(s) - renewal recommended");
+            result.RequiresRenewal = true;
+        }
+
+        // License type specific validation
+        switch (license.LicenseModel)
+        {
+            case LicenseType.VolumetricLicense:
+                if (!license.MaxAllowedUsers.HasValue || license.MaxAllowedUsers <= 0)
+                {
+                    result.BusinessRuleViolations.Add("VolumetricLicense must specify MaxAllowedUsers greater than 0");
+                }
+                result.ValidationMessages.Add($"VolumetricLicense validation completed for {license.MaxAllowedUsers} users");
+                break;
+            case LicenseType.ProductKey:
+                result.ValidationMessages.Add("ProductKey license validation completed");
+                break;
+            case LicenseType.ProductLicenseFile:
+                if (string.IsNullOrWhiteSpace(license.LicenseSignature))
+                {
+                    result.BusinessRuleViolations.Add("ProductLicenseFile must have a digital signature");
+                }
+                result.ValidationMessages.Add("ProductLicenseFile license validation completed");
+                break;
+        }
+
+        // Set final validation status
+        result.IsValid = result.BusinessRuleViolations.Count == 0;
+
+        result.ValidationMessages.Add("Basic enhanced validation completed");
+        
+        _logger.LogInformation("Basic enhanced validation completed for license {LicenseId}. Valid: {IsValid}", 
+            license.LicenseId, result.IsValid);
+
+        return await Task.FromResult(result);
     }
 
     #region TODO: Missing Interface Methods - Require Implementation
@@ -504,7 +685,7 @@ public class ProductLicenseService : IProductLicenseService
         var result = await _unitOfWork.Licenses.SearchAsync(searchRequest);
         return result.Results;
     }
-
+ 
 
     #endregion
 }

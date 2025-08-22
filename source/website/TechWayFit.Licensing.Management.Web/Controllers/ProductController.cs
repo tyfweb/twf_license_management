@@ -24,19 +24,22 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         private readonly IProductLicenseService _licenseService;
         private readonly IConsumerAccountService _consumerService;
         private readonly IProductFeatureService _productFeatureService;
+        private readonly IKeyManagementService _keyManagementService;
 
         public ProductController(
             ILogger<ProductController> logger,
             IEnterpriseProductService productService,
             IProductLicenseService licenseService,
             IConsumerAccountService consumerService,
-            IProductFeatureService productFeatureService)
+            IProductFeatureService productFeatureService,
+            IKeyManagementService keyManagementService)
         {
             _logger = logger;
             _productService = productService ?? throw new ArgumentNullException(nameof(productService));
             _licenseService = licenseService ?? throw new ArgumentNullException(nameof(licenseService));
             _consumerService = consumerService ?? throw new ArgumentNullException(nameof(consumerService));
             _productFeatureService = productFeatureService ?? throw new ArgumentNullException(nameof(productFeatureService));
+            _keyManagementService = keyManagementService ?? throw new ArgumentNullException(nameof(keyManagementService));
         }
 
         /// <summary>
@@ -114,12 +117,18 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 if (product == null)
                 {
                     return NotFound();
-                }                var viewModel = new ProductDetailViewModel
+                }
+
+                // Get key management information
+                var keyInfo = await GetProductKeyInfoAsync(id);
+
+                var viewModel = new ProductDetailViewModel
                 {
                     Product = product,
                     Consumers = await GetProductConsumersAsync(id),
                     RecentLicenses = await GetRecentLicensesAsync(id),
-                    Statistics = await GetProductStatisticsAsync(id)
+                    Statistics = await GetProductStatisticsAsync(id),
+                    KeyInfo = keyInfo
                 };
 
                 // Populate stats tiles for reusable component
@@ -198,7 +207,26 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
 
                 var product = await _productService.CreateProductAsync(enterpriseProduct, User.Identity?.Name ?? "System");
 
-                TempData["SuccessMessage"] = $"Product '{model.ProductName}' created successfully!";
+                // Auto-generate RSA keys if requested
+                if (model.AutoGenerateKeys)
+                {
+                    try
+                    {
+                        await _keyManagementService.GenerateKeyPairForProductAsync(product.ProductId, model.KeySize);
+                        _logger.LogInformation("Auto-generated {KeySize}-bit RSA keys for new product {ProductId}", model.KeySize, product.ProductId);
+                        TempData["SuccessMessage"] = $"Product '{model.ProductName}' created successfully with {model.KeySize}-bit RSA keys!";
+                    }
+                    catch (Exception keyEx)
+                    {
+                        _logger.LogError(keyEx, "Error auto-generating keys for product {ProductId}", product.ProductId);
+                        TempData["WarningMessage"] = $"Product '{model.ProductName}' created successfully, but key generation failed. You can generate keys manually from the product details page.";
+                    }
+                }
+                else
+                {
+                    TempData["SuccessMessage"] = $"Product '{model.ProductName}' created successfully!";
+                }
+
                 return RedirectToAction(nameof(Details), new { id = product.ProductId });
             }
             catch (Exception ex)
@@ -1325,8 +1353,8 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 newFeature.Code = string.Join("", newFeature.FeatureId.ToString().Split('-').Select(part => part.First().ToString().ToUpper()));
                 newFeature.Usage = new ProductFeatureUsage
                 {
-                    MaxUsage = model.MaxUsage.Value,
-                    IsUnlimited = model.MaxUsage.Value <= 0,
+                    MaxUsage = model.MaxUsage ?? 0,
+                    IsUnlimited = (model.MaxUsage ?? 0) <= 0,
                     ExpirationDate = DateTime.Now.AddYears(10)
                 };
                 await _productFeatureService.CreateFeatureAsync(newFeature, CurrentUserName);
@@ -1495,6 +1523,62 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 CanDelete = true // Simplified, in real app check if feature can be deleted
             }).ToList();
 
+        }
+
+        /// <summary>
+        /// Get product key information for display
+        /// </summary>
+        private async Task<ProductKeyInfoViewModel> GetProductKeyInfoAsync(Guid productId)
+        {
+            try
+            {
+                var hasKeys = await _keyManagementService.HasValidKeysAsync(productId);
+                
+                var keyInfo = new ProductKeyInfoViewModel
+                {
+                    ProductId = productId,
+                    HasKeys = hasKeys
+                };
+
+                if (hasKeys)
+                {
+                    // TODO: Get actual key generation date, version, size from database
+                    keyInfo.KeyGeneratedAt = DateTime.UtcNow; // Placeholder
+                    keyInfo.KeyVersion = 1; // Placeholder
+                    keyInfo.KeySize = 2048; // Placeholder
+                    
+                    // Generate fingerprint from public key if needed
+                    var publicKey = await _keyManagementService.GetPublicKeyAsync(productId);
+                    if (!string.IsNullOrEmpty(publicKey))
+                    {
+                        keyInfo.KeyFingerprint = GenerateKeyFingerprint(publicKey);
+                    }
+                }
+
+                return keyInfo;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting key info for product {ProductId}", productId);
+                return new ProductKeyInfoViewModel { ProductId = productId, HasKeys = false };
+            }
+        }
+
+        /// <summary>
+        /// Generate a fingerprint for a public key
+        /// </summary>
+        private string GenerateKeyFingerprint(string publicKey)
+        {
+            try
+            {
+                using var sha256 = System.Security.Cryptography.SHA256.Create();
+                var hash = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(publicKey));
+                return Convert.ToHexString(hash).ToLower();
+            }
+            catch
+            {
+                return "unknown";
+            }
         }
 
         #endregion

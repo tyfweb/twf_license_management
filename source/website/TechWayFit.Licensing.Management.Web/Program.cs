@@ -382,6 +382,16 @@ static void RegisterServices(WebApplicationBuilder builder)
     builder.Services.AddScoped<IProductFeatureService, ProductFeatureService>();
     builder.Services.AddScoped<IProductActivationService, ProductActivationService>();
     
+    // Add license generation factory - Required for ProductLicenseService
+    builder.Services.AddScoped<TechWayFit.Licensing.Management.Services.Factories.ILicenseGenerationFactory, TechWayFit.Licensing.Management.Services.Factories.LicenseGenerationFactory>();
+    
+    // Task 5: License File Generation & Download services
+    builder.Services.AddScoped<ILicenseFileService, LicenseFileService>();
+    builder.Services.AddScoped<ILicenseActivationService, LicenseActivationService>();
+    
+    // Legacy validation service from TechWayFit.Licensing.Core
+    builder.Services.AddScoped<ILicenseActivationService, LicenseActivationService>();
+    
     // Legacy validation service from TechWayFit.Licensing.Core
     builder.Services.AddSingleton<TechWayFit.Licensing.Core.Contracts.ILicenseValidationService, TechWayFit.Licensing.Core.Services.LicenseValidationService>();
 

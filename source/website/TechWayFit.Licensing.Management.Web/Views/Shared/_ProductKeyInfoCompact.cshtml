@@ -1,0 +1,133 @@
+@model TechWayFit.Licensing.Management.Web.ViewModels.Product.ProductKeyInfoViewModel
+
+@if (Model != null)
+{
+    <div class="card">
+        <div class="card-header">
+            <h6 class="mb-0">
+                <i class="fas fa-key me-2"></i>License Signing Keys
+                <span class="badge @Model.StatusCssClass ms-2">@Model.Status</span>
+            </h6>
+        </div>
+        <div class="card-body">
+            @if (Model.HasKeys)
+            {
+                <div class="row g-2 text-sm">
+                    <div class="col-6">
+                        <strong>Algorithm:</strong> RSA @Model.KeySize-bit
+                    </div>
+                    <div class="col-6">
+                        <strong>Version:</strong> @Model.KeyVersion
+                    </div>
+                    <div class="col-6">
+                        <strong>Generated:</strong> @(Model.KeyGeneratedAt?.ToString("yyyy-MM-dd") ?? "Unknown")
+                    </div>
+                    <div class="col-6">
+                        <strong>Status:</strong> Active
+                    </div>
+                </div>
+                
+                @if (!string.IsNullOrEmpty(Model.KeyFingerprint))
+                {
+                    <div class="mt-2">
+                        <small class="text-muted d-block">Fingerprint:</small>
+                        <code class="small">@Model.KeyFingerprint.Substring(0, Math.Min(16, Model.KeyFingerprint.Length))...</code>
+                    </div>
+                }
+
+                <div class="d-flex gap-1 mt-3">
+                    <a asp-controller="ProductKeyManagement" asp-action="Index" asp-route-productId="@Model.ProductId" 
+                       class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-cog"></i> Manage
+                    </a>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="quickRotateKeys('@Model.ProductId')">
+                        <i class="fas fa-sync-alt"></i> Rotate
+                    </button>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-2">
+                    <i class="fas fa-key fa-lg text-muted mb-2"></i>
+                    <p class="text-muted mb-2 small">No signing keys generated</p>
+                    <div class="d-flex gap-1 justify-content-center">
+                        <button type="button" class="btn btn-primary btn-sm" onclick="quickGenerateKeys('@Model.ProductId')">
+                            <i class="fas fa-plus"></i> Generate
+                        </button>
+                        <a asp-controller="ProductKeyManagement" asp-action="Index" asp-route-productId="@Model.ProductId" 
+                           class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-cog"></i> Manage
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+else
+{
+    <div class="card">
+        <div class="card-body text-center">
+            <i class="fas fa-key fa-lg text-muted mb-2"></i>
+            <p class="text-muted mb-0 small">Key information will be available after product creation</p>
+        </div>
+    </div>
+}
+
+<script>
+    // Quick key operations (shared with _ProductKeyInfo.cshtml)
+    if (typeof quickGenerateKeys === 'undefined') {
+        function quickGenerateKeys(productId) {
+            // Simplified quick generation
+            if (confirm('Generate RSA 2048-bit key pair for this product?')) {
+                $.ajax({
+                    url: '@Url.Action("GenerateKeys", "ProductKeyManagement")',
+                    type: 'POST',
+                    data: {
+                        productId: productId,
+                        keySize: 2048,
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            alert('Keys generated successfully!');
+                            location.reload();
+                        } else {
+                            alert('Error: ' + response.message);
+                        }
+                    },
+                    error: function() {
+                        alert('An error occurred while generating keys.');
+                    }
+                });
+            }
+        }
+    }
+
+    if (typeof quickRotateKeys === 'undefined') {
+        function quickRotateKeys(productId) {
+            if (confirm('Rotate keys? This will generate new keys and deactivate current ones.')) {
+                $.ajax({
+                    url: '@Url.Action("RotateKeys", "ProductKeyManagement")',
+                    type: 'POST',
+                    data: {
+                        productId: productId,
+                        keySize: 2048,
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            alert('Keys rotated successfully!');
+                            location.reload();
+                        } else {
+                            alert('Error: ' + response.message);
+                        }
+                    },
+                    error: function() {
+                        alert('An error occurred while rotating keys.');
+                    }
+                });
+            }
+        }
+    }
+</script>

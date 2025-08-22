@@ -87,6 +87,10 @@ public class DatabaseKeyManagementService : IKeyManagementService
                 _logger.LogInformation("Private key encrypted for product {ProductId}", productId);
             }
 
+            // Get the next key version for this product
+            var existingKeys = await _unitOfWork.ProductKeys.GetKeysByProductIdAsync(productId);
+            var nextKeyVersion = existingKeys.Any() ? existingKeys.Max(k => k.KeyVersion) + 1 : 1;
+
             // Create new ProductKeys entity
             var productKeys = new ProductKeys
             {
@@ -96,7 +100,7 @@ public class DatabaseKeyManagementService : IKeyManagementService
                 KeySize = 2048, // Default, could be extracted from key
                 Algorithm = "RSA",
                 KeyGeneratedAt = DateTime.UtcNow,
-                KeyVersion = 1,
+                KeyVersion = nextKeyVersion,
                 IsActive = true
             };
 

@@ -26,6 +26,9 @@
                 <a href="@Url.Action("Index", "ProductFeature", new { productId = Model.Product.ProductId })" class="btn btn-outline-primary">
                     <i class="fas fa-star me-1"></i>Features
                 </a>
+                <a href="@Url.Action("Index", "ProductKeyManagement", new { productId = Model.Product.ProductId })" class="btn btn-outline-primary">
+                    <i class="fas fa-key me-1"></i>Keys
+                </a>
             </div>        </div>
     </div>
 
@@ -330,6 +333,14 @@
                     </div>
                 </div>
             </div>
+
+            <!-- RSA Key Management -->
+            @if (Model.KeyInfo != null)
+            {
+                <div class="sidebar-section">
+                    <partial name="_ProductKeyInfo" model="Model.KeyInfo" />
+                </div>
+            }
         </div>
     </div>
 </div>

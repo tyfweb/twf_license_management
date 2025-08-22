@@ -1,0 +1,226 @@
+@model TechWayFit.Licensing.Management.Web.ViewModels.Product.ProductKeyInfoViewModel
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-key"></i> RSA Key Information
+        </h5>
+        <span class="badge @Model.StatusCssClass">@Model.Status</span>
+    </div>
+    <div class="card-body">
+        @if (Model.HasKeys)
+        {
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-2">
+                        <strong>Key Size:</strong> @Model.KeySize bits
+                    </div>
+                    <div class="mb-2">
+                        <strong>Algorithm:</strong> RSA
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-2">
+                        <strong>Generated:</strong> @(Model.KeyGeneratedAt?.ToString("yyyy-MM-dd HH:mm") ?? "Unknown")
+                    </div>
+                    <div class="mb-2">
+                        <strong>Version:</strong> @Model.KeyVersion
+                    </div>
+                </div>
+            </div>
+            
+            @if (!string.IsNullOrEmpty(Model.KeyFingerprint))
+            {
+                <div class="mb-3">
+                    <strong>Fingerprint:</strong>
+                    <code class="d-block small">@Model.KeyFingerprint</code>
+                </div>
+            }
+
+            <div class="d-flex gap-2 flex-wrap">
+                <a asp-controller="ProductKeyManagement" asp-action="Index" asp-route-productId="@Model.ProductId" 
+                   class="btn btn-primary btn-sm">
+                    <i class="fas fa-cog"></i> Manage Keys
+                </a>
+                <button type="button" class="btn btn-outline-success btn-sm" onclick="quickDownloadPublicKey('@Model.ProductId')">
+                    <i class="fas fa-download"></i> Download Public Key
+                </button>
+                <button type="button" class="btn btn-outline-warning btn-sm" onclick="quickRotateKeys('@Model.ProductId')">
+                    <i class="fas fa-sync-alt"></i> Quick Rotate
+                </button>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-3">
+                <i class="fas fa-key fa-2x text-muted mb-2"></i>
+                <p class="text-muted mb-2">No RSA keys generated for this product</p>
+                <div class="d-flex gap-2 justify-content-center">
+                    <button type="button" class="btn btn-primary btn-sm" onclick="quickGenerateKeys('@Model.ProductId')">
+                        <i class="fas fa-plus"></i> Generate Keys
+                    </button>
+                    <a asp-controller="ProductKeyManagement" asp-action="Index" asp-route-productId="@Model.ProductId" 
+                       class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-cog"></i> Key Management
+                    </a>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Quick Operations Modal -->
+<div class="modal fade" id="quickKeyOperationModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="quickOperationTitle">Key Operation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="quickOperationContent">
+                    <!-- Dynamic content loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="quickOperationConfirm" onclick="executeQuickOperation()">
+                    <i class="fas fa-cog fa-spin d-none" id="quickOperationSpinner"></i>
+                    <span id="quickOperationText">Execute</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentQuickOperation = null;
+    let currentProductId = null;
+
+    // Quick generate keys
+    function quickGenerateKeys(productId) {
+        currentQuickOperation = 'generate';
+        currentProductId = productId;
+        
+        $('#quickOperationTitle').text('Generate RSA Keys');
+        $('#quickOperationText').text('Generate Keys');
+        $('#quickOperationConfirm').removeClass('btn-warning btn-danger').addClass('btn-primary');
+        
+        $('#quickOperationContent').html(`
+            <div class="mb-3">
+                <label for="quickKeySize" class="form-label">Key Size</label>
+                <select id="quickKeySize" class="form-select">
+                    <option value="2048">2048 bits (Standard)</option>
+                    <option value="4096">4096 bits (Enhanced Security)</option>
+                </select>
+            </div>
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i>
+                Generate RSA key pair for license signing. This operation may take a few seconds.
+            </div>
+        `);
+        
+        $('#quickKeyOperationModal').modal('show');
+    }
+
+    // Quick rotate keys
+    function quickRotateKeys(productId) {
+        currentQuickOperation = 'rotate';
+        currentProductId = productId;
+        
+        $('#quickOperationTitle').text('Rotate RSA Keys');
+        $('#quickOperationText').text('Rotate Keys');
+        $('#quickOperationConfirm').removeClass('btn-primary btn-danger').addClass('btn-warning');
+        
+        $('#quickOperationContent').html(`
+            <div class="mb-3">
+                <label for="quickKeySize" class="form-label">New Key Size</label>
+                <select id="quickKeySize" class="form-select">
+                    <option value="2048">2048 bits (Standard)</option>
+                    <option value="4096">4096 bits (Enhanced Security)</option>
+                </select>
+            </div>
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>Key Rotation:</strong> This will generate new keys and deactivate current ones. 
+                Existing licenses remain valid, but new licenses will use the new key pair.
+            </div>
+        `);
+        
+        $('#quickKeyOperationModal').modal('show');
+    }
+
+    // Quick download public key
+    function quickDownloadPublicKey(productId) {
+        window.location.href = '@Url.Action("DownloadPublicKey", "ProductKeyManagement")?productId=' + productId;
+    }
+
+    // Execute quick operation
+    function executeQuickOperation() {
+        if (!currentQuickOperation || !currentProductId) return;
+        
+        const keySize = $('#quickKeySize').val() || 2048;
+        const spinner = $('#quickOperationSpinner');
+        const button = $('#quickOperationConfirm');
+        
+        // Show loading state
+        spinner.removeClass('d-none');
+        button.prop('disabled', true);
+        
+        const url = currentQuickOperation === 'generate' 
+            ? '@Url.Action("GenerateKeys", "ProductKeyManagement")'
+            : '@Url.Action("RotateKeys", "ProductKeyManagement")';
+        
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: {
+                productId: currentProductId,
+                keySize: keySize,
+                __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+            },
+            success: function(response) {
+                if (response.success) {
+                    $('#quickKeyOperationModal').modal('hide');
+                    showQuickSuccessMessage(response.message);
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showQuickErrorMessage(response.message);
+                }
+            },
+            error: function() {
+                showQuickErrorMessage('An error occurred. Please try again.');
+            },
+            complete: function() {
+                spinner.addClass('d-none');
+                button.prop('disabled', false);
+            }
+        });
+    }
+
+    // Show quick success message
+    function showQuickSuccessMessage(message) {
+        const alert = $(`
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle"></i> ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `);
+        
+        $('.main-content, .container, .container-fluid').first().prepend(alert);
+        setTimeout(() => alert.alert('close'), 5000);
+    }
+
+    // Show quick error message
+    function showQuickErrorMessage(message) {
+        const alert = $(`
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle"></i> ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `);
+        
+        $('.main-content, .container, .container-fluid').first().prepend(alert);
+        setTimeout(() => alert.alert('close'), 8000);
+    }
+</script>
