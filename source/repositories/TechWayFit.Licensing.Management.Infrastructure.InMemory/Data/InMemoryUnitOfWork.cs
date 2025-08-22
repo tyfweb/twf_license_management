@@ -43,6 +43,7 @@ public class InMemoryUnitOfWork : IUnitOfWork
     private IUserProfileRepository? _users;
 
     // Supporting repositories
+    private IProductKeysRepository? _productKeys;
     private IProductFeatureRepository? _productFeatures;
     private IProductTierRepository? _productTiers;
     private IProductVersionRepository? _productVersions;
@@ -93,6 +94,9 @@ public class InMemoryUnitOfWork : IUnitOfWork
     #endregion
 
     #region Supporting Repositories
+
+    public IProductKeysRepository ProductKeys => 
+        throw new NotImplementedException("ProductKeys repository is not implemented for InMemory provider");
 
     public IProductFeatureRepository ProductFeatures => 
         _productFeatures ??= new EfCoreProductFeatureRepository(_context, _userContext);

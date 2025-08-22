@@ -44,6 +44,7 @@ public class EfCoreUnitOfWork : IUnitOfWork
     private IUserProfileRepository? _users;
 
     // Supporting repositories
+    private IProductKeysRepository? _productKeys;
     private IProductFeatureRepository? _productFeatures;
     private IProductTierRepository? _productTiers;
     private IProductVersionRepository? _productVersions;
@@ -94,6 +95,9 @@ public class EfCoreUnitOfWork : IUnitOfWork
     #endregion
 
     #region Supporting Repositories
+
+    public IProductKeysRepository ProductKeys => 
+        _productKeys ??= new ProductKeysRepository(_context, _userContext);
 
     public IProductFeatureRepository ProductFeatures => 
         _productFeatures ??= new EfCoreProductFeatureRepository(_context,_userContext);

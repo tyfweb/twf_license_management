@@ -377,11 +377,13 @@ static void RegisterServices(WebApplicationBuilder builder)
 
     // Step 5: License management services
     builder.Services.AddScoped<ILicenseGenerator, StatelessLicenseGenerator>();
-    builder.Services.AddScoped<IKeyManagementService, KeyManagementService>();
+    builder.Services.AddScoped<IKeyManagementService, DatabaseKeyManagementService>();
     builder.Services.AddScoped<IProductLicenseService, ProductLicenseService>();
     builder.Services.AddScoped<IProductFeatureService, ProductFeatureService>();
     builder.Services.AddScoped<IProductActivationService, ProductActivationService>();
-    builder.Services.AddSingleton<ILicenseValidationService, LicenseValidationService>();
+    
+    // Legacy validation service from TechWayFit.Licensing.Core
+    builder.Services.AddSingleton<TechWayFit.Licensing.Core.Contracts.ILicenseValidationService, TechWayFit.Licensing.Core.Services.LicenseValidationService>();
 
     // Step 6: Settings management services
     builder.Services.AddScoped<ISettingService, SettingService>();

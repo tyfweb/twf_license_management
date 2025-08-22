@@ -8,6 +8,7 @@ using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Sett
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Tenants;
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.User;
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Workflow;
+using TechWayFit.Licensing.Management.Infrastructure.Contracts.Data;
 
 namespace TechWayFit.Licensing.Management.Infrastructure.Contracts.Data;
 
@@ -51,6 +52,11 @@ public interface IUnitOfWork : IDisposable
     #endregion
 
     #region Supporting Repositories
+
+    /// <summary>
+    /// Product Keys repository
+    /// </summary>
+    IProductKeysRepository ProductKeys { get; }
 
     /// <summary>
     /// Product Feature repository

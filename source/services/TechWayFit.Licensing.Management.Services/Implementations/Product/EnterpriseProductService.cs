@@ -17,13 +17,16 @@ namespace TechWayFit.Licensing.Management.Services.Implementations.Product;
 public class EnterpriseProductService : IEnterpriseProductService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IKeyManagementService _keyManagementService;
     private readonly ILogger<EnterpriseProductService> _logger;
 
     public EnterpriseProductService(
         IUnitOfWork unitOfWork,
+        IKeyManagementService keyManagementService,
         ILogger<EnterpriseProductService> logger)
     {
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        _keyManagementService = keyManagementService ?? throw new ArgumentNullException(nameof(keyManagementService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -100,6 +103,20 @@ public class EnterpriseProductService : IEnterpriseProductService
              //   await _unitOfWork.SaveChangesAsync();
             }
                await _unitOfWork.SaveChangesAsync();
+
+            // Automatically generate cryptographic keys for the new product
+            try
+            {
+                _logger.LogInformation("Generating cryptographic keys for product: {ProductId}", createdEntity.Id);
+                await _keyManagementService.GenerateKeyPairForProductAsync(createdEntity.Id);
+                _logger.LogInformation("Successfully generated cryptographic keys for product: {ProductId}", createdEntity.Id);
+            }
+            catch (Exception keyGenEx)
+            {
+                _logger.LogError(keyGenEx, "Failed to generate cryptographic keys for product: {ProductId}", createdEntity.Id);
+                // Note: We don't throw here to avoid rolling back the product creation
+                // The keys can be generated later if needed
+            }
 
             // Map back to model
             var result = createdEntity;
