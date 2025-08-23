@@ -1,0 +1,1361 @@
+@model TechWayFit.Licensing.Management.Web.ViewModels.Product.ProductEnhancedEditViewModel
+
+@{
+    ViewData["Title"] = "Product Tiers - " + Model.ProductName;
+    ViewData["Description"] = "Manage product tiers, pricing, and capabilities";
+    var productTiers = ViewData["ProductTiers"] as List<TechWayFit.Licensing.Management.Web.ViewModels.Product.TierInfoViewModel> ?? new List<TechWayFit.Licensing.Management.Web.ViewModels.Product.TierInfoViewModel>();
+}
+
+<div class="container-fluid py-3">
+    <!-- Header Section -->
+    <div class="page-header mb-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="mb-1">Product Tiers</h2>
+                <p class="text-muted mb-0">Manage pricing tiers and feature sets for @Model.ProductName.</p>
+            </div>
+            <div class="btn-group" role="group">
+                <a href="@Url.Action("Details", "Product", new { id = Model.ProductId })" class="btn btn-outline-primary">
+                    <i class="fas fa-info-circle me-1"></i>Basic Details
+                </a>
+                <a href="@Url.Action("Index", "ProductTier", new { productId = Model.ProductId })" class="btn btn-primary">
+                    <i class="fas fa-layer-group me-1"></i>Tiers
+                </a>
+                <a href="@Url.Action("Index", "ProductVersion", new { productId = Model.ProductId })" class="btn btn-outline-primary">
+                    <i class="fas fa-code-branch me-1"></i>Versions
+                </a>
+                <a href="@Url.Action("Index", "ProductFeature", new { productId = Model.ProductId })" class="btn btn-outline-primary">
+                    <i class="fas fa-star me-1"></i>Features
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product List Container -->
+    <div class="product-list-container">
+        <!-- Search and Actions -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="search-container">
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="fas fa-search"></i>
+                    </span>
+                    <input type="text" class="form-control" id="searchInput" placeholder="Search tiers...">
+                </div>
+            </div>
+            <div class="action-buttons">
+                <a href="@Url.Action("Create", new { productId = Model.ProductId })" class="btn btn-primary">
+                    <i class="fas fa-plus me-1"></i>Add Tier
+                </a>
+            </div>
+        </div>
+
+        <!-- Tiers Table -->
+        <div class="table-responsive">
+            <table class="table product-list-table">
+                <thead>
+                    <tr>
+                        <th class="sortable" data-sort="name">
+                            <i class="fas fa-sort me-1"></i>Name
+                        </th>
+                        <th>Description</th>
+                        <th class="sortable" data-sort="price">
+                            <i class="fas fa-sort me-1"></i>Price
+                        </th>
+                        <th class="sortable" data-sort="displayOrder">
+                            <i class="fas fa-sort me-1"></i>Order
+                        </th>
+                        <th>Max Users</th>
+                        <th>Max Devices</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (productTiers != null && productTiers.Any())
+                    {
+                        @foreach (var tier in productTiers)
+                        {
+                            <tr data-search-text="@tier.Name @tier.Description">
+                                <td>
+                                    <div class="fw-medium">@tier.Name</div>
+                                </td>
+                                <td class="text-muted">@tier.Description</td>
+                                <td>
+                                    <span class="fw-bold">@tier.Price</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">@tier.DisplayOrder</span>
+                                </td>
+                                <td>@(tier.MaxUsers?.ToString() ?? "Unlimited")</td>
+                                <td>@(tier.MaxDevices?.ToString() ?? "Unlimited")</td>
+                                <td>
+                                    <span class="badge bg-@(tier.IsActive ? "success" : "secondary")">
+                                        @(tier.IsActive ? "Active" : "Inactive")
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="@Url.Action("Edit", new { productId = Model.ProductId, id = tier.Id })" 
+                                           class="btn btn-outline-primary" 
+                                           title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="@Url.Action("Features", new { productId = Model.ProductId, tierId = tier.Id })" 
+                                           class="btn btn-outline-success" 
+                                           title="Manage Features">
+                                            <i class="fas fa-star"></i>
+                                        </a>
+                                        <button class="btn btn-outline-danger" 
+                                                onclick="confirmDelete('@tier.Id', '@tier.Name')" 
+                                                title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center py-4">
+                                <div class="text-muted">
+                                    <i class="fas fa-layer-group fa-2x mb-2"></i>
+                                    <p>No product tiers found.</p>
+                                    <p><small>Click "Add Tier" to create your first tier.</small></p>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Alert Messages -->
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle"></i>
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i>
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Tiers List -->
+    <div class="product-list-container">
+        <div class="product-list-header">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="product-list-stats">
+                        <span class="badge bg-primary">@productTiers.Count Tiers</span>
+                        @if (productTiers.Any(t => t.IsActive))
+                        {
+                            <span class="badge bg-success">@productTiers.Count(t => t.IsActive) Active</span>
+                        }
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex justify-content-end">
+                        <div class="input-group me-2" style="max-width: 300px;">
+                            <input type="text" class="form-control" placeholder="Search tiers..." id="searchInput">
+                            <button class="btn btn-outline-secondary" type="button">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                        <a href="@Url.Action("Create", "ProductTier", new { productId = Model.ProductId })" class="btn btn-success">
+                            <i class="fas fa-plus me-1"></i>Add Tier
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (productTiers.Any())
+        {
+            <div class="table-responsive">
+                <table class="table product-list-table table-hover">
+                    <thead>
+                        <tr>
+                            <th class="sortable" data-sort="name">
+                                <i class="fas fa-sort me-1"></i>Tier Name
+                            </th>
+                            <th class="sortable" data-sort="description">
+                                <i class="fas fa-sort me-1"></i>Description
+                            </th>
+                            <th class="sortable" data-sort="price">
+                                <i class="fas fa-sort me-1"></i>Price
+                            </th>
+                            <th class="sortable" data-sort="displayOrder">
+                                <i class="fas fa-sort me-1"></i>Order
+                            </th>
+                            <th class="sortable" data-sort="status">
+                                <i class="fas fa-sort me-1"></i>Status
+                            </th>
+                            <th>Users/Devices</th>
+                            <th width="200">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var tier in productTiers.OrderBy(t => t.DisplayOrder))
+                        {
+                            <tr data-search-text="@(tier.Name + " " + tier.Description + " " + tier.Price)">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-2" style="width: 30px; height: 30px; background: rgba(108, 117, 125, 0.1); border-radius: 6px; display: flex; align-items: center; justify-content: center;">
+                                            <i class="fas fa-layer-group text-secondary"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-medium">@tier.Name</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="text-muted">@(string.IsNullOrEmpty(tier.Description) ? "No description" : tier.Description)</span>
+                                </td>
+                                <td>
+                                    <span class="fw-medium text-success">@tier.Price</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">@tier.DisplayOrder</span>
+                                </td>
+                                <td>
+                                    @if (tier.IsActive)
+                                    {
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check me-1"></i>Active
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">
+                                            <i class="fas fa-pause me-1"></i>Inactive
+                                        </span>
+                                    }
+                                </td>
+                                <td>
+                                    <small class="text-muted">
+                                        @if (tier.MaxUsers.HasValue)
+                                        {
+                                            <div>Users: @(tier.MaxUsers == int.MaxValue ? "Unlimited" : tier.MaxUsers.ToString())</div>
+                                        }
+                                        @if (tier.MaxDevices.HasValue)
+                                        {
+                                            <div>Devices: @(tier.MaxDevices == int.MaxValue ? "Unlimited" : tier.MaxDevices.ToString())</div>
+                                        }
+                                    </small>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a href="@Url.Action("ManageFeatures", "ProductTier", new { productId = Model.ProductId, tierId = tier.Id })" 
+                                           class="btn btn-outline-success" title="Manage Features">
+                                            <i class="fas fa-star"></i>
+                                        </a>
+                                        <a href="@Url.Action("Details", "ProductTier", new { productId = Model.ProductId, tierId = tier.Id })" 
+                                           class="btn btn-outline-info" title="View Details">
+                                            <i class="fas fa-info-circle"></i>
+                                        </a>
+                                        <a href="@Url.Action("Edit", "ProductTier", new { productId = Model.ProductId, tierId = tier.Id })" 
+                                           class="btn btn-outline-primary" title="Edit Tier">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        @if (tier.CanDelete)
+                                        {
+                                            <button type="button" class="btn btn-outline-danger" 
+                                                    onclick="confirmDelete('@tier.Id', '@tier.Name')" title="Delete Tier">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <div class="mb-3">
+                    <i class="fas fa-layer-group fa-3x text-muted"></i>
+                </div>
+                <h5 class="text-muted">No Tiers Found</h5>
+                <p class="text-muted mb-3">This product doesn't have any tiers defined yet.</p>
+                <a href="@Url.Action("Create", "ProductTier", new { productId = Model.ProductId })" class="btn btn-primary">
+                    <i class="fas fa-plus me-1"></i>Add First Tier
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the tier "<span id="tierName"></span>"?</p>
+                <p class="text-danger small">This action cannot be undone and may affect existing licenses.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="post" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">Delete Tier</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr[data-search-text]');
+            
+            rows.forEach(row => {
+                const searchText = row.getAttribute('data-search-text').toLowerCase();
+                if (searchText.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+
+        // Sort functionality
+        document.querySelectorAll('.sortable').forEach(header => {
+            header.addEventListener('click', function() {
+                const column = this.getAttribute('data-sort');
+                sortTable(column);
+            });
+        });
+
+        function sortTable(column) {
+            const table = document.querySelector('.product-list-table');
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            
+            rows.sort((a, b) => {
+                let aVal, bVal;
+                
+                switch(column) {
+                    case 'name':
+                        aVal = a.querySelector('td:first-child .fw-medium').textContent;
+                        bVal = b.querySelector('td:first-child .fw-medium').textContent;
+                        break;
+                    case 'price':
+                        aVal = a.querySelector('td:nth-child(3)').textContent;
+                        bVal = b.querySelector('td:nth-child(3)').textContent;
+                        break;
+                    case 'displayOrder':
+                        aVal = parseInt(a.querySelector('td:nth-child(4) .badge').textContent);
+                        bVal = parseInt(b.querySelector('td:nth-child(4) .badge').textContent);
+                        return aVal - bVal;
+                    default:
+                        aVal = a.querySelector(`td:nth-child(${getColumnIndex(column)})`).textContent;
+                        bVal = b.querySelector(`td:nth-child(${getColumnIndex(column)})`).textContent;
+                }
+                
+                return aVal.localeCompare(bVal);
+            });
+            
+            rows.forEach(row => tbody.appendChild(row));
+        }
+
+        function getColumnIndex(column) {
+            switch(column) {
+                case 'name': return 1;
+                case 'description': return 2;
+                case 'price': return 3;
+                case 'displayOrder': return 4;
+                case 'status': return 5;
+                default: return 1;
+            }
+        }
+
+        // Delete confirmation
+        function confirmDelete(tierId, tierName) {
+            document.getElementById('tierName').textContent = tierName;
+            document.getElementById('deleteForm').action = '@Url.Action("Delete", "ProductTier", new { productId = Model.ProductId })' + '?tierId=' + tierId;
+            
+            var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            modal.show();
+        }
+    </script>
+}
+                    <div class="d-flex align-items-center">
+                        <div class="product-icon me-3" style="width: 40px; height: 40px;">
+                            <i class="fas fa-cube text-primary"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0">@Model.ProductName</h5>
+                            <small class="text-muted">@Model.ProductType • Version @Model.Version</small>
+                        </div>
+                        <div class="ms-auto">
+                            @if (Model.IsActive)
+                            {
+                                <span class="badge bg-success me-2">Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary me-2">Inactive</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <partial name="_StatsTiles" model="Model.StatsTiles" />
+
+    <div class="row g-2">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Alert container -->
+            <div id="alert-container" class="mb-3"></div>
+
+            <!-- Tiers Management -->
+            <div class="edit-section">
+                <div class="section-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-layer-group me-2"></i>Product Tiers
+                        </h5>
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-outline-secondary btn-sm active" id="cardViewBtn" onclick="switchView('card')">
+                                <i class="fas fa-th-large me-1"></i>Cards
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="listViewBtn" onclick="switchView('list')">
+                                <i class="fas fa-list me-1"></i>List
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="section-content">
+                    <!-- Tiers content - Server-side rendered -->
+                    <div id="tiers-content">
+                        @if (productTiers != null && productTiers.Any())
+                        {
+                            <!-- Card View -->
+                            <div id="card-view" class="row g-4">
+                                @foreach (var tier in productTiers)
+                                {
+                                    <div class="col-md-6 col-lg-4">
+                                        <div class="card tier-card @(tier.IsActive ? "tier-active" : "tier-inactive")">
+                                            <div class="card-header d-flex justify-content-between align-items-center">
+                                                <h6 class="mb-0 fw-bold">@tier.Name</h6>
+                                                <div class="dropdown">
+                                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" 
+                                                            id="dropdownTier@(tier.Id)" 
+                                                            data-bs-toggle="dropdown" 
+                                                            aria-expanded="false">
+                                                        <i class="fas fa-ellipsis-v"></i>
+                                                    </button>
+                                                    <ul class="dropdown-menu" aria-labelledby="dropdownTier@(tier.Id)">
+                                                        <li><a class="dropdown-item" href="/ProductTier/@Model.ProductId/@tier.Id/edit"><i class="fas fa-edit me-2"></i>Edit</a></li>
+                                                        <li><a class="dropdown-item" href="/ProductTier/@Model.ProductId/@tier.Id/features"><i class="fas fa-star me-2"></i>Manage Features</a></li>
+                                                        <li><hr class="dropdown-divider"></li>
+                                                        <li><a class="dropdown-item toggle-tier" href="#" data-tier-id="@tier.Id"><i class="fas fa-toggle-@(tier.IsActive ? "off" : "on") me-2"></i>@(tier.IsActive ? "Deactivate" : "Activate")</a></li>
+                                                        <li><a class="dropdown-item delete-tier text-danger" href="#" data-tier-id="@tier.Id"><i class="fas fa-trash me-2"></i>Delete</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                            <div class="card-body">
+                                                <p class="text-muted small mb-3">@tier.Description</p>
+                                                <div class="pricing-info mb-3">
+                                                    <span class="price-tag">@tier.Price</span>
+                                                </div>
+                                                <div class="tier-details">
+                                                    <div class="row">
+                                                        <div class="col-6">
+                                                            <small class="text-muted">Max Users</small>
+                                                            <div class="fw-bold">@(tier.MaxUsers?.ToString() ?? "Unlimited")</div>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <small class="text-muted">Max Devices</small>
+                                                            <div class="fw-bold">@(tier.MaxDevices?.ToString() ?? "Unlimited")</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                @if (tier.SupportSLA != null)
+                                                {
+                                                    <div class="mt-3">
+                                                        <small class="text-muted">Support SLA</small>
+                                                        <div class="fw-bold">@tier.SupportSLA.Name</div>
+                                                        <small class="text-muted">Critical: @tier.SupportSLA.CriticalResponseHours hrs</small>
+                                                    </div>
+                                                }
+                                            </div>
+                                            <div class="card-footer">
+                                                <span class="badge bg-@(tier.IsActive ? "success" : "secondary")">
+                                                    @(tier.IsActive ? "Active" : "Inactive")
+                                                </span>
+                                                <span class="badge bg-light text-dark ms-2">Order: @tier.DisplayOrder</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- List View -->
+                            <div id="list-view" style="display: none;">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Description</th>
+                                                <th>Price</th>
+                                                <th>Max Users</th>
+                                                <th>Max Devices</th>
+                                                <th>Support SLA</th>
+                                                <th>Status</th>
+                                                <th>Order</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var tier in productTiers)
+                                            {
+                                                <tr class="@(tier.IsActive ? "" : "table-secondary")">
+                                                    <td class="fw-bold">@tier.Name</td>
+                                                    <td class="text-muted">@tier.Description</td>
+                                                    <td><span class="price-tag">@tier.Price</span></td>
+                                                    <td>@(tier.MaxUsers?.ToString() ?? "Unlimited")</td>
+                                                    <td>@(tier.MaxDevices?.ToString() ?? "Unlimited")</td>
+                                                    <td>
+                                                        @if (tier.SupportSLA != null)
+                                                        {
+                                                            <span title="@tier.SupportSLA.Description">@tier.SupportSLA.Name</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="text-muted">None</span>
+                                                        }
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-@(tier.IsActive ? "success" : "secondary")">
+                                                            @(tier.IsActive ? "Active" : "Inactive")
+                                                        </span>
+                                                    </td>
+                                                    <td>@tier.DisplayOrder</td>
+                                                    <td>
+                                                        <div class="btn-group btn-group-sm">
+                                                            <a href="/ProductTier/@Model.ProductId/@tier.Id/edit" class="btn btn-outline-primary btn-sm" title="Edit">
+                                                                <i class="fas fa-edit"></i>
+                                                            </a>
+                                                            <a href="/ProductTier/@Model.ProductId/@tier.Id/features" class="btn btn-outline-success btn-sm" title="Manage Features">
+                                                                <i class="fas fa-star"></i>
+                                                            </a>
+                                                            <button class="btn btn-outline-@(tier.IsActive ? "warning" : "success") btn-sm toggle-tier" data-tier-id="@tier.Id" title="@(tier.IsActive ? "Deactivate" : "Activate")">
+                                                                <i class="fas fa-toggle-@(tier.IsActive ? "off" : "on")"></i>
+                                                            </button>
+                                                            <button class="btn btn-outline-danger btn-sm delete-tier" data-tier-id="@tier.Id" title="Delete">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center py-5">
+                                <div class="text-muted">
+                                    <i class="fas fa-layer-group fa-3x mb-3"></i>
+                                    <p>No product tiers found.</p>
+                                    <p><small>Click "Add Tier" to create your first tier.</small></p>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Quick Actions -->
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <h6><i class="fas fa-bolt me-2"></i>Quick Actions</h6>
+                </div>
+                <div class="section-content">
+                    <div class="d-grid gap-2">
+                        <a href="@Url.Action("Create", new { productId = Model.ProductId })" class="btn btn-outline-primary">
+                            <i class="fas fa-plus me-2"></i>Add Tier
+                        </a>
+                        <button type="button" class="btn btn-outline-secondary" onclick="importTiersFromJson()">
+                            <i class="fas fa-upload me-2"></i>Import Tiers
+                        </button>
+                        <button type="button" class="btn btn-outline-info" onclick="copyToAnotherProduct()">
+                            <i class="fas fa-copy me-2"></i>Copy to Product
+                        </button>
+                        <button type="button" class="btn btn-outline-success" onclick="exportToJson()">
+                            <i class="fas fa-download me-2"></i>Export to JSON
+                        </button>
+                        <a href="@Url.Action("Details", "Product", new { id = Model.ProductId })" class="btn btn-outline-warning">
+                            <i class="fas fa-info-circle me-2"></i>Product Details
+                        </a>
+                        <a asp-controller="License" asp-action="Create" asp-route-productId="@Model.ProductId" class="btn btn-outline-success">
+                            <i class="fas fa-certificate me-2"></i>Generate License
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Tier Modal -->
+<div class="modal fade" id="tierModal" tabindex="-1" aria-labelledby="tierModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="tierModalLabel">Add Product Tier</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="tierForm">
+                <div class="modal-body">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="ProductId" value="@Model.ProductId" />
+                    <input type="hidden" name="TierId" id="tierId" />
+                    
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label for="tierName" class="form-label">Tier Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="tierName" name="TierName" required maxlength="50">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="tier" class="form-label">Tier Level</label>
+                                <select class="form-select" id="tier" name="Tier">
+                                    <option value="Community">Community</option>
+                                    <option value="Professional">Professional</option>
+                                    <option value="Enterprise">Enterprise</option>
+                                    <option value="Premium">Premium</option>
+                                </select>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="monthlyPriceAmount" class="form-label">Monthly Price</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" id="monthlyPriceAmount" name="MonthlyPriceAmount" step="0.01" min="0">
+                                    <select class="form-select" id="monthlyPriceCurrency" name="MonthlyPriceCurrency" style="max-width: 100px;">
+                                        <option value="USD">USD</option>
+                                        <option value="EUR">EUR</option>
+                                        <option value="GBP">GBP</option>
+                                    </select>
+                                </div>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="annualPriceAmount" class="form-label">Annual Price</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" id="annualPriceAmount" name="AnnualPriceAmount" step="0.01" min="0">
+                                    <select class="form-select" id="annualPriceCurrency" name="AnnualPriceCurrency" style="max-width: 100px;">
+                                        <option value="USD">USD</option>
+                                        <option value="EUR">EUR</option>
+                                        <option value="GBP">GBP</option>
+                                    </select>
+                                </div>
+                                <div class="form-text">Set annual discount for better customer retention</div>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label for="tierDescription" class="form-label">Description</label>
+                                <textarea class="form-control" id="tierDescription" name="Description" rows="3" maxlength="200"></textarea>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="displayOrder" class="form-label">Display Order</label>
+                                <input type="number" class="form-control" id="displayOrder" name="DisplayOrder" min="0" max="999" value="0">
+                                <div class="form-text">Used for sorting tiers (0 = first)</div>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Support SLA Section -->
+                    <div class="mb-3">
+                        <label class="form-label">Support SLA</label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="slaName" class="form-label">SLA Name</label>
+                                <input type="text" class="form-control" id="slaName" name="SupportSLA.Name" maxlength="100" placeholder="e.g., Premium Support">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="slaDescription" class="form-label">SLA Description</label>
+                                <input type="text" class="form-control" id="slaDescription" name="SupportSLA.Description" maxlength="200" placeholder="Brief description of support level">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-3">
+                                <label for="criticalResponseTime" class="form-label">Critical (hours)</label>
+                                <input type="number" class="form-control" id="criticalResponseTime" name="SupportSLA.CriticalResponseTime" min="0" step="0.5" value="1" placeholder="1">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="highResponseTime" class="form-label">High (hours)</label>
+                                <input type="number" class="form-control" id="highResponseTime" name="SupportSLA.HighPriorityResponseTime" min="0" step="0.5" value="4" placeholder="4">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="mediumResponseTime" class="form-label">Medium (hours)</label>
+                                <input type="number" class="form-control" id="mediumResponseTime" name="SupportSLA.MediumPriorityResponseTime" min="0" step="0.5" value="8" placeholder="8">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="lowResponseTime" class="form-label">Low (hours)</label>
+                                <input type="number" class="form-control" id="lowResponseTime" name="SupportSLA.LowPriorityResponseTime" min="0" step="0.5" value="24" placeholder="24">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="maxUsers" class="form-label">Max Users</label>
+                                <input type="number" class="form-control" id="maxUsers" name="MaxUsers" min="1">
+                                <div class="form-text">Leave empty for unlimited</div>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="maxDevices" class="form-label">Max Devices</label>
+                                <input type="number" class="form-control" id="maxDevices" name="MaxDevices" min="1">
+                                <div class="form-text">Leave empty for unlimited</div>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="trialPeriodDays" class="form-label">Trial Period (Days)</label>
+                                <input type="number" class="form-control" id="trialPeriodDays" name="TrialPeriodDays" min="0" max="365" value="0">
+                                <div class="form-text">0 means no trial period</div>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-check mb-3">
+                                <input type="hidden" name="IsFree" value="false">
+                                <input class="form-check-input" type="checkbox" id="isFree" name="IsFree" value="true">
+                                <label class="form-check-label" for="isFree">
+                                    Free Tier
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check mb-3">
+                                <input type="hidden" name="IsActive" value="false">
+                                <input class="form-check-input" type="checkbox" id="isActive" name="IsActive" value="true" checked>
+                                <label class="form-check-label" for="isActive">
+                                    Active
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="tierSubmitBtn">Add Tier</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Import Tiers Modal -->
+<div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="importModalLabel">Import Tiers</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="importJson" class="form-label">Paste JSON or upload file</label>
+                    <textarea class="form-control" id="importJson" rows="10" placeholder='[{"tierName": "Free", "description": "Free tier with limited features", "monthlyPrice": 0}]'></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="importFile" class="form-label">Or upload a JSON file</label>
+                    <input type="file" class="form-control" id="importFile" accept=".json">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="importBtn">Import Tiers</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Load tiers on page load
+            loadProductTiers();
+            
+            // Handle tier form submission
+            $('#tierForm').on('submit', function(e) {
+                e.preventDefault();
+                saveTier();
+            });
+            
+            // Free tier checkbox handler
+            $('#isFree').on('change', function() {
+                if ($(this).is(':checked')) {
+                    $('#monthlyPriceAmount').val('0').prop('disabled', true);
+                    $('#annualPriceAmount').val('0').prop('disabled', true);
+                } else {
+                    $('#monthlyPriceAmount').prop('disabled', false);
+                    $('#annualPriceAmount').prop('disabled', false);
+                }
+            });
+            
+            // Initialize view based on saved preference
+            const savedView = localStorage.getItem('tierViewType') || 'card';
+            switchView(savedView);
+        });
+
+        function loadProductTiers() {
+            // Server-side rendering is already done, just update view type based on localStorage
+            var viewType = localStorage.getItem('tierViewType') || 'card';
+            switchView(viewType);
+        }
+        
+        function updateTierStats(tiers) {
+            // Stats are now handled server-side via ViewData and calculated in controller
+            // This function is kept for compatibility but does nothing
+        }
+
+        function renderProductTiersCard(tiers) {
+            if (!tiers || tiers.length === 0) {
+                return '<div class="text-center py-5"><div class="text-muted"><i class="fas fa-layer-group fa-3x mb-3"></i><p>No product tiers found.</p><p><small>Click "Add Tier" to create your first tier.</small></p></div></div>';
+            }
+
+            var html = '<div class="row">';
+            tiers.forEach(function(tier) {
+                html += '<div class="col-lg-4 col-md-6 mb-3">';
+                html += '  <div class="card tier-card h-100">';
+                html += '    <div class="card-body">';
+                html += '      <div class="d-flex justify-content-between align-items-start mb-2">';
+                html += '        <div class="tier-icon me-3">';
+                
+                // Tier level icon
+                switch(tier.Name.toLowerCase()) {
+                    case 'free':
+                    case 'community':
+                        html += '          <i class="fas fa-heart text-success"></i>';
+                        break;
+                    case 'basic':
+                    case 'standard':
+                        html += '          <i class="fas fa-star text-primary"></i>';
+                        break;
+                    case 'professional':
+                    case 'pro':
+                        html += '          <i class="fas fa-crown text-warning"></i>';
+                        break;
+                    case 'enterprise':
+                    case 'business':
+                        html += '          <i class="fas fa-building text-info"></i>';
+                        break;
+                    default:
+                        html += '          <i class="fas fa-layer-group text-secondary"></i>';
+                }
+                
+                html += '        </div>';
+                html += '        <div class="flex-grow-1">';
+                html += '          <h6 class="card-title mb-1">' + tier.Name + '</h6>';
+                if (tier.Description) {
+                    html += '          <p class="card-text text-muted small mb-2">' + tier.Description + '</p>';
+                }
+                html += '        </div>';
+                html += '        <div class="dropdown">';
+                html += '          <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">';
+                html += '            <i class="fas fa-ellipsis-v"></i>';
+                html += '          </button>';
+                html += '          <ul class="dropdown-menu dropdown-menu-end">';
+                html += '            <li><a class="dropdown-item" href="/ProductTier/@Model.ProductId/' + tier.Id + '/edit"><i class="fas fa-edit me-2"></i>Edit</a></li>';
+                if (tier.CanDelete) {
+                    html += '            <li><a class="dropdown-item text-danger" href="#" onclick="deleteTier(\'' + tier.Id + '\')"><i class="fas fa-trash me-2"></i>Delete</a></li>';
+                }
+                html += '          </ul>';
+                html += '        </div>';
+                html += '      </div>';
+                
+                html += '      <div class="tier-info mt-3">';
+                html += '        <div class="price-tag text-center mb-3">';
+                if (tier.Price === 'Free' || tier.Price === '0' || tier.Price.includes('0.00')) {
+                    html += '          <div class="h4 mb-0 text-success">Free</div>';
+                } else {
+                    html += '          <div class="h4 mb-0 text-success">' + tier.Price + '</div>';
+                }
+                html += '        </div>';
+                
+                html += '        <div class="tier-badges">';
+                if (tier.IsActive) {
+                    html += '          <span class="badge bg-success me-1">Active</span>';
+                } else {
+                    html += '          <span class="badge bg-secondary me-1">Inactive</span>';
+                }
+                
+                // Display order badge
+                html += '          <span class="badge bg-info me-1">Order: ' + tier.DisplayOrder + '</span>';
+                
+                html += '        </div>';
+                html += '      </div>';
+                html += '    </div>';
+                html += '  </div>';
+                html += '</div>';
+            });
+            html += '</div>';
+            return html;
+        }
+        
+        function renderProductTiersList(tiers) {
+            if (!tiers || tiers.length === 0) {
+                return '<div class="text-center py-5"><div class="text-muted"><i class="fas fa-layer-group fa-3x mb-3"></i><p>No product tiers found.</p><p><small>Click "Add Tier" to create your first tier.</small></p></div></div>';
+            }
+            
+            var html = '<div class="table-responsive">';
+            html += '<table class="table table-hover">';
+            html += '<thead class="table-light">';
+            html += '<tr>';
+            html += '<th>Tier Name</th>';
+            html += '<th>Price</th>';
+            html += '<th>Description</th>';
+            html += '<th>Display Order</th>';
+            html += '<th>SLA</th>';
+            html += '<th>Status</th>';
+            html += '<th>Actions</th>';
+            html += '</tr>';
+            html += '</thead>';
+            html += '<tbody>';
+            
+            tiers.forEach(function(tier) {
+                html += '<tr>';
+                
+                // Tier name and icon
+                html += '<td>';
+                html += '<div class="d-flex align-items-center">';
+                html += '<div class="tier-icon me-2" style="width: 30px; height: 30px;">';
+                
+                // Tier icon based on name
+                switch(tier.Name.toLowerCase()) {
+                    case 'free':
+                    case 'community':
+                        html += '<i class="fas fa-heart text-success"></i>';
+                        break;
+                    case 'basic':
+                    case 'standard':
+                        html += '<i class="fas fa-star text-primary"></i>';
+                        break;
+                    case 'professional':
+                    case 'pro':
+                        html += '<i class="fas fa-crown text-warning"></i>';
+                        break;
+                    case 'enterprise':
+                    case 'business':
+                        html += '<i class="fas fa-building text-info"></i>';
+                        break;
+                    default:
+                        html += '<i class="fas fa-layer-group text-secondary"></i>';
+                }
+                
+                html += '</div>';
+                html += '<div class="fw-semibold">' + tier.Name + '</div>';
+                html += '</div>';
+                html += '</td>';
+                
+                // Price
+                html += '<td>';
+                if (tier.Price === 'Free' || tier.Price === '0' || tier.Price.includes('0.00')) {
+                    html += '<span class="badge bg-success">Free</span>';
+                } else {
+                    html += tier.Price;
+                }
+                html += '</td>';
+                
+                // Description
+                html += '<td>';
+                html += '<small class="text-muted">' + (tier.Description || '-') + '</small>';
+                html += '</td>';
+                
+                // Display Order
+                html += '<td>';
+                html += '<span class="badge bg-info">' + tier.DisplayOrder + '</span>';
+                html += '</td>';
+                
+                // SLA
+                html += '<td>';
+                if (tier.SupportSLA && tier.SupportSLA.AvailabilityHours) {
+                    html += '<small class="text-muted">' + tier.SupportSLA.AvailabilityHours + '</small>';
+                } else {
+                    html += '<span class="text-muted">-</span>';
+                }
+                html += '</td>';
+                
+                // Status
+                html += '<td>';
+                if (tier.IsActive) {
+                    html += '<span class="badge bg-success">Active</span>';
+                } else {
+                    html += '<span class="badge bg-secondary">Inactive</span>';
+                }
+                html += '</td>';
+                
+                // Actions
+                html += '<td>';
+                html += '<div class="btn-group btn-group-sm" role="group">';
+                html += '<a href="/ProductTier/@Model.ProductId/' + tier.Id + '/edit" class="btn btn-outline-primary"><i class="fas fa-edit"></i></a>';
+                if (tier.CanDelete) {
+                    html += '<button type="button" class="btn btn-outline-danger" onclick="deleteTier(\'' + tier.Id + '\')"><i class="fas fa-trash"></i></button>';
+                }
+                html += '</div>';
+                html += '</td>';
+                
+                html += '</tr>';
+            });
+            
+            html += '</tbody>';
+            html += '</table>';
+            html += '</div>';
+            
+            return html;
+        }
+        
+        function switchView(viewType) {
+            const cardViewBtn = document.getElementById('cardViewBtn');
+            const listViewBtn = document.getElementById('listViewBtn');
+
+            if (viewType === 'card') {
+                cardViewBtn.classList.add('active');
+                listViewBtn.classList.remove('active');
+                localStorage.setItem('tierViewType', 'card');
+            } else {
+                cardViewBtn.classList.remove('active');
+                listViewBtn.classList.add('active');
+                localStorage.setItem('tierViewType', 'list');
+            }
+            
+            // Reload the tiers with the current view
+            loadProductTiers();
+        }
+
+        function showAddTierModal() {
+            // Reset form and modal
+            $('#tierForm')[0].reset();
+            $('#tierId').val('');
+            $('#tierModalLabel').text('Add Product Tier');
+            $('#tierSubmitBtn').text('Add Tier');
+            clearValidationErrors();
+            
+            // Enable price fields
+            $('#monthlyPrice').prop('disabled', false);
+            $('#annualPrice').prop('disabled', false);
+            
+            // Show modal
+            var modal = new bootstrap.Modal(document.getElementById('tierModal'));
+            modal.show();
+        }
+
+        function editTier(tierId) {
+            // Get tier data
+            $.get('@Url.Action("GetProductTier", "ProductTier")', { 
+                productId: '@Model.ProductId', 
+                tierId: tierId 
+            })
+            .done(function(response) {
+                if (response.success && response.data) {
+                    var tier = response.data;
+                    
+                    // Populate form
+                    $('#tierId').val(tier.TierId);
+                    $('#tierName').val(tier.TierName);
+                    $('#tierDescription').val(tier.Description);
+                    $('#displayOrder').val(tier.DisplayOrder || 0);
+                    $('#monthlyPrice').val(tier.MonthlyPrice);
+                    $('#maxUsers').val(tier.MaxUsers);
+                    $('#maxDevices').val(tier.MaxDevices);
+                    $('#isActive').prop('checked', tier.IsActive);
+                    
+                    // Populate Support SLA fields
+                    if (tier.SupportSLA) {
+                        $('#slaName').val(tier.SupportSLA.Name || '');
+                        $('#slaDescription').val(tier.SupportSLA.Description || '');
+                        $('#criticalResponseTime').val(tier.SupportSLA.CriticalResponseTime || 1);
+                        $('#highResponseTime').val(tier.SupportSLA.HighPriorityResponseTime || 4);
+                        $('#mediumResponseTime').val(tier.SupportSLA.MediumPriorityResponseTime || 8);
+                        $('#lowResponseTime').val(tier.SupportSLA.LowPriorityResponseTime || 24);
+                    }
+                    
+                    // Update modal title and button
+                    $('#tierModalLabel').text('Edit Product Tier');
+                    $('#tierSubmitBtn').text('Update Tier');
+                    clearValidationErrors();
+                    
+                    // Show modal
+                    var modal = new bootstrap.Modal(document.getElementById('tierModal'));
+                    modal.show();
+                } else {
+                    showAlert('Error loading tier data', 'danger');
+                }
+            })
+            .fail(function() {
+                showAlert('Error loading tier data', 'danger');
+            });
+        }
+
+        function deleteTier(tierId) {
+            if (confirm('Are you sure you want to delete this tier? This action cannot be undone.')) {
+                var formData = new FormData();
+                formData.append('productId', '@Model.ProductId');
+                formData.append('tierId', tierId);
+                formData.append('__RequestVerificationToken', $('[name=__RequestVerificationToken]').val());
+
+                $.ajax({
+                    url: '@Url.Action("DeleteProductTier", "ProductTier")',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        if (response.success) {
+                            showAlert(response.message, 'success');
+                            loadProductTiers(); // Reload the tiers list
+                        } else {
+                            showAlert(response.message, 'danger');
+                        }
+                    },
+                    error: function() {
+                        showAlert('Error deleting tier', 'danger');
+                    }
+                });
+            }
+        }
+
+        function saveTier() {
+            var tierId = $('#tierId').val();
+            var isEdit = tierId && tierId !== '';
+            var url = isEdit ? '@Url.Action("EditProductTier", "ProductTier")' : '@Url.Action("AddProductTier", "ProductTier")';
+            
+            var formData = new FormData(document.getElementById('tierForm'));
+            if (isEdit) {
+                formData.append('tierId', tierId);
+            }
+            formData.append('productId', '@Model.ProductId');
+
+            // Disable submit button
+            $('#tierSubmitBtn').prop('disabled', true).text('Saving...');
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.success) {
+                        showAlert(response.message, 'success');
+                        $('#tierModal').modal('hide');
+                        loadProductTiers(); // Reload the tiers list
+                    } else {
+                        if (response.errors && response.errors.length > 0) {
+                            showValidationErrors(response.errors);
+                        } else {
+                            showAlert(response.message, 'danger');
+                        }
+                    }
+                },
+                error: function() {
+                    showAlert('Error saving tier', 'danger');
+                },
+                complete: function() {
+                    // Re-enable submit button
+                    $('#tierSubmitBtn').prop('disabled', false).text(isEdit ? 'Update Tier' : 'Add Tier');
+                }
+            });
+        }
+        
+        function importTiersFromJson() {
+            // Show import modal
+            var modal = new bootstrap.Modal(document.getElementById('importModal'));
+            modal.show();
+            
+            // Set up the import button handler
+            $('#importBtn').off('click').on('click', function() {
+                // Get the JSON data
+                const jsonText = $('#importJson').val();
+                let jsonData;
+                
+                try {
+                    jsonData = JSON.parse(jsonText);
+                    if (!Array.isArray(jsonData)) {
+                        throw new Error("JSON must be an array of tiers");
+                    }
+                    
+                    // Implement the import logic here
+                    // This is a placeholder - would need server-side support
+                    showAlert('Tier import functionality will be implemented in a future update.', 'info');
+                    $('#importModal').modal('hide');
+                    
+                } catch (e) {
+                    showAlert('Invalid JSON format: ' + e.message, 'danger');
+                }
+            });
+            
+            // Handle file upload
+            $('#importFile').off('change').on('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    $('#importJson').val(event.target.result);
+                };
+                reader.readAsText(file);
+            });
+        }
+        
+        function copyToAnotherProduct() {
+            showAlert('Copy to Another Product functionality will be implemented in a future update.', 'info');
+        }
+        
+        function exportToJson() {
+            $.get('/ProductTier/@Model.ProductId/list')
+                .done(function(response) {
+                    if (response.success && response.data) {
+                        // Create a JSON string and download it
+                        const jsonData = JSON.stringify(response.data, null, 2);
+                        const blob = new Blob([jsonData], { type: 'application/json' });
+                        const url = window.URL.createObjectURL(blob);
+                        
+                        // Create temp link and click it
+                        const a = document.createElement('a');
+                        a.style.display = 'none';
+                        a.href = url;
+                        a.download = '@Model.ProductName-tiers.json';
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        document.body.removeChild(a);
+                    } else {
+                        showAlert('No tiers to export', 'warning');
+                    }
+                })
+                .fail(function() {
+                    showAlert('Failed to export tiers', 'danger');
+                });
+        }
+
+        function clearValidationErrors() {
+            $('.is-invalid').removeClass('is-invalid');
+            $('.invalid-feedback').empty();
+        }
+
+        function showValidationErrors(errors) {
+            clearValidationErrors();
+            errors.forEach(function(error) {
+                showAlert(error, 'danger');
+            });
+        }
+
+        function showAlert(message, type) {
+            var alertClass = 'alert-' + type;
+            var icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle';
+            var alertHtml = '<div class="alert ' + alertClass + ' alert-dismissible fade show" role="alert">' +
+                            '<i class="fas ' + icon + ' me-2"></i>' +
+                            message +
+                            '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+                            '</div>';
+            
+            // Remove existing alerts
+            $('#alert-container .alert').remove();
+            
+            // Add new alert
+            $('#alert-container').html(alertHtml);
+            
+            // Auto-hide success alerts after 5 seconds
+            if (type === 'success') {
+                setTimeout(function() {
+                    $('.alert-success').alert('close');
+                }, 5000);
+            }
+        }
+
+        // Initialize Bootstrap dropdowns - Bootstrap 5 should auto-initialize, but let's be explicit
+        document.addEventListener('DOMContentLoaded', function() {
+            // Debug: log dropdown elements found
+            console.log('Initializing dropdowns...');
+            
+            // Initialize all dropdowns explicitly
+            var dropdownElementList = document.querySelectorAll('.dropdown-toggle');
+            console.log('Found ' + dropdownElementList.length + ' dropdown toggles');
+            
+            dropdownElementList.forEach(function(element) {
+                console.log('Initializing dropdown:', element.id);
+                // Ensure the dropdown is properly initialized
+                var dropdown = new bootstrap.Dropdown(element);
+                
+                // Add click event listener as backup
+                element.addEventListener('click', function(e) {
+                    console.log('Dropdown clicked:', this.id);
+                    e.preventDefault();
+                    dropdown.toggle();
+                });
+            });
+        });
+    </script>
+}

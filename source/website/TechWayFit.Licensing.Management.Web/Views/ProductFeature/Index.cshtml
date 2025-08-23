@@ -1,301 +1,304 @@
 @model TechWayFit.Licensing.Management.Web.ViewModels.Product.ProductFeatureIndexViewModel
+
 @{
-    ViewData["Title"] = $"{Model.ProductName} - Features";
+    ViewData["Title"] = "Product Features";
+    ViewData["PageTitle"] = "Product Features";
     var features = ViewData["Features"] as List<TechWayFit.Licensing.Management.Web.ViewModels.Product.FeatureInfoViewModel> ?? new List<TechWayFit.Licensing.Management.Web.ViewModels.Product.FeatureInfoViewModel>();
 }
 
-<!-- Page Header -->
-<div class="page-header">
-    <div class="page-header-content">
-        <div class="page-header-info">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item">
-                        <a asp-controller="Product" asp-action="Index">Products</a>
-                    </li>
-                    <li class="breadcrumb-item">
-                        <a asp-controller="Product" asp-action="Details" asp-route-id="@Model.ProductId">@Model.ProductName</a>
-                    </li>
-                    <li class="breadcrumb-item active" aria-current="page">Features</li>
-                </ol>
-            </nav>
-            <h1 class="page-title">
-                <i class="fas fa-puzzle-piece"></i>
-                @Model.ProductName - Features
-            </h1>
-            @if (!string.IsNullOrEmpty(Model.ProductDescription))
-            {
-                <p class="page-description">@Model.ProductDescription</p>
-            }
-        </div>
-        <div class="page-header-actions">
-            <a asp-action="Create" asp-route-productId="@Model.ProductId" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Add Feature
-            </a>
-        </div>
-    </div>
-</div>
-
-<div class="product-list-container">
-    <!-- Header with Search and Actions -->
-    <div class="product-list-header">
-        <div class="search-section">
-            <div class="search-controls">
-                <div class="search-input">
-                    <i class="fas fa-search search-icon"></i>
-                    <input type="text" id="searchInput" class="form-control" placeholder="Search features..." />
-                </div>
-                <span class="filter-count" id="filterCount" style="display: none;">0 results</span>
-                <a href="#" class="clear-filter" id="clearFilter" style="display: none;">Clear</a>
+<div class="container-fluid py-3">
+    <!-- Header Section -->
+    <div class="page-header mb-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="mb-1">Product Features</h2>
+                <p class="text-muted mb-0">Manage features and capabilities for @Model.ProductName.</p>
+            </div>
+            <div class="btn-group" role="group">
+                <a href="@Url.Action("Details", "Product", new { id = Model.ProductId })" class="btn btn-outline-primary">
+                    <i class="fas fa-info-circle me-1"></i>Basic Details
+                </a>
+                <a href="@Url.Action("Tiers", "Product", new { id = Model.ProductId })" class="btn btn-outline-primary">
+                    <i class="fas fa-layer-group me-1"></i>Tiers
+                </a>
+                <a href="@Url.Action("Index", "ProductVersion", new { productId = Model.ProductId })" class="btn btn-outline-primary">
+                    <i class="fas fa-code-branch me-1"></i>Versions
+                </a>
+                <a href="@Url.Action("Index", "ProductFeature", new { productId = Model.ProductId })" class="btn btn-primary">
+                    <i class="fas fa-star me-1"></i>Features
+                </a>
             </div>
         </div>
     </div>
 
-    <!-- Table Section -->
-    <div class="product-list-table">
+    <!-- Product Info Card -->
+    <div class="row g-2 mb-3">
+        <div class="col-12">
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <div class="d-flex align-items-center">
+                        <div class="product-icon me-3" style="width: 40px; height: 40px; background: rgba(13, 110, 253, 0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-cube text-primary"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">@Model.ProductName</h6>
+                            <small class="text-muted">@Model.ProductDescription</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features List -->
+    <div class="product-list-container">
+        <div class="product-list-header">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="product-list-stats">
+                        <span class="badge bg-primary">@features.Count Features</span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex justify-content-end">
+                        <div class="input-group me-2" style="max-width: 300px;">
+                            <input type="text" class="form-control" placeholder="Search features..." id="searchInput">
+                            <button class="btn btn-outline-secondary" type="button">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                        <a href="@Url.Action("Create", "ProductFeature", new { productId = Model.ProductId })" class="btn btn-success">
+                            <i class="fas fa-plus me-1"></i>Add Feature
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         @if (features.Any())
         {
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th class="sortable" data-sort="name">
-                            Feature Name
-                            <i class="fas fa-sort sort-icon"></i>
-                        </th>
-                        <th class="sortable" data-sort="description">
-                            Description
-                            <i class="fas fa-sort sort-icon"></i>
-                        </th>
-                        <th class="sortable" data-sort="order">
-                            Display Order
-                            <i class="fas fa-sort sort-icon"></i>
-                        </th>
-                        <th class="sortable" data-sort="code">
-                            Feature Code
-                            <i class="fas fa-sort sort-icon"></i>
-                        </th>
-                        <th class="sortable" data-sort="status">
-                            Status
-                            <i class="fas fa-sort sort-icon"></i>
-                        </th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="productTable">
-                    @foreach (var item in features)
-                    {
-                        <tr data-search="@(item.Name?.ToLower()) @(item.Description?.ToLower()) @(item.Code?.ToLower())">
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <div class="item-icon icon-primary">
-                                        <i class="fas fa-puzzle-piece"></i>
+            <div class="table-responsive">
+                <table class="table product-list-table table-hover">
+                    <thead>
+                        <tr>
+                            <th class="sortable" data-sort="name">
+                                <i class="fas fa-sort me-1"></i>Feature Name
+                            </th>
+                            <th class="sortable" data-sort="code">
+                                <i class="fas fa-sort me-1"></i>Feature Code
+                            </th>
+                            <th class="sortable" data-sort="description">
+                                <i class="fas fa-sort me-1"></i>Description
+                            </th>
+                            <th class="sortable" data-sort="displayOrder">
+                                <i class="fas fa-sort me-1"></i>Order
+                            </th>
+                            <th class="sortable" data-sort="status">
+                                <i class="fas fa-sort me-1"></i>Status
+                            </th>
+                            <th class="sortable" data-sort="versions">
+                                <i class="fas fa-sort me-1"></i>Version Support
+                            </th>
+                            <th width="120">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var feature in features)
+                        {
+                            <tr data-search-text="@(feature.Name + " " + feature.Code + " " + feature.Description)">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-2" style="width: 30px; height: 30px; background: rgba(40, 167, 69, 0.1); border-radius: 6px; display: flex; align-items: center; justify-content: center;">
+                                            <i class="fas fa-star text-success"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-medium">@feature.Name</div>
+                                        </div>
                                     </div>
-                                    <div class="item-details">
-                                        <div class="item-title">@Html.DisplayFor(modelItem => item.Name)</div>
-                                        @if (!string.IsNullOrEmpty(item.Code))
+                                </td>
+                                <td>
+                                    <code class="bg-light px-2 py-1 rounded">@feature.Code</code>
+                                </td>
+                                <td>
+                                    <span class="text-muted">@(string.IsNullOrEmpty(feature.Description) ? "No description" : feature.Description)</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">@feature.DisplayOrder</span>
+                                </td>
+                                <td>
+                                    @if (feature.IsEnabled)
+                                    {
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check me-1"></i>Enabled
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">
+                                            <i class="fas fa-times me-1"></i>Disabled
+                                        </span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(feature.SupportFromVersion) || !string.IsNullOrEmpty(feature.SupportToVersion))
+                                    {
+                                        <small class="text-muted">
+                                            @if (!string.IsNullOrEmpty(feature.SupportFromVersion))
+                                            {
+                                                <span>From: @feature.SupportFromVersion</span>
+                                            }
+                                            @if (!string.IsNullOrEmpty(feature.SupportToVersion))
+                                            {
+                                                @if (!string.IsNullOrEmpty(feature.SupportFromVersion))
+                                                {
+                                                    <br />
+                                                }
+                                                <span>To: @feature.SupportToVersion</span>
+                                            }
+                                        </small>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">All versions</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a href="@Url.Action("Edit", "ProductFeature", new { productId = Model.ProductId, featureId = feature.Id })" 
+                                           class="btn btn-outline-primary" title="Edit Feature">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        @if (feature.CanDelete)
                                         {
-                                            <div class="item-subtitle">Code: @Html.DisplayFor(modelItem => item.Code)</div>
+                                            <button type="button" class="btn btn-outline-danger" 
+                                                    onclick="confirmDelete('@feature.Id', '@feature.Name')" title="Delete Feature">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
                                         }
                                     </div>
-                                </div>
-                            </td>
-                            <td>
-                                @if (!string.IsNullOrEmpty(item.Description))
-                                {
-                                    <span title="@item.Description">
-                                        @(item.Description.Length > 60 ? item.Description.Substring(0, 60) + "..." : item.Description)
-                                    </span>
-                                }
-                                else
-                                {
-                                    <span class="text-muted">No description</span>
-                                }
-                            </td>
-                            <td>
-                                <span class="badge badge-tier">Order: @item.DisplayOrder</span>
-                            </td>
-                            <td>
-                                @if (!string.IsNullOrEmpty(item.Code))
-                                {
-                                    <span class="badge badge-secondary">@item.Code</span>
-                                }
-                                else
-                                {
-                                    <span class="text-muted">No code</span>
-                                }
-                            </td>
-                            <td>
-                                <span class="badge @(item.IsEnabled ? "badge-status-active" : "badge-status-inactive")">
-                                    @(item.IsEnabled ? "Enabled" : "Disabled")
-                                </span>
-                            </td>
-                            <td>
-                                <div class="actions">
-                                    <div class="dropdown">
-                                        <button class="btn btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                            <i class="fas fa-ellipsis-v"></i>
-                                        </button>
-                                        <ul class="dropdown-menu dropdown-menu-end">
-                                            <li>
-                                                <a class="dropdown-item" asp-action="Details" asp-route-id="@item.Id" asp-route-productId="@Model.ProductId">
-                                                    <i class="fas fa-eye"></i> View Details
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a class="dropdown-item" asp-action="Edit" asp-route-id="@item.Id" asp-route-productId="@Model.ProductId">
-                                                    <i class="fas fa-edit"></i> Edit
-                                                </a>
-                                            </li>
-                                            @if (item.CanDelete)
-                                            {
-                                                <li><hr class="dropdown-divider"></li>
-                                                <li>
-                                                    <a class="dropdown-item text-danger" asp-action="Delete" asp-route-id="@item.Id" asp-route-productId="@Model.ProductId">
-                                                        <i class="fas fa-trash"></i> Delete
-                                                    </a>
-                                                </li>
-                                            }
-                                        </ul>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         }
         else
         {
-            <div class="empty-state">
-                <div class="empty-state-icon">
-                    <i class="fas fa-puzzle-piece"></i>
+            <div class="text-center py-5">
+                <div class="mb-3">
+                    <i class="fas fa-star fa-3x text-muted"></i>
                 </div>
-                <div class="empty-state-content">
-                    <h5>No Product Features Found</h5>
-                    <p class="text-muted">
-                        @if (features.Any())
-                        {
-                            <span>No features match your search criteria.</span>
-                        }
-                        else
-                        {
-                            <span>No features have been configured for this product yet.</span>
-                        }
-                    </p>
-                    <a asp-action="Create" asp-route-productId="@Model.ProductId" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> Create First Feature
-                    </a>
-                </div>
+                <h5 class="text-muted">No Features Found</h5>
+                <p class="text-muted mb-3">This product doesn't have any features defined yet.</p>
+                <a href="@Url.Action("Create", "ProductFeature", new { productId = Model.ProductId })" class="btn btn-primary">
+                    <i class="fas fa-plus me-1"></i>Add First Feature
+                </a>
             </div>
         }
     </div>
+</div>
 
-    <!-- Stats Bar -->
-    <div class="product-list-stats">
-        <div class="stats-content">
-            <div class="stats-info">
-                @if (features.Any())
-                {
-                    <span class="stats-text">
-                        Showing <span id="visibleCount">@features.Count()</span> of <span id="totalCount">@features.Count()</span> features
-                    </span>
-                }
-                else
-                {
-                    <span class="stats-text">No features available</span>
-                }
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-        
-    </div>
-
-    <!-- Footer with Info -->
-    @if (features.Any())
-    {
-        <div class="product-list-footer">
-            <div class="list-info">
-                <div class="count-info">
-                    Showing <span id="visibleCount">@features.Count()</span> of <span id="totalCount">@features.Count()</span> features
-                </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the feature "<span id="featureName"></span>"?</p>
+                <p class="text-danger small">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="post" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">Delete Feature</button>
+                </form>
             </div>
         </div>
-    }
+    </div>
 </div>
 
 @section Scripts {
     <script>
-        $(document).ready(function() {
-            // Search functionality
-            $('#searchInput').on('keyup', function() {
-                var searchText = $(this).val().toLowerCase();
-                var $rows = $('#productTable tr');
-                var visibleCount = 0;
-                
-                $rows.each(function() {
-                    var searchData = $(this).data('search') || '';
-                    if (searchData.includes(searchText)) {
-                        $(this).removeClass('filtered-out');
-                        visibleCount++;
-                    } else {
-                        $(this).addClass('filtered-out');
-                    }
-                });
-                
-                // Update counts and filter indicators
-                $('#visibleCount').text(visibleCount);
-                
-                if (searchText) {
-                    $('#filterCount').text(visibleCount + ' results').show();
-                    $('#clearFilter').show();
-                } else {
-                    $('#filterCount').hide();
-                    $('#clearFilter').hide();
-                }
-            });
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr[data-search-text]');
             
-            // Clear filter
-            $('#clearFilter').on('click', function(e) {
-                e.preventDefault();
-                $('#searchInput').val('');
-                $('#productTable tr').removeClass('filtered-out');
-                $('#filterCount').hide();
-                $('#clearFilter').hide();
-                $('#visibleCount').text($('#totalCount').text());
-            });
-            
-            // Table sorting
-            $('.sortable').on('click', function() {
-                var $this = $(this);
-                var column = $this.data('sort');
-                var $table = $this.closest('table');
-                var $tbody = $table.find('tbody');
-                var $rows = $tbody.find('tr:not(.filtered-out)');
-                var isAsc = $this.hasClass('sort-asc');
-                
-                // Reset all sort classes
-                $('.sortable').removeClass('sort-asc sort-desc');
-                
-                // Set current sort direction
-                if (isAsc) {
-                    $this.addClass('sort-desc');
+            rows.forEach(row => {
+                const searchText = row.getAttribute('data-search-text').toLowerCase();
+                if (searchText.includes(searchTerm)) {
+                    row.style.display = '';
                 } else {
-                    $this.addClass('sort-asc');
+                    row.style.display = 'none';
                 }
-                
-                // Sort rows
-                $rows.sort(function(a, b) {
-                    var aVal = $(a).find('td').eq($this.index()).text().toLowerCase();
-                    var bVal = $(b).find('td').eq($this.index()).text().toLowerCase();
-                    
-                    if (isAsc) {
-                        return aVal < bVal ? 1 : aVal > bVal ? -1 : 0;
-                    } else {
-                        return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
-                    }
-                });
-                
-                // Reorder rows in DOM
-                $tbody.append($rows);
             });
         });
+
+        // Sort functionality
+        document.querySelectorAll('.sortable').forEach(header => {
+            header.addEventListener('click', function() {
+                const column = this.getAttribute('data-sort');
+                sortTable(column);
+            });
+        });
+
+        function sortTable(column) {
+            // Simple table sorting implementation
+            const table = document.querySelector('.product-list-table');
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            
+            rows.sort((a, b) => {
+                let aVal, bVal;
+                
+                switch(column) {
+                    case 'name':
+                        aVal = a.querySelector('td:first-child .fw-medium').textContent;
+                        bVal = b.querySelector('td:first-child .fw-medium').textContent;
+                        break;
+                    case 'code':
+                        aVal = a.querySelector('td:nth-child(2) code').textContent;
+                        bVal = b.querySelector('td:nth-child(2) code').textContent;
+                        break;
+                    case 'displayOrder':
+                        aVal = parseInt(a.querySelector('td:nth-child(4) .badge').textContent);
+                        bVal = parseInt(b.querySelector('td:nth-child(4) .badge').textContent);
+                        return aVal - bVal;
+                    default:
+                        aVal = a.querySelector(`td:nth-child(${getColumnIndex(column)})`).textContent;
+                        bVal = b.querySelector(`td:nth-child(${getColumnIndex(column)})`).textContent;
+                }
+                
+                return aVal.localeCompare(bVal);
+            });
+            
+            rows.forEach(row => tbody.appendChild(row));
+        }
+
+        function getColumnIndex(column) {
+            switch(column) {
+                case 'name': return 1;
+                case 'code': return 2;
+                case 'description': return 3;
+                case 'displayOrder': return 4;
+                case 'status': return 5;
+                case 'versions': return 6;
+                default: return 1;
+            }
+        }
+
+        // Delete confirmation
+        function confirmDelete(featureId, featureName) {
+            document.getElementById('featureName').textContent = featureName;
+            document.getElementById('deleteForm').action = '@Url.Action("Delete", "ProductFeature", new { productId = Model.ProductId })' + '?featureId=' + featureId;
+            
+            var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            modal.show();
+        }
     </script>
 }

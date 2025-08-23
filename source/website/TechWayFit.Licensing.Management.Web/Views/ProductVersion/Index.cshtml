@@ -5,9 +5,10 @@
     ViewData["PageTitle"] = "Product Versions";
     var versions = ViewData["Versions"] as List<TechWayFit.Licensing.Management.Web.ViewModels.Product.VersionInfoViewModel> ?? new List<TechWayFit.Licensing.Management.Web.ViewModels.Product.VersionInfoViewModel>();
 }
+
 <div class="container-fluid py-3">
     <!-- Header Section -->
-    <div class="header mb-3">
+    <div class="page-header mb-3">
         <div class="d-flex justify-content-between align-items-center">
             <div>
                 <h2 class="mb-1">Product Versions</h2>
@@ -29,14 +30,14 @@
             </div>
         </div>
     </div>
- 
-<!-- Product Info Card -->
+
+    <!-- Product Info Card -->
     <div class="row g-2 mb-3">
         <div class="col-12">
             <div class="sidebar-section">
                 <div class="section-header">
                     <div class="d-flex align-items-center">
-                        <div class="product-icon me-3" style="width: 40px; height: 40px;">
+                        <div class="product-icon me-3" style="width: 40px; height: 40px; background: rgba(13, 110, 253, 0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
                             <i class="fas fa-cube text-primary"></i>
                         </div>
                         <div>
@@ -48,62 +49,6 @@
             </div>
         </div>
     </div>
-    <!-- Statistics Cards -->
-    <div class="row g-2 mb-3">
-        <div class="col-sm-6 col-lg-3">
-            <div class="stats-card">
-                <div class="stats-row-1">
-                    <div class="stats-icon">
-                        <i class="fas fa-code-branch"></i>
-                    </div>
-                    <div class="stats-number">@versions.Count</div>
-                </div>
-                <div class="stats-row-2">
-                    <div class="stats-label">Total Versions</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-lg-3">
-            <div class="stats-card stats-card-success">
-                <div class="stats-row-1">
-                    <div class="stats-icon">
-                        <i class="fas fa-star"></i>
-                    </div>
-                    <div class="stats-number">@versions.Count(v => v.IsCurrent)</div>
-                </div>
-                <div class="stats-row-2">
-                    <div class="stats-label">Current Version</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-lg-3">
-            <div class="stats-card">
-                <div class="stats-row-1">
-                    <div class="stats-icon">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <div class="stats-number">@versions.Count(v => v.IsActive)</div>
-                </div>
-                <div class="stats-row-2">
-                    <div class="stats-label">Active Versions</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-lg-3">
-            <div class="stats-card">
-                <div class="stats-row-1">
-                    <div class="stats-icon">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                    <div class="stats-number">@versions.Count(v => v.SupportEndDate.HasValue && v.SupportEndDate > DateTime.Now)</div>
-                </div>
-                <div class="stats-row-2">
-                    <div class="stats-label">Supported</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
 
     <!-- Alert Messages -->
     @if (TempData["Error"] != null)
@@ -124,55 +69,129 @@
         </div>
     }
 
-    <div class="row g-2">
-        <!-- Main Content -->
-        <div class="col-lg-8">
-            <!-- Versions Section -->
-            <div class="edit-section">
-                <div class="section-header">
-                    <h5><i class="fas fa-code-branch me-2"></i>Product Versions</h5>
+    <!-- Versions List -->
+    <div class="product-list-container">
+        <div class="product-list-header">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="product-list-stats">
+                        <span class="badge bg-primary">@versions.Count Versions</span>
+                        @if (versions.Any(v => v.IsCurrent))
+                        {
+                            <span class="badge bg-success">Current: v@(versions.FirstOrDefault(v => v.IsCurrent)?.Version)</span>
+                        }
+                    </div>
                 </div>
-                <div class="section-content">
-                    @if (versions.Any())
-                    {
+                <div class="col-md-6">
+                    <div class="d-flex justify-content-end">
+                        <div class="input-group me-2" style="max-width: 300px;">
+                            <input type="text" class="form-control" placeholder="Search versions..." id="searchInput">
+                            <button class="btn btn-outline-secondary" type="button">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                        <a href="@Url.Action("Create", new { productId = Model.ProductId })" class="btn btn-success">
+                            <i class="fas fa-plus me-1"></i>Add Version
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (versions.Any())
+        {
+            <div class="table-responsive">
+                <table class="table product-list-table table-hover">
+                    <thead>
+                        <tr>
+                            <th class="sortable" data-sort="version">
+                                <i class="fas fa-sort me-1"></i>Version
+                            </th>
+                            <th class="sortable" data-sort="name">
+                                <i class="fas fa-sort me-1"></i>Name
+                            </th>
+                            <th class="sortable" data-sort="releaseDate">
+                                <i class="fas fa-sort me-1"></i>Release Date
+                            </th>
+                            <th class="sortable" data-sort="status">
+                                <i class="fas fa-sort me-1"></i>Status
+                            </th>
+                            <th>Release Notes</th>
+                            <th>End of Life</th>
+                            <th width="150">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
                         @foreach (var version in versions.OrderByDescending(v => v.ReleaseDate).ThenByDescending(v => v.Version))
                         {
-                            <div class="version-card">
-                                <div class="version-header">
-                                    <div>
-                                        <div class="d-flex align-items-center gap-2 mb-1">
-                                            <h6 class="mb-0">@version.Name</h6>
-                                            <span class="version-badge @(version.IsCurrent ? "current" : "")">
-                                                v@version.Version
-                                                @if (version.IsCurrent)
-                                                {
-                                                    <text>(Current)</text>
-                                                }
-                                            </span>
+                            <tr data-search-text="@(version.Name + " " + version.Version + " " + version.ReleaseNotes)">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-2" style="width: 30px; height: 30px; background: rgba(25, 135, 84, 0.1); border-radius: 6px; display: flex; align-items: center; justify-content: center;">
+                                            <i class="fas fa-code-branch text-success"></i>
                                         </div>
-                                        @if (!string.IsNullOrEmpty(version.ReleaseNotes))
-                                        {
-                                            <p class="text-muted mb-2">@version.ReleaseNotes</p>
-                                        }
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <small class="text-muted">
-                                                    <i class="fas fa-calendar"></i> 
-                                                    Released: @(version.ReleaseDate != DateTime.MinValue ? version.ReleaseDate.ToString("MMM dd, yyyy") : "Not set")
-                                                </small>
-                                            </div>
-                                            @if (version.EndOfLifeDate.HasValue)
-                                            {
-                                                <div class="col-md-6">
-                                                    <small class="text-muted">
-                                                        <i class="fas fa-exclamation-triangle"></i> 
-                                                        EOL: @version.EndOfLifeDate.Value.ToString("MMM dd, yyyy")
-                                                    </small>
-                                                </div>
-                                            }
+                                        <div>
+                                            <code class="bg-light px-2 py-1 rounded">v@version.Version</code>
                                         </div>
                                     </div>
-                                    <div class="version-actions">
+                                </td>
+                                <td>
+                                    <div class="fw-medium">@version.Name</div>
+                                </td>
+                                <td>
+                                    @if (version.ReleaseDate != DateTime.MinValue)
+                                    {
+                                        <span class="text-muted">@version.ReleaseDate.ToString("MMM dd, yyyy")</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Not set</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (version.IsCurrent)
+                                    {
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-star me-1"></i>Current
+                                        </span>
+                                    }
+                                    else if (version.IsActive)
+                                    {
+                                        <span class="badge bg-primary">
+                                            <i class="fas fa-check me-1"></i>Active
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">
+                                            <i class="fas fa-archive me-1"></i>Inactive
+                                        </span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(version.ReleaseNotes))
+                                    {
+                                        <span class="text-muted" title="@version.ReleaseNotes">
+                                            @(version.ReleaseNotes.Length > 50 ? version.ReleaseNotes.Substring(0, 50) + "..." : version.ReleaseNotes)
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">No notes</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (version.EndOfLifeDate.HasValue)
+                                    {
+                                        <span class="text-warning">@version.EndOfLifeDate.Value.ToString("MMM dd, yyyy")</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Not set</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
                                         @if (!version.IsCurrent)
                                         {
                                             <form method="post" 
@@ -180,124 +199,148 @@
                                                   style="display: inline;">
                                                 @Html.AntiForgeryToken()
                                                 <button type="submit" 
-                                                        class="btn btn-sm btn-outline-success"
+                                                        class="btn btn-outline-success"
                                                         title="Set as current version">
                                                     <i class="fas fa-star"></i>
                                                 </button>
                                             </form>
                                         }
                                         <a href="@Url.Action("Details", new { productId = Model.ProductId, versionId = version.Id })" 
-                                           class="btn btn-sm btn-outline-info"
-                                           title="View version details">
+                                           class="btn btn-outline-info" title="View details">
                                             <i class="fas fa-info-circle"></i>
                                         </a>
                                         <a href="@Url.Action("Edit", new { productId = Model.ProductId, versionId = version.Id })" 
-                                           class="btn btn-sm btn-outline-primary"
-                                           title="Edit version">
+                                           class="btn btn-outline-primary" title="Edit version">
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         @if (version.CanDelete)
                                         {
-                                            <form method="post" 
-                                                  action="@Url.Action("Delete", new { productId = Model.ProductId, versionId = version.Id })" 
-                                                  style="display: inline;"
-                                                  onsubmit="return confirm('Are you sure you want to delete this version?');">
-                                                @Html.AntiForgeryToken()
-                                                <button type="submit" 
-                                                        class="btn btn-sm btn-outline-danger"
-                                                        title="Delete version">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </form>
+                                            <button type="button" class="btn btn-outline-danger" 
+                                                    onclick="confirmDelete('@version.Id', '@version.Version')" title="Delete version">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
                                         }
                                     </div>
-                                </div>
-                            </div>
+                                </td>
+                            </tr>
                         }
-                    }
-                    else
-                    {
-                        <div class="text-center py-5">
-                            <div class="mb-3">
-                                <i class="fas fa-tags text-muted" style="font-size: 3rem;"></i>
-                            </div>
-                            <h5 class="text-muted mb-3">No Versions Found</h5>
-                            <p class="text-muted mb-4">
-                                This product doesn't have any versions yet. 
-                                Start by creating the first version to track releases and updates.
-                            </p>
-                            <a href="@Url.Action("Create", new { productId = Model.ProductId })" 
-                               class="btn btn-primary">
-                                <i class="fas fa-plus"></i> Create First Version
-                            </a>
-                        </div>
-                    }
-                </div>
+                    </tbody>
+                </table>
             </div>
-        </div>
-
-        <!-- Sidebar -->
-        <div class="col-lg-4">
-            <!-- Quick Actions -->
-            <div class="sidebar-section">
-                <div class="card-header">
-                    <h6 class="mb-0">
-                        <i class="fas fa-bolt"></i> Quick Actions
-                    </h6>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <div class="mb-3">
+                    <i class="fas fa-code-branch fa-3x text-muted"></i>
                 </div>
-                <div class="card-body">
-                    <div class="d-grid gap-2">
-                        <a href="@Url.Action("Create", new { productId = Model.ProductId })" 
-                           class="btn btn-outline-primary btn-sm">
-                            <i class="fas fa-plus"></i> Add New Version
-                        </a>
-                        <a href="@Url.Action("Index", "ProductTier", new { productId = Model.ProductId })" 
-                           class="btn btn-outline-secondary btn-sm">
-                            <i class="fas fa-layer-group"></i> Manage Tiers
-                        </a>
-                        <a href="@Url.Action("Index", "ProductFeature", new { productId = Model.ProductId })" 
-                           class="btn btn-outline-secondary btn-sm">
-                            <i class="fas fa-puzzle-piece"></i> Manage Features
-                        </a>
-                    </div>
-                </div>
+                <h5 class="text-muted">No Versions Found</h5>
+                <p class="text-muted mb-3">This product doesn't have any versions defined yet.</p>
+                <a href="@Url.Action("Create", new { productId = Model.ProductId })" class="btn btn-primary">
+                    <i class="fas fa-plus me-1"></i>Add First Version
+                </a>
             </div>
+        }
+    </div>
+</div>
 
-            <!-- Version Management Info -->
-            <div class="sidebar-section">
-                <div class="card-header">
-                    <h6 class="mb-0">
-                        <i class="fas fa-info-circle"></i> Version Management
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <h6>Version Guidelines</h6>
-                    <ul class="small mb-3">
-                        <li>Use semantic versioning (Major.Minor.Patch)</li>
-                        <li>Only one version can be marked as current</li>
-                        <li>Set proper release dates for tracking</li>
-                        <li>Document changes in release notes</li>
-                    </ul>
-                    
-                    <h6>Best Practices</h6>
-                    <ul class="small mb-3">
-                        <li>Plan version releases in advance</li>
-                        <li>Communicate end-of-life dates clearly</li>
-                        <li>Maintain backwards compatibility when possible</li>
-                        <li>Test thoroughly before marking as current</li>
-                    </ul>
-
-                    @if (versions.Any())
-                    {
-                        <h6>Quick Stats</h6>
-                        <ul class="list-unstyled small">
-                            <li><strong>Total Versions:</strong> @versions.Count</li>
-                            <li><strong>Current Version:</strong> @(versions.FirstOrDefault(v => v.IsCurrent)?.Version ?? "None")</li>
-                            <li><strong>Latest Release:</strong> @(versions.Any() && versions.OrderByDescending(v => v.ReleaseDate).First().ReleaseDate != DateTime.MinValue ? versions.OrderByDescending(v => v.ReleaseDate).First().ReleaseDate.ToString("MMM yyyy") : "None")</li>
-                        </ul>
-                    }
-                </div>
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete version "<span id="versionNumber"></span>"?</p>
+                <p class="text-danger small">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="post" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">Delete Version</button>
+                </form>
             </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr[data-search-text]');
+            
+            rows.forEach(row => {
+                const searchText = row.getAttribute('data-search-text').toLowerCase();
+                if (searchText.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+
+        // Sort functionality
+        document.querySelectorAll('.sortable').forEach(header => {
+            header.addEventListener('click', function() {
+                const column = this.getAttribute('data-sort');
+                sortTable(column);
+            });
+        });
+
+        function sortTable(column) {
+            const table = document.querySelector('.product-list-table');
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            
+            rows.sort((a, b) => {
+                let aVal, bVal;
+                
+                switch(column) {
+                    case 'version':
+                        aVal = a.querySelector('td:first-child code').textContent;
+                        bVal = b.querySelector('td:first-child code').textContent;
+                        break;
+                    case 'name':
+                        aVal = a.querySelector('td:nth-child(2) .fw-medium').textContent;
+                        bVal = b.querySelector('td:nth-child(2) .fw-medium').textContent;
+                        break;
+                    case 'releaseDate':
+                        aVal = a.querySelector('td:nth-child(3)').textContent;
+                        bVal = b.querySelector('td:nth-child(3)').textContent;
+                        break;
+                    default:
+                        aVal = a.querySelector(`td:nth-child(${getColumnIndex(column)})`).textContent;
+                        bVal = b.querySelector(`td:nth-child(${getColumnIndex(column)})`).textContent;
+                }
+                
+                return aVal.localeCompare(bVal);
+            });
+            
+            rows.forEach(row => tbody.appendChild(row));
+        }
+
+        function getColumnIndex(column) {
+            switch(column) {
+                case 'version': return 1;
+                case 'name': return 2;
+                case 'releaseDate': return 3;
+                case 'status': return 4;
+                default: return 1;
+            }
+        }
+
+        // Delete confirmation
+        function confirmDelete(versionId, versionNumber) {
+            document.getElementById('versionNumber').textContent = 'v' + versionNumber;
+            document.getElementById('deleteForm').action = '@Url.Action("Delete", new { productId = Model.ProductId })' + '?versionId=' + versionId;
+            
+            var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            modal.show();
+        }
+    </script>
+}
