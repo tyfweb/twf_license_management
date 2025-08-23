@@ -27,7 +27,8 @@ public class EfCoreProductTierRepository :  BaseRepository<ProductTier,ProductTi
 
     public Task<ProductTier?> GetWithFeaturesAsync(Guid tierId)
     {
-        var result = _dbSet.Include(t => t.Features)
+        var result = _dbSet.Include(t => t.FeatureMappings)
+                        .ThenInclude(m => m.ProductFeature)
                      .FirstOrDefaultAsync(t => t.Id == tierId && t.IsActive);
         return result.ContinueWith(t => t.Result?.Map());
     }

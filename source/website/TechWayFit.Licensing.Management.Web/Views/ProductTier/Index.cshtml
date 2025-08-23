@@ -170,8 +170,9 @@
                                                     </button>
                                                     <ul class="dropdown-menu" aria-labelledby="dropdownTier@(tier.Id)">
                                                         <li><a class="dropdown-item" href="/ProductTier/@Model.ProductId/@tier.Id/edit"><i class="fas fa-edit me-2"></i>Edit</a></li>
-                                                        <li><a class="dropdown-item toggle-tier" href="#" data-tier-id="@tier.Id"><i class="fas fa-toggle-@(tier.IsActive ? "off" : "on") me-2"></i>@(tier.IsActive ? "Deactivate" : "Activate")</a></li>
+                                                        <li><a class="dropdown-item" href="/ProductTier/@Model.ProductId/@tier.Id/features"><i class="fas fa-star me-2"></i>Manage Features</a></li>
                                                         <li><hr class="dropdown-divider"></li>
+                                                        <li><a class="dropdown-item toggle-tier" href="#" data-tier-id="@tier.Id"><i class="fas fa-toggle-@(tier.IsActive ? "off" : "on") me-2"></i>@(tier.IsActive ? "Deactivate" : "Activate")</a></li>
                                                         <li><a class="dropdown-item delete-tier text-danger" href="#" data-tier-id="@tier.Id"><i class="fas fa-trash me-2"></i>Delete</a></li>
                                                     </ul>
                                                 </div>
@@ -259,6 +260,9 @@
                                                         <div class="btn-group btn-group-sm">
                                                             <a href="/ProductTier/@Model.ProductId/@tier.Id/edit" class="btn btn-outline-primary btn-sm" title="Edit">
                                                                 <i class="fas fa-edit"></i>
+                                                            </a>
+                                                            <a href="/ProductTier/@Model.ProductId/@tier.Id/features" class="btn btn-outline-success btn-sm" title="Manage Features">
+                                                                <i class="fas fa-star"></i>
                                                             </a>
                                                             <button class="btn btn-outline-@(tier.IsActive ? "warning" : "success") btn-sm toggle-tier" data-tier-id="@tier.Id" title="@(tier.IsActive ? "Deactivate" : "Activate")">
                                                                 <i class="fas fa-toggle-@(tier.IsActive ? "off" : "on")"></i>

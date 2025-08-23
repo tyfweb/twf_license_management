@@ -48,9 +48,9 @@ public class ProductTier
     public ProductSupportSLA SupportSLA { get; set; } = ProductSupportSLA.NoSLA;
 
     /// <summary>
-    /// Features included in this tier
+    /// Feature mappings for this tier (many-to-many relationship)
     /// </summary>
-    public List<ProductFeature> Features { get; set; } = new();
+    public List<ProductFeatureTierMapping> FeatureMappings { get; set; } = new();
 
     /// <summary>
     /// Pricing options for this tier (Monthly, Yearly, Perpetual)
@@ -59,7 +59,6 @@ public class ProductTier
 
     public ProductTier()
     {
-        Features.Add(ProductFeature.Default);
         MaxUsers = 1;
         MaxDevices = 1;
         Audit.IsActive = true;

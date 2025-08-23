@@ -47,6 +47,7 @@ public class EfCoreUnitOfWork : IUnitOfWork
     private IProductKeysRepository? _productKeys;
     private IProductFeatureRepository? _productFeatures;
     private IProductTierRepository? _productTiers;
+    private IProductFeatureTierMappingRepository? _productFeatureTierMappings;
     private IProductVersionRepository? _productVersions;
     private IAuditEntryRepository? _auditEntries;
     private INotificationTemplateRepository? _notificationTemplates;
@@ -104,6 +105,9 @@ public class EfCoreUnitOfWork : IUnitOfWork
 
     public IProductTierRepository ProductTiers => 
         _productTiers ??= new EfCoreProductTierRepository(_context,_userContext);
+
+    public IProductFeatureTierMappingRepository ProductFeatureTierMappings => 
+        _productFeatureTierMappings ??= new EfCoreProductFeatureTierMappingRepository(_context,_userContext);
 
     public IProductVersionRepository ProductVersions => 
         _productVersions ??= new EfCoreProductVersionRepository(_context,_userContext);

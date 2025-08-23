@@ -17,13 +17,7 @@ public class ProductFeatureEntity : AuditWorkflowEntity, IEntityMapper<ProductFe
     /// <summary>
     /// Foreign key to Product
     /// </summary>
-
     public Guid ProductId { get; set; } = Guid.NewGuid();
-
-    /// <summary>
-    /// Foreign key to Product Tier
-    /// </summary>
-    public Guid TierId { get; set; } = Guid.NewGuid();
 
     /// <summary>
     /// Name of the feature
@@ -64,11 +58,6 @@ public class ProductFeatureEntity : AuditWorkflowEntity, IEntityMapper<ProductFe
     public string FeatureUsageJson { get; set; } = "{}"; // Assuming usage is stored as JSON
 
     /// <summary>
-    /// Navigation property to Product Tier
-    /// </summary>
-    public virtual ProductTierEntity? Tier { get; set; }
-
-    /// <summary>
     /// Navigation property to SupportFromVersion
     /// </summary>
     public virtual ProductVersionEntity? SupportFromVersion { get; set; }
@@ -83,6 +72,11 @@ public class ProductFeatureEntity : AuditWorkflowEntity, IEntityMapper<ProductFe
     /// </summary>
     public virtual ICollection<ProductLicenseEntity> ProductLicenses { get; set; } = new List<ProductLicenseEntity>();
 
+    /// <summary>
+    /// Navigation property to Tier Mappings
+    /// </summary>
+    public virtual ICollection<ProductFeatureTierMappingEntity> TierMappings { get; set; } = new List<ProductFeatureTierMappingEntity>();
+
     #region IEntityMapper Implementation
      public ProductFeatureEntity Map(ProductFeature model)
     {
@@ -91,7 +85,6 @@ public class ProductFeatureEntity : AuditWorkflowEntity, IEntityMapper<ProductFe
         Id = model.FeatureId;
         TenantId = model.TenantId;
         ProductId = model.ProductId;
-        TierId = model.TierId;
         Code = model.Code;
         Name = model.Name;
         Description = model.Description;
@@ -129,7 +122,6 @@ public class ProductFeatureEntity : AuditWorkflowEntity, IEntityMapper<ProductFe
             FeatureId = this.Id,
             TenantId = this.TenantId,
             ProductId = this.ProductId,
-            TierId = this.TierId,
             Code = this.Code,
             Name = this.Name,
             Description = this.Description,

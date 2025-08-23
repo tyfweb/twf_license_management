@@ -28,9 +28,12 @@ public class EfCoreProductFeatureRepository :   BaseRepository<ProductFeature,Pr
 
     public async Task<IEnumerable<ProductFeature>> GetByTierIdAsync(Guid tierId)
     {
-        var result = await _dbSet.Where(f => f.TierId == tierId && f.IsActive)
-                         .OrderBy(f => f.DisplayOrder)
-                         .ToListAsync();
+        var result = await _context.ProductFeatureTierMappings
+            .Include(m => m.ProductFeature)
+            .Where(m => m.ProductTierId == tierId && m.IsActive && m.ProductFeature != null && m.ProductFeature.IsActive)
+            .OrderBy(m => m.DisplayOrder)
+            .Select(m => m.ProductFeature!)
+            .ToListAsync();
         return result.Select(f => f.Map());
     }
 

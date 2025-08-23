@@ -62,8 +62,16 @@ public class EnterpriseProductService : IEnterpriseProductService
 
             // Save to repository
             var createdEntity = await _unitOfWork.Products.AddAsync(product);
-          //  await _unitOfWork.SaveChangesAsync();
-
+            await _unitOfWork.SaveChangesAsync();
+            // Ensure the product has at least few features
+            
+            var defaultFeature = new ProductFeature
+            {
+                ProductId = createdEntity.Id,
+                Name = "Default Feature",
+                Description = "Default feature for new products"
+            };
+            var createdFeature = await _unitOfWork.ProductFeatures.AddAsync(defaultFeature);
             // Ensure the product has at least one tier
             if (!createdEntity.Tiers.Any())
             {
@@ -71,21 +79,15 @@ public class EnterpriseProductService : IEnterpriseProductService
                 defaultTier.ProductId = createdEntity.Id; // Ensure the tier is linked to the product
                 createdEntity.Tiers = new List<ProductTier> { defaultTier };
                 var defaultTierEntity = await _unitOfWork.ProductTiers.AddAsync(defaultTier);
-            //    await _unitOfWork.SaveChangesAsync();
 
-                // Ensure the product has at least few features
-            
-                var defaultFeature = new ProductFeature
+                await _unitOfWork.ProductFeatureTierMappings.AddAsync(new ProductFeatureTierMapping
                 {
-                    ProductId = createdEntity.Id,
-                    Name = "Default Feature",
-                    Description = "Default feature for new products",
-                    TierId = defaultTierEntity.TierId
-                };
-
-                defaultTierEntity.Features.Add(defaultFeature);
-                await _unitOfWork.ProductFeatures.AddAsync(defaultFeature);
-            //    await _unitOfWork.SaveChangesAsync();
+                    ProductFeatureId = createdFeature.FeatureId,
+                    ProductTierId = defaultTierEntity.TierId,
+                    IsEnabled = true,
+                    DisplayOrder = 1,
+                    Configuration = null
+                });
             }
             // Ensure the product has at least one version
             if (!createdEntity.Versions.Any())
@@ -100,7 +102,6 @@ public class EnterpriseProductService : IEnterpriseProductService
                 };
                 createdEntity.Versions = [defaultVersion];
                 await _unitOfWork.ProductVersions.AddAsync(defaultVersion);
-             //   await _unitOfWork.SaveChangesAsync();
             }
                await _unitOfWork.SaveChangesAsync();
 

@@ -54,9 +54,9 @@ public class ProductTierEntity : AuditWorkflowEntity, IEntityMapper<ProductTier,
     public virtual ICollection<ProductTierPriceEntity> Prices { get; set; } = new List<ProductTierPriceEntity>();
 
     /// <summary>
-    /// Navigation property to Product Features
+    /// Navigation property to Product Feature Tier Mappings
     /// </summary>
-    public virtual ICollection<ProductFeatureEntity> Features { get; set; } = new List<ProductFeatureEntity>();
+    public virtual ICollection<ProductFeatureTierMappingEntity> FeatureMappings { get; set; } = new List<ProductFeatureTierMappingEntity>();
 
     /// <summary>
     /// Navigation property to Product Licenses using this tier
@@ -112,6 +112,7 @@ public class ProductTierEntity : AuditWorkflowEntity, IEntityMapper<ProductTier,
                 : JsonSerializer.Deserialize<ProductSupportSLA>(this.SupportSLAJson) ?? ProductSupportSLA.NoSLA, // Deserialize JSON to SupportSLA object
             DisplayOrder = this.DisplayOrder,
             Prices = this.Prices?.Select(p => p.Map()).ToList() ?? new List<ProductTierPrice>(),
+            FeatureMappings = this.FeatureMappings?.Select(fm => fm.Map()).ToList() ?? new List<ProductFeatureTierMapping>(),
             MaxUsers = this.MaxUsers ?? 0,
             MaxDevices = this.MaxDevices ?? 0,
             Audit = new AuditInfo

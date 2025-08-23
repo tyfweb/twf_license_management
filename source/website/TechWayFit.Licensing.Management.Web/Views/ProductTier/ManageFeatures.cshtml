@@ -1,0 +1,346 @@
+@model TechWayFit.Licensing.Management.Web.ViewModels.Product.TierFeatureSelectionViewModel
+
+@{
+    ViewData["Title"] = "Manage Tier Features";
+    
+    // Prepare header data
+    var headerModel = new TechWayFit.Licensing.Management.Web.ViewModels.Shared.PageHeaderViewModel
+    {
+        Title = $"Manage Features - {Model.TierName}",
+        Icon = "fas fa-puzzle-piece",
+        BreadcrumbItems = new List<TechWayFit.Licensing.Management.Web.ViewModels.Shared.BreadcrumbItem>
+        {
+            new() { Text = "Dashboard", Controller = "License", Action = "Index" },
+            new() { Text = "Products", Controller = "Product", Action = "Index" },
+            new() { Text = "Product Tiers", Controller = "ProductTier", Action = "Index", RouteValues = new { productId = Model.ProductId } },
+            new() { Text = $"Manage Features - {Model.TierName}", IsActive = true }
+        },
+        BackButtonText = "Back to Product Tiers",
+        BackButtonController = "ProductTier",
+        BackButtonAction = "Index",
+        BackButtonRouteValues = new { productId = Model.ProductId }
+    };
+}
+
+@section styles {
+    <style>
+        .feature-selection-container {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .tier-info-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+        
+        .tier-info-card h4 {
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .tier-info-card p {
+            margin: 0;
+            opacity: 0.9;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .feature-card {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 16px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: white;
+        }
+        
+        .feature-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        }
+        
+        .feature-card.selected {
+            border-color: #28a745;
+            background: linear-gradient(135deg, #e8f5e8 0%, #f0f8f0 100%);
+        }
+        
+        .feature-card.selected .feature-icon {
+            color: #28a745;
+        }
+        
+        .feature-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .feature-icon {
+            font-size: 1.2em;
+            margin-right: 8px;
+            color: #667eea;
+            transition: color 0.3s ease;
+        }
+        
+        .feature-name {
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 0;
+        }
+        
+        .feature-description {
+            color: #6c757d;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        
+        .feature-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8em;
+            color: #868e96;
+        }
+        
+        .feature-code {
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        
+        .feature-checkbox {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        .checkmark {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border: 2px solid #ddd;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card.selected .checkmark {
+            background: #28a745;
+            border-color: #28a745;
+        }
+        
+        .feature-card.selected .checkmark:after {
+            content: "✓";
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .action-buttons {
+            border-top: 1px solid #e9ecef;
+            padding-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .selection-summary {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        
+        .btn-save {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border: none;
+            color: white;
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-save:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        }
+        
+        .btn-cancel {
+            background: #6c757d;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-cancel:hover {
+            background: #5a6268;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+        
+        .empty-state i {
+            font-size: 3em;
+            margin-bottom: 16px;
+            color: #dee2e6;
+        }
+    </style>
+}
+
+@section scripts {
+    <script>
+        $(document).ready(function() {
+            // Handle feature card clicks
+            $('.feature-card').on('click', function(e) {
+                e.preventDefault();
+                var checkbox = $(this).find('input[type="checkbox"]');
+                checkbox.prop('checked', !checkbox.prop('checked'));
+                $(this).toggleClass('selected', checkbox.prop('checked'));
+                updateSelectionSummary();
+            });
+            
+            // Handle checkbox clicks (prevent double toggle)
+            $('.feature-checkbox').on('click', function(e) {
+                e.stopPropagation();
+                $(this).closest('.feature-card').toggleClass('selected', this.checked);
+                updateSelectionSummary();
+            });
+            
+            // Initialize selected state
+            $('.feature-checkbox:checked').each(function() {
+                $(this).closest('.feature-card').addClass('selected');
+            });
+            
+            updateSelectionSummary();
+            
+            function updateSelectionSummary() {
+                var totalFeatures = $('.feature-card').length;
+                var selectedFeatures = $('.feature-checkbox:checked').length;
+                $('.selection-summary').text(selectedFeatures + ' of ' + totalFeatures + ' features selected');
+                
+                // Enable/disable save button
+                $('.btn-save').prop('disabled', selectedFeatures === 0);
+            }
+        });
+    </script>
+}
+
+<!-- Page Header -->
+@await Html.PartialAsync("_PageHeader", headerModel)
+
+<div class="container-fluid">
+    <div class="feature-selection-container">
+        
+        <!-- Tier Information Card -->
+        <div class="tier-info-card">
+            <h4>@Model.TierName</h4>
+            @if (!string.IsNullOrWhiteSpace(Model.TierDescription))
+            {
+                <p>@Model.TierDescription</p>
+            }
+        </div>
+
+        <!-- Feature Selection Form -->
+        @using (Html.BeginForm("UpdateTierFeatures", "ProductTier", FormMethod.Post, new { @class = "feature-selection-form" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.TierId)
+            @Html.HiddenFor(m => m.ProductId)
+            
+            @if (Model.AvailableFeatures?.Any() == true)
+            {
+                <div class="features-grid">
+                    @for (int i = 0; i < Model.AvailableFeatures.Count; i++)
+                    {
+                        var feature = Model.AvailableFeatures[i];
+                        var isSelected = Model.SelectedFeatureIds?.Contains(feature.FeatureId) == true;
+                        
+                        <div class="feature-card @(isSelected ? "selected" : "")" data-feature-id="@feature.FeatureId">
+                            <div class="checkmark"></div>
+                            
+                            @Html.HiddenFor(m => m.AvailableFeatures[i].FeatureId)
+                            @Html.HiddenFor(m => m.AvailableFeatures[i].Name)
+                            @Html.HiddenFor(m => m.AvailableFeatures[i].Description)
+                            @Html.HiddenFor(m => m.AvailableFeatures[i].Code)
+                            
+                            <input type="checkbox" 
+                                   name="SelectedFeatureIds" 
+                                   value="@feature.FeatureId" 
+                                   class="feature-checkbox"
+                                   @(isSelected ? "checked" : "") />
+                            
+                            <div class="feature-header">
+                                <i class="fas fa-puzzle-piece feature-icon"></i>
+                                <h6 class="feature-name">@feature.Name</h6>
+                            </div>
+                            
+                            @if (!string.IsNullOrWhiteSpace(feature.Description))
+                            {
+                                <p class="feature-description">@feature.Description</p>
+                            }
+                            
+                            <div class="feature-meta">
+                                @if (!string.IsNullOrWhiteSpace(feature.Code))
+                                {
+                                    <span class="feature-code">@feature.Code</span>
+                                }
+                                <span class="feature-status">
+                                    @(isSelected ? "Selected" : "Available")
+                                </span>
+                            </div>
+                        </div>
+                    }
+                </div>
+                
+                <div class="action-buttons">
+                    <div class="selection-summary"></div>
+                    <div class="button-group">
+                        <a href="@Url.Action("Index", new { productId = Model.ProductId })" class="btn btn-cancel">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-save">
+                            <i class="fas fa-save"></i> Save Feature Selection
+                        </button>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="empty-state">
+                    <i class="fas fa-puzzle-piece"></i>
+                    <h5>No Features Available</h5>
+                    <p>There are no features available for this product. Create features first in the Product Feature management section.</p>
+                    <a href="@Url.Action("Index", "ProductFeature", new { productId = Model.ProductId })" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Manage Product Features
+                    </a>
+                </div>
+            }
+        }
+    </div>
+</div>

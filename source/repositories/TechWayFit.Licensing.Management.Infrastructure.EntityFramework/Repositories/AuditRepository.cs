@@ -277,5 +277,10 @@ public partial class AuditRepository<TModel, TEntity> : IDataRepository<TModel>
     {
         return query;
     }
- 
+
+    public Task<bool> AddRangeAsync(IEnumerable<TModel> entities, CancellationToken cancellationToken = default)
+    {
+       _dbSet.AddRange(entities.Select(e => new TEntity().Map(e)));
+        return Task.FromResult(true);
+    }
 }

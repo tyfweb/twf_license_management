@@ -69,6 +69,11 @@ public interface IUnitOfWork : IDisposable
     IProductTierRepository ProductTiers { get; }
 
     /// <summary>
+    /// Product Feature Tier Mapping repository
+    /// </summary>
+    IProductFeatureTierMappingRepository ProductFeatureTierMappings { get; }
+
+    /// <summary>
     /// Product Version repository
     /// </summary>
     IProductVersionRepository ProductVersions { get; }

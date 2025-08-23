@@ -25,15 +25,12 @@ public class ProductFeature
     /// </summary>
     public WorkflowInfo Workflow { get; set; } = new();
     /// <summary>
-    /// Unique identifier for the product feature
+    /// Unique identifier for the product this feature belongs to
     /// </summary>
     public Guid ProductId { get; set; } = Guid.Empty;
+    
     /// <summary>
-    /// Unique identifier for the product feature
-    /// </summary>
-    public Guid TierId { get; set; } = Guid.Empty;
-    /// <summary>
-    /// Unique identifier for the product feature
+    /// Unique code for the product feature
     /// </summary>
     public string Code { get; set; } = string.Empty;
 

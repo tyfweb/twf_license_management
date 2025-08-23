@@ -180,8 +180,7 @@ public class ProductApiController : BaseController
                     Id = t.TierId,
                     Name = t.Name,
                     Description = t.Description,
-                    MaxUsers = t.MaxUsers,
-                    FeatureIds = t.Features.Select(f => f.FeatureId).ToList()
+                    MaxUsers = t.MaxUsers
                 }).ToList()
             };
 
@@ -273,8 +272,7 @@ public class ProductApiController : BaseController
                         ProductId = createdProduct.Id,
                         Name = tierRequest.Name,
                         Description = tierRequest.Description ?? string.Empty,
-                        MaxUsers = tierRequest.MaxUsers ?? 1,
-                        Features = new List<ProductFeature>()
+                        MaxUsers = tierRequest.MaxUsers ?? 1 
                     };
                     await _tierService.CreateTierAsync(tier, currentUser);
                 }
@@ -557,8 +555,7 @@ public class ProductApiController : BaseController
                 Id = t.TierId,
                 Name = t.Name,
                 Description = t.Description,
-                MaxUsers = t.MaxUsers,
-                FeatureIds = t.Features.Select(f => f.FeatureId).ToList()
+                MaxUsers = t.MaxUsers
             }).ToList();
 
             return Ok(JsonResponse.OK(response));
@@ -605,8 +602,7 @@ public class ProductApiController : BaseController
                 ProductId = id,
                 Name = request.Name,
                 Description = request.Description ?? string.Empty,
-                MaxUsers = request.MaxUsers ?? 1,
-                Features = new List<ProductFeature>()
+                MaxUsers = request.MaxUsers ?? 1
             };
 
             var createdTier = await _tierService.CreateTierAsync(tier, currentUser);
@@ -615,8 +611,7 @@ public class ProductApiController : BaseController
                 Id = createdTier.TierId,
                 Name = createdTier.Name,
                 Description = createdTier.Description,
-                MaxUsers = createdTier.MaxUsers,
-                FeatureIds = createdTier.Features.Select(f => f.FeatureId).ToList()
+                MaxUsers = createdTier.MaxUsers
             };
 
             return CreatedAtAction(nameof(GetProductTiers), new { id }, JsonResponse.OK(response));

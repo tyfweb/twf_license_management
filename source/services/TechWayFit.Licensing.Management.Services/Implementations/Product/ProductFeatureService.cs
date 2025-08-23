@@ -100,8 +100,7 @@ public class ProductFeatureService : IProductFeatureService
             existingEntity.Description = feature.Description;
             existingEntity.Code = feature.Code;
             existingEntity.IsEnabled = feature.IsEnabled;
-            existingEntity.ProductId = feature.ProductId;
-            existingEntity.TierId = feature.TierId;
+            existingEntity.ProductId = feature.ProductId; 
             existingEntity.DisplayOrder = feature.DisplayOrder;
             existingEntity.SupportFromVersion = feature.SupportFromVersion;
             existingEntity.SupportToVersion = feature.SupportToVersion;  
@@ -261,9 +260,9 @@ public class ProductFeatureService : IProductFeatureService
     /// <summary>
     /// Checks if a feature code exists for a tier
     /// </summary>
-    public async Task<bool> FeatureCodeExistsAsync(Guid tierId, string featureCode, Guid? excludeFeatureId = null)
+    public async Task<bool> FeatureCodeExistsAsync(string featureCode, Guid? excludeFeatureId = null)
     {
-        if (tierId == Guid.Empty || string.IsNullOrWhiteSpace(featureCode))
+        if (string.IsNullOrWhiteSpace(featureCode))
             return false;
 
         try
@@ -273,7 +272,7 @@ public class ProductFeatureService : IProductFeatureService
             
             var searchRequest = new SearchRequest<ProductFeature>
             {
-                Filters = { {"TierId", tierId}, {"Code", featureCode} }
+                Filters = { {"Code", featureCode} }
             };
 
            /* if (excludeFeatureId.HasValue)
@@ -287,7 +286,7 @@ public class ProductFeatureService : IProductFeatureService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error checking if feature code exists: {TierId}/{FeatureCode}", tierId, featureCode);
+            _logger.LogError(ex, "Error checking if feature code exists: {FeatureCode}", featureCode);
             throw;
         }
     }
@@ -314,20 +313,18 @@ public class ProductFeatureService : IProductFeatureService
 
         if (feature.ProductId == Guid.Empty)
             errors.Add("Product ID is required");
-
-        if (feature.TierId == Guid.Empty)
-            errors.Add("Tier ID is required");
+ 
 
         // Business rule validations
-        if (!string.IsNullOrWhiteSpace(feature.Code) && feature.TierId != Guid.Empty)
+        if (!string.IsNullOrWhiteSpace(feature.Code))
         {
             // Check for duplicate feature code within the tier
             try
             {
-                var codeExists = await FeatureCodeExistsAsync(feature.TierId, feature.Code, feature.FeatureId);
+                var codeExists = await FeatureCodeExistsAsync( feature.Code, feature.FeatureId);
                 if (codeExists)
                 {
-                    errors.Add($"Feature code '{feature.Code}' already exists in tier '{feature.TierId}'");
+                    errors.Add($"Feature code '{feature.Code}' already exists");
                 }
             }
             catch
@@ -448,8 +445,7 @@ public class ProductFeatureService : IProductFeatureService
                 var copiedFeature = new ProductFeature
                 {
                     FeatureId = Guid.NewGuid(),
-                    ProductId = sourceFeature.ProductId,
-                    TierId = targetTierId,
+                    ProductId = sourceFeature.ProductId, 
                     Name = sourceFeature.Name,
                     Description = sourceFeature.Description,
                     Code = sourceFeature.Code,
@@ -461,7 +457,7 @@ public class ProductFeatureService : IProductFeatureService
                 };
 
                 // Check if feature code already exists in target tier
-                var codeExists = await FeatureCodeExistsAsync(targetTierId, copiedFeature.Code);
+                var codeExists = await FeatureCodeExistsAsync(copiedFeature.Code);
                 if (!codeExists)
                 {
                     await CreateFeatureAsync(copiedFeature, copiedBy);
@@ -510,7 +506,7 @@ public class ProductFeatureService : IProductFeatureService
                 TotalFeatures = features.Count(),
                 FeaturesByType = new Dictionary<string, int>(), // TODO: Group by feature type when available
                 MostUsedFeatures = new Dictionary<string, int>(), // TODO: Implement usage tracking
-                FeaturesByTier = features.GroupBy(f => f.TierId).ToDictionary(g => g.Key.ToString(), g => g.Count())
+                FeaturesByTier = new Dictionary<string, int>() //TODO: CHANGE
             };
 
             await Task.CompletedTask;
@@ -546,4 +542,5 @@ public class ProductFeatureService : IProductFeatureService
             throw;
         }
     }
+ 
 }

@@ -57,8 +57,7 @@ public class ProductFeatureController : BaseController
             var featureViewModels = features.Select(f => new FeatureInfoViewModel
             {
                 Id = f.FeatureId,
-                ProductId = f.ProductId,
-                TierId = f.TierId,
+                ProductId = f.ProductId, 
                 Name = f.Name,
                 Description = f.Description,
                 Code = f.Code,
@@ -207,8 +206,7 @@ public class ProductFeatureController : BaseController
 
             var newFeature = new ProductFeature
             {
-                ProductId = productId,
-                TierId = model.TierId,
+                ProductId = productId, 
                 Name = model.Name,
                 Description = model.Description,
                 Code = model.Code,
@@ -279,8 +277,7 @@ public class ProductFeatureController : BaseController
             var viewModel = new ProductFeatureCreateEditViewModel
             {
                 FeatureId = featureId,
-                ProductId = productId,
-                TierId = feature.TierId,
+                ProductId = productId, 
                 Name = feature.Name,
                 Description = feature.Description,
                 Code = feature.Code,
@@ -366,8 +363,7 @@ public class ProductFeatureController : BaseController
                 return NotFound($"Feature with ID {featureId} not found");
             }
 
-            // Update feature properties
-            existingFeature.TierId = model.TierId;
+            // Update feature properties 
             existingFeature.Name = model.Name;
             existingFeature.Description = model.Description;
             existingFeature.Code = model.Code;

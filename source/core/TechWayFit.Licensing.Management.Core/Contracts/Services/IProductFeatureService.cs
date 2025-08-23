@@ -72,13 +72,12 @@ public interface IProductFeatureService
     Task<bool> FeatureExistsAsync(Guid featureId);
 
     /// <summary>
-    /// Checks if a feature code exists for a tier
+    /// Checks if a feature code exists
     /// </summary>
-    /// <param name="tierId">Tier ID</param>
     /// <param name="featureCode">Feature code</param>
     /// <param name="excludeFeatureId">Feature ID to exclude from check (for updates)</param>
     /// <returns>True if code exists</returns>
-    Task<bool> FeatureCodeExistsAsync(Guid tierId, string featureCode, Guid? excludeFeatureId = null);
+    Task<bool> FeatureCodeExistsAsync(string featureCode, Guid? excludeFeatureId = null);
 
     /// <summary>
     /// Validates feature data

@@ -47,12 +47,15 @@ public class InMemoryUnitOfWork : IUnitOfWork
     private IProductFeatureRepository? _productFeatures;
     private IProductTierRepository? _productTiers;
     private IProductVersionRepository? _productVersions;
+    private IProductFeatureTierMappingRepository? _productFeatureTierMappings;
     private IAuditEntryRepository? _auditEntries;
     private INotificationTemplateRepository? _notificationTemplates;
     private INotificationHistoryRepository? _notificationHistory;
-    private ISettingRepository? _settings;    private IUserRoleRepository? _userRoles;
+    private ISettingRepository? _settings;
+    private IUserRoleRepository? _userRoles;
     private IUserRoleMappingRepository? _userRoleMappings;
     private IRolePermissionRepository? _rolePermissions;
+
     
     // Workflow repositories
     private IWorkflowHistoryRepository? _workflowHistory;
@@ -146,6 +149,9 @@ public class InMemoryUnitOfWork : IUnitOfWork
 
     public ISeedingHistoryRepository SeedingHistory => 
         _seedingHistory ??= new EfCoreSeedingHistoryRepository(_context, _userContext);
+
+    public IProductFeatureTierMappingRepository ProductFeatureTierMappings =>
+        _productFeatureTierMappings ??= new EfCoreProductFeatureTierMappingRepository(_context, _userContext);
 
     #endregion
 

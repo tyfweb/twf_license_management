@@ -1346,8 +1346,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                     ProductId = productId,
                     Name = model.Name,
                     Description = model.Description,
-                    IsEnabled = model.IsEnabled,
-                    TierId = model.MinimumTier,
+                    IsEnabled = model.IsEnabled
                     
                 };
                 newFeature.Code = string.Join("", newFeature.FeatureId.ToString().Split('-').Select(part => part.First().ToString().ToUpper()));

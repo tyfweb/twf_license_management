@@ -10,6 +10,14 @@ public interface IDataRepository<TModel> where TModel : class
     /// </summary>
     Task<TModel> AddAsync(TModel entity, CancellationToken cancellationToken = default);
     /// <summary>
+    /// Adds a range of new entities to the repository.
+    /// </summary>
+    /// <param name="entities"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    Task<bool> AddRangeAsync(IEnumerable<TModel> entities, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Deletes an entity from the repository by its ID.
     /// </summary>
     Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default);

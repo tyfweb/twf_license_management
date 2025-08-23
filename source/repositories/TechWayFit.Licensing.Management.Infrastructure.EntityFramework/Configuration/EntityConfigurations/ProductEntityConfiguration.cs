@@ -101,7 +101,6 @@ public class ProductFeatureEntityConfiguration : IEntityTypeConfiguration<Produc
         builder.HasKey(e => e.Id);
         builder.Property(e => e.Id).IsRequired();
         builder.Property(e => e.ProductId).IsRequired();
-        builder.Property(e => e.TierId).IsRequired();
         builder.Property(e => e.Name).HasMaxLength(200).IsRequired();
         builder.Property(e => e.Description).HasMaxLength(1000);
         builder.Property(e => e.Code).HasMaxLength(100).IsRequired();
@@ -118,12 +117,6 @@ public class ProductFeatureEntityConfiguration : IEntityTypeConfiguration<Produc
         builder.Property(e => e.CreatedBy).HasMaxLength(100).IsRequired();
         builder.Property(e => e.UpdatedBy).HasMaxLength(100);
 
-        // Relationships
-        builder.HasOne(e => e.Tier)
-              .WithMany(t => t.Features)
-              .HasForeignKey(e => e.TierId)
-              .OnDelete(DeleteBehavior.Cascade);
-
         // Version support relationships
         builder.HasOne(e => e.SupportFromVersion)
               .WithMany()
@@ -136,12 +129,46 @@ public class ProductFeatureEntityConfiguration : IEntityTypeConfiguration<Produc
               .OnDelete(DeleteBehavior.SetNull);
 
         // Indexes
-        builder.HasIndex(e => new { e.TierId, e.Code }).IsUnique();
         builder.HasIndex(e => e.IsEnabled);
         builder.HasIndex(e => e.Code);
         builder.HasIndex(e => e.TenantId);
         builder.HasIndex(e => e.SupportFromVersionId);
         builder.HasIndex(e => e.SupportToVersionId);
+    }
+}
+
+public class ProductFeatureTierMappingEntityConfiguration : IEntityTypeConfiguration<ProductFeatureTierMappingEntity>
+{
+    public void Configure(EntityTypeBuilder<ProductFeatureTierMappingEntity> builder)
+    {
+        builder.HasKey(e => e.Id);
+        builder.Property(e => e.Id).IsRequired();
+        builder.Property(e => e.ProductFeatureId).IsRequired();
+        builder.Property(e => e.ProductTierId).IsRequired();
+        builder.Property(e => e.IsEnabled).IsRequired();
+        builder.Property(e => e.DisplayOrder);
+        builder.Property(e => e.Configuration).HasMaxLength(2000);
+
+        // Audit fields
+        builder.Property(e => e.CreatedBy).HasMaxLength(100).IsRequired();
+        builder.Property(e => e.UpdatedBy).HasMaxLength(100);
+
+        // Relationships
+        builder.HasOne(e => e.ProductFeature)
+              .WithMany(f => f.TierMappings)
+              .HasForeignKey(e => e.ProductFeatureId)
+              .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(e => e.ProductTier)
+              .WithMany(t => t.FeatureMappings)
+              .HasForeignKey(e => e.ProductTierId)
+              .OnDelete(DeleteBehavior.Cascade);
+
+        // Indexes
+        builder.HasIndex(e => new { e.ProductFeatureId, e.ProductTierId }).IsUnique();
+        builder.HasIndex(e => e.IsEnabled);
+        builder.HasIndex(e => e.IsActive);
+        builder.HasIndex(e => e.TenantId);
     }
 }
 

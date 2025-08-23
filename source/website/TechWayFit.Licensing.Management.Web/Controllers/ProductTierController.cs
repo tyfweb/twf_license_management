@@ -22,17 +22,23 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         private readonly ILogger<ProductTierController> _logger;
         private readonly IEnterpriseProductService _productService;
         private readonly IProductTierService _productTierService;
+        private readonly IProductFeatureService _productFeatureService;
+        private readonly IProductFeatureTierMappingService _productFeatureTierMappingService;
         private readonly ProductConfiguration _productConfig;
 
         public ProductTierController(
             ILogger<ProductTierController> logger,
             IEnterpriseProductService productService,
             IProductTierService productTierService,
+            IProductFeatureService productFeatureService,
+            IProductFeatureTierMappingService productFeatureTierMappingService,
             IOptions<ProductConfiguration> productConfig)
         {
             _logger = logger;
             _productService = productService ?? throw new ArgumentNullException(nameof(productService));
             _productTierService = productTierService ?? throw new ArgumentNullException(nameof(productTierService));
+            _productFeatureService = productFeatureService ?? throw new ArgumentNullException(nameof(productFeatureService));
+            _productFeatureTierMappingService = productFeatureTierMappingService ?? throw new ArgumentNullException(nameof(productFeatureTierMappingService));
             _productConfig = productConfig?.Value ?? throw new ArgumentNullException(nameof(productConfig));
         }
 
@@ -637,6 +643,107 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
             {
                 _logger.LogError(ex, "Error toggling product tier {TierId} for product {ProductId}", tierId, productId);
                 return Json(JsonResponse.Error("Error toggling product tier status"));
+            }
+        }
+
+        /// <summary>
+        /// Manage features for a specific tier
+        /// </summary>
+        [HttpGet]
+        [Route("ProductTier/{productId:guid}/{tierId:guid}/features")]
+        public async Task<IActionResult> ManageFeatures(Guid productId, Guid tierId)
+        {
+            try
+            {
+                var product = await GetProductByIdAsync(productId);
+                if (product == null)
+                {
+                    return NotFound($"Product with ID {productId} not found");
+                }
+
+                var tier = await _productTierService.GetTierByIdAsync(tierId);
+                if (tier == null || tier.ProductId != productId)
+                {
+                    return NotFound($"Tier with ID {tierId} not found");
+                }
+
+                // Get all features for the product
+                var allFeatures = await _productFeatureService.GetFeaturesByproductIdAsync(productId);
+                
+                // Get current tier-feature mappings
+                var currentMappings = await _productFeatureTierMappingService.GetFeaturesForTierAsync(tierId);
+                var selectedFeatureIds = currentMappings.Select(m => m.ProductFeatureId).ToList();
+
+                var viewModel = new TierFeatureSelectionViewModel
+                {
+                    TierId = tierId,
+                    ProductId = productId,
+                    TierName = tier.Name,
+                    TierDescription = tier.Description,
+                    AvailableFeatures = allFeatures.Select(f => new FeatureSelectionItem
+                    {
+                        FeatureId = f.FeatureId,
+                        Code = f.Code,
+                        Name = f.Name,
+                        Description = f.Description,
+                        IsEnabled = f.IsEnabled,
+                        IsSelected = selectedFeatureIds.Contains(f.FeatureId),
+                        DisplayOrder = f.DisplayOrder
+                    }).OrderBy(f => f.DisplayOrder).ToList(),
+                    SelectedFeatureIds = selectedFeatureIds
+                };
+
+                ViewData["ProductName"] = product.Name;
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading feature management for tier {TierId} in product {ProductId}", tierId, productId);
+                TempData["Error"] = "An error occurred while loading feature management.";
+                return RedirectToAction("Index", new { productId });
+            }
+        }
+
+        /// <summary>
+        /// Update features for a specific tier
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("ProductTier/{productId:guid}/{tierId:guid}/features")]
+        public async Task<IActionResult> UpdateTierFeatures(Guid productId, Guid tierId, UpdateTierFeaturesRequest request)
+        {
+            try
+            {
+                var product = await GetProductByIdAsync(productId);
+                if (product == null)
+                {
+                    return NotFound($"Product with ID {productId} not found");
+                }
+
+                var tier = await _productTierService.GetTierByIdAsync(tierId);
+                if (tier == null || tier.ProductId != productId)
+                {
+                    return NotFound($"Tier with ID {tierId} not found");
+                }
+
+                // Update tier features using the mapping service
+                var selectedFeatureIds = request.SelectedFeatureIds ?? new List<Guid>();
+                _logger.LogInformation("Updating features for tier {TierId}. Selected features: {FeatureIds}", 
+                    tierId, string.Join(", ", selectedFeatureIds));
+
+                // Set the tier features (this will replace existing mappings)
+                await _productFeatureTierMappingService.SetTierFeaturesAsync(tierId, selectedFeatureIds);
+
+                var selectedCount = selectedFeatureIds.Count();
+                TempData["Success"] = $"Successfully updated tier features. {selectedCount} feature(s) are now available in {tier.Name}.";
+                
+                return RedirectToAction("Index", new { productId });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating features for tier {TierId} in product {ProductId}", tierId, productId);
+                TempData["Error"] = "An error occurred while updating features.";
+                return RedirectToAction("ManageFeatures", new { productId, tierId });
             }
         }
 

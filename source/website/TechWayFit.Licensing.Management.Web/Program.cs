@@ -386,6 +386,7 @@ static void RegisterServices(WebApplicationBuilder builder)
     builder.Services.AddScoped<IKeyManagementService, DatabaseKeyManagementService>();
     builder.Services.AddScoped<IProductLicenseService, ProductLicenseService>();
     builder.Services.AddScoped<IProductFeatureService, ProductFeatureService>();
+    builder.Services.AddScoped<IProductFeatureTierMappingService, ProductFeatureTierMappingService>();
     builder.Services.AddScoped<IProductActivationService, ProductActivationService>();
     
     // Add license generation factory - Required for ProductLicenseService
