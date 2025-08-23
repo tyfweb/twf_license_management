@@ -410,6 +410,9 @@ static void RegisterServices(WebApplicationBuilder builder)
     // Step 6: Settings management services
     builder.Services.AddScoped<ISettingService, SettingService>();
 
+    // Navigation service for sidebar
+    builder.Services.AddScoped<INavigationService, NavigationService>();
+
     // Step 6a: Settings helper services
     //builder.Services.AddScoped<TechWayFit.Licensing.Management.Web.Helpers.SettingsHelper>();
 

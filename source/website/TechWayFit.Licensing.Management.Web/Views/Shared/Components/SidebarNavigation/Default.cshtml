@@ -1,0 +1,70 @@
+@model SidebarNavigationViewModel
+
+<!-- Sidebar Navigation -->
+<div class="licensehub-sidebar d-flex flex-column" id="sidebar">
+    <nav class="licensehub-sidebar-nav flex-fill p-3">
+        <ul class="nav nav-pills flex-column gap-1">
+            @foreach (var item in Model.NavigationItems.Where(x => x.IsVisible).OrderBy(x => x.Order))
+            {
+                <li class="nav-item">
+                    @if (item.IsSubmenu)
+                    {
+                        <!-- Submenu Item -->
+                        @{
+                            var isSubmenuActive = Model.IsNavigationItemActive(item);
+                        }
+                        <a class="nav-link licensehub-nav-link @(isSubmenuActive ? "active" : "") d-flex justify-content-between align-items-center" 
+                           data-bs-toggle="collapse" 
+                           data-bs-target="#@item.SubmenuId" 
+                           aria-expanded="@(isSubmenuActive ? "true" : "false")"
+                           style="cursor: pointer;">
+                            <span><i class="@item.Icon me-2"></i>@item.Title</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </a>
+                        <div class="collapse @(isSubmenuActive ? "show" : "")" id="@item.SubmenuId">
+                            <ul class="nav nav-pills flex-column ms-3 mt-1">
+                                @foreach (var child in item.Children.Where(x => x.IsVisible))
+                                {
+                                    <li class="nav-item">
+                                        @if (child.IsExternal)
+                                        {
+                                            <a class="nav-link licensehub-nav-link py-1" 
+                                               href="@child.Url" target="_blank">
+                                                <i class="@child.Icon me-2"></i>@child.Title
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <a class="nav-link licensehub-nav-link py-1 @(Model.IsNavigationItemActive(child) ? "active" : "")" 
+                                               asp-controller="@child.Controller" asp-action="@child.Action">
+                                                <i class="@child.Icon me-2"></i>@child.Title
+                                            </a>
+                                        }
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- Regular Menu Item -->
+                        @if (item.IsExternal)
+                        {
+                            <a class="nav-link licensehub-nav-link" 
+                               href="@item.Url" target="_blank">
+                                <i class="@item.Icon me-2"></i>@item.Title
+                            </a>
+                        }
+                        else
+                        {
+                            <a class="nav-link licensehub-nav-link @(Model.IsNavigationItemActive(item) ? "active" : "")" 
+                               asp-controller="@item.Controller" asp-action="@item.Action">
+                                <i class="@item.Icon me-2"></i>@item.Title
+                            </a>
+                        }
+                    }
+                </li>
+            }
+        </ul>
+    </nav>
+</div>
