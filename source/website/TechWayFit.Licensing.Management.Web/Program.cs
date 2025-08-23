@@ -71,9 +71,11 @@ try
         })
         .AddRazorOptions(options =>
         {
-            // Ensure tag helpers are enabled
+            // Ensure tag helpers are enabled and add custom view location formats
             options.ViewLocationFormats.Add("/Views/{1}/{0}.cshtml");
             options.ViewLocationFormats.Add("/Views/Shared/{0}.cshtml");
+            options.ViewLocationFormats.Add("/Views/Shared/Partial/{0}.cshtml");
+            options.ViewLocationFormats.Add("/Views/Shared/Layout/{0}.cshtml");
         });
 
     // Add Swagger/OpenAPI services
