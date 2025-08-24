@@ -3,5 +3,9 @@ source "https://rubygems.org"
 # GitHub Pages
 gem "github-pages", group: :jekyll_plugins
 
-# Theme
-gem "just-the-docs"
+# Plugins that are whitelisted for GitHub Pages
+group :jekyll_plugins do
+  gem "jekyll-feed"
+  gem "jekyll-sitemap"
+  gem "jekyll-seo-tag"
+end

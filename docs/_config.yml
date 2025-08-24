@@ -1,5 +1,4 @@
 # Theme Configuration
-theme: just-the-docs
 remote_theme: just-the-docs/just-the-docs
 
 # Site settings
@@ -31,6 +30,7 @@ plugins:
   - jekyll-feed
   - jekyll-sitemap
   - jekyll-seo-tag
+  - jekyll-remote-theme
 
 # For GitHub Pages compatibility
 safe: true
@@ -52,31 +52,7 @@ exclude:
 # Navigation structure
 nav_sort: case_insensitive
 
-# Collections
-collections:
-  guides:
-    output: true
-    permalink: /:collection/:name/
-
-# Defaults
-defaults:
-  - scope:
-      path: ""
-    values:
-      layout: default
-  - scope:
-      path: ""
-      type: "guides"
-    values:
-      layout: default
-
 # Kramdown settings
 kramdown:
   input: GFM
   syntax_highlighter: rouge
-  syntax_highlighter_opts:
-    css_class: 'highlight'
-    span:
-      line_numbers: false
-    block:
-      line_numbers: true
