@@ -115,15 +115,36 @@ public class EfCoreProductLicenseRepository : BaseRepository<ProductLicense, Pro
         var expiringIn30Days = await query.CountAsync(
             license => license.ValidTo <= DateTime.UtcNow.AddDays(30) && license.ValidTo > DateTime.UtcNow, cancellationToken);
 
-        Dictionary<LicenseStatus, int> licenseCountGroupByStatus = await query
-        .GroupBy(license => license.Status)
-            .ToDictionaryAsync(group => group.Key.ToEnum<LicenseStatus>(), group => group.Count(), cancellationToken);
-
-        var expiredLicenses = licenseCountGroupByStatus.GetValueOrDefault(LicenseStatus.Expired, 0);
+        // Use individual count queries instead of GroupBy for InMemory provider compatibility
+        var activeLicenses = await query.CountAsync(license => license.Status == LicenseStatus.Active.ToString(), cancellationToken);
+        var expiredLicenses = await query.CountAsync(license => license.Status == LicenseStatus.Expired.ToString(), cancellationToken);
+        var revokedLicenses = await query.CountAsync(license => license.Status == LicenseStatus.Revoked.ToString(), cancellationToken);
+        var suspendedLicenses = await query.CountAsync(license => license.Status == LicenseStatus.Suspended.ToString(), cancellationToken);
+        
+        // Add expired licenses that are still marked as active but past expiration date
         expiredLicenses += await query
             .CountAsync(license =>
                 license.ValidTo < DateTime.UtcNow && license.Status == LicenseStatus.Active.ToString(), cancellationToken);
-        var totalLicenses = licenseCountGroupByStatus.Values.Sum();
+        
+        var totalLicenses = activeLicenses + expiredLicenses + revokedLicenses + suspendedLicenses;
+
+        // Build status dictionary from individual counts
+        var licenseCountGroupByStatus = new Dictionary<LicenseStatus, int>
+        {
+            { LicenseStatus.Active, activeLicenses },
+            { LicenseStatus.Expired, expiredLicenses },
+            { LicenseStatus.Revoked, revokedLicenses },
+            { LicenseStatus.Suspended, suspendedLicenses }
+        };
+
+        // Get unique product IDs and count licenses for each
+        var productIds = await query.Select(l => l.ProductId).Distinct().ToListAsync(cancellationToken);
+        var licensesByProduct = new Dictionary<string, int>();
+        foreach (var pid in productIds)
+        {
+            var count = await query.CountAsync(l => l.ProductId == pid, cancellationToken);
+            licensesByProduct[pid.ToString()] = count;
+        }
 
         return new LicenseUsageStatistics
         {
@@ -133,9 +154,7 @@ public class EfCoreProductLicenseRepository : BaseRepository<ProductLicense, Pro
             ExpiredLicenses = expiredLicenses,
             RevokedLicenses = licenseCountGroupByStatus.GetValueOrDefault(LicenseStatus.Revoked, 0),
             SuspendedLicenses = licenseCountGroupByStatus.GetValueOrDefault(LicenseStatus.Suspended, 0),
-            LicensesByProduct = await query
-                .GroupBy(license => license.ProductId)
-                .ToDictionaryAsync(group => group.Key.ToString(), group => group.Count(), cancellationToken),
+            LicensesByProduct = licensesByProduct,
             LicensesByStatus = licenseCountGroupByStatus
         };
     }

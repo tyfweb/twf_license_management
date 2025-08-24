@@ -124,13 +124,21 @@ public class EfCoreEnterpriseProductApprovalRepository : BaseRepository<Enterpri
 
     public async Task<Dictionary<EntityStatus, int>> GetStatusCountsAsync(CancellationToken cancellationToken = default)
     {
-        var counts = await _dbSet
-            .Where(e => !e.IsDeleted)
-            .GroupBy(e => e.EntityStatus)
-            .Select(g => new { Status = g.Key, Count = g.Count() })
-            .ToListAsync(cancellationToken);
-
-        return counts.ToDictionary(x => (EntityStatus)x.Status, x => x.Count);
+        var baseQuery = _dbSet.Where(e => !e.IsDeleted);
+        
+        // Use individual count queries instead of GroupBy for InMemory provider compatibility
+        var result = new Dictionary<EntityStatus, int>();
+        
+        foreach (EntityStatus status in Enum.GetValues<EntityStatus>())
+        {
+            var count = await baseQuery.CountAsync(e => e.EntityStatus == (int)status, cancellationToken);
+            if (count > 0)
+            {
+                result[status] = count;
+            }
+        }
+        
+        return result;
     }
 
     public async Task<EnterpriseProduct> UpdateStatusAsync(Guid entityId, EntityStatus newStatus, string? comments = null, CancellationToken cancellationToken = default)

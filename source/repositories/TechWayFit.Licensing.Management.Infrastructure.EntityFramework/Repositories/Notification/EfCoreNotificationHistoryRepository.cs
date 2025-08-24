@@ -34,7 +34,10 @@ public class EfCoreNotificationHistoryRepository : BaseRepository<NotificationHi
         }
 
         var totalCount = query.Count();
-        var groupByStatus = query.GroupBy(nh => nh.Status);
+        
+        // For InMemory provider compatibility: Load data first, then group in memory
+        var allNotifications = query.ToList();
+        var groupByStatus = allNotifications.GroupBy(nh => nh.Status);
         var sentCount = groupByStatus.Where(g => g.Key == DeliveryStatus.Sent.ToString()).Sum(g => g.Count());
         var pendingCount = groupByStatus.Where(g => g.Key == DeliveryStatus.Pending.ToString()).Sum(g => g.Count());
         var failedCount = groupByStatus.Where(g => g.Key == DeliveryStatus.Failed.ToString()).Sum(g => g.Count());
