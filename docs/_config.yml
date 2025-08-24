@@ -1,5 +1,5 @@
 # Theme Configuration
-remote_theme: just-the-docs/just-the-docs
+remote_theme: pages-themes/cayman@v0.2.0
 
 # Site settings
 title: "TechWayFit License Management"
@@ -7,39 +7,20 @@ description: "Comprehensive Enterprise Software Licensing Platform"
 url: "https://tyfweb.github.io"
 baseurl: "/twf_license_management"
 
-# Theme settings
-color_scheme: light
-search_enabled: true
-heading_anchors: true
-
-# Custom CSS
-custom_css: assets/css/custom.css
-nav_external_links:
-  - title: GitHub Repository
-    url: https://github.com/tyfweb/twf_license_management
-    hide_icon: false
-
-# Footer settings
-footer_content: "Copyright &copy; 2025 TechWayFit. Licensed under the <a href=\"https://github.com/tyfweb/twf_license_management/blob/main/LICENSE\">MIT License</a>."
-
-# Print settings (for PDF generation)
-print_title: "TechWayFit License Management Documentation"
-print_subtitle: "Complete System Guide and API Reference"
+# GitHub integration
+github:
+  is_project_page: true
+  repository_url: "https://github.com/tyfweb/twf_license_management"
+  repository_name: "twf_license_management"
+  owner_name: "tyfweb"
+  owner_url: "https://github.com/tyfweb"
 
 # Build settings
 markdown: kramdown
 highlighter: rouge
 plugins:
-  - jekyll-feed
-  - jekyll-sitemap
-  - jekyll-seo-tag
   - jekyll-remote-theme
-
-# For GitHub Pages compatibility
-safe: true
-incremental: false
-gist:
-  noscript: false
+  - jekyll-seo-tag
 
 # Exclude files from processing
 exclude:
@@ -48,14 +29,7 @@ exclude:
   - Gemfile.lock
   - node_modules
   - vendor
-  - .sass-cache
-  - .jekyll-cache
-  - legacy-docs
-
-# Navigation structure
-nav_sort: case_insensitive
-
-# Kramdown settings
-kramdown:
-  input: GFM
-  syntax_highlighter: rouge
+  - builds/
+  - docker/
+  - source/
+  - tests/

@@ -1,63 +1,56 @@
-# Site settings
-title: TechWayFit License Management System
-email: support@techwayfit.com
-description: >-
-  Comprehensive documentation for the TechWayFit License Management System.
-  Learn how to manage products, generate licenses, and integrate with your applications.
+# Theme Configuration
+theme: minima
+remote_theme: pages-themes/cayman@v0.2.0
+plugins:
+  - jekyll-remote-theme
 
-baseurl: "/two_license_management"
+# Site settings
+title: "TechWayFit License Management"
+description: "Comprehensive Enterprise Software Licensing Platform"
 url: "https://tyfweb.github.io"
+baseurl: "/twf_license_management"
+
+# GitHub settings
+github:
+  repository_url: "https://github.com/tyfweb/twf_license_management"
+
+# Footer settings
+footer_content: "Copyright &copy; 2025 TechWayFit. Licensed under the <a href=\"https://github.com/tyfweb/twf_license_management/blob/main/LICENSE\">MIT License</a>."
+
+# Print settings (for PDF generation)
+print_title: "TechWayFit License Management Documentation"
+print_subtitle: "Complete System Guide and API Reference"
 
 # Build settings
 markdown: kramdown
 highlighter: rouge
-theme: minima
-
-# Plugins
 plugins:
   - jekyll-feed
   - jekyll-sitemap
   - jekyll-seo-tag
+  - jekyll-remote-theme
 
-# Collections
-collections:
-  guides:
-    output: true
-    permalink: /:collection/:name/
-  api:
-    output: true
-    permalink: /:collection/:name/
+# For GitHub Pages compatibility
+safe: true
+incremental: false
+gist:
+  noscript: false
 
-# Navigation
-navigation:
-  - title: "Home"
-    url: "/"
-  - title: "User Guide"
-    url: "/user-guide/"
-  - title: "Admin Guide" 
-    url: "/admin-guide/"
-  - title: "API Documentation"
-    url: "/api/"
-  - title: "Technical Docs"
-    url: "/technical/"
-
-# Exclude from processing
+# Exclude files from processing
 exclude:
+  - README.md
   - Gemfile
   - Gemfile.lock
   - node_modules
-  - vendor/bundle/
-  - vendor/cache/
-  - vendor/gems/
-  - vendor/ruby/
+  - vendor
+  - .sass-cache
+  - .jekyll-cache
+  - legacy-docs
+
+# Navigation structure
+nav_sort: case_insensitive
 
 # Kramdown settings
 kramdown:
   input: GFM
   syntax_highlighter: rouge
-  syntax_highlighter_opts:
-    css_class: 'highlight'
-    span:
-      line_numbers: false
-    block:
-      line_numbers: true

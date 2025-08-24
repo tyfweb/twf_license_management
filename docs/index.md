@@ -1,22 +1,14 @@
 ---
-title: Home
-nav_order: 1
-description: "TechWayFit License Management System - Comprehensive Software Licensing Solution"
-permalink: /
+layout: default
+title: "TechWayFit License Management"
+description: "Comprehensive Enterprise Software Licensing Platform"
 ---
 
 # TechWayFit License Management System
-{: .fs-9 }
 
 A comprehensive enterprise-grade software licensing platform designed to manage, validate, and monitor software licenses across multi-tenant environments.
-{: .fs-6 .fw-300 }
 
-[Get started now](#quick-start){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 }
-[View on GitHub](https://github.com/TechWayFit/licensing-management){: .btn .fs-5 .mb-4 .mb-md-0 }
-
----
-
-## Quick Start
+## 🚀 Quick Start
 
 ### System Overview
 
