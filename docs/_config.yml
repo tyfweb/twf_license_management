@@ -1,4 +1,5 @@
 # Theme Configuration
+theme: just-the-docs
 remote_theme: just-the-docs/just-the-docs
 
 # Site settings
@@ -27,10 +28,15 @@ print_subtitle: "Complete System Guide and API Reference"
 markdown: kramdown
 highlighter: rouge
 plugins:
-  - jekyll-remote-theme
+  - jekyll-feed
   - jekyll-sitemap
   - jekyll-seo-tag
-  - jekyll-feed
+
+# For GitHub Pages compatibility
+safe: true
+incremental: false
+gist:
+  noscript: false
 
 # Exclude files from processing
 exclude:

@@ -1,0 +1,38 @@
+{% assign pages_list = site.pages | sort:"nav_order" %}
+<ul class="navigation-list">
+  {% for page in pages_list %}
+    {% unless page.nav_exclude %}
+      {% if page.parent == nil %}
+        <li class="navigation-list-item{% if page.has_children %} has-children{% endif %}">
+          <a href="{{ page.url | relative_url }}" class="navigation-list-link{% if page.url == page.url %} active{% endif %}">
+            {{ page.title }}
+          </a>
+          {% if page.has_children %}
+            {% assign children = pages_list | where: "parent", page.title | sort: "nav_order" %}
+            <ul class="navigation-list-child-list">
+              {% for child in children %}
+                <li class="navigation-list-item">
+                  <a href="{{ child.url | relative_url }}" class="navigation-list-link{% if child.url == page.url %} active{% endif %}">
+                    {{ child.title }}
+                  </a>
+                  {% if child.has_children %}
+                    {% assign grandchildren = pages_list | where: "parent", child.title | sort: "nav_order" %}
+                    <ul class="navigation-list-child-list">
+                      {% for grandchild in grandchildren %}
+                        <li class="navigation-list-item">
+                          <a href="{{ grandchild.url | relative_url }}" class="navigation-list-link{% if grandchild.url == page.url %} active{% endif %}">
+                            {{ grandchild.title }}
+                          </a>
+                        </li>
+                      {% endfor %}
+                    </ul>
+                  {% endif %}
+                </li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </li>
+      {% endif %}
+    {% endunless %}
+  {% endfor %}
+</ul>
