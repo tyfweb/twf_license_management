@@ -5,7 +5,7 @@ remote_theme: just-the-docs/just-the-docs
 title: "TechWayFit License Management"
 description: "Comprehensive Enterprise Software Licensing Platform"
 url: "https://tyfweb.github.io"
-baseurl: "/two_license_management"
+baseurl: "/twf_license_management"
 
 # Theme settings
 color_scheme: light
