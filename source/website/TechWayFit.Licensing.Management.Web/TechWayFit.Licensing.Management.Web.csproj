@@ -12,6 +12,8 @@
   <ItemGroup>
     <PackageReference Include="EFCore.NamingConventions" Version="9.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="8.0.0" />
+    <PackageReference Include="MiniProfiler.AspNetCore.Mvc" Version="4.5.4" />
+    <PackageReference Include="MiniProfiler.EntityFrameworkCore" Version="4.5.4" />
     <PackageReference Include="Serilog.Expressions" Version="5.0.0" />
     <PackageReference Include="System.Text.Json" Version="9.0.7" />
     <PackageReference Include="Npgsql" Version="9.0.3" />
@@ -80,10 +82,7 @@
   <!-- Ensure npm packages are installed before build -->
   <Target Name="EnsureNodeModules" BeforeTargets="BeforeBuild">
     <Message Text="Checking for npm dependencies..." Importance="high" />
-    <Exec Command="npm install" 
-          Condition="!Exists('node_modules')" 
-          ContinueOnError="false" 
-          WorkingDirectory="$(MSBuildProjectDirectory)" />
+    <Exec Command="npm install" Condition="!Exists('node_modules')" ContinueOnError="false" WorkingDirectory="$(MSBuildProjectDirectory)" />
   </Target>
 
   <!-- Build SCSS during development builds -->
@@ -94,16 +93,10 @@
     <MakeDir Directories="$(ScssOutputDir)" Condition="!Exists('$(ScssOutputDir)')" />
     
     <!-- Compile SCSS for development (expanded with source maps) -->
-    <Exec Command="npm run scss:dev" 
-          ContinueOnError="false" 
-          WorkingDirectory="$(MSBuildProjectDirectory)"
-          Condition="'$(Configuration)' == 'Debug'" />
+    <Exec Command="npm run scss:dev" ContinueOnError="false" WorkingDirectory="$(MSBuildProjectDirectory)" Condition="'$(Configuration)' == 'Debug'" />
     
     <!-- Compile SCSS for production (both expanded and minified) -->
-    <Exec Command="npm run scss:prod" 
-          ContinueOnError="false" 
-          WorkingDirectory="$(MSBuildProjectDirectory)"
-          Condition="'$(Configuration)' == 'Release'" />
+    <Exec Command="npm run scss:prod" ContinueOnError="false" WorkingDirectory="$(MSBuildProjectDirectory)" Condition="'$(Configuration)' == 'Release'" />
           
     <Message Text="SCSS compilation completed successfully!" Importance="high" />
     <Message Text="Output files: $(ScssOutputFile)" Importance="high" Condition="'$(Configuration)' == 'Debug'" />
@@ -119,9 +112,7 @@
   <!-- Watch SCSS files for changes in development -->
   <Target Name="WatchScss" Condition="'$(Configuration)' == 'Debug' AND '$(DOTNET_WATCH)' == '1'">
     <Message Text="Starting SCSS watch mode..." Importance="high" />
-    <Exec Command="npm run scss:watch" 
-          ContinueOnError="true" 
-          WorkingDirectory="$(MSBuildProjectDirectory)" />
+    <Exec Command="npm run scss:watch" ContinueOnError="true" WorkingDirectory="$(MSBuildProjectDirectory)" />
   </Target>
 
 </Project>

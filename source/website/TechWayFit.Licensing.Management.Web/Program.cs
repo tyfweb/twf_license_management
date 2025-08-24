@@ -30,7 +30,7 @@ try
     // Configure services using extension methods
     builder.Services.AddAuthenticationServices(builder.Configuration);
     builder.Services.AddMvcAndSwaggerServices(builder.Environment);
-    builder.Services.AddInfrastructureServices(builder.Configuration);
+    builder.Services.AddInfrastructureServices(builder.Configuration, builder.Environment);
     builder.Services.AddBusinessServices();
 
     var app = builder.Build();

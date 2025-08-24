@@ -16,8 +16,9 @@ public static class InfrastructureExtensions
     /// </summary>
     /// <param name="services">The service collection to configure</param>
     /// <param name="configuration">The application configuration</param>
+    /// <param name="environment">The hosting environment</param>
     /// <returns>The configured service collection</returns>
-    public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
         // Add memory cache
         services.AddMemoryCache();
@@ -33,8 +34,11 @@ public static class InfrastructureExtensions
         });
 
         // Configure database infrastructure (SQLite for development, can be swapped for production)
-       // services.AddSqliteInfrastructure("licensing.db");
-        services.AddInMemoryInfrastructure();
+        services.AddSqliteInfrastructure("licensing.db");
+        
+        // Switch to SQL Server to see EF profiling in action
+        // services.AddSqlServerInfrastructure("Server=(localdb)\\mssqllocaldb;Database=LicensingDb;Trusted_Connection=true;MultipleActiveResultSets=true");
+        // services.AddInMemoryInfrastructure();
         services.AddHttpContextAccessor();
 
         // Configure Hangfire for background job processing
@@ -48,6 +52,9 @@ public static class InfrastructureExtensions
 
         // Register seeding services
         services.AddSeedingServices();
+
+        // Add profiling services for performance monitoring in development
+        services.AddProfilingServices(environment);
 
         return services;
     }

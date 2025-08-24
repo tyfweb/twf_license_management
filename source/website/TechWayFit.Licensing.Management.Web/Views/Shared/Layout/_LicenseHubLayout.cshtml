@@ -1,3 +1,4 @@
+@using StackExchange.Profiling
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -101,5 +102,11 @@
     <script src="~/js/licensehub-layout.js" asp-append-version="true"></script>
     
     @await RenderSectionAsync("Scripts", required: false)
+    
+    @* MiniProfiler - Only show in development *@
+    @if (Context.Request.Host.Host.Contains("localhost") && MiniProfiler.Current != null)
+    {
+        @MiniProfiler.Current.RenderIncludes(Context)
+    }
 </body>
 </html>

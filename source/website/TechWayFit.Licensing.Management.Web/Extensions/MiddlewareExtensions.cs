@@ -27,6 +27,10 @@ public static class MiddlewareExtensions
         if (environment.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
+            
+            // Add profiling middleware early in development pipeline
+            app.UseProfilingMiddleware(environment);
+            
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
