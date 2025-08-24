@@ -59,7 +59,7 @@ Removed complex collections and defaults that could interfere with theme loading
    - Source: Deploy from branch
    - Branch: `main`, Folder: `/docs`
 3. **Wait for deployment** (check Actions tab)
-4. **Access documentation**: `https://tyfweb.github.io/two_license_management/`
+4. **Access documentation**: `https://tyfweb.github.io/twf_license_Mangement/`
 
 ## 🧪 **Test Page Created**
 
