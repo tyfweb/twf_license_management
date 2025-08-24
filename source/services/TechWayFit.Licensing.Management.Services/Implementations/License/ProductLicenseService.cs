@@ -452,34 +452,293 @@ public class ProductLicenseService : IProductLicenseService
 
     public async Task<bool> ActivateLicenseAsync(Guid licenseId, ActivationInfo activationInfo)
     {
-        // TODO: Implement
-        _logger.LogWarning("ActivateLicenseAsync not implemented");
-        await Task.CompletedTask;
-        return false;
+        if (licenseId == Guid.Empty)
+            throw new ArgumentException("LicenseId cannot be empty", nameof(licenseId));
+        if (activationInfo == null)
+            throw new ArgumentNullException(nameof(activationInfo));
+        if (string.IsNullOrWhiteSpace(activationInfo.ActivatedBy))
+            throw new ArgumentException("ActivatedBy cannot be null or empty", nameof(activationInfo.ActivatedBy));
+
+        try
+        {
+            _logger.LogInformation("Activating license {LicenseId} by {ActivatedBy}", licenseId, activationInfo.ActivatedBy);
+
+            // Get the license
+            var license = await GetLicenseByIdAsync(licenseId);
+            if (license == null)
+            {
+                _logger.LogWarning("License {LicenseId} not found for activation", licenseId);
+                return false;
+            }
+
+            // Check if license is already active
+            if (license.Status == LicenseStatus.Active)
+            {
+                _logger.LogInformation("License {LicenseId} is already active", licenseId);
+                return true;
+            }
+
+            // Check if license is in a state that can be activated
+            if (license.Status == LicenseStatus.Revoked)
+            {
+                _logger.LogWarning("Cannot activate revoked license {LicenseId}", licenseId);
+                return false;
+            }
+
+            // Check if license is expired
+            if (license.ValidTo < DateTime.UtcNow)
+            {
+                _logger.LogWarning("Cannot activate expired license {LicenseId} (expired: {ExpiryDate})", 
+                    licenseId, license.ValidTo);
+                return false;
+            }
+
+            // Update license status
+            license.Status = LicenseStatus.Active;
+            license.UpdatedOn = DateTime.UtcNow;
+            license.UpdatedBy = activationInfo.ActivatedBy;
+
+            // Update activation metadata if provided
+            if (activationInfo.ActivationMetadata.Any())
+            {
+                var metadata = license.Metadata ?? new Dictionary<string, object>();
+
+                metadata["LastActivation"] = activationInfo.ActivationDate;
+                metadata["ActivatedBy"] = activationInfo.ActivatedBy;
+                if (!string.IsNullOrWhiteSpace(activationInfo.MachineId))
+                    metadata["LastActivationMachine"] = activationInfo.MachineId;
+
+                // Merge activation metadata
+                foreach (var kvp in activationInfo.ActivationMetadata)
+                {
+                    metadata[kvp.Key] = kvp.Value;
+                }
+
+                license.Metadata = metadata;
+            }
+
+            // Save changes
+            await _unitOfWork.Licenses.UpdateAsync(license.LicenseId, license);
+            await _unitOfWork.SaveChangesAsync();
+
+            _logger.LogInformation("Successfully activated license {LicenseId} by {ActivatedBy}", 
+                licenseId, activationInfo.ActivatedBy);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error activating license {LicenseId} by {ActivatedBy}", 
+                licenseId, activationInfo.ActivatedBy);
+            throw;
+        }
     }
 
     public async Task<bool> DeactivateLicenseAsync(Guid licenseId, string deactivatedBy, string? reason = null)
     {
-        // TODO: Implement
-        _logger.LogWarning("DeactivateLicenseAsync not implemented");
-        await Task.CompletedTask;
-        return false;
+        if (licenseId == Guid.Empty)
+            throw new ArgumentException("LicenseId cannot be empty", nameof(licenseId));
+        if (string.IsNullOrWhiteSpace(deactivatedBy))
+            throw new ArgumentException("DeactivatedBy cannot be null or empty", nameof(deactivatedBy));
+
+        try
+        {
+            _logger.LogInformation("Deactivating license {LicenseId} by {DeactivatedBy} with reason: {Reason}", 
+                licenseId, deactivatedBy, reason ?? "No reason provided");
+
+            // Get the license
+            var license = await GetLicenseByIdAsync(licenseId);
+            if (license == null)
+            {
+                _logger.LogWarning("License {LicenseId} not found for deactivation", licenseId);
+                return false;
+            }
+
+            // Check if license is already suspended (deactivated)
+            if (license.Status == LicenseStatus.Suspended)
+            {
+                _logger.LogInformation("License {LicenseId} is already deactivated (suspended)", licenseId);
+                return true;
+            }
+
+            // Check if license is revoked (can't deactivate revoked licenses)
+            if (license.Status == LicenseStatus.Revoked)
+            {
+                _logger.LogWarning("Cannot deactivate revoked license {LicenseId}", licenseId);
+                return false;
+            }
+
+            // Update license status
+            license.Status = LicenseStatus.Suspended;
+            license.UpdatedOn = DateTime.UtcNow;
+            license.UpdatedBy = deactivatedBy;
+
+            // Update deactivation metadata
+            var metadata = license.Metadata ?? new Dictionary<string, object>();
+            metadata["LastDeactivation"] = DateTime.UtcNow;
+            metadata["DeactivatedBy"] = deactivatedBy;
+            if (!string.IsNullOrWhiteSpace(reason))
+                metadata["DeactivationReason"] = reason;
+            
+            license.Metadata = metadata;
+
+            // Save changes
+            await _unitOfWork.Licenses.UpdateAsync(license.LicenseId, license);
+            await _unitOfWork.SaveChangesAsync();
+
+            _logger.LogInformation("Successfully deactivated license {LicenseId} by {DeactivatedBy}", 
+                licenseId, deactivatedBy);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deactivating license {LicenseId} by {DeactivatedBy}", 
+                licenseId, deactivatedBy);
+            throw;
+        }
     }
 
     public async Task<bool> SuspendLicenseAsync(Guid licenseId, string suspendedBy, string reason, DateTime? suspendUntil = null)
     {
-        // TODO: Implement
-        _logger.LogWarning("SuspendLicenseAsync not implemented");
-        await Task.CompletedTask;
-        return false;
+        if (licenseId == Guid.Empty)
+            throw new ArgumentException("LicenseId cannot be empty", nameof(licenseId));
+        if (string.IsNullOrWhiteSpace(suspendedBy))
+            throw new ArgumentException("SuspendedBy cannot be null or empty", nameof(suspendedBy));
+        if (string.IsNullOrWhiteSpace(reason))
+            throw new ArgumentException("Reason cannot be null or empty for suspension", nameof(reason));
+
+        try
+        {
+            _logger.LogInformation("Suspending license {LicenseId} by {SuspendedBy} with reason: {Reason} until: {SuspendUntil}", 
+                licenseId, suspendedBy, reason, suspendUntil?.ToString("yyyy-MM-dd") ?? "indefinite");
+
+            // Get the license
+            var license = await GetLicenseByIdAsync(licenseId);
+            if (license == null)
+            {
+                _logger.LogWarning("License {LicenseId} not found for suspension", licenseId);
+                return false;
+            }
+
+            // Check if license is already suspended
+            if (license.Status == LicenseStatus.Suspended)
+            {
+                _logger.LogInformation("License {LicenseId} is already suspended", licenseId);
+                return true;
+            }
+
+            // Check if license is revoked (can't suspend revoked licenses)
+            if (license.Status == LicenseStatus.Revoked)
+            {
+                _logger.LogWarning("Cannot suspend revoked license {LicenseId}", licenseId);
+                return false;
+            }
+
+            // Check if license is expired
+            if (license.Status == LicenseStatus.Expired)
+            {
+                _logger.LogWarning("Cannot suspend expired license {LicenseId}", licenseId);
+                return false;
+            }
+
+            // Store original status for potential restoration
+            var metadata = license.Metadata ?? new Dictionary<string, object>();
+            metadata["OriginalStatusBeforeSuspension"] = license.Status.ToString();
+            metadata["SuspensionDate"] = DateTime.UtcNow;
+            metadata["SuspendedBy"] = suspendedBy;
+            metadata["SuspensionReason"] = reason;
+            
+            if (suspendUntil.HasValue)
+            {
+                metadata["SuspendedUntil"] = suspendUntil.Value;
+                _logger.LogInformation("License {LicenseId} will be suspended until {SuspendUntil}", 
+                    licenseId, suspendUntil.Value);
+            }
+            else
+            {
+                metadata["SuspendedUntil"] = "Indefinite";
+                _logger.LogInformation("License {LicenseId} will be suspended indefinitely", licenseId);
+            }
+
+            // Update license status
+            license.Status = LicenseStatus.Suspended;
+            license.UpdatedOn = DateTime.UtcNow;
+            license.UpdatedBy = suspendedBy;
+            license.Metadata = metadata;
+
+            // Save changes
+            await _unitOfWork.Licenses.UpdateAsync(license.LicenseId, license);
+            await _unitOfWork.SaveChangesAsync();
+
+            _logger.LogInformation("Successfully suspended license {LicenseId} by {SuspendedBy}", 
+                licenseId, suspendedBy);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error suspending license {LicenseId} by {SuspendedBy}", 
+                licenseId, suspendedBy);
+            throw;
+        }
     }
 
     public async Task<bool> RevokeLicenseAsync(Guid licenseId, string revokedBy, string reason)
     {
-        // TODO: Implement
-        _logger.LogWarning("RevokeLicenseAsync not implemented");
-        await Task.CompletedTask;
-        return false;
+        if (licenseId == Guid.Empty)
+            throw new ArgumentException("LicenseId cannot be empty", nameof(licenseId));
+        if (string.IsNullOrWhiteSpace(revokedBy))
+            throw new ArgumentException("RevokedBy cannot be null or empty", nameof(revokedBy));
+        if (string.IsNullOrWhiteSpace(reason))
+            throw new ArgumentException("Reason cannot be null or empty for revocation", nameof(reason));
+
+        try
+        {
+            _logger.LogInformation("Revoking license {LicenseId} by {RevokedBy} with reason: {Reason}", 
+                licenseId, revokedBy, reason);
+
+            // Get the license
+            var license = await GetLicenseByIdAsync(licenseId);
+            if (license == null)
+            {
+                _logger.LogWarning("License {LicenseId} not found for revocation", licenseId);
+                return false;
+            }
+
+            // Check if license is already revoked
+            if (license.Status == LicenseStatus.Revoked)
+            {
+                _logger.LogInformation("License {LicenseId} is already revoked", licenseId);
+                return true;
+            }
+
+            // Store original status and revocation details
+            var metadata = license.Metadata ?? new Dictionary<string, object>();
+            metadata["OriginalStatusBeforeRevocation"] = license.Status.ToString();
+            metadata["RevocationDate"] = DateTime.UtcNow;
+            metadata["RevokedBy"] = revokedBy;
+            metadata["RevocationReason"] = reason;
+
+            // Update license status and revocation fields
+            license.Status = LicenseStatus.Revoked;
+            license.RevokedAt = DateTime.UtcNow;
+            license.RevocationReason = reason;
+            license.UpdatedOn = DateTime.UtcNow;
+            license.UpdatedBy = revokedBy;
+            license.Metadata = metadata;
+
+            // Save changes
+            await _unitOfWork.Licenses.UpdateAsync(license.LicenseId, license);
+            await _unitOfWork.SaveChangesAsync();
+
+            _logger.LogInformation("Successfully revoked license {LicenseId} by {RevokedBy}. Reason: {Reason}", 
+                licenseId, revokedBy, reason);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error revoking license {LicenseId} by {RevokedBy}", 
+                licenseId, revokedBy);
+            throw;
+        }
     }
 
     public async Task<bool> RenewLicenseAsync(Guid licenseId, DateTime newExpiryDate, string renewedBy)

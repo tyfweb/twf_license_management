@@ -41,7 +41,8 @@ public class ConsumerAccountSeeder : BaseDataSeeder
         for (int i = 0; i < 20; i++)
         {
             string companyName = companyNames[i % companyNames.Length];
-            string email = $"contact@{companyName.ToLower()}.com";
+            // Make email unique by adding the iteration number
+            string email = $"contact{i + 1}@{companyName.ToLower()}.com";
             string phone = $"{new Random().Next(100, 999)}-{new Random().Next(100, 999)}-{new Random().Next(1000, 9999)}";
             
             var randomAccount = CreateConsumerAccount(companyName, email, phone);

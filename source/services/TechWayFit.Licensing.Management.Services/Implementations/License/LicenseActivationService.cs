@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using TechWayFit.Licensing.Core.Models;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Core.Models.Enums;
+using TechWayFit.Licensing.Management.Core.Models.License;
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Data;
 
 namespace TechWayFit.Licensing.Management.Services.Implementations.License;
@@ -104,8 +105,19 @@ public class LicenseActivationService : ILicenseActivationService
             var activationToken = GenerateActivationToken(license.LicenseId, deviceId);
             var activatedAt = DateTime.UtcNow;
 
-            // TODO: Store activation record in database
-            // This would typically create/update an activation record
+            // Store activation record in database
+            var activationRecord = await CreateOrUpdateActivationRecordAsync(license, deviceId, deviceInfo, activationToken, activatedAt);
+            if (activationRecord == null)
+            {
+                _logger.LogError("Failed to create activation record for license {LicenseId} and device {DeviceId}", 
+                    license.LicenseId, deviceId);
+                return new LicenseActivationResult
+                {
+                    IsSuccessful = false,
+                    Message = "Failed to store activation record",
+                    ErrorCode = LicenseActivationError.ServerError
+                };
+            }
 
             // Track activation usage
             await TrackUsageAsync(license.LicenseId, deviceId, LicenseUsageType.Activation, new Dictionary<string, object>
@@ -257,8 +269,14 @@ public class LicenseActivationService : ILicenseActivationService
             _logger.LogInformation("Deactivating license {LicenseId} from device {DeviceId}. Reason: {Reason}", 
                 licenseId, deviceId, reason);
 
-            // TODO: Remove activation record from database
-            // This would typically update/delete the activation record
+            // Remove/update activation record in database
+            var deactivated = await DeactivateActivationRecordAsync(licenseId, deviceId, reason);
+            if (!deactivated)
+            {
+                _logger.LogWarning("Failed to deactivate activation record for license {LicenseId} and device {DeviceId}", 
+                    licenseId, deviceId);
+                // Continue with the process even if database update fails
+            }
 
             // Track deactivation usage
             await TrackUsageAsync(licenseId, deviceId, LicenseUsageType.Deactivation, new Dictionary<string, object>
@@ -339,10 +357,84 @@ public class LicenseActivationService : ILicenseActivationService
     {
         try
         {
-            // TODO: Query active devices from database
-            await Task.CompletedTask; // Placeholder
+            _logger.LogDebug("Getting active devices for license {LicenseId}", licenseId);
 
-            return new List<LicenseDevice>();
+            // Get all activations for this license
+            var activations = await _unitOfWork.ProductActivations.GetByLicenseIdAsync(licenseId);
+
+            var activeDevices = new List<LicenseDevice>();
+
+            foreach (var activation in activations)
+            {
+                // Only include active activations
+                if (activation.Status != ProductActivationStatus.Active)
+                    continue;
+
+                // Skip expired activations
+                if (activation.ActivationEndDate.HasValue && activation.ActivationEndDate.Value <= DateTime.UtcNow)
+                    continue;
+
+                // Parse additional device info from JSON
+                var deviceInfo = new Dictionary<string, object>();
+                try
+                {
+                    if (!string.IsNullOrEmpty(activation.ActivationData) && activation.ActivationData != "{}")
+                    {
+                        var parsed = JsonSerializer.Deserialize<Dictionary<string, object>>(activation.ActivationData);
+                        if (parsed != null)
+                        {
+                            deviceInfo = parsed;
+                        }
+                    }
+                }
+                catch (JsonException ex)
+                {
+                    _logger.LogWarning(ex, "Failed to parse activation data for activation {ActivationId}", activation.Id);
+                }
+
+                // Determine device type from machine name or activation data
+                var deviceType = "Unknown";
+                if (deviceInfo.ContainsKey("DeviceType"))
+                {
+                    deviceType = deviceInfo["DeviceType"]?.ToString() ?? "Unknown";
+                }
+                else if (!string.IsNullOrEmpty(activation.MachineName))
+                {
+                    // Try to infer device type from machine name patterns
+                    deviceType = InferDeviceType(activation.MachineName);
+                }
+
+                // Extract OS information
+                var operatingSystem = "Unknown";
+                if (deviceInfo.ContainsKey("OS"))
+                {
+                    operatingSystem = deviceInfo["OS"]?.ToString() ?? "Unknown";
+                }
+                else if (deviceInfo.ContainsKey("OperatingSystem"))
+                {
+                    operatingSystem = deviceInfo["OperatingSystem"]?.ToString() ?? "Unknown";
+                }
+
+                // Create LicenseDevice object
+                var licenseDevice = new LicenseDevice
+                {
+                    DeviceId = activation.MachineId,
+                    DeviceName = activation.MachineName ?? activation.MachineId,
+                    DeviceType = deviceType,
+                    OperatingSystem = operatingSystem,
+                    ActivatedAt = activation.ActivationDate,
+                    LastActivity = activation.LastHeartbeat ?? activation.ActivationDate,
+                    IsActive = true, // We already filtered for active status
+                    IpAddress = activation.IpAddress,
+                    DeviceInfo = deviceInfo
+                };
+
+                activeDevices.Add(licenseDevice);
+            }
+
+            _logger.LogDebug("Found {DeviceCount} active devices for license {LicenseId}", activeDevices.Count, licenseId);
+            
+            return activeDevices;
         }
         catch (Exception ex)
         {
@@ -541,6 +633,194 @@ public class LicenseActivationService : ILicenseActivationService
             LicenseStatus.Invalid => LicenseActivationError.LicenseInactive,
             _ => LicenseActivationError.InvalidLicenseKey
         };
+    }
+
+    /// <summary>
+    /// Infer device type from machine name patterns
+    /// </summary>
+    private static string InferDeviceType(string machineName)
+    {
+        if (string.IsNullOrEmpty(machineName))
+            return "Unknown";
+
+        var lowerName = machineName.ToLowerInvariant();
+
+        // Common patterns for different device types
+        if (lowerName.Contains("desktop") || lowerName.Contains("pc") || lowerName.Contains("workstation"))
+            return "Desktop";
+        
+        if (lowerName.Contains("laptop") || lowerName.Contains("notebook"))
+            return "Laptop";
+        
+        if (lowerName.Contains("server") || lowerName.Contains("srv"))
+            return "Server";
+        
+        if (lowerName.Contains("mac") || lowerName.Contains("imac") || lowerName.Contains("macbook"))
+            return "Mac";
+        
+        if (lowerName.Contains("mobile") || lowerName.Contains("phone") || lowerName.Contains("android") || lowerName.Contains("iphone"))
+            return "Mobile";
+        
+        if (lowerName.Contains("tablet") || lowerName.Contains("ipad"))
+            return "Tablet";
+        
+        if (lowerName.Contains("vm") || lowerName.Contains("virtual"))
+            return "Virtual Machine";
+
+        // Default to Computer if no specific pattern matches
+        return "Computer";
+    }
+
+    /// <summary>
+    /// Create or update activation record in database
+    /// </summary>
+    private async Task<ProductActivation?> CreateOrUpdateActivationRecordAsync(
+        Core.Models.License.ProductLicense license, 
+        string deviceId, 
+        string deviceInfo, 
+        string activationToken, 
+        DateTime activatedAt)
+    {
+        try
+        {
+            // Check if activation already exists for this license and device
+            var existingActivation = await _unitOfWork.ProductActivations
+                .GetByProductKeyAndMachineAsync(license.LicenseCode, deviceId);
+
+            if (existingActivation != null)
+            {
+                // Update existing activation
+                existingActivation.ActivationSignature = activationToken;
+                existingActivation.ActivationDate = activatedAt;
+                existingActivation.LastHeartbeat = activatedAt;
+                existingActivation.Status = Core.Models.Enums.ProductActivationStatus.Active;
+                existingActivation.ActivationEndDate = license.ValidTo;
+                existingActivation.UpdatedBy = "LicenseActivationService";
+                existingActivation.UpdatedOn = DateTime.UtcNow;
+
+                // Update activation data with device info
+                var activationData = new Dictionary<string, object>
+                {
+                    ["DeviceInfo"] = deviceInfo,
+                    ["ActivationToken"] = activationToken,
+                    ["ActivatedAt"] = activatedAt,
+                    ["UserAgent"] = deviceInfo
+                };
+                existingActivation.ActivationData = System.Text.Json.JsonSerializer.Serialize(activationData);
+
+                var updatedActivation = await _unitOfWork.ProductActivations.UpdateAsync(existingActivation.Id, existingActivation);
+                await _unitOfWork.SaveChangesAsync();
+
+                _logger.LogInformation("Updated existing activation record {ActivationId} for license {LicenseId} and device {DeviceId}", 
+                    existingActivation.Id, license.LicenseId, deviceId);
+
+                return updatedActivation;
+            }
+            else
+            {
+                // Create new activation record
+                var deviceFingerprint = GenerateDeviceFingerprint(deviceId);
+                var activationData = new Dictionary<string, object>
+                {
+                    ["DeviceInfo"] = deviceInfo,
+                    ["ActivationToken"] = activationToken,
+                    ["ActivatedAt"] = activatedAt,
+                    ["UserAgent"] = deviceInfo,
+                    ["OperatingSystem"] = Environment.OSVersion.ToString(),
+                    ["MachineName"] = Environment.MachineName
+                };
+
+                var newActivation = new Core.Models.License.ProductActivation
+                {
+                    Id = Guid.NewGuid(),
+                    TenantId = license.TenantId,
+                    LicenseId = license.LicenseId,
+                    FormattedProductKey = license.LicenseCode, // Use LicenseCode as the formatted key
+                    MaxActivations = license.MaxAllowedUsers ?? 1, // Default to 1 if not specified
+                    ProductKey = license.LicenseCode,
+                    MachineId = deviceId,
+                    MachineName = Environment.MachineName,
+                    MachineFingerprint = deviceFingerprint,
+                    IpAddress = "127.0.0.1", // TODO: Get actual IP address from request context
+                    ActivationDate = activatedAt,
+                    ActivationEndDate = license.ValidTo,
+                    ActivationSignature = activationToken,
+                    LastHeartbeat = activatedAt,
+                    Status = Core.Models.Enums.ProductActivationStatus.Active,
+                    ActivationData = System.Text.Json.JsonSerializer.Serialize(activationData),
+                    IsActive = true,
+                    IsDeleted = false,
+                    CreatedBy = "LicenseActivationService",
+                    CreatedOn = DateTime.UtcNow
+                };
+
+                var createdActivation = await _unitOfWork.ProductActivations.AddAsync(newActivation);
+                await _unitOfWork.SaveChangesAsync();
+
+                _logger.LogInformation("Created new activation record {ActivationId} for license {LicenseId} and device {DeviceId}", 
+                    createdActivation.Id, license.LicenseId, deviceId);
+
+                return createdActivation;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating/updating activation record for license {LicenseId} and device {DeviceId}", 
+                license.LicenseId, deviceId);
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Deactivate activation record in database
+    /// </summary>
+    private async Task<bool> DeactivateActivationRecordAsync(Guid licenseId, string deviceId, string reason)
+    {
+        try
+        {
+            // Get the license to find the product key
+            var license = await _licenseService.GetLicenseByIdAsync(licenseId);
+            if (license == null)
+            {
+                _logger.LogWarning("License {LicenseId} not found for deactivation", licenseId);
+                return false;
+            }
+
+            // Find existing activation record
+            var existingActivation = await _unitOfWork.ProductActivations
+                .GetByProductKeyAndMachineAsync(license.LicenseCode, deviceId);
+
+            if (existingActivation != null)
+            {
+                // Update activation record to deactivated status
+                existingActivation.Status = Core.Models.Enums.ProductActivationStatus.Inactive;
+                existingActivation.DeactivationDate = DateTime.UtcNow;
+                existingActivation.DeactivationReason = reason;
+                existingActivation.DeactivatedBy = "LicenseActivationService";
+                existingActivation.UpdatedBy = "LicenseActivationService";
+                existingActivation.UpdatedOn = DateTime.UtcNow;
+
+                var updatedActivation = await _unitOfWork.ProductActivations.UpdateAsync(existingActivation.Id, existingActivation);
+                await _unitOfWork.SaveChangesAsync();
+
+                _logger.LogInformation("Deactivated activation record {ActivationId} for license {LicenseId} and device {DeviceId}", 
+                    existingActivation.Id, licenseId, deviceId);
+
+                return true;
+            }
+            else
+            {
+                _logger.LogWarning("No activation record found for license {LicenseId} and device {DeviceId}", 
+                    licenseId, deviceId);
+                return false;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deactivating activation record for license {LicenseId} and device {DeviceId}", 
+                licenseId, deviceId);
+            return false;
+        }
     }
 
     #endregion

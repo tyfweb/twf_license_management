@@ -372,4 +372,214 @@ public class DebugController : Controller
 
         return RedirectToAction("LicenseActivationTest");
     }
+
+    /// <summary>
+    /// Test active devices for a license
+    /// </summary>
+    public async Task<IActionResult> TestActiveDevices(Guid? licenseId)
+    {
+        if (!_environment.IsDevelopment())
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            if (!licenseId.HasValue)
+            {
+                // Get first available license for testing
+                var licenses = await _licenseService.GetLicensesAsync(pageSize: 1);
+                var firstLicense = licenses.FirstOrDefault();
+                if (firstLicense != null)
+                {
+                    licenseId = firstLicense.LicenseId;
+                }
+                else
+                {
+                    TempData["Error"] = "No licenses found. Create a license first.";
+                    return RedirectToAction("LicenseActivationTest");
+                }
+            }
+
+            var activeDevices = await _activationService.GetActiveDevicesAsync(licenseId.Value);
+            
+            TempData["Success"] = $"Found {activeDevices.Count} active devices for license {licenseId}";
+            TempData["DeviceList"] = JsonSerializer.Serialize(activeDevices, new JsonSerializerOptions { WriteIndented = true });
+
+            return RedirectToAction("LicenseActivationTest");
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = $"Error testing active devices: {ex.Message}";
+            return RedirectToAction("LicenseActivationTest");
+        }
+    }
+
+    /// <summary>
+    /// Test license activation
+    /// </summary>
+    public async Task<IActionResult> TestActivateLicense(Guid? licenseId)
+    {
+        if (!_environment.IsDevelopment())
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            if (!licenseId.HasValue)
+            {
+                TempData["Error"] = "License ID is required for activation test.";
+                return RedirectToAction("LicenseActivationTest");
+            }
+
+            var activationInfo = new ActivationInfo
+            {
+                ActivatedBy = "debug-user",
+                ActivationDate = DateTime.UtcNow,
+                MachineId = Environment.MachineName,
+                ActivationMetadata = new Dictionary<string, object>
+                {
+                    { "TestMode", true },
+                    { "ActivationSource", "DebugController" },
+                    { "UserAgent", Request.Headers.UserAgent.ToString() }
+                }
+            };
+
+            var result = await _licenseService.ActivateLicenseAsync(licenseId.Value, activationInfo);
+            
+            if (result)
+            {
+                TempData["Success"] = $"Successfully activated license {licenseId}";
+            }
+            else
+            {
+                TempData["Error"] = $"Failed to activate license {licenseId}";
+            }
+
+            return RedirectToAction("LicenseActivationTest");
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = $"Error activating license: {ex.Message}";
+            return RedirectToAction("LicenseActivationTest");
+        }
+    }
+
+    /// <summary>
+    /// Test license deactivation
+    /// </summary>
+    public async Task<IActionResult> TestDeactivateLicense(Guid? licenseId)
+    {
+        if (!_environment.IsDevelopment())
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            if (!licenseId.HasValue)
+            {
+                TempData["Error"] = "License ID is required for deactivation test.";
+                return RedirectToAction("LicenseActivationTest");
+            }
+
+            var result = await _licenseService.DeactivateLicenseAsync(licenseId.Value, "debug-user", "Testing deactivation from debug controller");
+            
+            if (result)
+            {
+                TempData["Success"] = $"Successfully deactivated license {licenseId}";
+            }
+            else
+            {
+                TempData["Error"] = $"Failed to deactivate license {licenseId}";
+            }
+
+            return RedirectToAction("LicenseActivationTest");
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = $"Error deactivating license: {ex.Message}";
+            return RedirectToAction("LicenseActivationTest");
+        }
+    }
+
+    /// <summary>
+    /// Test license suspension
+    /// </summary>
+    public async Task<IActionResult> TestSuspendLicense(Guid? licenseId)
+    {
+        if (!_environment.IsDevelopment())
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            if (!licenseId.HasValue)
+            {
+                TempData["Error"] = "License ID is required for suspension test.";
+                return RedirectToAction("LicenseActivationTest");
+            }
+
+            var suspendUntil = DateTime.UtcNow.AddDays(7); // Suspend for 7 days
+            var result = await _licenseService.SuspendLicenseAsync(licenseId.Value, "debug-user", 
+                "Testing suspension from debug controller", suspendUntil);
+            
+            if (result)
+            {
+                TempData["Success"] = $"Successfully suspended license {licenseId} until {suspendUntil:yyyy-MM-dd}";
+            }
+            else
+            {
+                TempData["Error"] = $"Failed to suspend license {licenseId}";
+            }
+
+            return RedirectToAction("LicenseActivationTest");
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = $"Error suspending license: {ex.Message}";
+            return RedirectToAction("LicenseActivationTest");
+        }
+    }
+
+    /// <summary>
+    /// Test license revocation
+    /// </summary>
+    public async Task<IActionResult> TestRevokeLicense(Guid? licenseId)
+    {
+        if (!_environment.IsDevelopment())
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            if (!licenseId.HasValue)
+            {
+                TempData["Error"] = "License ID is required for revocation test.";
+                return RedirectToAction("LicenseActivationTest");
+            }
+
+            var result = await _licenseService.RevokeLicenseAsync(licenseId.Value, "debug-user", 
+                "Testing revocation from debug controller - this is a permanent action");
+            
+            if (result)
+            {
+                TempData["Success"] = $"Successfully revoked license {licenseId} - THIS IS PERMANENT!";
+            }
+            else
+            {
+                TempData["Error"] = $"Failed to revoke license {licenseId}";
+            }
+
+            return RedirectToAction("LicenseActivationTest");
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = $"Error revoking license: {ex.Message}";
+            return RedirectToAction("LicenseActivationTest");
+        }
+    }
 }
