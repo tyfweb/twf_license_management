@@ -1,0 +1,76 @@
+# Theme Configuration
+remote_theme: just-the-docs/just-the-docs
+
+# Site settings
+title: "TechWayFit License Management"
+description: "Comprehensive Enterprise Software Licensing Platform"
+url: "https://tyfweb.github.io"
+baseurl: "/two_license_management"
+
+# Theme settings
+color_scheme: light
+search_enabled: true
+heading_anchors: true
+nav_external_links:
+  - title: GitHub Repository
+    url: https://github.com/TechWayFit/licensing-management
+    hide_icon: false
+
+# Footer settings
+footer_content: "Copyright &copy; 2025 TechWayFit. Licensed under the <a href=\"https://github.com/TechWayFit/licensing-management/blob/main/LICENSE\">MIT License</a>."
+
+# Print settings (for PDF generation)
+print_title: "TechWayFit License Management Documentation"
+print_subtitle: "Complete System Guide and API Reference"
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+plugins:
+  - jekyll-remote-theme
+  - jekyll-sitemap
+  - jekyll-seo-tag
+  - jekyll-feed
+
+# Exclude files from processing
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+  - .sass-cache
+  - .jekyll-cache
+  - legacy-docs
+
+# Navigation structure
+nav_sort: case_insensitive
+
+# Collections
+collections:
+  guides:
+    output: true
+    permalink: /:collection/:name/
+
+# Defaults
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default
+  - scope:
+      path: ""
+      type: "guides"
+    values:
+      layout: default
+
+# Kramdown settings
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    css_class: 'highlight'
+    span:
+      line_numbers: false
+    block:
+      line_numbers: true

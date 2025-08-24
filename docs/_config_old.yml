@@ -1,0 +1,63 @@
+# Site settings
+title: TechWayFit License Management System
+email: support@techwayfit.com
+description: >-
+  Comprehensive documentation for the TechWayFit License Management System.
+  Learn how to manage products, generate licenses, and integrate with your applications.
+
+baseurl: "/two_license_management"
+url: "https://tyfweb.github.io"
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+theme: minima
+
+# Plugins
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+# Collections
+collections:
+  guides:
+    output: true
+    permalink: /:collection/:name/
+  api:
+    output: true
+    permalink: /:collection/:name/
+
+# Navigation
+navigation:
+  - title: "Home"
+    url: "/"
+  - title: "User Guide"
+    url: "/user-guide/"
+  - title: "Admin Guide" 
+    url: "/admin-guide/"
+  - title: "API Documentation"
+    url: "/api/"
+  - title: "Technical Docs"
+    url: "/technical/"
+
+# Exclude from processing
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/
+
+# Kramdown settings
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    css_class: 'highlight'
+    span:
+      line_numbers: false
+    block:
+      line_numbers: true
