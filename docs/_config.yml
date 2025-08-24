@@ -11,6 +11,9 @@ baseurl: "/twf_license_management"
 color_scheme: light
 search_enabled: true
 heading_anchors: true
+
+# Custom CSS
+custom_css: assets/css/custom.css
 nav_external_links:
   - title: GitHub Repository
     url: https://github.com/tyfweb/twf_license_management
