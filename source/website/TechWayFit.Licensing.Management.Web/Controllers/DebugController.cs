@@ -7,6 +7,8 @@ using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Models.Enti
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using TechWayFit.Licensing.Management.Core.Contracts;
+using TechWayFit.Licensing.Management.Core.Contracts.Services;
+using TechWayFit.Licensing.Management.Core.Models.Enums;
 
 namespace TechWayFit.Licensing.Management.Web.Controllers;
 
@@ -20,16 +22,22 @@ public class DebugController : Controller
     private readonly EfCoreLicensingDbContext _context;
     private readonly IWebHostEnvironment _environment;
     private readonly ITenantScope _tenantScope;
+    private readonly ILicenseActivationService _activationService;
+    private readonly IProductLicenseService _licenseService;
 
     public DebugController(IUnitOfWork unitOfWork,
     EfCoreLicensingDbContext context,
     IWebHostEnvironment environment,
-    ITenantScope tenantScope)
+    ITenantScope tenantScope,
+    ILicenseActivationService activationService,
+    IProductLicenseService licenseService)
     {
         _unitOfWork = unitOfWork;
         _context = context;
         _environment = environment;
         _tenantScope = tenantScope;
+        _activationService = activationService;
+        _licenseService = licenseService;
     }
 
     /// <summary>
@@ -270,5 +278,98 @@ public class DebugController : Controller
             TempData["Error"] = $"Failed to clear data: {ex.Message}";
             return RedirectToAction("Index");
         }
+    }
+
+    /// <summary>
+    /// Test page for license activation
+    /// </summary>
+    public async Task<IActionResult> LicenseActivationTest()
+    {
+        if (!_environment.IsDevelopment())
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            // Get available licenses for testing
+            var licenses = await _licenseService.GetLicensesAsync(pageSize: 10);
+            ViewBag.AvailableLicenses = licenses.ToList();
+
+            return View();
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = $"Failed to load test data: {ex.Message}";
+            return View();
+        }
+    }
+
+    /// <summary>
+    /// Process license activation test
+    /// </summary>
+    [HttpPost]
+    public async Task<IActionResult> LicenseActivationTest(string activationKey, string deviceId, string deviceInfo)
+    {
+        if (!_environment.IsDevelopment())
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            if (string.IsNullOrWhiteSpace(activationKey))
+            {
+                TempData["Error"] = "Activation key is required";
+                return RedirectToAction("LicenseActivationTest");
+            }
+
+            if (string.IsNullOrWhiteSpace(deviceId))
+            {
+                deviceId = $"TEST-DEVICE-{Guid.NewGuid():N}"[..8];
+            }
+
+            if (string.IsNullOrWhiteSpace(deviceInfo))
+            {
+                deviceInfo = "Debug Test Device - Development Environment";
+            }
+
+            // Attempt to activate the license
+            var result = await _activationService.ActivateLicenseAsync(activationKey, deviceId, deviceInfo);
+
+            if (result.IsSuccessful)
+            {
+                TempData["Success"] = $"License activated successfully! License ID: {result.LicenseId}, Token: {result.ActivationToken}";
+                TempData["ActivationDetails"] = JsonSerializer.Serialize(new
+                {
+                    LicenseId = result.LicenseId,
+                    ActivationToken = result.ActivationToken,
+                    ActivatedAt = result.ActivatedAt,
+                    ExpiresAt = result.ExpiresAt,
+                    DeviceId = deviceId,
+                    DeviceInfo = deviceInfo,
+                    Metadata = result.Metadata
+                }, new JsonSerializerOptions { WriteIndented = true });
+            }
+            else
+            {
+                TempData["Error"] = $"License activation failed: {result.Message}";
+                TempData["FailureDetails"] = JsonSerializer.Serialize(new
+                {
+                    ActivationKey = activationKey,
+                    DeviceId = deviceId,
+                    DeviceInfo = deviceInfo,
+                    Error = result.Message,
+                    ErrorCode = result.ErrorCode
+                }, new JsonSerializerOptions { WriteIndented = true });
+            }
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = $"Exception during activation: {ex.Message}";
+            TempData["Exception"] = ex.ToString();
+        }
+
+        return RedirectToAction("LicenseActivationTest");
     }
 }

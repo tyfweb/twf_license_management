@@ -1,0 +1,35 @@
+# Theme Configuration
+remote_theme: pages-themes/cayman@v0.2.0
+
+# Site settings
+title: "TechWayFit License Management"
+description: "Comprehensive Enterprise Software Licensing Platform"
+url: "https://tyfweb.github.io"
+baseurl: "/twf_license_management"
+
+# GitHub integration
+github:
+  is_project_page: true
+  repository_url: "https://github.com/tyfweb/twf_license_management"
+  repository_name: "twf_license_management"
+  owner_name: "tyfweb"
+  owner_url: "https://github.com/tyfweb"
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+plugins:
+  - jekyll-remote-theme
+  - jekyll-seo-tag
+
+# Exclude files from processing
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+  - builds/
+  - docker/
+  - source/
+  - tests/

@@ -1,0 +1,40 @@
+# Theme Configuration
+remote_theme: just-the-docs/just-the-docs
+
+# Site settings
+title: "TechWayFit License Management"
+description: "Comprehensive Enterprise Software Licensing Platform"
+url: "https://tyfweb.github.io"
+baseurl: "/twf_license_management"
+
+# Just-the-Docs theme settings
+color_scheme: light
+search_enabled: true
+heading_anchors: true
+
+# Navigation
+nav_external_links:
+  - title: GitHub Repository
+    url: https://github.com/tyfweb/twf_license_management
+
+# Footer
+footer_content: "Copyright &copy; 2025 TechWayFit. Licensed under the MIT License."
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+plugins:
+  - jekyll-remote-theme
+  - jekyll-seo-tag
+
+# Exclude files from processing
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+  - builds/
+  - docker/
+  - source/
+  - tests/

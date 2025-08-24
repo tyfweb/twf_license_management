@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using TechWayFit.Licensing.Core.Models;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Core.Models.License;
+using TechWayFit.Licensing.Management.Core.Models.Enums;
 using TechWayFit.Licensing.Management.Web.Models.Api;
 using TechWayFit.Licensing.Management.Web.Models.Api.License;
 using TechWayFit.Licensing.Management.Web.Controllers;
@@ -23,17 +24,20 @@ public class LicenseApiController : BaseController
     private readonly IProductLicenseService _licenseService;
     private readonly IEnterpriseProductService _productService;
     private readonly IConsumerAccountService _consumerService;
+    private readonly ILicenseFileService _licenseFileService;
 
     public LicenseApiController(
         ILogger<LicenseApiController> logger,
         IProductLicenseService licenseService,
         IEnterpriseProductService productService,
-        IConsumerAccountService consumerService)
+        IConsumerAccountService consumerService,
+        ILicenseFileService licenseFileService)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _licenseService = licenseService ?? throw new ArgumentNullException(nameof(licenseService));
         _productService = productService ?? throw new ArgumentNullException(nameof(productService));
         _consumerService = consumerService ?? throw new ArgumentNullException(nameof(consumerService));
+        _licenseFileService = licenseFileService ?? throw new ArgumentNullException(nameof(licenseFileService));
     }
 
     /// <summary>
@@ -177,27 +181,43 @@ public class LicenseApiController : BaseController
     [ProducesResponseType(500)]
     public async Task<IActionResult> DownloadLicense(Guid id)
     {
-        // try
-        // {
-        //     _logger.LogInformation("Downloading license file for {LicenseId}", id);
+        try
+        {
+            _logger.LogInformation("Downloading license file for {LicenseId}", id);
 
-        //     var license = await _licenseService.GetLicenseByIdAsync(id);
-        //     if (license == null)
-        //     {
-        //         return NotFound();
-        //     }
+            var license = await _licenseService.GetLicenseByIdAsync(id);
+            if (license == null)
+            {
+                _logger.LogWarning("License {LicenseId} not found", id);
+                return NotFound(JsonResponse.Error("License not found"));
+            }
 
-        //     var licenseContent = await _licenseService.GenerateLicenseFileAsync(license);
-        //     var fileName = $"license_{license.LicenseKey}.lic";
+            // Check if license is in a downloadable state
+            if (license.Status != LicenseStatus.Active)
+            {
+                _logger.LogWarning("Attempted to download license {LicenseId} with status {Status}", id, license.Status);
+                return BadRequest(JsonResponse.Error("Only active licenses can be downloaded"));
+            }
 
-        //     return File(licenseContent, "application/octet-stream", fileName);
-        // }
-        // catch (Exception ex)
-        // {
-        //     _logger.LogError(ex, "Error downloading license {LicenseId}", id);
-        //     return StatusCode(500);
-        // }
-        throw new NotImplementedException("DownloadLicense method is not implemented yet.");
+            // Generate license file content
+            var licenseContent = await _licenseFileService.GenerateLicenseFileAsync(license);
+            var fileName = $"license_{license.LicenseKey}_{DateTime.UtcNow:yyyyMMdd}.lic";
+
+            // Track the download
+            await _licenseFileService.TrackDownloadAsync(license.LicenseId, User.Identity?.Name ?? "API User", "lic");
+
+            // Log the download action
+            _logger.LogInformation("License {LicenseId} downloaded via API by user {User}", id, User.Identity?.Name);
+
+            // Convert to bytes and return as file
+            var fileBytes = System.Text.Encoding.UTF8.GetBytes(licenseContent);
+            return File(fileBytes, "application/octet-stream", fileName);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error downloading license {LicenseId}", id);
+            return StatusCode(500, JsonResponse.Error("Failed to download license"));
+        }
     }
  
     private LicenseResponse MapToLicenseResponse(ProductLicense license)
