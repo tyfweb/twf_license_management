@@ -1,57 +1,88 @@
 # Documentation Setup Guide
 
-## Quick GitHub Pages Setup
+## 🔧 CSS Issues Fixed
 
-1. **Enable GitHub Pages**:
-   - Repository Settings → Pages
-   - Source: Deploy from branch
-   - Branch: `main`, Folder: `/docs`
+The following changes resolve the 404 errors for CSS and JS files:
 
-2. **Your documentation will be live at**:
-   `https://tyfweb.github.io/two_license_management/`
+### ✅ **Updated Configuration (`_config.yml`)**
 
-## CSS Issue Resolution
-
-The CSS issue has been resolved with:
-
-✅ **Proper Theme Configuration** (`_config.yml`):
+**Fixed**: Removed conflicting `theme` declaration, using only `remote_theme`
 ```yaml
+# Before (causing conflicts)
 theme: just-the-docs
+remote_theme: just-the-docs/just-the-docs
+
+# After (fixed)
 remote_theme: just-the-docs/just-the-docs
 ```
 
-✅ **Custom Styling** (`assets/css/style.scss`):
-- TechWayFit blue branding (#2563eb)
-- Professional table styling
-- Print-optimized layouts
-- Mobile responsive design
-
-✅ **GitHub Actions** (`.github/workflows/pages.yml`):
-- Automatic deployment on push to main
-- Uses standard Jekyll build process
-
-✅ **Simplified Dependencies** (`Gemfile`):
-- GitHub Pages compatible
-- Minimal required dependencies
-
-## Verification Steps
-
-1. Push changes to main branch
-2. Check Actions tab for successful build
-3. Access documentation at GitHub Pages URL
-4. Verify CSS is loading properly
-
-## Local Testing (Optional)
-
-```bash
-cd docs
-bundle install
-bundle exec jekyll serve
-# Open http://localhost:4000/two_license_management/
+**Added**: Required plugin for remote themes
+```yaml
+plugins:
+  - jekyll-remote-theme  # Essential for GitHub Pages
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-seo-tag
 ```
 
-## Troubleshooting
+### ✅ **Simplified Gemfile**
 
-- **CSS not loading**: Check `assets/css/style.scss` has Jekyll front matter `---`
-- **Build failing**: Check Actions tab for specific errors
-- **Navigation broken**: Verify front matter in all `.md` files
+Removed local theme dependency that conflicts with remote theme:
+```ruby
+# GitHub Pages compatible
+gem "github-pages", group: :jekyll_plugins
+
+# Removed this line (causes conflicts):
+# gem "just-the-docs"
+```
+
+### ✅ **Fixed CSS Import (`assets/css/style.scss`)**
+
+Removed problematic `@import` statement that was causing build failures:
+```scss
+# Before (causing errors)
+@import "just-the-docs";
+
+# After (works with remote theme)
+/* Custom styling only */
+```
+
+### ✅ **Simplified Build Configuration**
+
+Removed complex collections and defaults that could interfere with theme loading.
+
+## 🚀 **Deployment Steps**
+
+1. **Push changes** to main branch
+2. **Enable GitHub Pages**:
+   - Repository Settings → Pages  
+   - Source: Deploy from branch
+   - Branch: `main`, Folder: `/docs`
+3. **Wait for deployment** (check Actions tab)
+4. **Access documentation**: `https://tyfweb.github.io/two_license_management/`
+
+## 🧪 **Test Page Created**
+
+Visit `/test` to verify the setup is working correctly.
+
+## 🔍 **Verification Checklist**
+
+- [ ] No 404 errors in browser console
+- [ ] CSS loads properly (blue header)
+- [ ] Navigation works
+- [ ] Search functionality available
+- [ ] Mobile responsive
+
+## 🆘 **If Still Having Issues**
+
+1. **Check GitHub Actions**: Go to Actions tab, look for deployment errors
+2. **Verify Pages Settings**: Ensure source is set to `/docs` folder
+3. **Clear Browser Cache**: Hard refresh the page
+4. **Check Repository**: Ensure it's public or Pages is enabled for private repos
+
+## 📋 **Key Files Modified**
+
+- `_config.yml` - Fixed theme configuration
+- `Gemfile` - Removed conflicting dependencies  
+- `assets/css/style.scss` - Fixed import issues
+- `.github/workflows/pages.yml` - Updated deployment process
