@@ -38,3 +38,4 @@ exclude:
   - docker/
   - source/
   - tests/
+  - legacy-docs/
