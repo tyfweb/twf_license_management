@@ -5,7 +5,7 @@ remote_theme: just-the-docs/just-the-docs
 title: "TechWayFit License Management"
 description: "Comprehensive Enterprise Software Licensing Platform"
 url: "https://tyfweb.github.io"
-baseurl: "/twf_license_Mangement"
+baseurl: "/twf_license_management"
 
 # Theme settings
 color_scheme: light
@@ -13,11 +13,11 @@ search_enabled: true
 heading_anchors: true
 nav_external_links:
   - title: GitHub Repository
-    url: https://github.com/tyfweb/twf_license_Mangement
+    url: https://github.com/tyfweb/twf_license_management
     hide_icon: false
 
 # Footer settings
-footer_content: "Copyright &copy; 2025 TechWayFit. Licensed under the <a href=\"https://github.com/tyfweb/twf_license_Mangement/blob/main/LICENSE\">MIT License</a>."
+footer_content: "Copyright &copy; 2025 TechWayFit. Licensed under the <a href=\"https://github.com/tyfweb/twf_license_management/blob/main/LICENSE\">MIT License</a>."
 
 # Print settings (for PDF generation)
 print_title: "TechWayFit License Management Documentation"

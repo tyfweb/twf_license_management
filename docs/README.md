@@ -33,7 +33,7 @@ The TechWayFit Licensing System provides tamper-proof license generation and val
 ## Repository Structure
 
 ```
-twf_license_Mangement/
+twf_license_management/
 ├── source/                              # Source Code
 │   ├── TechWayFit.Licensing.Core/       # Core models and interfaces
 │   ├── TechWayFit.Licensing.Generator/  # License generation service
@@ -76,7 +76,7 @@ The fastest way to get started is using Docker:
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd twf_license_Mangement
+cd twf_license_management
 
 # Navigate to docker directory
 cd docker
