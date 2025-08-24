@@ -1,5 +1,4 @@
 ---
-layout: default
 title: "CSS Test Page"
 nav_order: 100
 ---
