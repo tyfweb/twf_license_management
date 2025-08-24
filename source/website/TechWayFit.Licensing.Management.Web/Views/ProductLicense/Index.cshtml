@@ -182,8 +182,8 @@
 @section Scripts {
     <script>
         function downloadLicense(licenseId) {
-            // TODO: Implement license download functionality
-            alert('Download functionality for license ' + licenseId + ' will be implemented');
+            // Redirect to license download with default .lic format
+            window.location.href = '@Url.Action("Download", "License")/' + licenseId;
         }
     </script>
 }

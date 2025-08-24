@@ -14,6 +14,7 @@ using CoreModels = TechWayFit.Licensing.Core.Models;
 using ManagementModels = TechWayFit.Licensing.Management.Core.Models.License;
 using TechWayFit.Licensing.Core.Models;
 using TechWayFit.Licensing.Management.Core.Models.Enums;
+using TechWayFit.Licensing.Management.Core.Models.Audit;
 
 namespace TechWayFit.Licensing.Management.Services.Implementations.License;
 
@@ -76,24 +77,82 @@ public class ProductLicenseService : IProductLicenseService
         try
         {
             // TODO: Implement GetByLicenseKeyAsync in repository
-            _logger.LogWarning("GetLicenseByKeyAsync using search - GetByLicenseKeyAsync repository method missing");
+            _logger.LogDebug("Getting license by key: {LicenseKey}", licenseKey);
 
-            var searchRequest = new SearchRequest<ProductLicense>
-            {
-                Filters = new Dictionary<string, object>
-                {
-                    { nameof(ProductLicense.LicenseKey), licenseKey }
-                }
-            };
-
-            var searchResult = await _unitOfWork.Licenses.SearchAsync(searchRequest);
-            var entity = searchResult.Results.FirstOrDefault();
+            // Use the repository method directly
+            var entity = await _unitOfWork.Licenses.GetByLicenseKeyAsync(licenseKey);
 
             return entity;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting license by key: {LicenseKey}", licenseKey);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Gets a license by license code (user-friendly identifier)
+    /// </summary>
+    public async Task<ProductLicense?> GetLicenseByCodeAsync(string licenseCode)
+    {
+        if (string.IsNullOrWhiteSpace(licenseCode))
+            throw new ArgumentException("LicenseCode cannot be null or empty", nameof(licenseCode));
+
+        try
+        {
+            _logger.LogInformation("Getting license by code: {LicenseCode}", licenseCode);
+
+            // Use the repository method directly
+            var entity = await _unitOfWork.Licenses.GetByLicenseCodeAsync(licenseCode);
+
+            if (entity != null)
+            {
+                _logger.LogDebug("Found license {LicenseId} for code {LicenseCode}", entity.LicenseId, licenseCode);
+            }
+            else
+            {
+                _logger.LogWarning("No license found for code: {LicenseCode}", licenseCode);
+            }
+
+            return entity;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting license by code: {LicenseCode}", licenseCode);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Gets a license by either license key or license code
+    /// </summary>
+    public async Task<ProductLicense?> GetLicenseByKeyOrCodeAsync(string identifier)
+    {
+        if (string.IsNullOrWhiteSpace(identifier))
+            throw new ArgumentException("Identifier cannot be null or empty", nameof(identifier));
+
+        try
+        {
+            _logger.LogInformation("Getting license by key or code: {Identifier}", identifier);
+
+            // Use the repository method that searches both key and code
+            var license = await _unitOfWork.Licenses.GetByKeyOrCodeAsync(identifier);
+
+            if (license != null)
+            {
+                _logger.LogDebug("Found license {LicenseId} for identifier {Identifier}", license.LicenseId, identifier);
+            }
+            else
+            {
+                _logger.LogWarning("No license found for identifier: {Identifier}", identifier);
+            }
+
+            return license;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting license by key or code: {Identifier}", identifier);
             throw;
         }
     }
@@ -325,18 +384,335 @@ public class ProductLicenseService : IProductLicenseService
 
     public async Task<ProductLicense> UpdateLicenseAsync(Guid licenseId, LicenseUpdateRequest request, string updatedBy)
     {
-        // TODO: Implement when entity properties are available
-        _logger.LogWarning("UpdateLicenseAsync not fully implemented - entity properties missing");
-        await Task.CompletedTask;
-        throw new NotImplementedException("UpdateLicenseAsync not implemented - entity structure incomplete");
+        try
+        {
+            _logger.LogInformation("Updating license {LicenseId} by user {UpdatedBy}", licenseId, updatedBy);
+
+            // Validate request
+            var validationResult = await ValidateLicenseUpdateRequestAsync(licenseId, request);
+            if (!validationResult.IsValid)
+            {
+                throw new ArgumentException($"License update validation failed: {string.Join(", ", validationResult.Errors)}");
+            }
+
+            // Begin transaction
+            await _unitOfWork.BeginTransactionAsync();
+
+            try
+            {
+                // Retrieve existing license
+                var existingLicense = await _unitOfWork.Licenses.GetByIdAsync(licenseId);
+                if (existingLicense == null)
+                {
+                    throw new ArgumentException($"License with ID {licenseId} not found");
+                }
+
+                // Check if license can be updated (not revoked or expired in some cases)
+                if (existingLicense.Status == LicenseStatus.Revoked)
+                {
+                    throw new InvalidOperationException("Cannot update a revoked license");
+                }
+
+                // Track original values for audit
+                var originalValues = new Dictionary<string, object?>
+                {
+                    ["ExpiryDate"] = existingLicense.ValidTo,
+                    ["MaxUsers"] = existingLicense.MaxAllowedUsers,
+                    ["Status"] = existingLicense.Status.ToString(),
+                    ["Notes"] = existingLicense.Metadata.ContainsKey("Notes") ? existingLicense.Metadata["Notes"] : null
+                };
+
+                // Apply updates
+                bool hasChanges = false;
+
+                if (request.ExpiryDate.HasValue && request.ExpiryDate.Value != existingLicense.ValidTo)
+                {
+                    existingLicense.ValidTo = request.ExpiryDate.Value;
+                    hasChanges = true;
+                    _logger.LogInformation("Updated license {LicenseId} expiry date to {ExpiryDate}", licenseId, request.ExpiryDate.Value);
+                }
+
+                if (request.MaxUsers.HasValue && request.MaxUsers.Value != existingLicense.MaxAllowedUsers)
+                {
+                    existingLicense.MaxAllowedUsers = request.MaxUsers.Value;
+                    hasChanges = true;
+                    _logger.LogInformation("Updated license {LicenseId} max users to {MaxUsers}", licenseId, request.MaxUsers.Value);
+                }
+
+                // Update metadata if provided
+                if (request.Metadata != null)
+                {
+                    foreach (var kvp in request.Metadata)
+                    {
+                        if (existingLicense.Metadata.ContainsKey(kvp.Key))
+                        {
+                            if (!existingLicense.Metadata[kvp.Key].Equals(kvp.Value))
+                            {
+                                existingLicense.Metadata[kvp.Key] = kvp.Value;
+                                hasChanges = true;
+                            }
+                        }
+                        else
+                        {
+                            existingLicense.Metadata[kvp.Key] = kvp.Value;
+                            hasChanges = true;
+                        }
+                    }
+                }
+
+                // Update custom properties if provided
+                if (request.CustomProperties != null)
+                {
+                    // Store custom properties in metadata with a prefix
+                    foreach (var kvp in request.CustomProperties)
+                    {
+                        var key = $"Custom_{kvp.Key}";
+                        if (existingLicense.Metadata.ContainsKey(key))
+                        {
+                            if (!existingLicense.Metadata[key].Equals(kvp.Value))
+                            {
+                                existingLicense.Metadata[key] = kvp.Value;
+                                hasChanges = true;
+                            }
+                        }
+                        else
+                        {
+                            existingLicense.Metadata[key] = kvp.Value;
+                            hasChanges = true;
+                        }
+                    }
+                }
+
+                // Update notes if provided
+                if (!string.IsNullOrEmpty(request.Notes))
+                {
+                    var currentNotes = existingLicense.Metadata.ContainsKey("Notes") ? existingLicense.Metadata["Notes"]?.ToString() : string.Empty;
+                    if (currentNotes != request.Notes)
+                    {
+                        existingLicense.Metadata["Notes"] = request.Notes;
+                        hasChanges = true;
+                    }
+                }
+
+                if (!hasChanges)
+                {
+                    _logger.LogInformation("No changes detected for license {LicenseId}", licenseId);
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return existingLicense;
+                }
+
+                // Update audit fields
+                existingLicense.UpdatedBy = updatedBy;
+                existingLicense.UpdatedOn = DateTime.UtcNow;
+
+                // Save the updated license
+                await _unitOfWork.Licenses.UpdateAsync(existingLicense.Id, existingLicense);
+
+                // Create audit entry
+                var auditEntry = new AuditEntry
+                {
+                    EntryId = Guid.NewGuid(),
+                    EntityType = nameof(ProductLicense),
+                    EntityId = licenseId.ToString(),
+                    ActionType = "Update",
+                    UserName = updatedBy,
+                    Timestamp = DateTime.UtcNow,
+                    Reason = request.Notes ?? "License update",
+                    Metadata = new Dictionary<string, string>
+                    {
+                        ["OriginalValues"] = JsonSerializer.Serialize(originalValues),
+                        ["NewValues"] = JsonSerializer.Serialize(new Dictionary<string, object?>
+                        {
+                            ["ExpiryDate"] = existingLicense.ValidTo,
+                            ["MaxUsers"] = existingLicense.MaxAllowedUsers,
+                            ["Status"] = existingLicense.Status.ToString(),
+                            ["Notes"] = existingLicense.Metadata.ContainsKey("Notes") ? existingLicense.Metadata["Notes"] : null
+                        }),
+                        ["UpdateReason"] = request.Notes ?? "License update"
+                    }
+                };
+
+                await _unitOfWork.AuditEntries.AddAsync(auditEntry);
+
+                // Save all changes
+                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.CommitTransactionAsync();
+
+                _logger.LogInformation("Successfully updated license {LicenseId} by user {UpdatedBy}", licenseId, updatedBy);
+                return existingLicense;
+            }
+            catch (Exception)
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+                throw;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating license {LicenseId} by user {UpdatedBy}", licenseId, updatedBy);
+            throw;
+        }
     }
 
     public async Task<ProductLicense> RegenerateLicenseKeyAsync(Guid licenseId, string regeneratedBy, string reason)
     {
-        // TODO: Implement
-        _logger.LogWarning("RegenerateLicenseKeyAsync not implemented");
-        await Task.CompletedTask;
-        throw new NotImplementedException();
+        if (licenseId == Guid.Empty)
+            throw new ArgumentException("LicenseId cannot be empty", nameof(licenseId));
+        if (string.IsNullOrWhiteSpace(regeneratedBy))
+            throw new ArgumentException("RegeneratedBy cannot be null or empty", nameof(regeneratedBy));
+        if (string.IsNullOrWhiteSpace(reason))
+            throw new ArgumentException("Reason cannot be null or empty for key regeneration", nameof(reason));
+
+        try
+        {
+            await _unitOfWork.BeginTransactionAsync();
+
+            _logger.LogInformation("Regenerating license key for license {LicenseId} by {RegeneratedBy} with reason: {Reason}", 
+                licenseId, regeneratedBy, reason);
+
+            // Get the license
+            var license = await GetLicenseByIdAsync(licenseId);
+            if (license == null)
+            {
+                _logger.LogWarning("License {LicenseId} not found for key regeneration", licenseId);
+                await _unitOfWork.RollbackTransactionAsync();
+                throw new ArgumentException($"License with ID {licenseId} not found");
+            }
+
+            // Check if license can have its key regenerated
+            if (license.Status == LicenseStatus.Revoked)
+            {
+                _logger.LogWarning("Cannot regenerate key for revoked license {LicenseId}", licenseId);
+                await _unitOfWork.RollbackTransactionAsync();
+                throw new InvalidOperationException($"Cannot regenerate key for revoked license {licenseId}");
+            }
+
+            // Store original key for audit purposes (but don't log it for security)
+            var originalKeyLength = license.LicenseKey?.Length ?? 0;
+            var originalKeyPrefix = license.LicenseKey?.Length > 8 ? license.LicenseKey.Substring(0, 8) + "..." : "N/A";
+
+            // Generate new license key using the existing generator
+            string newLicenseKey;
+            try
+            {
+                var generationRequest = new LicenseGenerationRequest
+                {
+                    ProductId = license.ProductId,
+                    ConsumerId = license.ConsumerId,
+                    TierId = license.ProductTierId,
+                    ProductName = license.LicenseConsumer?.Product?.Name,
+                    ConsumerName = license.LicenseConsumer?.Consumer?.CompanyName,
+                    LicenseCode = license.LicenseCode,
+                    ProductTier = license.LicenseConsumer?.ProductTier?.Name,
+                    LicenseModel = license.LicenseModel,
+                    ValidFrom = license.ValidFrom,
+                    ExpiryDate = license.ValidTo,
+                    MaxUsers = license.MaxAllowedUsers,
+                    Notes = "Key regeneration",
+                    Metadata = license.Metadata
+                };
+
+                var regeneratedLicense = await GenerateLicenseAsync(generationRequest, regeneratedBy);
+                newLicenseKey = regeneratedLicense.LicenseKey;
+
+                _logger.LogInformation("Generated new license key for license {LicenseId}", licenseId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to generate new license key for license {LicenseId}", licenseId);
+                await _unitOfWork.RollbackTransactionAsync();
+                throw new InvalidOperationException($"Failed to generate new license key: {ex.Message}", ex);
+            }
+
+            // Update license with new key and regeneration metadata
+            var metadata = license.Metadata ?? new Dictionary<string, object>();
+            
+            // Track key regeneration history
+            var regenerationHistory = new List<object>();
+            if (metadata.ContainsKey("KeyRegenerationHistory"))
+            {
+                try
+                {
+                    var existingHistory = JsonSerializer.Deserialize<List<object>>(metadata["KeyRegenerationHistory"].ToString() ?? "[]");
+                    if (existingHistory != null)
+                        regenerationHistory = existingHistory;
+                }
+                catch (JsonException ex)
+                {
+                    _logger.LogWarning(ex, "Failed to parse existing key regeneration history for license {LicenseId}", licenseId);
+                }
+            }
+
+            // Add current regeneration to history (without storing actual keys for security)
+            regenerationHistory.Add(new
+            {
+                RegenerationDate = DateTime.UtcNow,
+                RegeneratedBy = regeneratedBy,
+                Reason = reason,
+                PreviousKeyLength = originalKeyLength,
+                NewKeyLength = newLicenseKey.Length,
+                RegenerationType = "Manual"
+            });
+
+            metadata["KeyRegenerationHistory"] = JsonSerializer.Serialize(regenerationHistory);
+            metadata["LastKeyRegeneration"] = DateTime.UtcNow;
+            metadata["LastKeyRegeneratedBy"] = regeneratedBy;
+            metadata["KeyRegenerationReason"] = reason;
+            metadata["KeyRegenerationCount"] = regenerationHistory.Count;
+
+            // Update license with new key
+            license.LicenseKey = newLicenseKey;
+            license.UpdatedOn = DateTime.UtcNow;
+            license.UpdatedBy = regeneratedBy;
+            license.Metadata = metadata;
+
+            // If the license was previously expired but is still within a reasonable time frame,
+            // consider reactivating it (business decision)
+            if (license.Status == LicenseStatus.Expired && license.ValidTo > DateTime.UtcNow.AddDays(-30))
+            {
+                license.Status = LicenseStatus.Active;
+                metadata["StatusChangedDuringKeyRegeneration"] = "Reactivated expired license during key regeneration";
+                _logger.LogInformation("License {LicenseId} status changed from Expired to Active during key regeneration", licenseId);
+            }
+
+            // Save changes
+            await _unitOfWork.Licenses.UpdateAsync(license.LicenseId, license);
+
+            // Create audit entry for key regeneration
+            var auditEntry = new AuditEntry
+            {
+                EntryId = Guid.NewGuid(),
+                EntityType = nameof(ProductLicense),
+                EntityId = licenseId.ToString(),
+                ActionType = "RegenerateKey",
+                UserName = regeneratedBy,
+                Timestamp = DateTime.UtcNow,
+                Reason = reason,
+                Metadata = new Dictionary<string, string>
+                {
+                    ["RegenerationType"] = "Manual",
+                    ["PreviousKeyPrefix"] = originalKeyPrefix,
+                    ["NewKeyLength"] = newLicenseKey.Length.ToString(),
+                    ["RegenerationCount"] = regenerationHistory.Count.ToString(),
+                    ["LicenseStatus"] = license.Status.ToString()
+                }
+            };
+
+            await _unitOfWork.AuditEntries.AddAsync(auditEntry);
+            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.CommitTransactionAsync();
+
+            _logger.LogInformation("Successfully regenerated license key for license {LicenseId} by {RegeneratedBy}. New key length: {KeyLength}. Status: {Status}", 
+                licenseId, regeneratedBy, newLicenseKey.Length, license.Status);
+            return license;
+        }
+        catch (Exception ex)
+        {
+            await _unitOfWork.RollbackTransactionAsync();
+            _logger.LogError(ex, "Error regenerating license key for license {LicenseId} by {RegeneratedBy}", 
+                licenseId, regeneratedBy);
+            throw;
+        }
     }
 
     public async Task<ProductLicense?> GetLicenseByIdAsync(Guid licenseId)
@@ -743,10 +1119,155 @@ public class ProductLicenseService : IProductLicenseService
 
     public async Task<bool> RenewLicenseAsync(Guid licenseId, DateTime newExpiryDate, string renewedBy)
     {
-        // TODO: Implement
-        _logger.LogWarning("RenewLicenseAsync not implemented");
-        await Task.CompletedTask;
-        return false;
+        if (licenseId == Guid.Empty)
+            throw new ArgumentException("LicenseId cannot be empty", nameof(licenseId));
+        if (newExpiryDate <= DateTime.UtcNow)
+            throw new ArgumentException("New expiry date must be in the future", nameof(newExpiryDate));
+        if (string.IsNullOrWhiteSpace(renewedBy))
+            throw new ArgumentException("RenewedBy cannot be null or empty", nameof(renewedBy));
+
+        try
+        {
+            await _unitOfWork.BeginTransactionAsync();
+
+            _logger.LogInformation("Renewing license {LicenseId} with new expiry date {NewExpiryDate} by {RenewedBy}", 
+                licenseId, newExpiryDate, renewedBy);
+
+            // Get the license
+            var license = await GetLicenseByIdAsync(licenseId);
+            if (license == null)
+            {
+                _logger.LogWarning("License {LicenseId} not found for renewal", licenseId);
+                await _unitOfWork.RollbackTransactionAsync();
+                return false;
+            }
+
+            // Check if license can be renewed
+            if (license.Status == LicenseStatus.Revoked)
+            {
+                _logger.LogWarning("Cannot renew revoked license {LicenseId}", licenseId);
+                await _unitOfWork.RollbackTransactionAsync();
+                return false;
+            }
+
+            // Validate new expiry date is reasonable
+            if (newExpiryDate <= license.ValidFrom)
+            {
+                _logger.LogWarning("New expiry date {NewExpiryDate} must be after license valid from date {ValidFrom} for license {LicenseId}", 
+                    newExpiryDate, license.ValidFrom, licenseId);
+                await _unitOfWork.RollbackTransactionAsync();
+                return false;
+            }
+
+            // Don't allow renewal more than 10 years from now (business rule)
+            if (newExpiryDate > DateTime.UtcNow.AddYears(10))
+            {
+                _logger.LogWarning("New expiry date {NewExpiryDate} exceeds maximum allowed renewal period for license {LicenseId}", 
+                    newExpiryDate, licenseId);
+                await _unitOfWork.RollbackTransactionAsync();
+                return false;
+            }
+
+            // Store original values for audit
+            var originalExpiryDate = license.ValidTo;
+            var originalStatus = license.Status;
+
+            // Update license renewal information
+            var metadata = license.Metadata ?? new Dictionary<string, object>();
+            
+            // Track renewal history
+            var renewalHistory = new List<object>();
+            if (metadata.ContainsKey("RenewalHistory"))
+            {
+                try
+                {
+                    var existingHistory = JsonSerializer.Deserialize<List<object>>(metadata["RenewalHistory"].ToString() ?? "[]");
+                    if (existingHistory != null)
+                        renewalHistory = existingHistory;
+                }
+                catch (JsonException ex)
+                {
+                    _logger.LogWarning(ex, "Failed to parse existing renewal history for license {LicenseId}", licenseId);
+                }
+            }
+
+            // Add current renewal to history
+            renewalHistory.Add(new
+            {
+                RenewalDate = DateTime.UtcNow,
+                PreviousExpiryDate = originalExpiryDate,
+                NewExpiryDate = newExpiryDate,
+                RenewedBy = renewedBy,
+                RenewalType = license.Status == LicenseStatus.Expired ? "Post-Expiry" : "Pre-Expiry"
+            });
+
+            metadata["RenewalHistory"] = JsonSerializer.Serialize(renewalHistory);
+            metadata["LastRenewalDate"] = DateTime.UtcNow;
+            metadata["RenewedBy"] = renewedBy;
+            metadata["PreviousExpiryDate"] = originalExpiryDate;
+            metadata["RenewalCount"] = renewalHistory.Count;
+
+            // Update license fields
+            license.ValidTo = newExpiryDate;
+            license.UpdatedOn = DateTime.UtcNow;
+            license.UpdatedBy = renewedBy;
+            license.Metadata = metadata;
+
+            // Update status based on new expiry date
+            if (license.Status == LicenseStatus.Expired && newExpiryDate > DateTime.UtcNow)
+            {
+                // Reactivate expired license if renewed with future date
+                license.Status = LicenseStatus.Active;
+                metadata["StatusChangedDuringRenewal"] = $"Changed from {originalStatus} to {license.Status}";
+                _logger.LogInformation("License {LicenseId} status changed from Expired to Active during renewal", licenseId);
+            }
+            else if (license.Status == LicenseStatus.Suspended)
+            {
+                // Optionally reactivate suspended licenses during renewal (business decision)
+                license.Status = LicenseStatus.Active;
+                metadata["StatusChangedDuringRenewal"] = $"Changed from {originalStatus} to {license.Status}";
+                metadata["SuspensionClearedDuringRenewal"] = DateTime.UtcNow;
+                _logger.LogInformation("License {LicenseId} status changed from Suspended to Active during renewal", licenseId);
+            }
+
+            // Save changes
+            await _unitOfWork.Licenses.UpdateAsync(license.LicenseId, license);
+
+            // Create audit entry for renewal
+            var auditEntry = new AuditEntry
+            {
+                EntryId = Guid.NewGuid(),
+                EntityType = nameof(ProductLicense),
+                EntityId = licenseId.ToString(),
+                ActionType = "Renew",
+                UserName = renewedBy,
+                Timestamp = DateTime.UtcNow,
+                Reason = "License renewal",
+                Metadata = new Dictionary<string, string>
+                {
+                    ["PreviousExpiryDate"] = originalExpiryDate.ToString("yyyy-MM-dd HH:mm:ss"),
+                    ["NewExpiryDate"] = newExpiryDate.ToString("yyyy-MM-dd HH:mm:ss"),
+                    ["RenewalType"] = originalStatus == LicenseStatus.Expired ? "Post-Expiry" : "Pre-Expiry",
+                    ["StatusBefore"] = originalStatus.ToString(),
+                    ["StatusAfter"] = license.Status.ToString(),
+                    ["RenewalCount"] = renewalHistory.Count.ToString()
+                }
+            };
+
+            await _unitOfWork.AuditEntries.AddAsync(auditEntry);
+            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.CommitTransactionAsync();
+
+            _logger.LogInformation("Successfully renewed license {LicenseId} from {OriginalExpiry} to {NewExpiry} by {RenewedBy}. Status: {Status}", 
+                licenseId, originalExpiryDate, newExpiryDate, renewedBy, license.Status);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            await _unitOfWork.RollbackTransactionAsync();
+            _logger.LogError(ex, "Error renewing license {LicenseId} by {RenewedBy}", licenseId, renewedBy);
+            throw;
+        }
     }
 
     public async Task<bool> UpdateLicenseStatusAsync(Guid licenseId, LicenseStatus status, string updatedBy, string? reason = null)
@@ -854,10 +1375,153 @@ public class ProductLicenseService : IProductLicenseService
 
     public async Task<ValidationResult> ValidateLicenseUpdateRequestAsync(Guid licenseId, LicenseUpdateRequest request)
     {
-        // TODO: Implement
-        _logger.LogWarning("ValidateLicenseUpdateRequestAsync not implemented");
-        await Task.CompletedTask;
-        return ValidationResult.Success();
+        try
+        {
+            _logger.LogInformation("Validating license update request for license {LicenseId}", licenseId);
+
+            var errors = new List<string>();
+
+            // Basic request validation
+            if (request == null)
+            {
+                errors.Add("Update request cannot be null");
+                return ValidationResult.Failure(errors.ToArray());
+            }
+
+            // Validate license exists
+            var existingLicense = await _unitOfWork.Licenses.GetByIdAsync(licenseId);
+            if (existingLicense == null)
+            {
+                errors.Add($"License with ID {licenseId} not found");
+                return ValidationResult.Failure(errors.ToArray());
+            }
+
+            // Validate expiry date if provided
+            if (request.ExpiryDate.HasValue)
+            {
+                if (request.ExpiryDate.Value <= DateTime.UtcNow)
+                {
+                    errors.Add("Expiry date must be in the future");
+                }
+
+                if (request.ExpiryDate.Value <= existingLicense.ValidFrom)
+                {
+                    errors.Add("Expiry date must be after the license valid from date");
+                }
+
+                // Don't allow extending expired licenses beyond reasonable limits
+                if (existingLicense.IsExpired && request.ExpiryDate.Value > DateTime.UtcNow.AddYears(10))
+                {
+                    errors.Add("Cannot extend expired license more than 10 years from current date");
+                }
+            }
+
+            // Validate max users if provided
+            if (request.MaxUsers.HasValue)
+            {
+                if (request.MaxUsers.Value < 0)
+                {
+                    errors.Add("Maximum users cannot be negative");
+                }
+
+                if (request.MaxUsers.Value > 1000000) // Reasonable upper limit
+                {
+                    errors.Add("Maximum users cannot exceed 1,000,000");
+                }
+            }
+
+            // Validate max devices if provided
+            if (request.MaxDevices.HasValue)
+            {
+                if (request.MaxDevices.Value < 0)
+                {
+                    errors.Add("Maximum devices cannot be negative");
+                }
+
+                if (request.MaxDevices.Value > 1000000) // Reasonable upper limit
+                {
+                    errors.Add("Maximum devices cannot exceed 1,000,000");
+                }
+            }
+
+            // Validate notes length
+            if (!string.IsNullOrEmpty(request.Notes) && request.Notes.Length > 2000)
+            {
+                errors.Add("Notes cannot exceed 2000 characters");
+            }
+
+            // Validate metadata if provided
+            if (request.Metadata != null)
+            {
+                if (request.Metadata.Count > 50)
+                {
+                    errors.Add("Metadata cannot have more than 50 entries");
+                }
+
+                foreach (var kvp in request.Metadata)
+                {
+                    if (string.IsNullOrEmpty(kvp.Key))
+                    {
+                        errors.Add("Metadata keys cannot be null or empty");
+                        break;
+                    }
+
+                    if (kvp.Key.Length > 100)
+                    {
+                        errors.Add("Metadata keys cannot exceed 100 characters");
+                        break;
+                    }
+
+                    var valueString = kvp.Value?.ToString() ?? "";
+                    if (valueString.Length > 1000)
+                    {
+                        errors.Add("Metadata values cannot exceed 1000 characters");
+                        break;
+                    }
+                }
+            }
+
+            // Validate custom properties if provided
+            if (request.CustomProperties != null)
+            {
+                if (request.CustomProperties.Count > 50)
+                {
+                    errors.Add("Custom properties cannot have more than 50 entries");
+                }
+
+                foreach (var kvp in request.CustomProperties)
+                {
+                    if (string.IsNullOrEmpty(kvp.Key))
+                    {
+                        errors.Add("Custom property keys cannot be null or empty");
+                        break;
+                    }
+
+                    if (kvp.Key.Length > 100)
+                    {
+                        errors.Add("Custom property keys cannot exceed 100 characters");
+                        break;
+                    }
+
+                    var valueString = kvp.Value?.ToString() ?? "";
+                    if (valueString.Length > 1000)
+                    {
+                        errors.Add("Custom property values cannot exceed 1000 characters");
+                        break;
+                    }
+                }
+            }
+
+            _logger.LogInformation("License update validation completed for license {LicenseId}. Errors: {ErrorCount}", 
+                licenseId, errors.Count);
+
+            return errors.Count == 0 ? ValidationResult.Success() : ValidationResult.Failure(errors.ToArray());
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error validating license update request for license {LicenseId}", licenseId);
+            return ValidationResult.Failure("An error occurred during validation");
+        }
     }
 
     public async Task<IEnumerable<ProductLicense>> GetAllLicensesAsync(LicenseStatus? status = null, string? searchTerm = null, int pageNumber = 1, int pageSize = 50)

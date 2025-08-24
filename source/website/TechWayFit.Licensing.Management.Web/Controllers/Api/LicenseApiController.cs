@@ -219,6 +219,251 @@ public class LicenseApiController : BaseController
             return StatusCode(500, JsonResponse.Error("Failed to download license"));
         }
     }
+
+    /// <summary>
+    /// Suspend a license
+    /// </summary>
+    /// <param name="id">License ID</param>
+    /// <param name="request">Suspend request parameters</param>
+    /// <returns>Operation result</returns>
+    [HttpPost("{id:guid}/suspend")]
+    [ProducesResponseType(typeof(JsonResponse), 200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    [ProducesResponseType(500)]
+    public async Task<ActionResult<JsonResponse>> SuspendLicense(Guid id, [FromBody] SuspendLicenseRequest request)
+    {
+        try
+        {
+            _logger.LogInformation("Suspending license {LicenseId} with reason: {Reason}", id, request.Reason);
+
+            var license = await _licenseService.GetLicenseByIdAsync(id);
+            if (license == null)
+            {
+                return NotFound(JsonResponse.Error($"License with ID {id} not found"));
+            }
+
+            var result = await _licenseService.SuspendLicenseAsync(id, User.Identity?.Name ?? "API User", request.Reason);
+            
+            if (result)
+            {
+                _logger.LogInformation("License {LicenseId} suspended successfully", id);
+                return Ok(JsonResponse.OK("License suspended successfully"));
+            }
+            else
+            {
+                _logger.LogWarning("Failed to suspend license {LicenseId}", id);
+                return BadRequest(JsonResponse.Error("Failed to suspend license"));
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error suspending license {LicenseId}", id);
+            return StatusCode(500, JsonResponse.Error("Failed to suspend license"));
+        }
+    }
+
+    /// <summary>
+    /// Reactivate a license
+    /// </summary>
+    /// <param name="id">License ID</param>
+    /// <param name="request">Reactivate request parameters</param>
+    /// <returns>Operation result</returns>
+    [HttpPost("{id:guid}/reactivate")]
+    [ProducesResponseType(typeof(JsonResponse), 200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    [ProducesResponseType(500)]
+    public async Task<ActionResult<JsonResponse>> ReactivateLicense(Guid id, [FromBody] ReactivateLicenseRequest request)
+    {
+        try
+        {
+            _logger.LogInformation("Reactivating license {LicenseId} with reason: {Reason}", id, request.Reason);
+
+            var license = await _licenseService.GetLicenseByIdAsync(id);
+            if (license == null)
+            {
+                return NotFound(JsonResponse.Error($"License with ID {id} not found"));
+            }
+
+            // Create ActivationInfo for reactivation
+            var activationInfo = new ActivationInfo
+            {
+                ActivatedBy = User.Identity?.Name ?? "API User",
+                ActivationDate = DateTime.UtcNow,
+                ActivationMetadata = new Dictionary<string, object>
+                {
+                    { "reason", request.Reason ?? "License reactivated via API" },
+                    { "apiEndpoint", "reactivate" }
+                }
+            };
+
+            var result = await _licenseService.ActivateLicenseAsync(id, activationInfo);
+            
+            if (result)
+            {
+                _logger.LogInformation("License {LicenseId} reactivated successfully", id);
+                return Ok(JsonResponse.OK("License reactivated successfully"));
+            }
+            else
+            {
+                _logger.LogWarning("Failed to reactivate license {LicenseId}", id);
+                return BadRequest(JsonResponse.Error("Failed to reactivate license"));
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error reactivating license {LicenseId}", id);
+            return StatusCode(500, JsonResponse.Error("Failed to reactivate license"));
+        }
+    }
+
+    /// <summary>
+    /// Renew a license
+    /// </summary>
+    /// <param name="id">License ID</param>
+    /// <param name="request">Renew request parameters</param>
+    /// <returns>Operation result</returns>
+    [HttpPost("{id:guid}/renew")]
+    [ProducesResponseType(typeof(JsonResponse), 200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    [ProducesResponseType(500)]
+    public async Task<ActionResult<JsonResponse>> RenewLicense(Guid id, [FromBody] RenewLicenseRequest request)
+    {
+        try
+        {
+            _logger.LogInformation("Renewing license {LicenseId} for {Duration} days", id, request.RenewalDurationDays);
+
+            var license = await _licenseService.GetLicenseByIdAsync(id);
+            if (license == null)
+            {
+                return NotFound(JsonResponse.Error($"License with ID {id} not found"));
+            }
+
+            // Calculate new expiry date
+            var currentExpiry = license.ValidTo;
+            var newExpiryDate = currentExpiry > DateTime.UtcNow 
+                ? currentExpiry.AddDays(request.RenewalDurationDays)
+                : DateTime.UtcNow.AddDays(request.RenewalDurationDays);
+
+            var result = await _licenseService.RenewLicenseAsync(id, newExpiryDate, User.Identity?.Name ?? "API User");
+            
+            if (result)
+            {
+                _logger.LogInformation("License {LicenseId} renewed successfully", id);
+                var response = new RenewLicenseResponse
+                {
+                    Message = "License renewed successfully",
+                    NewExpirationDate = newExpiryDate,
+                    RenewalDurationDays = request.RenewalDurationDays
+                };
+                return Ok(JsonResponse.OK(response));
+            }
+            else
+            {
+                _logger.LogWarning("Failed to renew license {LicenseId}", id);
+                return BadRequest(JsonResponse.Error("Failed to renew license"));
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error renewing license {LicenseId}", id);
+            return StatusCode(500, JsonResponse.Error("Failed to renew license"));
+        }
+    }
+
+    /// <summary>
+    /// Revoke a license
+    /// </summary>
+    /// <param name="id">License ID</param>
+    /// <param name="request">Revoke request parameters</param>
+    /// <returns>Operation result</returns>
+    [HttpPost("{id:guid}/revoke")]
+    [ProducesResponseType(typeof(JsonResponse), 200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    [ProducesResponseType(500)]
+    public async Task<ActionResult<JsonResponse>> RevokeLicense(Guid id, [FromBody] RevokeLicenseRequest request)
+    {
+        try
+        {
+            _logger.LogInformation("Revoking license {LicenseId} with reason: {Reason}", id, request.Reason);
+
+            var license = await _licenseService.GetLicenseByIdAsync(id);
+            if (license == null)
+            {
+                return NotFound(JsonResponse.Error($"License with ID {id} not found"));
+            }
+
+            var result = await _licenseService.RevokeLicenseAsync(id, User.Identity?.Name ?? "API User", request.Reason);
+            
+            if (result)
+            {
+                _logger.LogInformation("License {LicenseId} revoked successfully", id);
+                return Ok(JsonResponse.OK("License revoked successfully"));
+            }
+            else
+            {
+                _logger.LogWarning("Failed to revoke license {LicenseId}", id);
+                return BadRequest(JsonResponse.Error("Failed to revoke license"));
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error revoking license {LicenseId}", id);
+            return StatusCode(500, JsonResponse.Error("Failed to revoke license"));
+        }
+    }
+
+    /// <summary>
+    /// Regenerate license key
+    /// </summary>
+    /// <param name="id">License ID</param>
+    /// <param name="request">Regenerate request parameters</param>
+    /// <returns>Operation result with new license key</returns>
+    [HttpPost("{id:guid}/regenerate-key")]
+    [ProducesResponseType(typeof(JsonResponse), 200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    [ProducesResponseType(500)]
+    public async Task<ActionResult<JsonResponse>> RegenerateLicenseKey(Guid id, [FromBody] RegenerateLicenseKeyRequest request)
+    {
+        try
+        {
+            _logger.LogInformation("Regenerating license key for {LicenseId} with reason: {Reason}", id, request.Reason);
+
+            var license = await _licenseService.GetLicenseByIdAsync(id);
+            if (license == null)
+            {
+                return NotFound(JsonResponse.Error($"License with ID {id} not found"));
+            }
+
+            var result = await _licenseService.RegenerateLicenseKeyAsync(id, User.Identity?.Name ?? "API User", request.Reason);
+            
+            if (result != null)
+            {
+                _logger.LogInformation("License key regenerated successfully for {LicenseId}", id);
+                var response = new RegenerateLicenseKeyResponse
+                {
+                    Message = "License key regenerated successfully",
+                    NewLicenseKey = result.LicenseKey,
+                    RegenerationReason = request.Reason
+                };
+                return Ok(JsonResponse.OK(response));
+            }
+            else
+            {
+                _logger.LogWarning("Failed to regenerate license key for {LicenseId}", id);
+                return BadRequest(JsonResponse.Error("Failed to regenerate license key"));
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error regenerating license key for {LicenseId}", id);
+            return StatusCode(500, JsonResponse.Error("Failed to regenerate license key"));
+        }
+    }
  
     private LicenseResponse MapToLicenseResponse(ProductLicense license)
     {

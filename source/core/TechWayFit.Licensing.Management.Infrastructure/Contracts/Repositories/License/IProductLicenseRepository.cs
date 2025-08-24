@@ -19,9 +19,23 @@ public interface IProductLicenseRepository : IDataRepository<ProductLicense>
     /// <summary>
     /// Get license by its unique key
     /// </summary>
-    /// <param name="licenseCode"></param>
-    /// <returns></returns>
-    Task<ProductLicense?> GetByLicenseKeyAsync(string licenseCode);
+    /// <param name="licenseKey">License key to search for</param>
+    /// <returns>License if found, null otherwise</returns>
+    Task<ProductLicense?> GetByLicenseKeyAsync(string licenseKey);
+
+    /// <summary>
+    /// Get license by its user-friendly license code
+    /// </summary>
+    /// <param name="licenseCode">License code to search for</param>
+    /// <returns>License if found, null otherwise</returns>
+    Task<ProductLicense?> GetByLicenseCodeAsync(string licenseCode);
+
+    /// <summary>
+    /// Get license by either license key or license code
+    /// </summary>
+    /// <param name="keyOrCode">License key or code to search for</param>
+    /// <returns>License if found, null otherwise</returns>
+    Task<ProductLicense?> GetByKeyOrCodeAsync(string keyOrCode);
     /// <summary>
     /// Get licenses by consumer identifier
     /// </summary>

@@ -2,6 +2,7 @@ using TechWayFit.Licensing.Management.Infrastructure.Contracts.Data;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Core.Models.Enums;
 using TechWayFit.Licensing.Management.Core.Models.License;
+using TechWayFit.Licensing.Management.Core.Services;
 using TechWayFit.Licensing.Management.Services.Contracts;
 using TechWayFit.Licensing.Generator.Services;
 using TechWayFit.Licensing.Generator.Models;
@@ -172,7 +173,13 @@ public abstract class BaseLicenseGenerationStrategy : ILicenseGenerationStrategy
         // Additional validation: Check if referenced entities exist
         await ValidateReferencedEntitiesAsync(request);
 
-        return new ProductLicense
+        // Generate user-friendly license code
+        var licenseCode = LicenseCodeGenerator.GenerateLicenseCode(
+            request.ProductId, 
+            request.ConsumerId, 
+            DateTime.UtcNow);
+
+        var licenseEntity = new ProductLicense
         {
             ProductId = request.ProductId,
             ConsumerId = request.ConsumerId,
@@ -180,6 +187,7 @@ public abstract class BaseLicenseGenerationStrategy : ILicenseGenerationStrategy
             ValidProductVersionFrom = request.ValidProductVersionFrom,
             ValidProductVersionTo = request.ValidProductVersionTo,
             LicenseKey = signedLicense.LicenseData ?? string.Empty,
+            LicenseCode = licenseCode, // User-friendly license code
             ValidFrom = generationRequest.ValidFrom,
             ValidTo = generationRequest.ValidTo,
             Status = LicenseStatus.Active,
@@ -191,6 +199,11 @@ public abstract class BaseLicenseGenerationStrategy : ILicenseGenerationStrategy
             UpdatedBy = generatedBy,
             UpdatedOn = DateTime.UtcNow
         };
+
+        _logger.LogInformation("Generated license with code: {LicenseCode} for product: {ProductId}, consumer: {ConsumerId}",
+            licenseCode, request.ProductId, request.ConsumerId);
+
+        return licenseEntity;
     }
 
     /// <summary>

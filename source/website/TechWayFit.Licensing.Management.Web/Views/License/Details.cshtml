@@ -49,6 +49,15 @@
                                         href="@Url.Action("DownloadJson", "License", new { id = Model.License.LicenseId })">
                                         <i class="fas fa-code me-2"></i>JSON Format (.json)
                                     </a></li>
+                                <li><a class="dropdown-item"
+                                        href="@Url.Action("DownloadXml", "License", new { id = Model.License.LicenseId })">
+                                        <i class="fas fa-file-code me-2"></i>XML Format (.xml)
+                                    </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item"
+                                        href="@Url.Action("DownloadZip", "License", new { id = Model.License.LicenseId })">
+                                        <i class="fas fa-file-archive me-2"></i>Complete Package (.zip)
+                                    </a></li>
                             </ul>
                     </div>
                 }
@@ -301,12 +310,29 @@
                     </div>
                     <div class="section-content">
                         <div class="download-options">
+                            <a href="@Url.Action("Download", "License", new { id = Model.License.LicenseId })"
+                                class="download-option">
+                                <i class="fas fa-file-alt download-option-icon"></i>
+                                <div class="download-option-title">License File</div>
+                                <p class="download-option-description">Human-readable license file (.lic) with complete details</p>
+                            </a>
+                            <a href="@Url.Action("DownloadJson", "License", new { id = Model.License.LicenseId })"
+                                class="download-option">
+                                <i class="fas fa-code download-option-icon"></i>
+                                <div class="download-option-title">JSON Format</div>
+                                <p class="download-option-description">Machine-readable JSON (.json) for API integration</p>
+                            </a>
+                            <a href="@Url.Action("DownloadXml", "License", new { id = Model.License.LicenseId })"
+                                class="download-option">
+                                <i class="fas fa-file-code download-option-icon"></i>
+                                <div class="download-option-title">XML Format</div>
+                                <p class="download-option-description">Structured XML (.xml) for enterprise systems</p>
+                            </a>
                             <a href="@Url.Action("DownloadZip", "License", new { id = Model.License.LicenseId })"
                                 class="download-option">
                                 <i class="fas fa-file-archive download-option-icon"></i>
                                 <div class="download-option-title">Complete Package</div>
-                                <p class="download-option-description">ZIP bundle with license file, JSON data, and
-                                    documentation</p>
+                                <p class="download-option-description">ZIP bundle with all formats, documentation, and README</p>
                             </a>
                         </div>
                     </div>
@@ -581,35 +607,188 @@
 
         function renewLicense() {
             if (confirm('Are you sure you want to renew this license?')) {
-                // TODO: Implement renew functionality
-                alert('Renew functionality will be implemented in a future update.');
+                // Show custom modal for renewal details
+                showRenewalDialog();
             }
         }
 
         function suspendLicense() {
             if (confirm('Are you sure you want to suspend this license?')) {
-                // TODO: Implement suspend functionality
-                alert('Suspend functionality will be implemented in a future update.');
+                // Show custom modal for suspension reason
+                showSuspensionDialog();
             }
         }
 
         function reactivateLicense() {
             if (confirm('Are you sure you want to reactivate this license?')) {
-                // TODO: Implement reactivate functionality
-                alert('Reactivate functionality will be implemented in a future update.');
+                // Prompt for optional reason
+                const reason = prompt('Enter reason for reactivation (optional):');
+                performLicenseAction('reactivate', { reason: reason || 'License reactivated' });
             }
         }
 
         function revokeLicense() {
             if (confirm('Are you sure you want to revoke this license? This action cannot be undone.')) {
-                // TODO: Implement revoke functionality
-                alert('Revoke functionality will be implemented in a future update.');
+                // Show custom modal for revocation reason
+                showRevocationDialog();
             }
         }
 
+        function showRenewalDialog() {
+            const durationDays = prompt('Enter renewal duration in days (1-3650):', '365');
+            if (durationDays && !isNaN(durationDays) && durationDays > 0 && durationDays <= 3650) {
+                const reason = prompt('Enter reason for renewal (optional):');
+                performLicenseAction('renew', { 
+                    renewalDurationDays: parseInt(durationDays),
+                    reason: reason || 'License renewed via web interface'
+                });
+            } else if (durationDays !== null) {
+                alert('Please enter a valid number of days between 1 and 3650.');
+            }
+        }
+
+        function showSuspensionDialog() {
+            const reason = prompt('Enter reason for suspension (required):');
+            if (reason && reason.trim()) {
+                performLicenseAction('suspend', { reason: reason.trim() });
+            } else if (reason !== null) {
+                alert('Reason is required for license suspension.');
+            }
+        }
+
+        function showRevocationDialog() {
+            const reason = prompt('Enter reason for revocation (required):');
+            if (reason && reason.trim()) {
+                performLicenseAction('revoke', { reason: reason.trim() });
+            } else if (reason !== null) {
+                alert('Reason is required for license revocation.');
+            }
+        }
+
+        function performLicenseAction(action, data) {
+            const licenseId = '@Model.License.Id';
+            const apiUrl = `/api/license/${licenseId}/${action}`;
+            
+            // Show loading indicator
+            showLoadingState(action);
+            
+            fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                hideLoadingState();
+                
+                if (result.success) {
+                    // Show success message
+                    showNotification(result.data?.message || `License ${action} completed successfully`, 'success');
+                    
+                    // Handle specific responses
+                    if (action === 'renew' && result.data?.newExpirationDate) {
+                        updateExpirationDate(result.data.newExpirationDate);
+                    }
+                    if (action === 'regenerate-key' && result.data?.newLicenseKey) {
+                        updateLicenseKey(result.data.newLicenseKey);
+                    }
+                    
+                    // Refresh page after successful operation
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                } else {
+                    showNotification(result.message || `Failed to ${action} license`, 'error');
+                }
+            })
+            .catch(error => {
+                hideLoadingState();
+                console.error('License operation error:', error);
+                showNotification(`An error occurred while performing ${action} operation`, 'error');
+            });
+        }
+
+        function showLoadingState(action) {
+            // Disable all action buttons and show loading
+            $('.license-action-btn').prop('disabled', true);
+            $('.license-action-btn').each(function() {
+                $(this).data('original-text', $(this).text());
+                if ($(this).text().toLowerCase().includes(action)) {
+                    $(this).html('<i class="fas fa-spinner fa-spin"></i> Processing...');
+                }
+            });
+        }
+
+        function hideLoadingState() {
+            // Re-enable buttons and restore text
+            $('.license-action-btn').prop('disabled', false);
+            $('.license-action-btn').each(function() {
+                const originalText = $(this).data('original-text');
+                if (originalText) {
+                    $(this).text(originalText);
+                }
+            });
+        }
+
+        function showNotification(message, type) {
+            // Create notification element
+            const notification = $(`
+                <div class="alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `);
+            
+            // Add to top of content area
+            $('.card-body').first().prepend(notification);
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                notification.fadeOut();
+            }, 5000);
+        }
+
+        function updateExpirationDate(newDate) {
+            // Update expiration date display
+            const formattedDate = new Date(newDate).toLocaleDateString();
+            $('.expiration-date').text(formattedDate);
+        }
+
+        function updateLicenseKey(newKey) {
+            // Update license key display
+            $('.license-key').text(newKey);
+        }
+
         function downloadLicense() {
-            // TODO: Implement download functionality
-            alert('Download functionality will be implemented in a future update.');
+            const licenseId = '@Model.License.Id';
+            const downloadUrl = `/api/license/${licenseId}/download`;
+            
+            // Create a temporary anchor element to trigger download
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = `license_${licenseId}.lic`;
+            
+            // Add to DOM, click, and remove
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Show notification
+            showNotification('License file download started', 'success');
+        }
+
+        function regenerateLicenseKey() {
+            if (confirm('Are you sure you want to regenerate the license key? This will invalidate the current key and cannot be undone.')) {
+                const reason = prompt('Enter reason for regenerating the license key (required):');
+                if (reason && reason.trim()) {
+                    performLicenseAction('regenerate-key', { reason: reason.trim() });
+                } else if (reason !== null) {
+                    alert('Reason is required for license key regeneration.');
+                }
+            }
         }
 
         function validateLicense() {

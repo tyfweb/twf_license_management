@@ -97,3 +97,54 @@ public class UpdateLicenseStatusRequest
     
     public string? Reason { get; set; }
 }
+
+public class SuspendLicenseRequest
+{
+    [Required]
+    [StringLength(500, ErrorMessage = "Reason must not exceed 500 characters")]
+    public string Reason { get; set; } = string.Empty;
+}
+
+public class ReactivateLicenseRequest
+{
+    [StringLength(500, ErrorMessage = "Reason must not exceed 500 characters")]
+    public string? Reason { get; set; }
+}
+
+public class RenewLicenseRequest
+{
+    [Required]
+    [Range(1, 3650, ErrorMessage = "Renewal duration must be between 1 and 3650 days")]
+    public int RenewalDurationDays { get; set; }
+    
+    [StringLength(500, ErrorMessage = "Reason must not exceed 500 characters")]
+    public string? Reason { get; set; }
+}
+
+public class RenewLicenseResponse
+{
+    public string Message { get; set; } = string.Empty;
+    public DateTime NewExpirationDate { get; set; }
+    public int RenewalDurationDays { get; set; }
+}
+
+public class RevokeLicenseRequest
+{
+    [Required]
+    [StringLength(500, ErrorMessage = "Reason must not exceed 500 characters")]
+    public string Reason { get; set; } = string.Empty;
+}
+
+public class RegenerateLicenseKeyRequest
+{
+    [Required]
+    [StringLength(500, ErrorMessage = "Reason must not exceed 500 characters")]
+    public string Reason { get; set; } = string.Empty;
+}
+
+public class RegenerateLicenseKeyResponse
+{
+    public string Message { get; set; } = string.Empty;
+    public string NewLicenseKey { get; set; } = string.Empty;
+    public string RegenerationReason { get; set; } = string.Empty;
+}

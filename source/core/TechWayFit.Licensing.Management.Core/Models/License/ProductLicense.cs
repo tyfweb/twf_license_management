@@ -17,7 +17,8 @@ public class ProductLicense : BaseAuditModel
         set => Id = value; 
     }
     /// <summary>
-    /// License code used for validation and activation
+    /// License code used for validation and activation (user-friendly format)
+    /// Format: XXXX-YYYY-ZZZZ-AAAA-BBBB
     /// </summary>
     public string LicenseCode { get; set; } = string.Empty;
     
@@ -77,7 +78,7 @@ public class ProductLicense : BaseAuditModel
     /// </summary>
     public string Signature { get; set; } = "SHA256";
     /// <summary>
-    /// Base64 encoded license key
+    /// Base64 encoded license key (technical/cryptographic identifier for internal use)
     /// </summary>
     public string LicenseKey { get; set; } = string.Empty;
     /// <summary>
@@ -106,6 +107,22 @@ public class ProductLicense : BaseAuditModel
     /// Maximum number of users allowed for this license (for Volumetric licenses)
     /// </summary>
     public int? MaxAllowedUsers { get; set; }
+    
+    /// <summary>
+    /// Device activations for this license
+    /// </summary>
+    public virtual ICollection<ProductActivation> DeviceActivations { get; set; } = new List<ProductActivation>();
+    
+    /// <summary>
+    /// Number of currently active device activations
+    /// </summary>
+    public int ActiveActivationsCount => DeviceActivations?.Count(a => a.Status == ProductActivationStatus.Active) ?? 0;
+    
+    /// <summary>
+    /// Whether this license can accept more device activations
+    /// </summary>
+    public bool CanAcceptMoreActivations => MaxAllowedUsers == null || 
+                                          ActiveActivationsCount < MaxAllowedUsers.Value;
 
     /// <summary>
     /// User who issued the license

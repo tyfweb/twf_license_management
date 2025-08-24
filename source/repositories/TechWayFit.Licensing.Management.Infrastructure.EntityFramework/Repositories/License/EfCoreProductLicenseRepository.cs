@@ -32,15 +32,41 @@ public class EfCoreProductLicenseRepository : BaseRepository<ProductLicense, Pro
         return result.Select(license => license.Map());
     }
     /// <summary>
-    /// Get license by its unique key
+    /// Get license by its unique key (cryptographic key)
     /// </summary>
-    /// <param name="licenseCode"></param>
-    /// <returns></returns>
-    public async Task<ProductLicense?> GetByLicenseKeyAsync(string licenseCode)
+    /// <param name="licenseKey">License key to search for</param>
+    /// <returns>License if found, null otherwise</returns>
+    public async Task<ProductLicense?> GetByLicenseKeyAsync(string licenseKey)
+    {
+        var result = await _dbSet.Include(l => l.Product)
+                         .Include(l => l.Consumer)
+                         .FirstOrDefaultAsync(l => l.LicenseKey == licenseKey);
+        return result?.Map();
+    }
+
+    /// <summary>
+    /// Get license by its user-friendly license code
+    /// </summary>
+    /// <param name="licenseCode">License code to search for</param>
+    /// <returns>License if found, null otherwise</returns>
+    public async Task<ProductLicense?> GetByLicenseCodeAsync(string licenseCode)
     {
         var result = await _dbSet.Include(l => l.Product)
                          .Include(l => l.Consumer)
                          .FirstOrDefaultAsync(l => l.LicenseCode == licenseCode);
+        return result?.Map();
+    }
+
+    /// <summary>
+    /// Get license by either license key or license code
+    /// </summary>
+    /// <param name="keyOrCode">License key or code to search for</param>
+    /// <returns>License if found, null otherwise</returns>
+    public async Task<ProductLicense?> GetByKeyOrCodeAsync(string keyOrCode)
+    {
+        var result = await _dbSet.Include(l => l.Product)
+                         .Include(l => l.Consumer)
+                         .FirstOrDefaultAsync(l => l.LicenseKey == keyOrCode || l.LicenseCode == keyOrCode);
         return result?.Map();
     }
 
