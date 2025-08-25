@@ -1737,22 +1737,38 @@ pre code {
 }
 
 .dropdown-menu {
-  display: none;
+  position: absolute !important;
+  top: 100% !important;
+  left: 0 !important;
+  z-index: 9999 !important;
+  transform: translateY(0) !important;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease !important;
+  animation: none !important;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+  border: 1px solid rgba(0, 0, 0, 0.15) !important;
+  background-color: white !important;
 }
 .dropdown-menu.show {
   display: block !important;
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 .dropdown {
-  position: relative;
+  position: relative !important;
+  z-index: 1000 !important;
 }
 .dropdown.show .dropdown-menu {
   display: block !important;
-  opacity: 1;
-  visibility: visible;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.card-body,
+.sidebar-section {
+  overflow: visible !important;
 }
 
 .dropdown-menu {

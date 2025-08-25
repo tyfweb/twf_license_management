@@ -98,30 +98,51 @@
 
 // Ensure dropdown menu visibility
 .dropdown-menu {
-    // Base state - hidden by default
-    display: none;
+    // Enhanced positioning and z-index for better visibility
+    position: absolute !important;
+    top: 100% !important;
+    left: 0 !important;
+    z-index: 9999 !important;
+    transform: translateY(0) !important;
+    
+    // Base state - hidden by default with smooth transitions
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease !important;
+    animation: none !important;
+    
+    // Enhanced visual styling
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    border: 1px solid rgba(0, 0, 0, 0.15) !important;
+    background-color: white !important;
     
     // When dropdown is shown by Bootstrap
     &.show {
         display: block !important;
-        opacity: 1;
-        visibility: visible;
-        transform: translateY(0);
+        opacity: 1 !important;
+        visibility: visible !important;
     }
 }
 
 // Ensure dropdown parent container works
 .dropdown {
-    position: relative;
+    position: relative !important;
+    z-index: 1000 !important;
     
     // When dropdown is shown
     &.show {
         .dropdown-menu {
             display: block !important;
-            opacity: 1;
-            visibility: visible;
+            opacity: 1 !important;
+            visibility: visible !important;
         }
     }
+}
+
+// Ensure parent containers don't clip the dropdown
+.card-body,
+.sidebar-section {
+    overflow: visible !important;
 }
 
 // Theme-specific dropdown fixes

@@ -361,12 +361,13 @@
                                 </button>
                             }
 
-                            <div class="dropdown">
+                            <div class="dropdown position-relative">
                                 <button class="btn btn-outline-primary btn-sm dropdown-toggle w-100" type="button"
-                                    data-bs-toggle="dropdown">
+                                    id="statusDropdown" data-bs-toggle="dropdown" aria-expanded="false"
+                                    onclick="toggleStatusDropdown(event)">
                                     <i class="fas fa-exchange-alt me-2"></i>Change Status
                                 </button>
-                                <ul class="dropdown-menu w-100">
+                                <ul class="dropdown-menu w-100" aria-labelledby="statusDropdown" id="statusDropdownMenu">
                                     <li>
                                         <h6 class="dropdown-header">
                                             <i class="fas fa-traffic-light me-2"></i>Available Statuses
@@ -560,6 +561,41 @@
             }
         }
 
+        // Toggle dropdown manually if Bootstrap isn't working
+        function toggleStatusDropdown(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            const dropdown = document.getElementById('statusDropdownMenu');
+            const button = document.getElementById('statusDropdown');
+            
+            if (dropdown.classList.contains('show')) {
+                dropdown.classList.remove('show');
+                button.setAttribute('aria-expanded', 'false');
+            } else {
+                // Close any other open dropdowns first
+                document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
+                    if (menu !== dropdown) {
+                        menu.classList.remove('show');
+                    }
+                });
+                
+                dropdown.classList.add('show');
+                button.setAttribute('aria-expanded', 'true');
+            }
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('statusDropdownMenu');
+            const button = document.getElementById('statusDropdown');
+            
+            if (dropdown && !event.target.closest('.dropdown')) {
+                dropdown.classList.remove('show');
+                if (button) button.setAttribute('aria-expanded', 'false');
+            }
+        });
+
         function updateProductStatus(productId, status) {
             const reason = prompt(`Optional: Provide a reason for changing status to ${status}:`);
             if (reason !== null) { // User didn't cancel
@@ -650,6 +686,21 @@
 
         // Initialize tooltips if you want to add them later
         document.addEventListener('DOMContentLoaded', function () {
+            // Try to initialize Bootstrap dropdowns first
+            try {
+                if (typeof bootstrap !== 'undefined') {
+                    var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
+                    var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
+                        return new bootstrap.Dropdown(dropdownToggleEl);
+                    });
+                    console.log('Bootstrap dropdowns initialized successfully');
+                } else {
+                    console.log('Bootstrap not available, using manual dropdown');
+                }
+            } catch (error) {
+                console.log('Bootstrap dropdown initialization failed, using manual approach:', error);
+            }
+
             // Add subtle entrance animation
             const card = document.querySelector('.card');
             if (card) {
