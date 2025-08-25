@@ -28,6 +28,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         private readonly IProductActivationService _productActivationService;
         private readonly ILicenseFileService _licenseFileService;
         private readonly IProductTierService _productTierService;
+        private readonly ILicenseActivationService _licenseActivationService;
 
         public LicenseController(
             ILogger<LicenseController> logger,
@@ -36,7 +37,8 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
             IConsumerAccountService consumerService,
             IProductActivationService productActivationService,
             ILicenseFileService licenseFileService,
-            IProductTierService productTierService)
+            IProductTierService productTierService,
+            ILicenseActivationService licenseActivationService)
         {
             _logger = logger;
             _licenseService = licenseService;
@@ -45,6 +47,7 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
             _productActivationService = productActivationService;
             _licenseFileService = licenseFileService;
             _productTierService = productTierService;
+            _licenseActivationService = licenseActivationService;
         }
 
         /// <summary>
@@ -332,11 +335,15 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                 var product = license.LicenseConsumer.Product;
                 var consumer = license.LicenseConsumer.Consumer;
 
+                // Get activation data
+                var activations = await _licenseActivationService.GetActiveDevicesAsync(id);
+
                 var model = new LicenseDetailViewModel
                 {
                     License = license,
                     Consumer = consumer,
                     Product = product,
+                    Activations = activations ?? new List<LicenseDevice>(),
                     CanEdit = true,
                     CanRenew = license.Status == LicenseStatus.Active || license.Status == LicenseStatus.GracePeriod,
                     CanRevoke = license.Status == LicenseStatus.Active || license.Status == LicenseStatus.GracePeriod,

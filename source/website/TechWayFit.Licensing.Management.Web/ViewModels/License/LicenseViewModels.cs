@@ -6,6 +6,7 @@ using LicenseModels = TechWayFit.Licensing.Core.Models;
 using TechWayFit.Licensing.Management.Core.Models.Product;
 using TechWayFit.Licensing.Management.Core.Models.Enums;
 using TechWayFit.Licensing.Management.Web.Attributes;
+using TechWayFit.Licensing.Management.Core.Contracts.Services;
 
 namespace TechWayFit.Licensing.Management.Web.ViewModels.License
 {
@@ -165,6 +166,7 @@ namespace TechWayFit.Licensing.Management.Web.ViewModels.License
         public List<object> AuditHistory { get; set; } = new(); // TODO: Replace with proper LicenseAuditEntry when available
         public LicenseValidationResult ValidationResult { get; set; } = new();
         public List<LicenseVersionViewModel> VersionHistory { get; set; } = new();
+        public List<LicenseDevice> Activations { get; set; } = new();
         public bool CanEdit { get; set; }
         public bool CanRenew { get; set; }
         public bool CanRevoke { get; set; }

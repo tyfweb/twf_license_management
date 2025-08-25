@@ -206,8 +206,39 @@
         </div>
     </div>
     
-    <!-- Main Content -->
+    <!-- Tab Navigation -->
     <div class="row g-2">
+        <div class="col-12">
+            <ul class="nav nav-tabs" id="licenseDetailsTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" 
+                            data-bs-target="#overview" type="button" role="tab" 
+                            aria-controls="overview" aria-selected="true">
+                        <i class="fas fa-info-circle me-2"></i>Overview
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="activations-tab" data-bs-toggle="tab" 
+                            data-bs-target="#activations" type="button" role="tab" 
+                            aria-controls="activations" aria-selected="false">
+                        <i class="fas fa-devices me-2"></i>Activations
+                        @if (Model.Activations?.Any() == true)
+                        {
+                            <span class="badge bg-primary ms-1">@Model.Activations.Count</span>
+                        }
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="licenseDetailsTabContent">
+        <!-- Overview Tab -->
+        <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
+    
+    <!-- Main Content -->
+    <div class="row g-2 mt-2">
         <!-- License Information -->
         <div class="col-lg-8">
             <div class="edit-section mb-3 license-info">
@@ -589,6 +620,194 @@
                         }
         </div>
     </div>
+        </div> <!-- End Overview Tab -->
+        
+        <!-- Activations Tab -->
+        <div class="tab-pane fade" id="activations" role="tabpanel" aria-labelledby="activations-tab">
+            <div class="row g-2 mt-2">
+                <div class="col-12">
+                    <div class="edit-section mb-3">
+                        <div class="section-header d-flex justify-content-between align-items-center">
+                            <h5><i class="fas fa-devices me-2"></i>License Activations</h5>
+                            <div class="d-flex gap-2">
+                                @if (Model.Activations?.Any() == true)
+                                {
+                                    <button class="btn btn-sm btn-outline-success" onclick="downloadActivationsCSV()">
+                                        <i class="fas fa-download me-1"></i>Download CSV
+                                    </button>
+                                }
+                                <button class="btn btn-sm btn-outline-primary" onclick="refreshActivations()">
+                                    <i class="fas fa-sync-alt me-1"></i>Refresh
+                                </button>
+                            </div>
+                        </div>
+                        <div class="section-content">
+                            @if (Model.Activations?.Any() == true)
+                            {
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th><i class="fas fa-desktop me-1"></i>Device</th>
+                                                <th><i class="fas fa-laptop me-1"></i>Type</th>
+                                                <th><i class="fas fa-desktop me-1"></i>OS</th>
+                                                <th><i class="fas fa-calendar-plus me-1"></i>Activated</th>
+                                                <th><i class="fas fa-clock me-1"></i>Last Activity</th>
+                                                <th><i class="fas fa-globe me-1"></i>IP Address</th>
+                                                <th><i class="fas fa-circle me-1"></i>Status</th>
+                                                <th class="text-center">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var activation in Model.Activations)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        <div>
+                                                            <strong class="text-truncate" style="max-width: 150px; display: inline-block;" 
+                                                                    title="@activation.DeviceName">
+                                                                @activation.DeviceName
+                                                            </strong>
+                                                            <small class="d-block text-muted text-truncate" 
+                                                                   style="max-width: 150px;" title="@activation.DeviceId">
+                                                                ID: @activation.DeviceId
+                                                            </small>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-secondary">
+                                                            @(string.IsNullOrEmpty(activation.DeviceType) ? "Unknown" : activation.DeviceType)
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="text-muted">
+                                                            @(string.IsNullOrEmpty(activation.OperatingSystem) ? "Unknown" : activation.OperatingSystem)
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="text-muted" title="@activation.ActivatedAt.ToString("f")">
+                                                            @activation.ActivatedAt.ToString("MMM dd, yyyy")
+                                                        </span>
+                                                        <small class="d-block text-muted">
+                                                            @activation.ActivatedAt.ToString("HH:mm")
+                                                        </small>
+                                                    </td>
+                                                    <td>
+                                                        <span class="text-muted" title="@activation.LastActivity.ToString("f")">
+                                                            @activation.LastActivity.ToString("MMM dd, yyyy")
+                                                        </span>
+                                                        <small class="d-block text-muted">
+                                                            @activation.LastActivity.ToString("HH:mm")
+                                                        </small>
+                                                    </td>
+                                                    <td>
+                                                        @if (!string.IsNullOrEmpty(activation.IpAddress))
+                                                        {
+                                                            <span class="text-monospace small">@activation.IpAddress</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="text-muted">Unknown</span>
+                                                        }
+                                                    </td>
+                                                    <td>
+                                                        @if (activation.IsActive)
+                                                        {
+                                                            <span class="badge bg-success">
+                                                                <i class="fas fa-check-circle me-1"></i>Active
+                                                            </span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="badge bg-secondary">
+                                                                <i class="fas fa-times-circle me-1"></i>Inactive
+                                                            </span>
+                                                        }
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <button class="btn btn-outline-info" 
+                                                                    onclick="viewDeviceInfo('@activation.DeviceId')" 
+                                                                    title="View Device Details">
+                                                                <i class="fas fa-info-circle"></i>
+                                                            </button>
+                                                            @if (activation.IsActive)
+                                                            {
+                                                                <button class="btn btn-outline-warning" 
+                                                                        onclick="deactivateDevice('@activation.DeviceId', '@activation.DeviceName')" 
+                                                                        title="Deactivate Device">
+                                                                    <i class="fas fa-power-off"></i>
+                                                                </button>
+                                                            }
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <!-- Activation Summary -->
+                                <div class="row mt-3">
+                                    <div class="col-md-4">
+                                        <div class="card bg-light">
+                                            <div class="card-body text-center">
+                                                <h5 class="card-title mb-1">@Model.Activations.Count</h5>
+                                                <p class="card-text text-muted mb-0">Total Activations</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card bg-light">
+                                            <div class="card-body text-center">
+                                                <h5 class="card-title mb-1">@Model.Activations.Count(a => a.IsActive)</h5>
+                                                <p class="card-text text-muted mb-0">Active Devices</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card bg-light">
+                                            <div class="card-body text-center">
+                                                @{
+                                                    var lastActivity = Model.Activations.Any() ? Model.Activations.Max(a => a.LastActivity) : DateTime.MinValue;
+                                                }
+                                                <h5 class="card-title mb-1">
+                                                    @if (lastActivity != DateTime.MinValue)
+                                                    {
+                                                        @lastActivity.ToString("MMM dd")
+                                                    }
+                                                    else
+                                                    {
+                                                        <span>Never</span>
+                                                    }
+                                                </h5>
+                                                <p class="card-text text-muted mb-0">Last Activity</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-center py-5">
+                                    <i class="fas fa-devices fa-3x text-muted mb-3"></i>
+                                    <h5 class="text-muted">No Activations Found</h5>
+                                    <p class="text-muted">This license has not been activated on any devices yet.</p>
+                                    @if (Model.License.Status == LicenseStatus.Active)
+                                    {
+                                        <p class="text-muted small">
+                                            Users can activate this license using the license key: 
+                                            <code class="bg-light px-2 py-1 rounded">@Model.License.LicenseCode</code>
+                                        </p>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> <!-- End Activations Tab -->
+    </div> <!-- End Tab Content -->
 </div>
 
 @functions {
@@ -820,24 +1039,8 @@
             var selectedFormat = formatSelect.value;
             var licenseId = '@Model.License.LicenseId';
             
-            var downloadUrl;
-            switch(selectedFormat) {
-                case 'lic':
-                    downloadUrl = '@Url.Action("Download", "License")' + '?id=' + licenseId;
-                    break;
-                case 'json':
-                    downloadUrl = '@Url.Action("DownloadJson", "License")' + '?id=' + licenseId;
-                    break;
-                case 'xml':
-                    downloadUrl = '@Url.Action("DownloadXml", "License")' + '?id=' + licenseId;
-                    break;
-                case 'zip':
-                    downloadUrl = '@Url.Action("DownloadZip", "License")' + '?id=' + licenseId;
-                    break;
-                default:
-                    alert('Please select a download format.');
-                    return;
-            }
+            // Use the unified Download action with format parameter
+            var downloadUrl = '@Url.Action("Download", "License")' + '?id=' + licenseId + '&format=' + selectedFormat;
             
             // Create a temporary anchor element to trigger download
             var link = document.createElement('a');
@@ -846,6 +1049,206 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+        }
+
+        // Activation management functions
+        function refreshActivations() {
+            // Refresh the current page to reload activation data
+            location.reload();
+        }
+
+        function downloadActivationsCSV() {
+            @if (Model.Activations?.Any() == true)
+            {
+                <text>
+            // Prepare CSV data with proper headers
+            var activations = @Html.Raw(Json.Serialize(Model.Activations));
+            var csvContent = "Device Name,Device ID,Device Type,Operating System,Activated Date,Last Activity Date,IP Address,Status\n";
+            
+            activations.forEach(function(activation) {
+                // Format dates properly for CSV
+                var activatedDate = new Date(activation.activatedAt).toLocaleDateString() + " " + new Date(activation.activatedAt).toLocaleTimeString();
+                var lastActivity = new Date(activation.lastActivity).toLocaleDateString() + " " + new Date(activation.lastActivity).toLocaleTimeString();
+                var status = activation.isActive ? 'Active' : 'Inactive';
+                
+                // Clean and escape CSV values
+                var deviceName = (activation.deviceName || 'Unknown').replace(/"/g, '""');
+                var deviceId = (activation.deviceId || '').replace(/"/g, '""');
+                var deviceType = (activation.deviceType || 'Unknown').replace(/"/g, '""');
+                var operatingSystem = (activation.operatingSystem || 'Unknown').replace(/"/g, '""');
+                var ipAddress = (activation.ipAddress || 'Unknown').replace(/"/g, '""');
+                
+                // Build CSV row - only quote fields that contain commas, quotes, or newlines
+                var row = [
+                    deviceName.includes(',') || deviceName.includes('"') || deviceName.includes('\n') ? '"' + deviceName + '"' : deviceName,
+                    deviceId.includes(',') || deviceId.includes('"') || deviceId.includes('\n') ? '"' + deviceId + '"' : deviceId,
+                    deviceType.includes(',') || deviceType.includes('"') || deviceType.includes('\n') ? '"' + deviceType + '"' : deviceType,
+                    operatingSystem.includes(',') || operatingSystem.includes('"') || operatingSystem.includes('\n') ? '"' + operatingSystem + '"' : operatingSystem,
+                    activatedDate.includes(',') ? '"' + activatedDate + '"' : activatedDate,
+                    lastActivity.includes(',') ? '"' + lastActivity + '"' : lastActivity,
+                    ipAddress.includes(',') || ipAddress.includes('"') || ipAddress.includes('\n') ? '"' + ipAddress + '"' : ipAddress,
+                    status
+                ];
+                
+                csvContent += row.join(',') + '\n';
+            });
+            
+            // Create and download CSV file with proper filename
+            var licenseCode = '@Model.License.LicenseCode';
+            var currentDate = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+            var filename = 'license_activations_' + licenseCode + '_' + currentDate + '.csv';
+            
+            var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            var link = document.createElement("a");
+            var url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            showNotification('Activations CSV file downloaded successfully', 'success');
+                </text>
+            }
+            else
+            {
+                <text>
+            showNotification('No activation data available to download', 'warning');
+                </text>
+            }
+        }
+
+        function viewDeviceInfo(deviceId) {
+            // Find the activation data for this device from the rendered model
+            @if (Model.Activations?.Any() == true)
+            {
+                <text>
+            var activations = @Html.Raw(Json.Serialize(Model.Activations));
+            var device = activations.find(a => a.deviceId === deviceId);
+            
+            if (device) {
+                var deviceInfo = device.deviceInfo || {};
+                var infoHtml = `
+                    <div class="device-info">
+                        <h6><i class="fas fa-desktop me-2"></i>${device.deviceName}</h6>
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <strong>Device ID:</strong><br>
+                                <code class="small">${device.deviceId}</code>
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Device Type:</strong><br>
+                                ${device.deviceType || 'Unknown'}
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Operating System:</strong><br>
+                                ${device.operatingSystem || 'Unknown'}
+                            </div>
+                            <div class="col-md-6">
+                                <strong>IP Address:</strong><br>
+                                ${device.ipAddress || 'Unknown'}
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Activated:</strong><br>
+                                ${new Date(device.activatedAt).toLocaleString()}
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Last Activity:</strong><br>
+                                ${new Date(device.lastActivity).toLocaleString()}
+                            </div>
+                            <div class="col-12">
+                                <strong>Status:</strong><br>
+                                <span class="badge bg-${device.isActive ? 'success' : 'secondary'}">
+                                    ${device.isActive ? 'Active' : 'Inactive'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Show device info in a modal or alert
+                showDeviceInfoModal(infoHtml);
+            }
+                </text>
+            }
+            else
+            {
+                <text>
+            alert('No activation data available.');
+                </text>
+            }
+        }
+
+        function showDeviceInfoModal(content) {
+            // Create a simple modal for device info
+            var modal = document.createElement('div');
+            modal.innerHTML = `
+                <div class="modal fade" id="deviceInfoModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Device Information</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                ${content}
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            var bootstrapModal = new bootstrap.Modal(document.getElementById('deviceInfoModal'));
+            bootstrapModal.show();
+            
+            // Clean up modal after hiding
+            document.getElementById('deviceInfoModal').addEventListener('hidden.bs.modal', function() {
+                document.body.removeChild(modal);
+            });
+        }
+
+        function deactivateDevice(deviceId, deviceName) {
+            if (confirm(`Are you sure you want to deactivate device "${deviceName}"? This will prevent the device from using this license.`)) {
+                var reason = prompt('Enter reason for deactivation (optional):');
+                
+                var licenseId = '@Model.License.LicenseId';
+                var deactivateUrl = `/api/activation/deactivate`;
+                
+                fetch(deactivateUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    body: JSON.stringify({
+                        licenseId: licenseId,
+                        deviceId: deviceId,
+                        reason: reason || 'Device deactivated via web interface'
+                    })
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        showNotification(`Device "${deviceName}" has been deactivated successfully`, 'success');
+                        // Refresh the activations tab
+                        setTimeout(() => {
+                            location.reload();
+                        }, 2000);
+                    } else {
+                        showNotification(result.message || 'Failed to deactivate device', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Deactivation error:', error);
+                    showNotification('An error occurred while deactivating the device', 'error');
+                });
+            }
         }
 
         // Ensure Bootstrap dropdown is properly initialized
