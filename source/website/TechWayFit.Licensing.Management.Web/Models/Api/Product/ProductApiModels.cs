@@ -243,3 +243,59 @@ public class CreateProductVersionRequest
     
     public bool IsActive { get; set; } = true;
 }
+
+/// <summary>
+/// Request model for deactivating a product
+/// </summary>
+[SwaggerSchema("Request model for deactivating a product")]
+public class DeactivateProductRequest
+{
+    /// <summary>
+    /// Optional reason for deactivation
+    /// </summary>
+    [StringLength(500, ErrorMessage = "Reason cannot exceed 500 characters")]
+    [SwaggerSchema("The reason for deactivating the product")]
+    public string? Reason { get; set; }
+}
+
+/// <summary>
+/// Request model for updating product status
+/// </summary>
+[SwaggerSchema("Request model for updating product status")]
+public class UpdateProductStatusRequest
+{
+    /// <summary>
+    /// New product status
+    /// </summary>
+    [Required(ErrorMessage = "Status is required")]
+    [SwaggerSchema("The new status for the product")]
+    public ProductStatus Status { get; set; }
+    
+    /// <summary>
+    /// Optional reason for status change
+    /// </summary>
+    [StringLength(500, ErrorMessage = "Reason cannot exceed 500 characters")]
+    [SwaggerSchema("The reason for changing the product status")]
+    public string? Reason { get; set; }
+}
+
+/// <summary>
+/// Request model for decommissioning a product
+/// </summary>
+[SwaggerSchema("Request model for decommissioning a product")]
+public class DecommissionProductRequest
+{
+    /// <summary>
+    /// Date when the product should be decommissioned
+    /// </summary>
+    [Required(ErrorMessage = "Decommission date is required")]
+    [SwaggerSchema("The date when the product will be decommissioned")]
+    public DateTime DecommissionDate { get; set; }
+    
+    /// <summary>
+    /// Optional reason for decommissioning
+    /// </summary>
+    [StringLength(500, ErrorMessage = "Reason cannot exceed 500 characters")]
+    [SwaggerSchema("The reason for decommissioning the product")]
+    public string? Reason { get; set; }
+}

@@ -6,6 +6,7 @@ using TechWayFit.Licensing.Management.Infrastructure.Models.Search;
 using TechWayFit.Licensing.Management.Core.Contracts.Services;
 using TechWayFit.Licensing.Management.Core.Models.Common;
 using TechWayFit.Licensing.Management.Core.Models.Product;
+using TechWayFit.Licensing.Management.Core.Models.Audit;
 using TechWayFit.Licensing.Management.Core.Helpers;
 using System.Text.Json;
 
@@ -18,15 +19,18 @@ public class EnterpriseProductService : IEnterpriseProductService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IKeyManagementService _keyManagementService;
+    private readonly IAuditService _auditService;
     private readonly ILogger<EnterpriseProductService> _logger;
 
     public EnterpriseProductService(
         IUnitOfWork unitOfWork,
         IKeyManagementService keyManagementService,
+        IAuditService auditService,
         ILogger<EnterpriseProductService> logger)
     {
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _keyManagementService = keyManagementService ?? throw new ArgumentNullException(nameof(keyManagementService));
+        _auditService = auditService ?? throw new ArgumentNullException(nameof(auditService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -302,26 +306,186 @@ public class EnterpriseProductService : IEnterpriseProductService
 
     public async Task<bool> ActivateProductAsync(Guid productId, string activatedBy)
     {
-        // TODO: Implement
-        _logger.LogWarning("ActivateProductAsync not implemented");
-        await Task.CompletedTask;
-        return false;
+        Ensure.NotDefault(productId, nameof(productId));
+        Ensure.NotEmpty(activatedBy, nameof(activatedBy));
+
+        _logger.LogInformation("Activating product {ProductId} by {ActivatedBy}", productId, activatedBy);
+
+        try
+        {
+            var product = await _unitOfWork.Products.GetByIdAsync(productId);
+            if (product == null)
+            {
+                _logger.LogWarning("Product {ProductId} not found for activation", productId);
+                return false;
+            }
+
+            if (product.Status == ProductStatus.Active)
+            {
+                _logger.LogInformation("Product {ProductId} is already active", productId);
+                return true;
+            }
+
+            // Update product status
+            var previousStatus = product.Status;
+            product.Status = ProductStatus.Active;
+            product.Audit.UpdatedBy = activatedBy;
+            product.Audit.UpdatedOn = DateTime.UtcNow;
+
+            await _unitOfWork.Products.UpdateAsync(productId, product);
+
+            // Create audit entry
+            var auditEntry = new AuditEntry
+            {
+                EntryId = Guid.NewGuid(),
+                EntityType = nameof(EnterpriseProduct),
+                EntityId = productId.ToString(),
+                ActionType = "Activate",
+                UserName = activatedBy,
+                Timestamp = DateTime.UtcNow,
+                Reason = "Product activation",
+                Metadata = new Dictionary<string, string>
+                {
+                    ["ProductId"] = product.ProductId.ToString(),
+                    ["ProductName"] = product.Name,
+                    ["PreviousStatus"] = previousStatus.ToString(),
+                    ["NewStatus"] = ProductStatus.Active.ToString()
+                }
+            };
+
+            await _auditService.LogAuditEntryAsync(auditEntry);
+            await _unitOfWork.SaveChangesAsync();
+
+            _logger.LogInformation("Product {ProductId} activated successfully", productId);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error activating product {ProductId}", productId);
+            return false;
+        }
     }
 
     public async Task<bool> DeactivateProductAsync(Guid productId, string deactivatedBy, string? reason = null)
     {
-        // TODO: Implement
-        _logger.LogWarning("DeactivateProductAsync not implemented");
-        await Task.CompletedTask;
-        return false;
+        Ensure.NotDefault(productId, nameof(productId));
+        Ensure.NotEmpty(deactivatedBy, nameof(deactivatedBy));
+
+        _logger.LogInformation("Deactivating product {ProductId} by {DeactivatedBy}", productId, deactivatedBy);
+
+        try
+        {
+            var product = await _unitOfWork.Products.GetByIdAsync(productId);
+            if (product == null)
+            {
+                _logger.LogWarning("Product {ProductId} not found for deactivation", productId);
+                return false;
+            }
+
+            if (product.Status == ProductStatus.Inactive)
+            {
+                _logger.LogInformation("Product {ProductId} is already inactive", productId);
+                return true;
+            }
+
+            // Update product status
+            var previousStatus = product.Status;
+            product.Status = ProductStatus.Inactive;
+            product.Audit.UpdatedBy = deactivatedBy;
+            product.Audit.UpdatedOn = DateTime.UtcNow;
+
+            await _unitOfWork.Products.UpdateAsync(productId, product);
+
+            // Create audit entry
+            var auditEntry = new AuditEntry
+            {
+                EntryId = Guid.NewGuid(),
+                EntityType = nameof(EnterpriseProduct),
+                EntityId = productId.ToString(),
+                ActionType = "Deactivate",
+                UserName = deactivatedBy,
+                Timestamp = DateTime.UtcNow,
+                Reason = reason ?? "Product deactivation",
+                Metadata = new Dictionary<string, string>
+                {
+                    ["ProductId"] = product.ProductId.ToString(),
+                    ["ProductName"] = product.Name,
+                    ["PreviousStatus"] = previousStatus.ToString(),
+                    ["NewStatus"] = ProductStatus.Inactive.ToString(),
+                    ["Reason"] = reason ?? "No reason provided"
+                }
+            };
+
+            await _auditService.LogAuditEntryAsync(auditEntry);
+            await _unitOfWork.SaveChangesAsync();
+
+            _logger.LogInformation("Product {ProductId} deactivated successfully", productId);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deactivating product {ProductId}", productId);
+            return false;
+        }
     }
 
     public async Task<bool> DeleteProductAsync(Guid productId, string deletedBy)
     {
-        // TODO: Implement
-        _logger.LogWarning("DeleteProductAsync not implemented");
-        await Task.CompletedTask;
-        return false;
+        Ensure.NotDefault(productId, nameof(productId));
+        Ensure.NotEmpty(deletedBy, nameof(deletedBy));
+
+        _logger.LogInformation("Deleting product {ProductId} by {DeletedBy}", productId, deletedBy);
+
+        try
+        {
+            var product = await _unitOfWork.Products.GetByIdAsync(productId);
+            if (product == null)
+            {
+                _logger.LogWarning("Product {ProductId} not found for deletion", productId);
+                return false;
+            }
+
+            // Check if product has active licenses before deletion
+            // TODO: Add license dependency check when implementing license-product relationship
+            
+            // Mark as deleted (soft delete)
+            product.Audit.IsDeleted = true;
+            product.Audit.DeletedBy = deletedBy;
+            product.Audit.DeletedOn = DateTime.UtcNow;
+            product.Audit.IsActive = false;
+
+            await _unitOfWork.Products.UpdateAsync(productId, product);
+
+            // Create audit entry
+            var auditEntry = new AuditEntry
+            {
+                EntryId = Guid.NewGuid(),
+                EntityType = nameof(EnterpriseProduct),
+                EntityId = productId.ToString(),
+                ActionType = "Delete",
+                UserName = deletedBy,
+                Timestamp = DateTime.UtcNow,
+                Reason = "Product deletion (soft delete)",
+                Metadata = new Dictionary<string, string>
+                {
+                    ["ProductId"] = product.ProductId.ToString(),
+                    ["ProductName"] = product.Name,
+                    ["ProductStatus"] = product.Status.ToString(),
+                    ["DeletionType"] = "SoftDelete"
+                }
+            };
+
+            await _auditService.LogAuditEntryAsync(auditEntry);
+            await _unitOfWork.SaveChangesAsync();
+
+            _logger.LogInformation("Product {ProductId} deleted successfully (soft delete)", productId);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting product {ProductId}", productId);
+            return false;
+        }
     }
 
 
@@ -344,74 +508,348 @@ public class EnterpriseProductService : IEnterpriseProductService
 
     public async Task<IEnumerable<EnterpriseProduct>> GetActiveProductsAsync()
     {
-        // TODO: Implement
-        _logger.LogWarning("GetActiveProductsAsync not implemented");
-        await Task.CompletedTask;
-        return Enumerable.Empty<EnterpriseProduct>();
+        try
+        {
+            _logger.LogInformation("Retrieving all active products");
+            
+            var activeProducts = await _unitOfWork.Products.GetActiveProductsAsync();
+            
+            _logger.LogInformation("Retrieved {Count} active products", activeProducts.Count());
+            return activeProducts;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving active products");
+            throw;
+        }
     }
 
     public async Task<int> GetProductCountAsync(ProductStatus? status = null, string? searchTerm = null)
     {
-        // TODO: Implement
-        _logger.LogWarning("GetProductCountAsync not implemented");
-        await Task.CompletedTask;
-        return 0;
+        try
+        {
+            _logger.LogInformation("Retrieving product count with status: {Status}, searchTerm: {SearchTerm}", 
+                status, searchTerm);
+
+            var searchRequest = new SearchRequest<EnterpriseProduct>
+            {
+                Page = 1,
+                PageSize = int.MaxValue, // Get all for counting
+                Filters = new Dictionary<string, object>()
+            };
+
+            // Add status filter if provided
+            if (status.HasValue)
+            {
+                searchRequest.Filters.Add("Status", status.Value.ToString());
+            }
+
+            // Add search term filter if provided
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                searchRequest.Query = searchTerm;
+            }
+
+            // Add filter to exclude deleted products
+            searchRequest.Filters.Add("Audit.IsDeleted", false);
+
+            var searchResult = await _unitOfWork.Products.SearchAsync(searchRequest);
+            var count = searchResult.TotalCount;
+
+            _logger.LogInformation("Found {Count} products matching criteria", count);
+            return count;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving product count");
+            throw;
+        }
     }
 
     public async Task<IEnumerable<string>> GetProductCodesAsync()
     {
-        // TODO: Implement
-        _logger.LogWarning("GetProductCodesAsync not implemented");
-        await Task.CompletedTask;
-        return Enumerable.Empty<string>();
+        try
+        {
+            _logger.LogInformation("Retrieving all product codes");
+
+            var allProducts = await _unitOfWork.Products.GetAllAsync(CancellationToken.None);
+            var productCodes = allProducts
+                .Where(p => !p.Audit.IsDeleted) // Exclude deleted products
+                .Select(p => p.ProductId.ToString()) // Using ProductId as code since there's no separate ProductCode property
+                .Distinct()
+                .OrderBy(code => code)
+                .ToList();
+
+            _logger.LogInformation("Retrieved {Count} product codes", productCodes.Count);
+            return productCodes;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving product codes");
+            throw;
+        }
     }
 
     public async Task<bool> IsProductCodeUniqueAsync(string productCode, Guid? excludeProductId = null)
     {
-        // TODO: Implement
-        _logger.LogWarning("IsProductCodeUniqueAsync not implemented");
-        await Task.CompletedTask;
-        return true;
+        try
+        {
+            Ensure.NotEmpty(productCode, nameof(productCode));
+
+            _logger.LogInformation("Checking uniqueness of product code: {ProductCode}", productCode);
+
+            // Note: Since EnterpriseProduct doesn't have a ProductCode property,
+            // we'll treat the product name as the code for uniqueness checking
+            // In a real implementation, you might want to add a ProductCode property to the model
+            
+            var searchRequest = new SearchRequest<EnterpriseProduct>
+            {
+                Query = productCode,
+                Filters = new Dictionary<string, object>
+                {
+                    ["Audit.IsDeleted"] = false
+                }
+            };
+
+            var searchResult = await _unitOfWork.Products.SearchAsync(searchRequest);
+            var matchingProducts = searchResult.Results.Where(p => 
+                string.Equals(p.Name, productCode, StringComparison.OrdinalIgnoreCase));
+
+            if (excludeProductId.HasValue)
+            {
+                matchingProducts = matchingProducts.Where(p => p.ProductId != excludeProductId.Value);
+            }
+
+            var isUnique = !matchingProducts.Any();
+
+            _logger.LogInformation("Product code {ProductCode} uniqueness check result: {IsUnique}", 
+                productCode, isUnique);
+
+            return isUnique;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error checking product code uniqueness for: {ProductCode}", productCode);
+            throw;
+        }
     }
 
     public async Task<bool> IsProductNameUniqueAsync(string productName, Guid? excludeProductId = null)
     {
-        // TODO: Implement
-        _logger.LogWarning("IsProductNameUniqueAsync not implemented");
-        await Task.CompletedTask;
-        return true;
+        try
+        {
+            Ensure.NotEmpty(productName, nameof(productName));
+
+            _logger.LogInformation("Checking uniqueness of product name: {ProductName}", productName);
+
+            // Use the repository's IsNameUniqueAsync method if available
+            var isUnique = await _unitOfWork.Products.IsNameUniqueAsync(productName, excludeProductId);
+
+            _logger.LogInformation("Product name {ProductName} uniqueness check result: {IsUnique}", 
+                productName, isUnique);
+
+            return isUnique;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error checking product name uniqueness for: {ProductName}", productName);
+            throw;
+        }
     }
 
     public async Task<bool> UpdateProductStatusAsync(Guid productId, ProductStatus status, string updatedBy)
     {
-        // TODO: Implement
-        _logger.LogWarning("UpdateProductStatusAsync not implemented");
-        await Task.CompletedTask;
-        return false;
+        Ensure.NotDefault(productId, nameof(productId));
+        Ensure.NotEmpty(updatedBy, nameof(updatedBy));
+
+        _logger.LogInformation("Updating product {ProductId} status to {Status} by {UpdatedBy}", 
+            productId, status, updatedBy);
+
+        try
+        {
+            var product = await _unitOfWork.Products.GetByIdAsync(productId);
+            if (product == null)
+            {
+                _logger.LogWarning("Product {ProductId} not found for status update", productId);
+                return false;
+            }
+
+            if (product.Status == status)
+            {
+                _logger.LogInformation("Product {ProductId} already has status {Status}", productId, status);
+                return true;
+            }
+
+            // Update product status
+            var previousStatus = product.Status;
+            product.Status = status;
+            product.Audit.UpdatedBy = updatedBy;
+            product.Audit.UpdatedOn = DateTime.UtcNow;
+
+            await _unitOfWork.Products.UpdateAsync(productId, product);
+
+            // Create audit entry
+            var auditEntry = new AuditEntry
+            {
+                EntryId = Guid.NewGuid(),
+                EntityType = nameof(EnterpriseProduct),
+                EntityId = productId.ToString(),
+                ActionType = "StatusUpdate",
+                UserName = updatedBy,
+                Timestamp = DateTime.UtcNow,
+                Reason = $"Product status updated to {status}",
+                Metadata = new Dictionary<string, string>
+                {
+                    ["ProductId"] = product.ProductId.ToString(),
+                    ["ProductName"] = product.Name,
+                    ["PreviousStatus"] = previousStatus.ToString(),
+                    ["NewStatus"] = status.ToString()
+                }
+            };
+
+            await _auditService.LogAuditEntryAsync(auditEntry);
+            await _unitOfWork.SaveChangesAsync();
+
+            _logger.LogInformation("Product {ProductId} status updated successfully from {PreviousStatus} to {NewStatus}", 
+                productId, previousStatus, status);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating product {ProductId} status to {Status}", productId, status);
+            return false;
+        }
     }
 
     public async Task<bool> DecommissionProductAsync(Guid productId, DateTime decommissionDate, string decommissionedBy)
     {
-        // TODO: Implement
-        _logger.LogWarning("DecommissionProductAsync not implemented");
-        await Task.CompletedTask;
-        return false;
+        Ensure.NotDefault(productId, nameof(productId));
+        Ensure.NotDefault(decommissionDate, nameof(decommissionDate));
+        Ensure.NotEmpty(decommissionedBy, nameof(decommissionedBy));
+
+        _logger.LogInformation("Decommissioning product {ProductId} on {DecommissionDate} by {DecommissionedBy}", 
+            productId, decommissionDate, decommissionedBy);
+
+        try
+        {
+            var product = await _unitOfWork.Products.GetByIdAsync(productId);
+            if (product == null)
+            {
+                _logger.LogWarning("Product {ProductId} not found for decommissioning", productId);
+                return false;
+            }
+
+            if (product.Status == ProductStatus.Decommissioned)
+            {
+                _logger.LogInformation("Product {ProductId} is already decommissioned", productId);
+                return true;
+            }
+
+            // Validate decommission date
+            if (decommissionDate < DateTime.UtcNow.Date)
+            {
+                throw new ArgumentException("Decommission date cannot be in the past", nameof(decommissionDate));
+            }
+
+            // Update product status and decommission date
+            var previousStatus = product.Status;
+            product.Status = ProductStatus.Decommissioned;
+            product.DecommissionDate = decommissionDate;
+            product.Audit.UpdatedBy = decommissionedBy;
+            product.Audit.UpdatedOn = DateTime.UtcNow;
+
+            await _unitOfWork.Products.UpdateAsync(productId, product);
+
+            // Create audit entry
+            var auditEntry = new AuditEntry
+            {
+                EntryId = Guid.NewGuid(),
+                EntityType = nameof(EnterpriseProduct),
+                EntityId = productId.ToString(),
+                ActionType = "Decommission",
+                UserName = decommissionedBy,
+                Timestamp = DateTime.UtcNow,
+                Reason = "Product decommissioning",
+                Metadata = new Dictionary<string, string>
+                {
+                    ["ProductId"] = product.ProductId.ToString(),
+                    ["ProductName"] = product.Name,
+                    ["PreviousStatus"] = previousStatus.ToString(),
+                    ["NewStatus"] = ProductStatus.Decommissioned.ToString(),
+                    ["DecommissionDate"] = decommissionDate.ToString("yyyy-MM-dd"),
+                    ["DaysUntilDecommission"] = Math.Max(0, (decommissionDate - DateTime.UtcNow.Date).Days).ToString()
+                }
+            };
+
+            await _auditService.LogAuditEntryAsync(auditEntry);
+            await _unitOfWork.SaveChangesAsync();
+
+            _logger.LogInformation("Product {ProductId} decommissioned successfully with date {DecommissionDate}", 
+                productId, decommissionDate);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error decommissioning product {ProductId}", productId);
+            return false;
+        }
     }
 
     public async Task<IEnumerable<EnterpriseProduct>> GetDeprecatedProductsAsync()
     {
-        // TODO: Implement
-        _logger.LogWarning("GetDeprecatedProductsAsync not implemented");
-        await Task.CompletedTask;
-        return Enumerable.Empty<EnterpriseProduct>();
+        try
+        {
+            _logger.LogInformation("Retrieving all deprecated products");
+
+            var searchRequest = new SearchRequest<EnterpriseProduct>
+            {
+                Filters = new Dictionary<string, object>
+                {
+                    ["Status"] = ProductStatus.Deprecated.ToString(),
+                    ["Audit.IsDeleted"] = false
+                }
+            };
+
+            var searchResult = await _unitOfWork.Products.SearchAsync(searchRequest);
+            var deprecatedProducts = searchResult.Results;
+
+            _logger.LogInformation("Retrieved {Count} deprecated products", deprecatedProducts.Count());
+            return deprecatedProducts;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving deprecated products");
+            throw;
+        }
     }
 
     public async Task<IEnumerable<EnterpriseProduct>> GetProductsNearingDecommissionAsync(int daysAhead = 30)
     {
-        // TODO: Implement
-        _logger.LogWarning("GetProductsNearingDecommissionAsync not implemented");
-        await Task.CompletedTask;
-        return Enumerable.Empty<EnterpriseProduct>();
+        try
+        {
+            _logger.LogInformation("Retrieving products nearing decommission within {DaysAhead} days", daysAhead);
+
+            var cutoffDate = DateTime.UtcNow.AddDays(daysAhead);
+            
+            var allProducts = await _unitOfWork.Products.GetAllAsync(CancellationToken.None);
+            var nearingDecommission = allProducts
+                .Where(p => !p.Audit.IsDeleted && 
+                           p.DecommissionDate.HasValue && 
+                           p.DecommissionDate.Value <= cutoffDate &&
+                           p.DecommissionDate.Value >= DateTime.UtcNow)
+                .OrderBy(p => p.DecommissionDate)
+                .ToList();
+
+            _logger.LogInformation("Found {Count} products nearing decommission within {DaysAhead} days", 
+                nearingDecommission.Count, daysAhead);
+            
+            return nearingDecommission;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving products nearing decommission");
+            throw;
+        }
     }
     #endregion
     #region Product Version Management

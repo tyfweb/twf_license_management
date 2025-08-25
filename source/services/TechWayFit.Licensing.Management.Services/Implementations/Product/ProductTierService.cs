@@ -33,21 +33,43 @@ public class ProductTierService : IProductTierService
 
         return tier;
     }
-    public Task<bool> DeleteTierAsync(Guid tierId, string deletedBy)
+    public async Task<bool> DeleteTierAsync(Guid tierId, string deletedBy)
     {
         if (tierId == Guid.Empty) throw new ArgumentException("Tier ID cannot be empty", nameof(tierId));
         if (string.IsNullOrWhiteSpace(deletedBy)) throw new ArgumentException("Deleted by cannot be null or empty", nameof(deletedBy));
 
-        // Check if tier exists
-        var tierExists = TierExistsAsync(tierId).Result;
-        if (!tierExists)
+        try
         {
-            _logger.LogWarning("Attempted to delete non-existing tier with ID: {TierId}", tierId);
-            return Task.FromResult(false);
-        }
+            _logger.LogInformation("Deleting tier {TierId} by {DeletedBy}", tierId, deletedBy);
 
-        // Soft delete the tier
-        return _unitOfWork.ProductTiers.DeleteAsync(tierId);
+            // Check if tier exists
+            var tierExists = await TierExistsAsync(tierId);
+            if (!tierExists)
+            {
+                _logger.LogWarning("Attempted to delete non-existing tier with ID: {TierId}", tierId);
+                return false;
+            }
+
+            // Soft delete the tier
+            var result = await _unitOfWork.ProductTiers.DeleteAsync(tierId);
+            
+            if (result)
+            {
+                await _unitOfWork.SaveChangesAsync();
+                _logger.LogInformation("Tier {TierId} deleted successfully", tierId);
+            }
+            else
+            {
+                _logger.LogWarning("Failed to delete tier {TierId}", tierId);
+            }
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting tier {TierId}", tierId);
+            throw;
+        }
     }
 
 
@@ -66,9 +88,33 @@ public class ProductTierService : IProductTierService
         return tierEntity;
     }
 
-    public Task<ProductTier?> GetTierByNameAsync(Guid productId, string tierName)
+    public async Task<ProductTier?> GetTierByNameAsync(Guid productId, string tierName)
     {
-        throw new NotImplementedException();
+        if (productId == Guid.Empty) 
+            throw new ArgumentException("Product ID cannot be empty", nameof(productId));
+        if (string.IsNullOrWhiteSpace(tierName))
+            throw new ArgumentException("Tier name cannot be null or empty", nameof(tierName));
+
+        try
+        {
+            _logger.LogInformation("Retrieving tier by name {TierName} for product {ProductId}", tierName, productId);
+
+            var tiers = await _unitOfWork.ProductTiers.GetByProductIdAsync(productId);
+            var tier = tiers.FirstOrDefault(t => 
+                string.Equals(t.Name, tierName, StringComparison.OrdinalIgnoreCase));
+
+            if (tier == null)
+            {
+                _logger.LogWarning("Tier with name {TierName} not found for product {ProductId}", tierName, productId);
+            }
+
+            return tier;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving tier by name {TierName} for product {ProductId}", tierName, productId);
+            throw;
+        }
     }
  
 
@@ -81,14 +127,60 @@ public class ProductTierService : IProductTierService
         return tiers;
     }
 
-    public Task<bool> TierExistsAsync(Guid tierId)
+    public async Task<bool> TierExistsAsync(Guid tierId)
     {
-        throw new NotImplementedException();
+        if (tierId == Guid.Empty)
+            throw new ArgumentException("Tier ID cannot be empty", nameof(tierId));
+
+        try
+        {
+            _logger.LogInformation("Checking if tier {TierId} exists", tierId);
+            
+            var exists = await _unitOfWork.ProductTiers.ExistsAsync(tierId);
+            
+            _logger.LogInformation("Tier {TierId} exists: {Exists}", tierId, exists);
+            return exists;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error checking if tier {TierId} exists", tierId);
+            throw;
+        }
     }
 
-    public Task<bool> TierNameExistsAsync(Guid productId, string tierName, Guid? excludeTierId = null)
+    public async Task<bool> TierNameExistsAsync(Guid productId, string tierName, Guid? excludeTierId = null)
     {
-        throw new NotImplementedException();
+        if (productId == Guid.Empty)
+            throw new ArgumentException("Product ID cannot be empty", nameof(productId));
+        if (string.IsNullOrWhiteSpace(tierName))
+            throw new ArgumentException("Tier name cannot be null or empty", nameof(tierName));
+
+        try
+        {
+            _logger.LogInformation("Checking if tier name {TierName} exists for product {ProductId}", tierName, productId);
+
+            var tiers = await _unitOfWork.ProductTiers.GetByProductIdAsync(productId);
+            var matchingTiers = tiers.Where(t => 
+                string.Equals(t.Name, tierName, StringComparison.OrdinalIgnoreCase));
+
+            if (excludeTierId.HasValue)
+            {
+                matchingTiers = matchingTiers.Where(t => t.TierId != excludeTierId.Value);
+            }
+
+            var exists = matchingTiers.Any();
+
+            _logger.LogInformation("Tier name {TierName} exists for product {ProductId}: {Exists}", 
+                tierName, productId, exists);
+            
+            return exists;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error checking if tier name {TierName} exists for product {ProductId}", 
+                tierName, productId);
+            throw;
+        }
     }
 
     public Task<ProductTier> UpdateTierAsync(ProductTier tier, string updatedBy)

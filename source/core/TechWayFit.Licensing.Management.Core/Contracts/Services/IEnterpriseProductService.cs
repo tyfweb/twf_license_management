@@ -70,6 +70,23 @@ public interface IEnterpriseProductService
     Task<bool> UpdateProductStatusAsync(Guid productId, ProductStatus status, string updatedBy);
 
     /// <summary>
+    /// Activates a product
+    /// </summary>
+    /// <param name="productId">Product ID</param>
+    /// <param name="activatedBy">User activating the product</param>
+    /// <returns>True if activated successfully</returns>
+    Task<bool> ActivateProductAsync(Guid productId, string activatedBy);
+
+    /// <summary>
+    /// Deactivates a product
+    /// </summary>
+    /// <param name="productId">Product ID</param>
+    /// <param name="deactivatedBy">User deactivating the product</param>
+    /// <param name="reason">Optional reason for deactivation</param>
+    /// <returns>True if deactivated successfully</returns>
+    Task<bool> DeactivateProductAsync(Guid productId, string deactivatedBy, string? reason = null);
+
+    /// <summary>
     /// Decommissions a product
     /// </summary>
     /// <param name="productId">Product ID</param>

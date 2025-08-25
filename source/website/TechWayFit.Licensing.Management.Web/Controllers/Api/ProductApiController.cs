@@ -622,4 +622,198 @@ public class ProductApiController : BaseController
             return StatusCode(500, JsonResponse.Error("Failed to create product tier"));
         }
     }
+
+    #region Product Lifecycle Management
+
+    /// <summary>
+    /// Activates a product
+    /// </summary>
+    /// <param name="id">Product ID</param>
+    /// <returns>Success response or error</returns>
+    [HttpPost("{id}/activate")]
+    [SwaggerOperation(
+        Summary = "Activate Product",
+        Description = "Activates a product, making it available for license generation and management.",
+        OperationId = "ActivateProduct"
+    )]
+    [SwaggerResponse(200, "Product activated successfully", typeof(JsonResponse))]
+    [SwaggerResponse(404, "Product not found", typeof(JsonResponse))]
+    [SwaggerResponse(500, "Internal server error", typeof(JsonResponse))]
+    public async Task<ActionResult<JsonResponse>> ActivateProduct(Guid id)
+    {
+        try
+        {
+            _logger.LogInformation("Activating product {ProductId}", id);
+
+            var product = await _productService.GetProductByIdAsync(id);
+            if (product == null)
+            {
+                return NotFound(JsonResponse.Error($"Product with ID {id} not found"));
+            }
+
+            var currentUser = CurrentUserName;
+            var result = await _productService.ActivateProductAsync(id, currentUser);
+
+            if (result)
+            {
+                return Ok(JsonResponse.OK("Product activated successfully"));
+            }
+            else
+            {
+                return StatusCode(500, JsonResponse.Error("Failed to activate product"));
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error activating product {ProductId}", id);
+            return StatusCode(500, JsonResponse.Error("Failed to activate product"));
+        }
+    }
+
+    /// <summary>
+    /// Deactivates a product
+    /// </summary>
+    /// <param name="id">Product ID</param>
+    /// <param name="request">Deactivation request with optional reason</param>
+    /// <returns>Success response or error</returns>
+    [HttpPost("{id}/deactivate")]
+    [SwaggerOperation(
+        Summary = "Deactivate Product",
+        Description = "Deactivates a product, preventing new license generation while preserving existing licenses.",
+        OperationId = "DeactivateProduct"
+    )]
+    [SwaggerResponse(200, "Product deactivated successfully", typeof(JsonResponse))]
+    [SwaggerResponse(404, "Product not found", typeof(JsonResponse))]
+    [SwaggerResponse(500, "Internal server error", typeof(JsonResponse))]
+    public async Task<ActionResult<JsonResponse>> DeactivateProduct(Guid id, [FromBody] DeactivateProductRequest? request = null)
+    {
+        try
+        {
+            _logger.LogInformation("Deactivating product {ProductId}", id);
+
+            var product = await _productService.GetProductByIdAsync(id);
+            if (product == null)
+            {
+                return NotFound(JsonResponse.Error($"Product with ID {id} not found"));
+            }
+
+            var currentUser = CurrentUserName;
+            var result = await _productService.DeactivateProductAsync(id, currentUser, request?.Reason);
+
+            if (result)
+            {
+                return Ok(JsonResponse.OK("Product deactivated successfully"));
+            }
+            else
+            {
+                return StatusCode(500, JsonResponse.Error("Failed to deactivate product"));
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deactivating product {ProductId}", id);
+            return StatusCode(500, JsonResponse.Error("Failed to deactivate product"));
+        }
+    }
+
+    /// <summary>
+    /// Updates product status
+    /// </summary>
+    /// <param name="id">Product ID</param>
+    /// <param name="request">Status update request</param>
+    /// <returns>Success response or error</returns>
+    [HttpPut("{id}/status")]
+    [SwaggerOperation(
+        Summary = "Update Product Status",
+        Description = "Updates the status of a product to any valid ProductStatus value.",
+        OperationId = "UpdateProductStatus"
+    )]
+    [SwaggerResponse(200, "Product status updated successfully", typeof(JsonResponse))]
+    [SwaggerResponse(400, "Invalid status value", typeof(JsonResponse))]
+    [SwaggerResponse(404, "Product not found", typeof(JsonResponse))]
+    [SwaggerResponse(500, "Internal server error", typeof(JsonResponse))]
+    public async Task<ActionResult<JsonResponse>> UpdateProductStatus(Guid id, [FromBody] UpdateProductStatusRequest request)
+    {
+        try
+        {
+            _logger.LogInformation("Updating product {ProductId} status to {Status}", id, request.Status);
+
+            var product = await _productService.GetProductByIdAsync(id);
+            if (product == null)
+            {
+                return NotFound(JsonResponse.Error($"Product with ID {id} not found"));
+            }
+
+            var currentUser = CurrentUserName;
+            var result = await _productService.UpdateProductStatusAsync(id, request.Status, currentUser);
+
+            if (result)
+            {
+                return Ok(JsonResponse.OK($"Product status updated to {request.Status} successfully"));
+            }
+            else
+            {
+                return StatusCode(500, JsonResponse.Error("Failed to update product status"));
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating product {ProductId} status", id);
+            return StatusCode(500, JsonResponse.Error("Failed to update product status"));
+        }
+    }
+
+    /// <summary>
+    /// Decommissions a product
+    /// </summary>
+    /// <param name="id">Product ID</param>
+    /// <param name="request">Decommission request with date</param>
+    /// <returns>Success response or error</returns>
+    [HttpPost("{id}/decommission")]
+    [SwaggerOperation(
+        Summary = "Decommission Product",
+        Description = "Schedules a product for decommissioning on a specific date.",
+        OperationId = "DecommissionProduct"
+    )]
+    [SwaggerResponse(200, "Product decommissioned successfully", typeof(JsonResponse))]
+    [SwaggerResponse(400, "Invalid decommission date", typeof(JsonResponse))]
+    [SwaggerResponse(404, "Product not found", typeof(JsonResponse))]
+    [SwaggerResponse(500, "Internal server error", typeof(JsonResponse))]
+    public async Task<ActionResult<JsonResponse>> DecommissionProduct(Guid id, [FromBody] DecommissionProductRequest request)
+    {
+        try
+        {
+            _logger.LogInformation("Decommissioning product {ProductId} on {DecommissionDate}", id, request.DecommissionDate);
+
+            var product = await _productService.GetProductByIdAsync(id);
+            if (product == null)
+            {
+                return NotFound(JsonResponse.Error($"Product with ID {id} not found"));
+            }
+
+            if (request.DecommissionDate < DateTime.UtcNow.Date)
+            {
+                return BadRequest(JsonResponse.Error("Decommission date cannot be in the past"));
+            }
+
+            var currentUser = CurrentUserName;
+            var result = await _productService.DecommissionProductAsync(id, request.DecommissionDate, currentUser);
+
+            if (result)
+            {
+                return Ok(JsonResponse.OK($"Product scheduled for decommission on {request.DecommissionDate:yyyy-MM-dd}"));
+            }
+            else
+            {
+                return StatusCode(500, JsonResponse.Error("Failed to decommission product"));
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error decommissioning product {ProductId}", id);
+            return StatusCode(500, JsonResponse.Error("Failed to decommission product"));
+        }
+    }
+
+    #endregion
 }
