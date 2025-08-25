@@ -52,6 +52,13 @@ public interface IProductLicenseService
     Task<ProductLicense?> GetLicenseByKeyAsync(string licenseKey);
 
     /// <summary>
+    /// Gets a license by license key or license code
+    /// </summary>
+    /// <param name="keyOrCode">License key or license code</param>
+    /// <returns>License or null if not found</returns>
+    Task<ProductLicense?> GetLicenseByKeyOrCodeAsync(string keyOrCode);
+
+    /// <summary>
     /// Gets a license by ID
     /// </summary>
     /// <param name="licenseId">License ID</param>

@@ -355,10 +355,10 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
         }
 
         /// <summary>
-        /// Download License Key - Generate and download license file
+        /// Download License - Generate and download license file in specified format
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> Download(Guid id)
+        public async Task<IActionResult> Download(Guid id, string format = "lic")
         {
             try
             {
@@ -383,165 +383,65 @@ namespace TechWayFit.Licensing.Management.Web.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
-                // Generate license file content using the enhanced service
-                var licenseFileContent = await _licenseFileService.GenerateLicenseFileAsync(license);
-                var fileName = $"License_{license.LicenseCode}_{DateTime.UtcNow:yyyyMMdd}.lic";
+                // Normalize format parameter
+                format = format?.ToLowerInvariant() ?? "lic";
+
+                string fileContent;
+                string fileName;
+                string contentType;
+
+                // Generate content based on format
+                switch (format)
+                {
+                    case "lic":
+                        fileContent = await _licenseFileService.GenerateLicenseFileAsync(license);
+                        fileName = $"License_{license.LicenseCode}_{DateTime.UtcNow:yyyyMMdd}.lic";
+                        contentType = "application/octet-stream";
+                        break;
+
+                    case "json":
+                        fileContent = await _licenseFileService.GenerateJsonLicenseFileAsync(license);
+                        fileName = $"License_{license.LicenseCode}_{DateTime.UtcNow:yyyyMMdd}.json";
+                        contentType = "application/json";
+                        break;
+
+                    case "xml":
+                        fileContent = await _licenseFileService.GenerateXmlLicenseFileAsync(license);
+                        fileName = $"License_{license.LicenseCode}_{DateTime.UtcNow:yyyyMMdd}.xml";
+                        contentType = "application/xml";
+                        break;
+
+                    case "zip":
+                        // For ZIP format, we use the existing package generation method
+                        var packageBytes = await _licenseFileService.GenerateLicensePackageAsync(license);
+                        fileName = $"License_{license.LicenseCode}_{DateTime.UtcNow:yyyyMMdd}.zip";
+                        
+                        // Track download
+                        await _licenseFileService.TrackDownloadAsync(license.LicenseId, User.Identity?.Name ?? "Anonymous", format);
+                        _logger.LogInformation("License {LicenseId} downloaded as {Format} by user {User}", id, format.ToUpperInvariant(), User.Identity?.Name);
+                        
+                        return File(packageBytes, "application/zip", fileName);
+
+                    default:
+                        TempData["ErrorMessage"] = $"Unsupported format: {format}. Supported formats are: lic, json, xml, zip.";
+                        return RedirectToAction(nameof(Details), new { id });
+                }
 
                 // Track download
-                await _licenseFileService.TrackDownloadAsync(license.LicenseId, User.Identity?.Name ?? "Anonymous", "lic");
+                await _licenseFileService.TrackDownloadAsync(license.LicenseId, User.Identity?.Name ?? "Anonymous", format);
 
                 // Log the download action
-                _logger.LogInformation("License {LicenseId} downloaded by user {User}", id, User.Identity?.Name);
+                _logger.LogInformation("License {LicenseId} downloaded as {Format} by user {User}", id, format.ToUpperInvariant(), User.Identity?.Name);
 
                 // Return file for download
-                var fileBytes = System.Text.Encoding.UTF8.GetBytes(licenseFileContent);
-                return File(fileBytes, "application/octet-stream", fileName);
+                var fileBytes = System.Text.Encoding.UTF8.GetBytes(fileContent);
+                return File(fileBytes, contentType, fileName);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error downloading license {LicenseId}", id);
+                _logger.LogError(ex, "Error downloading license {LicenseId} in format {Format}", id, format);
                 TempData["ErrorMessage"] = "An error occurred while downloading the license.";
-                return RedirectToAction(nameof(Index));
-            }
-        }
-
-        /// <summary>
-        /// Download License as JSON format
-        /// </summary>
-        [HttpGet]
-        public async Task<IActionResult> DownloadJson(Guid id)
-        {
-            try
-            {
-                if (id == Guid.Empty)
-                {
-                    TempData["ErrorMessage"] = "License ID is required.";
-                    return RedirectToAction(nameof(Index));
-                }
-
-                var license = await _licenseService.GetLicenseByIdAsync(id);
-                if (license == null)
-                {
-                    TempData["ErrorMessage"] = "License not found.";
-                    return RedirectToAction(nameof(Index));
-                }
-
-                if (license.Status != LicenseStatus.Active)
-                {
-                    TempData["ErrorMessage"] = "Only active licenses can be downloaded.";
-                    return RedirectToAction(nameof(Index));
-                }
-
-                // Generate JSON license content using enhanced service
-                var licenseJson = await _licenseFileService.GenerateJsonLicenseFileAsync(license);
-                var fileName = $"License_{license.LicenseCode}_{DateTime.UtcNow:yyyyMMdd}.json";
-
-                // Track download
-                await _licenseFileService.TrackDownloadAsync(license.LicenseId, User.Identity?.Name ?? "Anonymous", "json");
-
-                _logger.LogInformation("License {LicenseId} downloaded as JSON by user {User}", id, User.Identity?.Name);
-
-                var fileBytes = System.Text.Encoding.UTF8.GetBytes(licenseJson);
-                return File(fileBytes, "application/json", fileName);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error downloading license JSON {LicenseId}", id);
-                TempData["ErrorMessage"] = "An error occurred while downloading the license.";
-                return RedirectToAction(nameof(Index));
-            }
-        }
-
-        /// <summary>
-        /// Download License as ZIP bundle containing all formats
-        /// </summary>
-        [HttpGet]
-        public async Task<IActionResult> DownloadZip(Guid id)
-        {
-            try
-            {
-                if (id == Guid.Empty)
-                {
-                    TempData["ErrorMessage"] = "License ID is required.";
-                    return RedirectToAction(nameof(Index));
-                }
-
-                var license = await _licenseService.GetLicenseByIdAsync(id);
-                if (license == null)
-                {
-                    TempData["ErrorMessage"] = "License not found.";
-                    return RedirectToAction(nameof(Index));
-                }
-
-                if (license.Status != LicenseStatus.Active)
-                {
-                    TempData["ErrorMessage"] = "Only active licenses can be downloaded.";
-                    return RedirectToAction(nameof(Index));
-                }
-
-                // Generate complete license package using enhanced service
-                var packageBytes = await _licenseFileService.GenerateLicensePackageAsync(license);
-                var fileName = $"License_{license.LicenseCode}_{DateTime.UtcNow:yyyyMMdd}.zip";
-
-                // Track download
-                await _licenseFileService.TrackDownloadAsync(license.LicenseId, User.Identity?.Name ?? "Anonymous", "zip");
-
-                _logger.LogInformation("License {LicenseId} downloaded as ZIP bundle by user {User}", id, User.Identity?.Name);
-
-                return File(packageBytes, "application/zip", fileName);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error downloading license ZIP {LicenseId}", id);
-                TempData["ErrorMessage"] = "An error occurred while downloading the license bundle.";
-                return RedirectToAction(nameof(Index));
-            }
-        }
-
-        /// <summary>
-        /// Download License as XML format
-        /// </summary>
-        [HttpGet]
-        public async Task<IActionResult> DownloadXml(Guid id)
-        {
-            try
-            {
-                if (id == Guid.Empty)
-                {
-                    TempData["ErrorMessage"] = "License ID is required.";
-                    return RedirectToAction(nameof(Index));
-                }
-
-                var license = await _licenseService.GetLicenseByIdAsync(id);
-                if (license == null)
-                {
-                    TempData["ErrorMessage"] = "License not found.";
-                    return RedirectToAction(nameof(Index));
-                }
-
-                if (license.Status != LicenseStatus.Active)
-                {
-                    TempData["ErrorMessage"] = "Only active licenses can be downloaded.";
-                    return RedirectToAction(nameof(Index));
-                }
-
-                // Generate XML license content using enhanced service
-                var licenseXml = await _licenseFileService.GenerateXmlLicenseFileAsync(license);
-                var fileName = $"License_{license.LicenseCode}_{DateTime.UtcNow:yyyyMMdd}.xml";
-
-                // Track download
-                await _licenseFileService.TrackDownloadAsync(license.LicenseId, User.Identity?.Name ?? "Anonymous", "xml");
-
-                _logger.LogInformation("License {LicenseId} downloaded as XML by user {User}", id, User.Identity?.Name);
-
-                var fileBytes = System.Text.Encoding.UTF8.GetBytes(licenseXml);
-                return File(fileBytes, "application/xml", fileName);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error downloading license XML {LicenseId}", id);
-                TempData["ErrorMessage"] = "An error occurred while downloading the license.";
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Details), new { id });
             }
         }
 

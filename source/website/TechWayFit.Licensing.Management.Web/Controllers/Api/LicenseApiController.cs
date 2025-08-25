@@ -130,17 +130,17 @@ public class LicenseApiController : BaseController
                 return BadRequest(JsonResponse.Error("Invalid request data"));
             }
 
-            _logger.LogInformation("Validating license key: {LicenseKey}", request.LicenseKey.Substring(0, Math.Min(8, request.LicenseKey.Length)) + "...");
+            _logger.LogInformation("Validating license key or code: {LicenseKeyOrCode}", request.LicenseKeyOrCode.Substring(0, Math.Min(8, request.LicenseKeyOrCode.Length)) + "...");
 
-            var license = await _licenseService.GetLicenseByKeyAsync(request.LicenseKey);
+            var license = await _licenseService.GetLicenseByKeyOrCodeAsync(request.LicenseKeyOrCode);
             
             var response = new ValidateLicenseResponse();
             
             if (license == null)
             {
                 response.IsValid = false;
-                response.Message = "License key not found";
-                response.Errors.Add("Invalid license key");
+                response.Message = "License key or code not found";
+                response.Errors.Add("Invalid license key or code");
             }
             else if (license.Status != LicenseStatus.Active)
             {

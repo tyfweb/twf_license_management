@@ -3,8 +3,35 @@
 @model TechWayFit.Licensing.Management.Web.ViewModels.License.LicenseDetailViewModel
 @{
     ViewData["Title"] = "License Details";
+    Layout = "~/Views/Shared/Layout/_LicenseHubLayout.cshtml";
 }
 
+@section Styles {
+    <style>
+        /* Style for download format selection */
+        .d-flex.gap-2 {
+            gap: 0.5rem !important;
+        }
+        
+        .form-select {
+            border: 1px solid #ced4da;
+            border-radius: 0.375rem;
+        }
+        
+        .form-select:focus {
+            border-color: #86b7fe;
+            outline: 0;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+        
+        /* Ensure proper button sizing */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+}
 
 
 <div class="container-fluid py-3 license-details-container">
@@ -299,45 +326,7 @@
                 </div>
             </div>
 
-            @if (Model.License.Status == LicenseStatus.Active)
-            {
-                <!-- Download Section -->
-                <div class="download-section">
-                    <div class="section-header">
-                        <h5><i class="fas fa-download me-2"></i>Download License Files</h5>
-                        <p class="mb-0 opacity-75">Download your license files in different formats for integration with
-                            your applications.</p>
-                    </div>
-                    <div class="section-content">
-                        <div class="download-options">
-                            <a href="@Url.Action("Download", "License", new { id = Model.License.LicenseId })"
-                                class="download-option">
-                                <i class="fas fa-file-alt download-option-icon"></i>
-                                <div class="download-option-title">License File</div>
-                                <p class="download-option-description">Human-readable license file (.lic) with complete details</p>
-                            </a>
-                            <a href="@Url.Action("DownloadJson", "License", new { id = Model.License.LicenseId })"
-                                class="download-option">
-                                <i class="fas fa-code download-option-icon"></i>
-                                <div class="download-option-title">JSON Format</div>
-                                <p class="download-option-description">Machine-readable JSON (.json) for API integration</p>
-                            </a>
-                            <a href="@Url.Action("DownloadXml", "License", new { id = Model.License.LicenseId })"
-                                class="download-option">
-                                <i class="fas fa-file-code download-option-icon"></i>
-                                <div class="download-option-title">XML Format</div>
-                                <p class="download-option-description">Structured XML (.xml) for enterprise systems</p>
-                            </a>
-                            <a href="@Url.Action("DownloadZip", "License", new { id = Model.License.LicenseId })"
-                                class="download-option">
-                                <i class="fas fa-file-archive download-option-icon"></i>
-                                <div class="download-option-title">Complete Package</div>
-                                <p class="download-option-description">ZIP bundle with all formats, documentation, and README</p>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            }
+
 
             @if (Model.License.LicenseConsumer.Features.Any())
             {
@@ -464,9 +453,29 @@
                 </div>
                 <div class="section-content">
                     <div class="d-grid gap-2">
-                        <button class="btn btn-outline-secondary" onclick="downloadLicense()">
-                            <i class="fas fa-download me-2"></i>Download License
-                        </button>
+                        @if (Model.License.Status == LicenseStatus.Active)
+                        {
+                            <!-- Download License Format Selection -->
+                            <div class="d-flex gap-2 w-100">
+                                <select class="form-select" id="downloadFormat" style="flex: 1;">
+                                    <option value="lic">License File (.lic) - Human-readable</option>
+                                    <option value="json">JSON Format (.json) - API integration</option>
+                                    <option value="xml">XML Format (.xml) - Enterprise systems</option>
+                                    <option value="zip">Complete Package (.zip) - All formats</option>
+                                </select>
+                                <button class="btn btn-primary" onclick="downloadSelectedFormat()" style="white-space: nowrap;">
+                                    <i class="fas fa-download me-1"></i>Download
+                                </button>
+                            </div>
+                        }
+                        else
+                        {
+                            <!-- Disabled Download Button for inactive licenses -->
+                            <button class="btn btn-outline-secondary" disabled>
+                                <i class="fas fa-download me-2"></i>Download License
+                                <small class="d-block">Available only for active licenses</small>
+                            </button>
+                        }
                         <button class="btn btn-outline-secondary" onclick="validateLicense()">
                             <i class="fas fa-check-circle me-2"></i>Validate License
                         </button>
@@ -805,5 +814,80 @@
             // TODO: Implement report generation functionality
             alert('Report generation functionality will be implemented in a future update.');
         }
+
+        function downloadSelectedFormat() {
+            var formatSelect = document.getElementById('downloadFormat');
+            var selectedFormat = formatSelect.value;
+            var licenseId = '@Model.License.LicenseId';
+            
+            var downloadUrl;
+            switch(selectedFormat) {
+                case 'lic':
+                    downloadUrl = '@Url.Action("Download", "License")' + '?id=' + licenseId;
+                    break;
+                case 'json':
+                    downloadUrl = '@Url.Action("DownloadJson", "License")' + '?id=' + licenseId;
+                    break;
+                case 'xml':
+                    downloadUrl = '@Url.Action("DownloadXml", "License")' + '?id=' + licenseId;
+                    break;
+                case 'zip':
+                    downloadUrl = '@Url.Action("DownloadZip", "License")' + '?id=' + licenseId;
+                    break;
+                default:
+                    alert('Please select a download format.');
+                    return;
+            }
+            
+            // Create a temporary anchor element to trigger download
+            var link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = '';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Ensure Bootstrap dropdown is properly initialized
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize all dropdowns
+            var dropdownElements = document.querySelectorAll('[data-bs-toggle="dropdown"]');
+            dropdownElements.forEach(function(element) {
+                new bootstrap.Dropdown(element);
+            });
+
+            // Manual click handler as backup
+            var downloadButton = document.getElementById('downloadDropdown');
+            if (downloadButton) {
+                downloadButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var dropdownMenu = this.nextElementSibling;
+                    if (dropdownMenu && dropdownMenu.classList.contains('dropdown-menu')) {
+                        if (dropdownMenu.style.display === 'block') {
+                            dropdownMenu.style.display = 'none';
+                            dropdownMenu.classList.remove('show');
+                            this.setAttribute('aria-expanded', 'false');
+                        } else {
+                            dropdownMenu.style.display = 'block';
+                            dropdownMenu.classList.add('show');
+                            this.setAttribute('aria-expanded', 'true');
+                        }
+                    }
+                });
+            }
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                var downloadButton = document.getElementById('downloadDropdown');
+                if (downloadButton && !downloadButton.contains(e.target)) {
+                    var dropdownMenu = downloadButton.nextElementSibling;
+                    if (dropdownMenu && dropdownMenu.classList.contains('dropdown-menu')) {
+                        dropdownMenu.style.display = 'none';
+                        dropdownMenu.classList.remove('show');
+                        downloadButton.setAttribute('aria-expanded', 'false');
+                    }
+                }
+            });
+        });
     </script>
 }

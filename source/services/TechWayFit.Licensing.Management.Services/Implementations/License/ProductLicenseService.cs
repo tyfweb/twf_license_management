@@ -1590,23 +1590,46 @@ public class ProductLicenseService : IProductLicenseService
 
     public async Task<IEnumerable<ProductLicense>> GetLicensesAsync(LicenseStatus? status = null, string? searchTerm = null, int pageNumber = 1, int pageSize = 50)
     {
-        SearchRequest<ProductLicense> searchRequest = new SearchRequest<ProductLicense>
+        try
         {
-            Filters = new Dictionary<string, object>(),
-            Page = pageNumber,
-            PageSize = pageSize,
-            Query= searchTerm
-        };
+            _logger.LogInformation("Getting licenses with status: {Status}, searchTerm: {SearchTerm}, page: {Page}, pageSize: {PageSize}", status, searchTerm, pageNumber, pageSize);
 
-        if (status.HasValue)
-        {
-            searchRequest.Filters.Add("Status", status.Value.ToString());
+            // Get all licenses first
+            var allLicenses = await _unitOfWork.Licenses.GetAllAsync(CancellationToken.None);
+
+            // Apply status filter
+            IEnumerable<ProductLicense> filteredLicenses = allLicenses;
+            if (status.HasValue)
+            {
+                filteredLicenses = filteredLicenses.Where(l => l.Status == status.Value);
+            }
+
+            // Apply search term filter - search across multiple fields including license code
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                var searchTermLower = searchTerm.ToLowerInvariant();
+                filteredLicenses = filteredLicenses.Where(l =>
+                    (!string.IsNullOrEmpty(l.LicenseKey) && l.LicenseKey.ToLowerInvariant().Contains(searchTermLower)) ||
+                    (!string.IsNullOrEmpty(l.LicenseCode) && l.LicenseCode.ToLowerInvariant().Contains(searchTermLower)) ||
+                    (l.LicenseId.ToString().ToLowerInvariant().Contains(searchTermLower)) ||
+                    (!string.IsNullOrEmpty(l.LicenseConsumer?.Consumer?.CompanyName) && l.LicenseConsumer.Consumer.CompanyName.ToLowerInvariant().Contains(searchTermLower)) ||
+                    (!string.IsNullOrEmpty(l.LicenseConsumer?.Consumer?.PrimaryContact?.Email) && l.LicenseConsumer.Consumer.PrimaryContact.Email.ToLowerInvariant().Contains(searchTermLower))
+                );
+            }
+
+            // Apply pagination
+            var pagedLicenses = filteredLicenses
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize);
+
+            _logger.LogInformation("Found {Count} licenses matching criteria", pagedLicenses.Count());
+            return pagedLicenses;
         }
-
-
-
-        var result = await _unitOfWork.Licenses.SearchAsync(searchRequest);
-        return result.Results;
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting licenses with search criteria");
+            throw;
+        }
     }
  
 

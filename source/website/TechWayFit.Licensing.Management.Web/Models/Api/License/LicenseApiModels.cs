@@ -75,7 +75,7 @@ public class GetLicensesResponse
 public class ValidateLicenseRequest
 {
     [Required]
-    public string LicenseKey { get; set; } = string.Empty;
+    public string LicenseKeyOrCode { get; set; } = string.Empty;
     
     public string? ProductVersion { get; set; }
     
