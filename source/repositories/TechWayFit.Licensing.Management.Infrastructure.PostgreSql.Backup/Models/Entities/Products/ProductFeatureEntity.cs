@@ -36,6 +36,11 @@ public class ProductFeatureEntity : AuditWorkflowEntity, IEntityMapper<ProductFe
     public string Description { get; set; } = string.Empty;
 
     /// <summary>
+    /// Type/category of the feature (stored as string)
+    /// </summary>
+    public string Type { get; set; } = FeatureType.Core.ToString();
+
+    /// <summary>
     /// Feature code or identifier
     /// </summary>
     public string Code { get; set; } = string.Empty;
@@ -97,6 +102,7 @@ public class ProductFeatureEntity : AuditWorkflowEntity, IEntityMapper<ProductFe
             Code = model.Code,
             Name = model.Name,
             Description = model.Description,
+            Type = model.Type.ToString(),
             IsEnabled = model.IsEnabled,
             DisplayOrder = model.DisplayOrder,
             SupportFromVersionId = model.SupportFromVersionId,
@@ -130,10 +136,11 @@ public class ProductFeatureEntity : AuditWorkflowEntity, IEntityMapper<ProductFe
             FeatureId = this.Id,
             TenantId = this.TenantId,
             ProductId = this.ProductId,
-            TierId = this.TierId,
+            // TierId = this.TierId, // TODO: Add TierId property to ProductFeature model
             Code = this.Code,
             Name = this.Name,
             Description = this.Description,
+            Type = Enum.TryParse<FeatureType>(this.Type, out var featureType) ? featureType : FeatureType.Core,
             IsEnabled = this.IsEnabled,
             DisplayOrder = this.DisplayOrder,
             SupportFromVersionId = this.SupportFromVersionId,

@@ -47,6 +47,11 @@ public class ProductFeature
     public string Description { get; set; } = string.Empty;
 
     /// <summary>
+    /// Type/category of the product feature
+    /// </summary>
+    public FeatureType Type { get; set; } = FeatureType.Core;
+
+    /// <summary>
     /// Indicates if the feature is enabled
     /// </summary>
     public bool IsEnabled { get; set; } = true;
@@ -84,6 +89,7 @@ public class ProductFeature
         FeatureId = IdConstants.DefaultFeatureId,
         Name = "Default Feature",
         Description = "Default product feature with basic functionality",
+        Type = FeatureType.Core,
         IsEnabled = true,
         Usage = ProductFeatureUsage.NoLimit,  //Basic usage without limits
         SupportFromVersion = SemanticVersion.Default

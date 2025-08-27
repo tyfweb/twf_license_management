@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using TechWayFit.Licensing.Management.Infrastructure.Contracts.Repositories.Consumer;
 using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Configuration;
 using TechWayFit.Licensing.Management.Infrastructure.EntityFramework.Repositories;
@@ -15,6 +16,21 @@ public class EfCoreConsumerAccountRepository : BaseRepository<ConsumerAccount,Co
     public EfCoreConsumerAccountRepository(EfCoreLicensingDbContext context,IUserContext userContext) : base(context,userContext)
     {
     }
+
+    public async Task<ConsumerAccount?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            return null;
+
+        var entity = await _dbSet
+            .FirstOrDefaultAsync(c => 
+                c.PrimaryContactEmail == email || 
+                (c.SecondaryContactEmail != null && c.SecondaryContactEmail == email),
+                cancellationToken);
+
+        return entity?.Map();
+    }
+
     protected override IQueryable<ConsumerAccountEntity> SearchQuery(IQueryable<ConsumerAccountEntity> query, string searchQuery)
     {
         return base.SearchQuery(query, searchQuery)

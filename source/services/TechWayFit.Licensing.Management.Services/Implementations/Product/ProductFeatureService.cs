@@ -359,10 +359,10 @@ public class ProductFeatureService : IProductFeatureService
                 Filters = new Dictionary<string, object>()
             };
             
-            // TODO: Apply feature type filter when available in entity
+            // Apply feature type filter
             if (!string.IsNullOrWhiteSpace(featureType))
             {
-                _logger.LogWarning("Feature type filtering not implemented - FeatureType property missing in entity");
+                searchRequest.Filters.Add("Type", featureType);
             }
 
             var searchResult = await _unitOfWork.ProductFeatures.SearchAsync(searchRequest);
@@ -407,10 +407,12 @@ public class ProductFeatureService : IProductFeatureService
 
         try
         {
-            // TODO: Implement when FeatureType property is available in entity
-            _logger.LogWarning("GetFeaturesByTypeAsync not implemented - FeatureType property missing in entity");
-            await Task.CompletedTask;
-            return Enumerable.Empty<ProductFeature>();
+            // Filter features by type using LINQ
+            var allFeatures = await _unitOfWork.ProductFeatures.GetAllAsync(CancellationToken.None);
+            var filteredFeatures = allFeatures.Where(f => f.Type.ToString().Equals(featureType, StringComparison.OrdinalIgnoreCase));
+            
+            _logger.LogInformation("Retrieved {Count} features of type {FeatureType}", filteredFeatures.Count(), featureType);
+            return filteredFeatures;
         }
         catch (Exception ex)
         {
